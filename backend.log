@@ -1,0 +1,11 @@
+
+> studentcompass@1.0.0 dev:server
+> node --watch server/index.js
+
+[WS] WebSocket bridge listening on port 8080
+[StudentCompass] Server started — TCP:1234  WS:8080
+Failed running 'server/index.js'. Waiting for file changes before restarting...
+Restarting 'server/index.js'
+[WS] WebSocket bridge listening on port 8080
+[StudentCompass] Server started — TCP:1234  WS:8080
+Failed running 'server/index.js'. Waiting for file changes before restarting...
