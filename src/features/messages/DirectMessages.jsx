@@ -161,7 +161,7 @@ export default function DirectMessages({ session, profile }) {
         setActive(prev => (prev && others.some(u => u.userId === prev.userId)) ? prev : (others[0] || null))
       })
       .catch(() => {})
-  }, [currentUserId, currentName, scope])
+  }, [currentUserId, currentName, scope, meta])
 
   useEffect(() => {
     const unsub = socketService.subscribe('presence:online', (users) => {
