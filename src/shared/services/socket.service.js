@@ -53,7 +53,9 @@ class SocketService extends EventTarget {
       this.#scheduleReconnect()
     }
 
-    this.#ws.onerror = () => {}
+    this.#ws.onerror = (e) => {
+      console.warn('[SocketService] WebSocket error:', e)
+    }
 
     this.#ws.onmessage = ({ data }) => {
       let msg

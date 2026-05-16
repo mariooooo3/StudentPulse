@@ -507,7 +507,7 @@ export default function ScheduleHub({ profile, session }) {
   const [week, setWeek] = useState(0)
   const { pushNotification } = useNotifications(session?.userId)
 
-  const facultyData = getScheduleData(profile)
+  const facultyData = getScheduleData(profile) || { schedule: [], recoverySlots: [], swapRequests: [] }
   const { schedule, recoverySlots, swapRequests } = facultyData
 
   const weekLabel = week === 0 ? 'Săptămâna curentă' : week > 0 ? `+${week} săpt.` : `${week} săpt.`
@@ -516,13 +516,17 @@ export default function ScheduleHub({ profile, session }) {
     <div className="flex flex-col h-full animate-fade-in">
       <div className="px-6 py-4 border-b border-slate-700/50 flex items-center gap-4 bg-slate-900 shrink-0 flex-wrap gap-y-2">
         <div className="flex items-center gap-2">
-          {[<ChevronLeft />, null, <ChevronRight />].map((icon, i) => icon ? (
-            <button key={i} onClick={() => setWeek(w => w + (i === 0 ? -1 : 1))}
+          {[
+            { key: 'prev', icon: <ChevronLeft />, dir: -1 },
+            { key: 'label', icon: null },
+            { key: 'next', icon: <ChevronRight />, dir: 1 },
+          ].map(({ key, icon, dir }) => icon ? (
+            <button key={key} onClick={() => setWeek(w => w + dir)}
               className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 text-slate-400">
               {icon}
             </button>
           ) : (
-            <span key={i} className="text-sm text-slate-300 w-36 text-center">{weekLabel}</span>
+            <span key={key} className="text-sm text-slate-300 w-36 text-center">{weekLabel}</span>
           ))}
         </div>
         <div className="flex gap-1 bg-slate-800 p-1 rounded-xl ml-auto">

@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MapPin, Camera, Sparkles, Send, X, Loader2, Navigation as NavIcon, Lightbulb, Route, ArrowRight, Users, Wifi, WifiOff } from 'lucide-react'
+import { MapPin, Camera, Upload, Sparkles, Send, X, Loader2, Navigation as NavIcon, Lightbulb, Route, ArrowRight, Users, Wifi, WifiOff, FlipHorizontal } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import HeatmapLayer from './HeatmapLayer'
@@ -206,9 +206,15 @@ export default function CampusNavigator() {
   const [photoResult, setPhotoResult] = useState(null)
   const [photoLoading, setPhotoLoading] = useState(false)
   const [photoPreview, setPhotoPreview] = useState(null)
-  const [recommendations, setRecommendations] = useState(null)
-  const [recoLoading, setRecoLoading] = useState(false)
+  const [pulseData, setPulseData] = useState(null)
+  const [pulseLoading, setPulseLoading] = useState(false)
+  const [pulseLoaded, setPulseLoaded] = useState(false)
+  const [cameraOpen, setCameraOpen] = useState(false)
+  const [cameraStream, setCameraStream] = useState(null)
+  const [cameraFacing, setCameraFacing] = useState('environment')
   const fileInputRef = useRef(null)
+  const videoRef = useRef(null)
+  const canvasRef = useRef(null)
   const chatBottomRef = useRef(null)
   const chatHistory = useRef([])
   const [fromRoom, setFromRoom] = useState('')
@@ -221,96 +227,48 @@ export default function CampusNavigator() {
   const { profile } = useAuth()
   const firstName = profile?.name?.split(' ')[0] ?? 'Student'
 
-  const smartCards = useMemo(() => {
-    const h = new Date().getHours()
-    const cards = []
+  useEffect(() => {
+    if (activeTab !== 'reco' || pulseLoaded) return
+    loadPulse()
+  }, [activeTab])
 
-    if (totalUsers > 0) {
-      const level = totalUsers < 80 ? 'liniștit' : totalUsers < 160 ? 'moderat' : 'aglomerat'
-      cards.push({ id: 'live-campus', icon: '🏫', color: '#0ea5e9', live: true,
-        title: 'Status campus live',
-        desc: `${totalUsers} studenți activi acum. Trafic ${level} pe campus.` })
+  useEffect(() => {
+    if (cameraOpen && videoRef.current && cameraStream) {
+      videoRef.current.srcObject = cameraStream
     }
+  }, [cameraOpen, cameraStream])
 
-    if (h >= 7 && h < 10) {
-      cards.push(
-        { id: 'coffee-am', icon: '☕', color: '#8b5cf6', tag: 'Recomandat',
-          title: 'Cafea înainte de ore',
-          desc: 'Coffee Campus e aproape gol dimineața. Prinde-ți locul înainte de aglomerație.' },
-        { id: 'library-am', icon: '📚', color: '#0ea5e9',
-          title: 'Bibliotecă — studiu matinal',
-          desc: 'Sala de lectură e liberă. Cel mai bun moment pentru concentrare maximă.',
-          action: { label: 'Localizează pe hartă', fn: () => { setActiveTab('map'); setShowPOI(true) } } },
-        { id: 'route-am', icon: '🛤️', color: '#22c55e',
-          title: 'Traseu recomandat',
-          desc: 'Traseul principal spre Corp C e liber. Evită holul central — folosește intrarea laterală.' },
-      )
-    } else if (h >= 10 && h < 12) {
-      cards.push(
-        { id: 'crowd-warn', icon: '⚠️', color: '#f97316', tag: 'Atenție',
-          title: 'Aglomerație la pauze',
-          desc: 'Pauzele de 10:00 cresc traficul în holurile Corp C. Planifică deplasarea cu 5 min înainte.' },
-        { id: 'study-spot', icon: '💡', color: '#8b5cf6',
-          title: 'Sală liberă disponibilă',
-          desc: 'Etajul 3 Corp A are săli disponibile 10:00–12:00. Ideal pentru studiu individual sau grup.' },
-        { id: 'atm', icon: '🏧', color: '#1d4ed8', tag: 'Aproape',
-          title: 'ATM BRD fără coadă',
-          desc: 'Bancomatul de lângă Corp C e accesibil acum, fără aglomerație.' },
-        { id: 'route-break', icon: '🛤️', color: '#22c55e',
-          title: 'Traseu alternativ',
-          desc: 'Ocolul prin curtea interioară reduce timpul de deplasare cu ~2 min în pauze.',
-          action: { label: 'Calculează traseu', fn: () => setActiveTab('map') } },
-      )
-    } else if (h >= 12 && h < 14) {
-      cards.push(
-        { id: 'lunch-warn', icon: '🍽️', color: '#ef4444', tag: 'Evită acum', live: true,
-          title: 'Cantina — vârf de aglomerație',
-          desc: 'Cantina atinge maximum 12:00–13:00. Mergi după 13:15 pentru coadă sub 5 min.' },
-        { id: 'petru-luca', icon: '🛒', color: '#f97316',
-          title: 'Alternativă: Magazin Petru Luca',
-          desc: 'La 2 min de Corp C — sandwich-uri proaspete și băuturi, fără aglomerație.',
-          action: { label: 'Localizează pe hartă', fn: () => { setActiveTab('map'); setShowPOI(true) } } },
-        { id: 'library-lunch', icon: '📖', color: '#0ea5e9',
-          title: 'Biblioteca mai goală la prânz',
-          desc: 'Sala de lectură e disponibilă în pauza de prânz. Bun moment pentru studiu focusat.' },
-        { id: 'kebab', icon: '🌯', color: '#8b5cf6',
-          title: 'Kebab & Pizza Express',
-          desc: 'Alternativă rapidă la cantină — servire sub 5 min, prețuri accesibile.',
-          action: { label: 'Vezi localizarea', fn: () => { setActiveTab('map'); setShowPOI(true) } } },
-      )
-    } else if (h >= 14 && h < 18) {
-      cards.push(
-        { id: 'traffic-down', icon: '🌤️', color: '#22c55e', live: true,
-          title: 'Trafic în scădere',
-          desc: 'Activitatea pe campus scade după 15:00. Trasee libere, ideal pentru deplasări.' },
-        { id: 'consult', icon: '👨‍🏫', color: '#8b5cf6',
-          title: 'Consultații disponibile',
-          desc: '14:00–16:00 e intervalul optim pentru vizite la biroul profesorilor. Secretariatul FII e deschis.' },
-        { id: 'library-pm', icon: '🏛️', color: '#0ea5e9', tag: 'Recomandat',
-          title: 'Bibliotecă — după-amiaza',
-          desc: 'Cel mai liniștit interval al zilei în sala de lectură. Deschis până la 20:00.' },
-        { id: 'coffee-pm', icon: '☕', color: '#f97316',
-          title: 'Coffee Campus — ultima șansă',
-          desc: 'Cafeneaua se închide la 19:00. Atmosfera relaxantă de după-amiaza e ideală.' },
-      )
-    } else {
-      cards.push(
-        { id: 'evening', icon: '🌙', color: '#475569', live: true,
-          title: 'Campus liniștit seara',
-          desc: 'Activitate redusă după 17:00. Trasee fără aglomerație — verifică accesul în clădiri.' },
-        { id: 'access', icon: '🔐', color: '#1d4ed8', tag: 'Important',
-          title: 'Program acces clădiri',
-          desc: 'Clădirile se închid progresiv după 20:00. Biblioteca rămâne deschisă până la 21:00.' },
-        { id: 'kebab-eve', icon: '🌯', color: '#ef4444',
-          title: 'Mâncare disponibilă seara',
-          desc: 'Kebab & Pizza Express deschis până la 24:00. Singura opțiune disponibilă pe campus.',
-          action: { label: 'Localizează pe hartă', fn: () => { setActiveTab('map'); setShowPOI(true) } } },
-      )
+  async function loadPulse() {
+    setPulseLoading(true)
+    try {
+      const h = new Date().getHours()
+      const result = await getSmartRecommendations({ hour: h, totalUsers, schedule: courses.slice(0, 4) })
+      setPulseData(result)
+      setPulseLoaded(true)
+    } catch {
+      setPulseData({ briefing: 'Nu am putut genera recomandări acum.', cards: [] })
     }
+    setPulseLoading(false)
+  }
 
-    return cards
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalUsers])
+  async function sendQuickChat(question) {
+    setActiveTab('chat')
+    setChatMessages(prev => [...prev, { role: 'user', text: question }])
+    setChatLoading(true)
+    try {
+      const response = await askCampusAI(question, chatHistory.current)
+      chatHistory.current = [
+        ...chatHistory.current,
+        { role: 'user', content: question },
+        { role: 'assistant', content: response },
+      ]
+      setChatMessages(prev => [...prev, { role: 'model', text: response }])
+    } catch (err) {
+      setChatMessages(prev => [...prev, { role: 'model', text: `Eroare: ${err.message}` }])
+    }
+    setChatLoading(false)
+    setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+  }
 
   const [showPOI, setShowPOI] = useState(false)
   const poiIcons = useRef({})
@@ -404,16 +362,53 @@ export default function CampusNavigator() {
     reader.readAsDataURL(file)
   }
 
-  async function loadRecommendations() {
-    setRecoLoading(true)
-    setRecommendations(null)
+  async function openCamera(facing = 'environment') {
     try {
-      const result = await getSmartRecommendations(courses.slice(0, 4))
-      setRecommendations(result)
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } },
+      })
+      setCameraFacing(facing)
+      setCameraStream(stream)
+      setCameraOpen(true)
     } catch {
-      setRecommendations('Eroare la generarea recomandărilor.')
+      alert('Accesul la cameră a fost refuzat sau camera nu este disponibilă.')
     }
-    setRecoLoading(false)
+  }
+
+  function closeCamera() {
+    cameraStream?.getTracks().forEach(t => t.stop())
+    setCameraStream(null)
+    setCameraOpen(false)
+  }
+
+  async function flipCamera() {
+    cameraStream?.getTracks().forEach(t => t.stop())
+    const next = cameraFacing === 'environment' ? 'user' : 'environment'
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: next, width: { ideal: 1280 }, height: { ideal: 720 } },
+      })
+      setCameraFacing(next)
+      setCameraStream(stream)
+    } catch { /* keep existing */ }
+  }
+
+  function capturePhoto() {
+    const video = videoRef.current
+    const canvas = canvasRef.current
+    if (!video || !canvas) return
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    canvas.getContext('2d').drawImage(video, 0, 0)
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.92)
+    closeCamera()
+    setPhotoPreview(dataUrl)
+    setPhotoResult(null)
+    setPhotoLoading(true)
+    analyzePhoto(dataUrl.split(',')[1], 'image/jpeg')
+      .then(r => setPhotoResult(r))
+      .catch(e => setPhotoResult(`Eroare: ${e.message}`))
+      .finally(() => setPhotoLoading(false))
   }
 
   return (
@@ -755,13 +750,23 @@ export default function CampusNavigator() {
               <p className="text-sm text-slate-400 mt-1">Fă o poză la o clădire și AI-ul îți spune unde ești și cum navighezi.</p>
             </div>
 
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-700/60 rounded-2xl p-10 text-center cursor-pointer hover:border-indigo-500/40 hover:bg-indigo-900/10 transition-all"
-            >
-              <Camera size={32} className="text-slate-500 mx-auto mb-3" />
-              <p className="text-sm font-medium text-slate-200">Click pentru a alege o poză</p>
-              <p className="text-xs text-slate-500 mt-1">JPG, PNG, WEBP</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-slate-700/60 rounded-2xl p-8 text-center cursor-pointer hover:border-indigo-500/50 hover:bg-indigo-900/10 transition-all group"
+              >
+                <Upload size={28} className="text-slate-500 group-hover:text-indigo-400 mx-auto mb-2 transition-colors" />
+                <p className="text-sm font-medium text-slate-200">Alege poză</p>
+                <p className="text-xs text-slate-500 mt-1">Din galerie / fișiere</p>
+              </div>
+              <div
+                onClick={() => openCamera()}
+                className="border-2 border-dashed border-slate-700/60 rounded-2xl p-8 text-center cursor-pointer hover:border-violet-500/50 hover:bg-violet-900/10 transition-all group"
+              >
+                <Camera size={28} className="text-slate-500 group-hover:text-violet-400 mx-auto mb-2 transition-colors" />
+                <p className="text-sm font-medium text-slate-200">Fă o poză</p>
+                <p className="text-xs text-slate-500 mt-1">Cu camera live</p>
+              </div>
             </div>
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
 
@@ -793,116 +798,134 @@ export default function CampusNavigator() {
           const timeLabel = now.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })
           const dayLabel = now.toLocaleDateString('ro-RO', { weekday: 'long' })
           const dateLabel = now.toLocaleDateString('ro-RO', { day: 'numeric', month: 'long' })
-          const greeting = h < 12 ? 'dimineața' : h < 18 ? 'după-amiaza' : 'seara'
-          const periodLabel = h < 12 ? 'dimineața' : h < 14 ? 'la prânz' : h < 18 ? 'după-amiaza' : 'seara'
+          const crowdLabel = totalUsers === 0 ? '–' : totalUsers < 80 ? 'Liniștit' : totalUsers < 160 ? 'Moderat' : 'Aglomerat'
+          const crowdColor = totalUsers === 0 ? 'text-slate-400' : totalUsers < 80 ? 'text-emerald-400' : totalUsers < 160 ? 'text-amber-400' : 'text-red-400'
           const periodEmoji = h < 7 ? '🌙' : h < 10 ? '🌅' : h < 13 ? '☀️' : h < 17 ? '🌤️' : h < 20 ? '🌆' : '🌙'
+          const urgencyStyle = {
+            high:   { border: 'border-red-500/40',    bg: 'bg-red-500/8',    dot: 'bg-red-400',    text: 'text-red-400'    },
+            medium: { border: 'border-amber-500/40',  bg: 'bg-amber-500/8',  dot: 'bg-amber-400',  text: 'text-amber-400'  },
+            low:    { border: 'border-emerald-500/30', bg: 'bg-emerald-500/5', dot: 'bg-emerald-400', text: 'text-emerald-400' },
+          }
+          const QUICK_CHIPS = [
+            { label: 'Unde mănânc?',        icon: '🍽️', q: 'Unde pot mânca acum pe campus? Ce opțiuni am?' },
+            { label: 'Săli libere?',         icon: '🚪', q: 'Ce săli sunt disponibile acum în Corp C?' },
+            { label: 'Cel mai scurt traseu', icon: '🛤️', q: 'Care e cel mai scurt traseu de la intrarea principală la Biblioteca Centrală?' },
+            { label: 'ATM sau bancă?',       icon: '🏧', q: 'Unde e cel mai apropiat ATM de Corp C?' },
+            { label: 'Secretariatul?',       icon: '📋', q: 'Secretariatul FII e deschis acum? Unde se află?' },
+            { label: 'O cafea rapidă',       icon: '☕', q: 'Unde fac o cafea rapidă lângă campus?' },
+          ]
+
           return (
             <motion.div key="reco" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              className="space-y-5">
+              className="space-y-4">
 
-              <div className="bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600 rounded-2xl p-6 text-white relative overflow-hidden">
-                <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/5 pointer-events-none" />
-                <div className="absolute -bottom-8 -left-8 w-36 h-36 rounded-full bg-white/5 pointer-events-none" />
-                <div className="relative flex items-start justify-between mb-5">
+              {/* Header */}
+              <div className="bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 rounded-2xl p-5 text-white relative overflow-hidden">
+                <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/5 pointer-events-none" />
+                <div className="absolute -bottom-6 -left-6 w-28 h-28 rounded-full bg-white/5 pointer-events-none" />
+                <div className="relative flex items-center justify-between mb-4">
                   <div>
-                    <p className="text-white/60 text-xs uppercase tracking-widest mb-1">{dayLabel}, {dateLabel}</p>
-                    <h2 className="text-xl font-bold mb-0.5">Bună {greeting}, {firstName}!</h2>
-                    <p className="text-white/75 text-sm">Iată ce îți recomandăm {periodLabel}.</p>
+                    <p className="text-white/50 text-[11px] uppercase tracking-widest mb-0.5">{dayLabel}, {dateLabel}</p>
+                    <h2 className="text-lg font-bold flex items-center gap-2">
+                      <span>{periodEmoji}</span> Campus Pulse
+                    </h2>
                   </div>
-                  <span className="text-4xl select-none">{periodEmoji}</span>
+                  <button
+                    onClick={() => { setPulseLoaded(false); setPulseData(null); loadPulse() }}
+                    disabled={pulseLoading}
+                    className="flex items-center gap-1.5 text-xs bg-white/15 hover:bg-white/25 disabled:opacity-50 transition-colors px-3 py-1.5 rounded-xl font-medium cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    {pulseLoading ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
+                    {pulseLoading ? 'Analizez...' : 'Actualizează'}
+                  </button>
                 </div>
-                <div className="relative grid grid-cols-3 gap-3">
+                <div className="relative grid grid-cols-3 gap-2">
                   {[
-                    { emoji: '⏰', label: 'Ora', value: timeLabel },
-                    { emoji: '🏃', label: 'Campus', value: totalUsers > 0 ? `${totalUsers} activi` : '–' },
-                    { emoji: '📅', label: 'Cursuri azi', value: '3 programate' },
+                    { label: 'Ora', value: timeLabel, emoji: '⏰' },
+                    { label: 'Trafic', value: crowdLabel, emoji: '👥', valueClass: crowdColor },
+                    { label: 'Activi', value: totalUsers > 0 ? `${totalUsers}` : '–', emoji: '🏃' },
                   ].map(s => (
-                    <div key={s.label} className="bg-white/15 backdrop-blur-sm rounded-xl p-3 text-center">
-                      <div className="text-xl mb-0.5">{s.emoji}</div>
-                      <div className="text-[10px] text-white/60 mb-0.5 uppercase tracking-wide">{s.label}</div>
-                      <div className="text-xs font-semibold">{s.value}</div>
+                    <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-xl p-2.5 text-center">
+                      <div className="text-base mb-0.5">{s.emoji}</div>
+                      <div className="text-[9px] text-white/50 uppercase tracking-wide">{s.label}</div>
+                      <div className={`text-xs font-bold mt-0.5 ${s.valueClass || 'text-white'}`}>{s.value}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
+              {/* Quick chips */}
               <div>
-                <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                  <Lightbulb size={14} className="text-amber-400" />
-                  Recomandări pentru tine acum
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {smartCards.map((card, i) => (
-                    <motion.div key={card.id}
-                      initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.07 }}
-                      className="bg-slate-900 rounded-2xl border border-slate-700/60 p-4 flex gap-3 hover:shadow-sm transition-shadow">
-                      <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
-                        style={{ background: card.color + '18' }}>
-                        {card.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <p className="text-sm font-semibold text-white leading-tight">{card.title}</p>
-                          {card.live && (
-                            <span className="flex items-center gap-1 text-[10px] text-green-400 bg-green-900/20 px-1.5 py-0.5 rounded-full shrink-0">
-                              <span className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
-                              Live
-                            </span>
-                          )}
-                          {card.tag && (
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0"
-                              style={{ background: card.color + '18', color: card.color }}>
-                              {card.tag}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-400 leading-relaxed">{card.desc}</p>
-                        {card.action && (
-                          <button onClick={card.action.fn}
-                            className="mt-2 text-xs font-semibold flex items-center gap-1 hover:opacity-75 transition-opacity"
-                            style={{ color: card.color }}>
-                            {card.action.label} →
-                          </button>
-                        )}
-                      </div>
-                    </motion.div>
+                <p className="text-[11px] text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                  <Sparkles size={10} /> Întreabă rapid
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  {QUICK_CHIPS.map(chip => (
+                    <button key={chip.label} onClick={() => sendQuickChat(chip.q)}
+                      className="flex items-center gap-1.5 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500/50 text-slate-300 hover:text-white transition-all px-3 py-1.5 rounded-xl cursor-pointer">
+                      <span>{chip.icon}</span> {chip.label}
+                    </button>
                   ))}
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-indigo-500/30 bg-indigo-900/15 p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center">
-                      <Sparkles size={16} className="text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-white">Analiză AI personalizată</p>
-                      <p className="text-xs text-slate-500">Powered by Groq / Llama</p>
-                    </div>
-                  </div>
-                  <Button onClick={loadRecommendations} disabled={recoLoading} size="sm">
-                    {recoLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-                    {recoLoading ? 'Analizez...' : recommendations ? 'Regenerează' : 'Generează'}
-                  </Button>
-                </div>
-                {recoLoading && (
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
-                    <Loader2 size={16} className="animate-spin text-indigo-400" />
-                    <span className="text-sm text-indigo-300">AI analizează orarul și activitatea ta...</span>
+              {/* AI Cards */}
+              <div>
+                <p className="text-[11px] text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                  <Lightbulb size={10} className="text-amber-400" /> Recomandări acum
+                </p>
+
+                {pulseLoading && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="bg-slate-800/60 rounded-2xl border border-slate-700/40 p-4 animate-pulse">
+                        <div className="flex gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-slate-700 shrink-0" />
+                          <div className="flex-1 space-y-2 pt-1">
+                            <div className="h-3 bg-slate-700 rounded w-3/4" />
+                            <div className="h-2.5 bg-slate-700/60 rounded w-full" />
+                            <div className="h-2.5 bg-slate-700/60 rounded w-2/3" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
-                {recommendations && !recoLoading && (
-                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                    className="text-sm text-slate-200 whitespace-pre-wrap leading-relaxed">
-                    {recommendations}
-                  </motion.p>
+
+                {!pulseLoading && pulseData && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+                    {pulseData.briefing && (
+                      <p className="text-sm text-slate-400 italic border-l-2 border-indigo-500/40 pl-3">
+                        {pulseData.briefing}
+                      </p>
+                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {(pulseData.cards || []).map((card, i) => {
+                        const style = urgencyStyle[card.urgency] || urgencyStyle.low
+                        return (
+                          <motion.div key={card.id || i}
+                            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.08 }}
+                            className={`rounded-2xl border ${style.border} ${style.bg} p-4 flex gap-3`}>
+                            <div className="text-2xl leading-none pt-0.5 shrink-0">{card.emoji}</div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <p className="text-sm font-semibold text-white leading-tight">{card.title}</p>
+                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />
+                              </div>
+                              <p className="text-xs text-slate-400 leading-relaxed">{card.desc}</p>
+                            </div>
+                          </motion.div>
+                        )
+                      })}
+                    </div>
+                  </motion.div>
                 )}
-                {!recommendations && !recoLoading && (
-                  <p className="text-sm text-slate-500 text-center py-3">
-                    Apasă „Generează" pentru o analiză personalizată bazată pe cursurile tale.
-                  </p>
+
+                {!pulseLoading && !pulseData && (
+                  <div className="text-center py-8 text-slate-600 text-sm">
+                    Nu s-au putut genera recomandări.
+                  </div>
                 )}
               </div>
             </motion.div>
@@ -1099,6 +1122,74 @@ export default function CampusNavigator() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Camera modal */}
+      <AnimatePresence>
+        {cameraOpen && (
+          <motion.div
+            key="camera-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-black flex flex-col"
+          >
+            {/* Top bar */}
+            <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-b from-black/80 to-transparent absolute top-0 inset-x-0 z-10">
+              <div>
+                <p className="text-white font-semibold text-sm">Recunoaștere vizuală</p>
+                <p className="text-white/50 text-xs">Îndreaptă camera spre o clădire</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={flipCamera}
+                  className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 transition-colors flex items-center justify-center"
+                  title="Schimbă camera"
+                >
+                  <FlipHorizontal size={18} className="text-white" />
+                </button>
+                <button
+                  onClick={closeCamera}
+                  className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 transition-colors flex items-center justify-center"
+                >
+                  <X size={18} className="text-white" />
+                </button>
+              </div>
+            </div>
+
+            {/* Video stream */}
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
+
+            {/* Viewfinder overlay */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="relative w-72 h-72">
+                <span className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white rounded-tl-lg" />
+                <span className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white rounded-tr-lg" />
+                <span className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white rounded-bl-lg" />
+                <span className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white rounded-br-lg" />
+              </div>
+            </div>
+
+            {/* Capture button */}
+            <div className="absolute bottom-0 inset-x-0 pb-10 pt-6 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-center gap-3">
+              <p className="text-white/60 text-xs">Poziționează clădirea în cadru</p>
+              <button
+                onClick={capturePhoto}
+                className="w-18 h-18 rounded-full border-4 border-white bg-white/20 hover:bg-white/30 active:scale-95 transition-all flex items-center justify-center"
+                style={{ width: 72, height: 72 }}
+              >
+                <div className="w-14 h-14 rounded-full bg-white" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   )
 }

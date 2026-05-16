@@ -11,7 +11,7 @@ export function useNotifications(userId) {
     const channel = `notifications:${userId}`
     const unsub = socketService.subscribe(channel, (notif) => {
       setNotifications(prev => prev.some(n => n.id === notif.id) ? prev : [notif, ...prev])
-      if (!notif.read) setUnreadCount(c => c + 1)
+      if (notif.read === false) setUnreadCount(c => c + 1)
     })
 
     function loadNotifications() {
@@ -44,7 +44,7 @@ export function useNotifications(userId) {
       .then(({ notification: saved }) => {
         if (saved) {
           setNotifications(prev => prev.some(n => n.id === saved.id) ? prev : [saved, ...prev])
-          if (!saved.read) setUnreadCount(c => c + 1)
+          if (saved.read === false) setUnreadCount(c => c + 1)
         }
         return saved
       })
