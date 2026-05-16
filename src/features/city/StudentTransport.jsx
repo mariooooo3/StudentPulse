@@ -8,7 +8,7 @@ export default function StudentTransport({ onBack }) {
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-5">
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors">
+        <button onClick={onBack} className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center hover:bg-white/[0.07] transition-colors">
           <ChevronLeft size={16} className="text-slate-400" />
         </button>
         <div>
@@ -34,10 +34,10 @@ export default function StudentTransport({ onBack }) {
         {transportLines.map((line, i) => {
           const isExp = expanded === i
           return (
-            <div key={i} className="rounded-xl border border-slate-700/40 bg-slate-800/50 overflow-hidden">
+            <div key={i} className="rounded-xl border border-white/[0.05] bg-white/[0.03] overflow-hidden">
               <button
                 onClick={() => setExpanded(isExp ? null : i)}
-                className="w-full flex items-center gap-3 p-4 text-left hover:bg-slate-800/80 transition-colors"
+                className="w-full flex items-center gap-3 p-4 text-left hover:bg-white/[0.03] transition-colors"
               >
                 {/* Line badge */}
                 <div
@@ -59,7 +59,7 @@ export default function StudentTransport({ onBack }) {
               </button>
 
               {isExp && (
-                <div className="px-4 pb-4 space-y-3 border-t border-slate-700/40 pt-3">
+                <div className="px-4 pb-4 space-y-3 border-t border-white/[0.05] pt-3">
                   {/* Tip */}
                   {line.tip && (
                     <div className="text-xs text-amber-400/80 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
@@ -76,10 +76,10 @@ export default function StudentTransport({ onBack }) {
                   <div>
                     <p className="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">Stații principale</p>
                     <div className="relative pl-4">
-                      <div className="absolute left-1.5 top-1 bottom-1 w-px bg-slate-700" />
+                      <div className="absolute left-1.5 top-1 bottom-1 w-px bg-white/[0.08]" />
                       {line.stops.map((stop, si) => (
                         <div key={si} className="flex items-center gap-2 py-1 relative">
-                          <div className="w-2 h-2 rounded-full bg-slate-600 absolute -left-2.5 border border-slate-500" style={{ background: si === 0 || si === line.stops.length - 1 ? line.color : undefined }} />
+                          <div className="w-2 h-2 rounded-full absolute -left-2.5 border border-white/[0.15]" style={{ background: si === 0 || si === line.stops.length - 1 ? line.color : 'rgba(255,255,255,0.12)' }} />
                           <span className="text-xs text-slate-400 flex items-center gap-1">
                             <MapPin size={9} className="text-slate-600" /> {stop}
                           </span>

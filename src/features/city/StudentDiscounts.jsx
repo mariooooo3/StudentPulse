@@ -18,7 +18,7 @@ export default function StudentDiscounts({ onBack }) {
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-5">
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors">
+        <button onClick={onBack} className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center hover:bg-white/[0.07] transition-colors">
           <ChevronLeft size={16} className="text-slate-400" />
         </button>
         <div>
@@ -37,7 +37,7 @@ export default function StudentDiscounts({ onBack }) {
               'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all',
               filter === c
                 ? 'bg-indigo-600 text-white'
-                : 'bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700'
+                : 'bg-white/[0.03] text-slate-400 hover:text-slate-200 border border-white/[0.07]'
             )}
           >
             {c.charAt(0).toUpperCase() + c.slice(1)}
@@ -50,7 +50,7 @@ export default function StudentDiscounts({ onBack }) {
         {filtered.map((d, i) => {
           const catColor = CAT_COLORS[d.cat] || '#6366f1'
           return (
-            <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/40 hover:border-slate-600/60 transition-all">
+            <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-white/[0.09] transition-all">
               {/* Discount badge */}
               <div className="w-14 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 font-bold"
                 style={{ background: catColor + '20', border: `1.5px solid ${catColor}40` }}>

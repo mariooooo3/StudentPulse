@@ -44,15 +44,14 @@ function TutorCard({ t }) {
           </div>
         </div>
 
-        {/* Nota & stil */}
         <div className="grid grid-cols-2 gap-2 mb-4">
-          <div className="bg-slate-800/60 rounded-lg p-2.5">
-            <p className="text-[9px] text-slate-600 uppercase font-semibold">Nota obținută</p>
-            <p className="text-sm font-bold text-emerald-400">{t.grade}/10</p>
+          <div className="bg-white/[0.03] border border-white/[0.04] rounded-lg p-2.5">
+            <p className="text-[9px] text-slate-600 uppercase font-semibold tracking-wide">Nota obținută</p>
+            <p className="text-[13px] font-bold text-emerald-400 font-mono">{t.grade}/10</p>
           </div>
-          <div className="bg-slate-800/60 rounded-lg p-2.5">
-            <p className="text-[9px] text-slate-600 uppercase font-semibold">Stil</p>
-            <p className="text-[10px] text-slate-300 leading-tight">{t.style}</p>
+          <div className="bg-white/[0.03] border border-white/[0.04] rounded-lg p-2.5">
+            <p className="text-[9px] text-slate-600 uppercase font-semibold tracking-wide">Stil</p>
+            <p className="text-[10px] text-slate-400 leading-tight">{t.style}</p>
           </div>
         </div>
 
@@ -66,7 +65,7 @@ function TutorCard({ t }) {
         {showSlots && (
           <div className="flex flex-wrap gap-1.5 mb-3">
             {t.availability.map(slot => (
-              <span key={slot} className="px-2.5 py-1 rounded-lg text-[10px] bg-slate-800 border border-slate-700 text-slate-300 flex items-center gap-1">
+              <span key={slot} className="px-2.5 py-1 rounded-lg text-[10px] bg-white/[0.03] border border-white/[0.07] text-slate-400 flex items-center gap-1">
                 <Clock size={9} /> {slot}
               </span>
             ))}
@@ -75,8 +74,8 @@ function TutorCard({ t }) {
 
         {/* Action */}
         <div className="mt-auto flex gap-2">
-          <button className="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors shrink-0">
-            <MessageSquare size={15} className="text-slate-400" />
+          <button className="w-9 h-9 rounded-xl bg-white/[0.03] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.07] transition-colors shrink-0">
+            <MessageSquare size={14} className="text-slate-500" strokeWidth={1.75} />
           </button>
           {booked ? (
             <div className="flex-1 flex items-center justify-center gap-2 bg-emerald-600/20 border border-emerald-500/30 rounded-xl text-emerald-400 text-sm font-semibold">
@@ -114,28 +113,29 @@ export default function PeerTutoring({ profile }) {
   return (
     <div className="flex flex-col h-full animate-fade-in">
       {/* Filter bar */}
-      <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-900 shrink-0 space-y-3">
+      <div className="px-5 py-3.5 border-b border-white/[0.05] bg-[#070b14]/90 backdrop-blur-xl shrink-0 space-y-3">
         <div className="flex gap-2">
-          <div className="flex gap-1 bg-slate-800 p-1 rounded-xl">
+          <div className="flex p-[1px] rounded-full bg-white/[0.05] border border-white/[0.07]">
             {TABS.map((t, i) => (
               <button
                 key={t}
                 onClick={() => setTab(i)}
-                className={clsx('px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5', tab === i ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200')}
+                className={clsx('px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all flex items-center gap-1.5',
+                  tab === i ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/30' : 'text-slate-500 hover:text-slate-300')}
               >
-                {i === 1 && <ArrowLeftRight size={11} />}
+                {i === 1 && <ArrowLeftRight size={10} />}
                 {t}
               </button>
             ))}
           </div>
           {tab === 0 && (
-            <div className="flex-1 flex items-center gap-2 bg-slate-800 border border-slate-700/50 rounded-xl px-3 py-2">
-              <Search size={14} className="text-slate-500" />
+            <div className="flex-1 flex items-center gap-2 bg-white/[0.03] border border-white/[0.07] hover:bg-white/[0.05] rounded-xl px-3 py-2 transition-colors">
+              <Search size={13} className="text-slate-600 shrink-0" strokeWidth={1.75} />
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Caută tutor sau materie..."
-                className="bg-transparent text-sm text-slate-200 placeholder-slate-600 outline-none flex-1"
+                className="bg-transparent text-[13px] text-slate-300 placeholder-slate-700 outline-none flex-1 font-medium"
               />
             </div>
           )}
@@ -147,7 +147,8 @@ export default function PeerTutoring({ profile }) {
               <button
                 key={s}
                 onClick={() => setSubject(s)}
-                className={clsx('shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all border', subject === s ? 'bg-indigo-600/30 border-indigo-500/50 text-indigo-300' : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600')}
+                className={clsx('shrink-0 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all border',
+                  subject === s ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-300' : 'bg-white/[0.02] border-white/[0.06] text-slate-500 hover:border-white/[0.1] hover:text-slate-300')}
               >
                 {s}
               </button>
@@ -157,10 +158,10 @@ export default function PeerTutoring({ profile }) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto p-5">
         {tab === 0 && (
           <>
-            <p className="text-sm text-slate-400 mb-4">{filtered.length} tutori disponibili</p>
+            <p className="text-[12px] text-slate-500 font-medium mb-4">{filtered.length} tutori disponibili</p>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {filtered.map(t => <TutorCard key={t.id} t={t} />)}
             </div>

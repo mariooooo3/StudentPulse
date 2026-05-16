@@ -12,7 +12,7 @@ export default function SafeZones({ onBack }) {
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors">
+        <button onClick={onBack} className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center hover:bg-white/[0.07] transition-colors">
           <ChevronLeft size={16} className="text-slate-400" />
         </button>
         <div>
@@ -40,7 +40,7 @@ export default function SafeZones({ onBack }) {
           const meta = LEVEL_META[zone.level]
           const Icon = meta.icon
           return (
-            <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-slate-800/50 border border-slate-700/40">
+            <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/[0.05]">
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                 style={{ background: zone.color + '20', border: `1.5px solid ${zone.color}40` }}
@@ -70,7 +70,7 @@ export default function SafeZones({ onBack }) {
             <a
               key={i}
               href={`tel:${c.number}`}
-              className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700/40 hover:border-slate-600 transition-colors group"
+              className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-white/[0.09] transition-colors group"
             >
               <div className="w-8 h-8 rounded-lg bg-red-500/15 border border-red-500/30 flex items-center justify-center shrink-0">
                 <Phone size={14} className="text-red-400" />

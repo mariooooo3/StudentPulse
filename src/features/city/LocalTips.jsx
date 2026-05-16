@@ -22,7 +22,7 @@ export default function LocalTips({ onBack }) {
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-5">
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors">
+        <button onClick={onBack} className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center hover:bg-white/[0.07] transition-colors">
           <ChevronLeft size={16} className="text-slate-400" />
         </button>
         <div>
@@ -39,7 +39,7 @@ export default function LocalTips({ onBack }) {
             onClick={() => setFilter(c)}
             className={clsx(
               'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all',
-              filter === c ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700'
+              filter === c ? 'bg-indigo-600 text-white' : 'bg-white/[0.03] text-slate-400 hover:text-slate-200 border border-white/[0.07]'
             )}
           >
             {c.charAt(0).toUpperCase() + c.slice(1)}
@@ -53,9 +53,9 @@ export default function LocalTips({ onBack }) {
           const origIdx = tips.indexOf(tip)
           const voted = upvoted.has(origIdx)
           return (
-            <div key={i} className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/40 space-y-3">
+            <div key={i} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.05] space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm shrink-0">
+                <div className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center text-sm shrink-0">
                   {tip.avatar}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -74,7 +74,7 @@ export default function LocalTips({ onBack }) {
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
                     voted
                       ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
-                      : 'bg-slate-700/50 text-slate-500 hover:text-slate-300 border border-slate-700'
+                      : 'bg-white/[0.03] text-slate-500 hover:text-slate-300 border border-white/[0.07]'
                   )}
                 >
                   <ThumbsUp size={11} />

@@ -1,18 +1,18 @@
 import { cn } from '../../shared/utils/cn'
 
 const variants = {
-  default: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
-  primary: 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300',
-  success: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
-  warning: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
-  danger: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
+  default: 'bg-white/[0.05] text-slate-400 border border-white/[0.08]',
+  primary: 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30',
+  success: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25',
+  warning: 'bg-amber-500/15 text-amber-400 border border-amber-500/25',
+  danger: 'bg-red-500/15 text-red-400 border border-red-500/25',
 }
 
 export default function Badge({ children, variant = 'default', className }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-medium',
+        'inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-semibold tracking-wide',
         variants[variant],
         className
       )}

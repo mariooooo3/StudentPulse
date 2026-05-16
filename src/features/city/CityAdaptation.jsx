@@ -71,7 +71,7 @@ function ModuleCard({ mod, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-4 p-4 rounded-2xl border border-slate-700/40 bg-slate-800/40 hover:bg-slate-800/70 hover:border-slate-600/60 text-left transition-all duration-200 group w-full"
+      className="flex items-center gap-4 p-4 rounded-2xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.09] text-left transition-all duration-200 group w-full"
     >
       <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: mod.bg, border: `1.5px solid ${mod.color}40` }}>
         <Icon size={20} style={{ color: mod.color }} />
@@ -127,7 +127,7 @@ export default function CityAdaptation({ profile }) {
           { icon: Tag, label: '12 reduceri active', color: '#10b981' },
           { icon: Star, label: '10 sfaturi verificate', color: '#f59e0b' },
         ].map(({ icon: Icon, label, color }) => (
-          <div key={label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/60 border border-slate-700/50 text-xs text-slate-400">
+          <div key={label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] text-xs text-slate-400">
             <Icon size={11} style={{ color }} />
             {label}
           </div>

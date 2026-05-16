@@ -1,21 +1,30 @@
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from './providers/AuthContext'
 import { AUTH_STATE, PROFILE_STAGE } from '../shared/config/constants'
-import AuthFlow from '../features/auth/AuthFlow'
-import OnboardingFlow from '../features/onboarding/OnboardingFlow'
 import Sidebar from './layout/Sidebar'
 import Header from './layout/Header'
-import Dashboard from '../features/dashboard/Dashboard'
-import CampusNavigator from '../components/navigation/CampusNavigator'
-import ScheduleHub from '../features/schedule/ScheduleHub'
-import ThesisFinder from '../features/thesis/ThesisFinder'
-import PeerTutoring from '../features/tutoring/PeerTutoring'
-import DirectMessages from '../features/messages/DirectMessages'
-import CityAdaptation from '../features/city/CityAdaptation'
-import StudentLifeHub from '../features/student-life/StudentLifeHub'
-import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { socketService } from '../shared/services/socket.service'
 import { getUniversityTheme } from '../shared/utils/theme'
+
+const AuthFlow       = lazy(() => import('../features/auth/AuthFlow'))
+const OnboardingFlow = lazy(() => import('../features/onboarding/OnboardingFlow'))
+const Dashboard      = lazy(() => import('../features/dashboard/Dashboard'))
+const CampusNavigator = lazy(() => import('../components/navigation/CampusNavigator'))
+const ScheduleHub    = lazy(() => import('../features/schedule/ScheduleHub'))
+const ThesisFinder   = lazy(() => import('../features/thesis/ThesisFinder'))
+const PeerTutoring   = lazy(() => import('../features/tutoring/PeerTutoring'))
+const DirectMessages = lazy(() => import('../features/messages/DirectMessages'))
+const CityAdaptation = lazy(() => import('../features/city/CityAdaptation'))
+const StudentLifeHub = lazy(() => import('../features/student-life/StudentLifeHub'))
+
+function PageLoader() {
+  return (
+    <div className="flex-1 flex items-center justify-center">
+      <Loader2 size={24} className="text-indigo-400/50 animate-spin" />
+    </div>
+  )
+}
 
 const DEFAULT_VIEW_BY_MODE = {
   academic: 'dashboard',
@@ -55,31 +64,30 @@ function AppShell() {
 
   if (authState === AUTH_STATE.LOADING) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[#050810] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 size={32} className="text-indigo-400 animate-spin" />
-          <p className="text-slate-500 text-sm">Se încarcă...</p>
+          <p className="text-slate-600 text-sm">Se încarcă...</p>
         </div>
       </div>
     )
   }
 
   if (authState === AUTH_STATE.UNAUTHENTICATED) {
-    return <AuthFlow />
+    return <Suspense fallback={null}><AuthFlow /></Suspense>
   }
 
   if (profileStage === PROFILE_STAGE.ONBOARDING) {
     return (
-      <OnboardingFlow
-        session={session}
-        onComplete={(p) => completeOnboarding(p)}
-      />
+      <Suspense fallback={null}>
+        <OnboardingFlow session={session} onComplete={(p) => completeOnboarding(p)} />
+      </Suspense>
     )
   }
 
   return (
     <div
-      className="relative flex h-screen bg-slate-950 text-slate-100 overflow-hidden"
+      className="relative flex h-screen bg-[#050810] text-slate-100 overflow-hidden"
       style={theme.shellStyle}
     >
       <div
@@ -105,18 +113,20 @@ function AppShell() {
           profile={profile}
           session={session}
         />
-        <main className="flex-1 overflow-auto">
-          {platformMode === 'academic' && currentView === 'dashboard'  && <Dashboard profile={profile} session={session} onNavigate={handleNavigate} />}
-          {platformMode === 'academic' && currentView === 'navigator' && <CampusNavigator />}
-          {platformMode === 'academic' && currentView === 'schedule'  && <ScheduleHub profile={profile} session={session} />}
-          {platformMode === 'academic' && currentView === 'thesis'    && <ThesisFinder profile={profile} session={session} />}
-          {platformMode === 'academic' && currentView === 'tutoring'  && <PeerTutoring profile={profile} />}
-          {platformMode === 'academic' && currentView === 'messages'  && <DirectMessages session={session} profile={profile} />}
+        <main className="flex-1 overflow-auto flex flex-col">
+          <Suspense fallback={<PageLoader />}>
+            {platformMode === 'academic' && currentView === 'dashboard'  && <Dashboard profile={profile} session={session} onNavigate={handleNavigate} />}
+            {platformMode === 'academic' && currentView === 'navigator' && <CampusNavigator />}
+            {platformMode === 'academic' && currentView === 'schedule'  && <ScheduleHub profile={profile} session={session} />}
+            {platformMode === 'academic' && currentView === 'thesis'    && <ThesisFinder profile={profile} session={session} />}
+            {platformMode === 'academic' && currentView === 'tutoring'  && <PeerTutoring profile={profile} />}
+            {platformMode === 'academic' && currentView === 'messages'  && <DirectMessages session={session} profile={profile} />}
 
-          {platformMode === 'life' && ['discounts', 'career', 'community'].includes(currentView) && (
-            <StudentLifeHub activeSection={currentView} profile={profile} session={session} />
-          )}
-          {platformMode === 'life' && currentView === 'citylife' && <CityAdaptation profile={profile} session={session} />}
+            {platformMode === 'life' && ['discounts', 'career', 'community'].includes(currentView) && (
+              <StudentLifeHub activeSection={currentView} profile={profile} session={session} />
+            )}
+            {platformMode === 'life' && currentView === 'citylife' && <CityAdaptation profile={profile} session={session} />}
+          </Suspense>
         </main>
       </div>
     </div>

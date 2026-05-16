@@ -14,7 +14,7 @@ export default function StudentHousing({ onBack }) {
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-5">
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors">
+        <button onClick={onBack} className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center hover:bg-white/[0.07] transition-colors">
           <ChevronLeft size={16} className="text-slate-400" />
         </button>
         <div>
@@ -51,7 +51,7 @@ export default function StudentHousing({ onBack }) {
             onClick={() => setTab(t)}
             className={clsx(
               'px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-              tab === t ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700'
+              tab === t ? 'bg-indigo-600 text-white' : 'bg-white/[0.03] text-slate-400 hover:text-slate-200 border border-white/[0.07]'
             )}
           >
             {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -62,7 +62,7 @@ export default function StudentHousing({ onBack }) {
       {/* Listings */}
       <div className="space-y-3">
         {filtered.map((h, i) => (
-          <div key={i} className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/40 hover:border-slate-600/60 transition-all space-y-3">
+          <div key={i} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-white/[0.09] transition-all space-y-3">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -89,7 +89,7 @@ export default function StudentHousing({ onBack }) {
             {/* Amenities */}
             <div className="flex gap-1.5 flex-wrap">
               {h.amenities?.map((a, ai) => (
-                <span key={ai} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-700/60 text-slate-400">
+                <span key={ai} className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.05] text-slate-400">
                   {a}
                 </span>
               ))}
