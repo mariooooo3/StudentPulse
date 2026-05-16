@@ -29,7 +29,7 @@ export default function ArrivalAssistant({ onBack }) {
     <div className="p-6 max-w-2xl mx-auto space-y-5">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={onBack} className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 transition-colors">
+        <button onClick={onBack} className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center hover:bg-white/[0.07] transition-colors">
           <ChevronLeft size={16} className="text-slate-400" />
         </button>
         <div>
@@ -43,7 +43,7 @@ export default function ArrivalAssistant({ onBack }) {
       </div>
 
       {/* Progress bar */}
-      <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+      <div className="h-2 bg-white/[0.07] rounded-full overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-500"
           style={{ width: `${pct}%` }}
@@ -60,7 +60,7 @@ export default function ArrivalAssistant({ onBack }) {
               'px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all',
               filter === c
                 ? 'bg-indigo-600 text-white'
-                : 'bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700'
+                : 'bg-white/[0.03] text-slate-400 hover:text-slate-200 border border-white/[0.07]'
             )}
           >
             {c.charAt(0).toUpperCase() + c.slice(1)}
@@ -79,8 +79,8 @@ export default function ArrivalAssistant({ onBack }) {
               className={clsx(
                 'rounded-xl border transition-all duration-200',
                 item.done
-                  ? 'bg-slate-900/40 border-slate-800/40 opacity-60'
-                  : 'bg-slate-800/50 border-slate-700/50'
+                  ? 'bg-white/[0.01] border-white/[0.03] opacity-60'
+                  : 'bg-white/[0.03] border-white/[0.05]'
               )}
             >
               <div className="flex items-start gap-3 p-3">

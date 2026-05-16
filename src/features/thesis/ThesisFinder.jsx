@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, Filter, BookOpen, Star, Users, ChevronDown, Globe, Check, AlertCircle } from 'lucide-react'
+import { Search, BookOpen, Star, Users, ChevronDown, Check, AlertCircle, X } from 'lucide-react'
 import { getProfessors, getThesisDomains } from '../../shared/data/facultyCatalog'
 import BookingModal from './BookingModal'
 import clsx from 'clsx'
@@ -68,21 +68,24 @@ function ProfessorCard({ p, onBook }) {
 
         {/* Criteria */}
         <div className="grid grid-cols-2 gap-2 mb-4">
-          <div className="bg-slate-800/60 rounded-lg p-2.5">
-            <p className="text-[9px] text-slate-600 uppercase font-semibold">Medie minimă</p>
-            <p className="text-sm font-bold text-slate-200">{p.minGrade}</p>
+          <div className="bg-white/[0.03] border border-white/[0.04] rounded-lg p-2.5">
+            <p className="text-[9px] text-slate-600 uppercase font-semibold tracking-wide">Medie minimă</p>
+            <p className="text-[13px] font-bold text-slate-200 font-mono">{p.minGrade}</p>
           </div>
-          <div className="bg-slate-800/60 rounded-lg p-2.5">
-            <p className="text-[9px] text-slate-600 uppercase font-semibold">Limbă</p>
-            <p className="text-xs font-semibold text-slate-200 truncate">{p.language}</p>
+          <div className="bg-white/[0.03] border border-white/[0.04] rounded-lg p-2.5">
+            <p className="text-[9px] text-slate-600 uppercase font-semibold tracking-wide">Limbă</p>
+            <p className="text-[11px] font-semibold text-slate-200 truncate">{p.language}</p>
           </div>
-          <div className="bg-slate-800/60 rounded-lg p-2.5">
-            <p className="text-[9px] text-slate-600 uppercase font-semibold">Alte specializări</p>
-            <p className="text-xs font-semibold text-slate-200">{p.acceptsOther ? '✓ Acceptă' : '✗ Nu acceptă'}</p>
+          <div className="bg-white/[0.03] border border-white/[0.04] rounded-lg p-2.5">
+            <p className="text-[9px] text-slate-600 uppercase font-semibold tracking-wide">Alte specializări</p>
+            <p className="text-[11px] font-semibold flex items-center gap-1" style={{ color: p.acceptsOther ? '#34d399' : '#f87171' }}>
+              {p.acceptsOther ? <Check size={11} /> : <X size={11} />}
+              {p.acceptsOther ? 'Acceptă' : 'Nu acceptă'}
+            </p>
           </div>
-          <div className="bg-slate-800/60 rounded-lg p-2.5">
-            <p className="text-[9px] text-slate-600 uppercase font-semibold">Contact</p>
-            <p className="text-xs font-semibold text-slate-200 truncate">{p.contact}</p>
+          <div className="bg-white/[0.03] border border-white/[0.04] rounded-lg p-2.5">
+            <p className="text-[9px] text-slate-600 uppercase font-semibold tracking-wide">Contact</p>
+            <p className="text-[11px] font-semibold text-slate-200 truncate">{p.contact}</p>
           </div>
         </div>
 
@@ -98,9 +101,9 @@ function ProfessorCard({ p, onBook }) {
         {expanded && (
           <div className="space-y-2 mb-4">
             {p.previousTheses.map((t, i) => (
-              <div key={i} className="bg-slate-800/40 border border-slate-700/40 rounded-lg px-3 py-2">
-                <p className="text-xs text-slate-300 leading-relaxed">{t.title}</p>
-                <p className="text-[10px] text-slate-600 mt-0.5">{t.year}</p>
+              <div key={i} className="bg-white/[0.02] border border-white/[0.04] rounded-lg px-3 py-2">
+                <p className="text-[11px] text-slate-400 leading-relaxed">{t.title}</p>
+                <p className="text-[10px] text-slate-700 mt-0.5 font-mono">{t.year}</p>
               </div>
             ))}
           </div>
@@ -146,37 +149,36 @@ export default function ThesisFinder({ profile, session }) {
   return (
     <div className="flex flex-col h-full animate-fade-in">
       {/* Filter bar */}
-      <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-900 shrink-0 space-y-3">
+      <div className="px-5 py-3.5 border-b border-white/[0.05] bg-[#070b14]/90 backdrop-blur-xl shrink-0 space-y-3">
         <div className="flex gap-3">
-          <div className="flex-1 flex items-center gap-2 bg-slate-800 border border-slate-700/50 rounded-xl px-3 py-2.5">
-            <Search size={15} className="text-slate-500" />
+          <div className="flex-1 flex items-center gap-2 bg-white/[0.03] border border-white/[0.07] hover:bg-white/[0.05] rounded-xl px-3 py-2.5 transition-colors">
+            <Search size={13} className="text-slate-600 shrink-0" strokeWidth={1.75} />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Caută profesor, domeniu, tag..."
-              className="bg-transparent text-sm text-slate-200 placeholder-slate-600 outline-none flex-1"
+              className="bg-transparent text-[13px] text-slate-300 placeholder-slate-700 outline-none flex-1 font-medium"
             />
           </div>
-          <label className="flex items-center gap-2 bg-slate-800 border border-slate-700/50 rounded-xl px-4 cursor-pointer hover:bg-slate-700 transition-colors">
+          <label className="flex items-center gap-2.5 bg-white/[0.03] border border-white/[0.07] rounded-xl px-4 cursor-pointer hover:bg-white/[0.05] transition-colors">
             <div
               onClick={() => setOnlyAvailable(v => !v)}
-              className={`w-4 h-4 rounded border-2 flex items-center justify-center ${onlyAvailable ? 'bg-indigo-600 border-indigo-600' : 'border-slate-600'}`}
+              className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${onlyAvailable ? 'bg-indigo-600 border-indigo-600' : 'border-white/[0.15]'}`}
             >
               {onlyAvailable && <Check size={10} className="text-white" />}
             </div>
-            <span className="text-sm text-slate-400 whitespace-nowrap">Doar disponibili</span>
+            <span className="text-[12px] text-slate-500 font-medium whitespace-nowrap">Doar disponibili</span>
           </label>
         </div>
 
-        {/* Domain filter chips */}
         <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
           {DOMAINS.map(d => (
             <button
               key={d}
               onClick={() => setDomain(d)}
               className={clsx(
-                'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all border',
-                domain === d ? 'bg-indigo-600/30 border-indigo-500/50 text-indigo-300' : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600',
+                'shrink-0 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all border',
+                domain === d ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-300' : 'bg-white/[0.02] border-white/[0.06] text-slate-500 hover:border-white/[0.1] hover:text-slate-300',
               )}
             >
               {d}
@@ -186,10 +188,10 @@ export default function ThesisFinder({ profile, session }) {
       </div>
 
       {/* Results */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto p-5">
         <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-slate-400">{filtered.length} profesori găsiți</p>
-          <p className="text-xs text-slate-600">{filtered.filter(p => p.available).length} cu locuri disponibile</p>
+          <p className="text-[12px] text-slate-500 font-medium">{filtered.length} profesori găsiți</p>
+          <p className="text-[11px] text-slate-700">{filtered.filter(p => p.available).length} cu locuri disponibile</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map(p => (

@@ -8,7 +8,7 @@ function ProgressBar({ step, total }) {
     <div className="flex items-center gap-1.5 mb-8">
       {Array.from({ length: total }).map((_, i) => (
         <div key={i} className={clsx('h-1.5 flex-1 rounded-full transition-all duration-500',
-          i < step ? 'bg-indigo-500' : i === step ? 'bg-indigo-400/50' : 'bg-slate-700')} />
+          i < step ? 'bg-indigo-500' : i === step ? 'bg-indigo-400/50' : 'bg-white/[0.07]')} />
       ))}
     </div>
   )
@@ -17,11 +17,11 @@ function ProgressBar({ step, total }) {
 function SelectOption({ label, selected, onClick }) {
   return (
     <button onClick={onClick} className={clsx(
-      'w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all duration-150',
+      'w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all duration-150 flex items-center gap-2',
       selected ? 'bg-indigo-600/20 border-indigo-500/60 text-indigo-300'
-               : 'bg-slate-800/50 border-slate-700/50 text-slate-300 hover:border-slate-600 hover:text-white',
+               : 'bg-white/[0.03] border-white/[0.05] text-slate-300 hover:border-white/[0.1] hover:text-white',
     )}>
-      {selected && <span className="mr-2 text-indigo-400">✓</span>}{label}
+      {selected && <Check size={13} className="text-indigo-400 shrink-0" />}{label}
     </button>
   )
 }
@@ -30,10 +30,10 @@ function CardOption({ opt, selected, onClick }) {
   return (
     <button onClick={onClick} className={clsx(
       'w-full text-left px-4 py-3.5 rounded-xl border flex items-center gap-3 transition-all duration-150',
-      selected ? 'bg-indigo-600/20 border-indigo-500/60' : 'bg-slate-800/50 border-slate-700/50 hover:border-slate-600',
+      selected ? 'bg-indigo-600/20 border-indigo-500/60' : 'bg-white/[0.03] border-white/[0.05] hover:border-white/[0.1]',
     )}>
       <div className={clsx('w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0',
-        selected ? 'border-indigo-500 bg-indigo-500' : 'border-slate-600')}>
+        selected ? 'border-indigo-500 bg-indigo-500' : 'border-white/[0.2]')}>
         {selected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
       </div>
       <div>
@@ -51,11 +51,11 @@ function TagOptions({ options, selected = [], onToggle }) {
         const sel = selected.includes(tag)
         return (
           <button key={tag} onClick={() => onToggle(tag)} className={clsx(
-            'px-4 py-2 rounded-full border text-sm font-medium transition-all duration-150',
+            'px-4 py-2 rounded-full border text-sm font-medium transition-all duration-150 flex items-center gap-1.5',
             sel ? 'bg-indigo-600/30 border-indigo-500/60 text-indigo-300'
-                : 'bg-slate-800/50 border-slate-700/50 text-slate-400 hover:border-slate-600 hover:text-white',
+                : 'bg-white/[0.03] border-white/[0.05] text-slate-400 hover:border-white/[0.1] hover:text-white',
           )}>
-            {sel && '✓ '}{tag}
+            {sel && <Check size={11} className="text-indigo-400" />}{tag}
           </button>
         )
       })}
@@ -72,7 +72,7 @@ function FacultyStep({ value, onChange, universityFaculties }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5">
+      <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2.5">
         <Search size={15} className="text-slate-500" />
         <input
           value={search}
@@ -217,10 +217,12 @@ export default function OnboardingFlow({ onComplete, session }) {
 
   if (done) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-8">
+      <div className="min-h-screen bg-[#050810] flex items-center justify-center p-8">
         <div className="text-center max-w-md animate-slide-up">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-emerald-500/30">
-            <Check size={36} className="text-white" />
+          <div className="p-[1.5px] rounded-full bg-gradient-to-b from-emerald-400/30 to-emerald-500/10 mx-auto w-fit mb-6">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-2xl shadow-emerald-500/30">
+              <Check size={36} className="text-white" />
+            </div>
           </div>
           <h2 className="text-3xl font-bold text-white mb-3">Profilul tău este gata!</h2>
           <p className="text-slate-400 mb-8 leading-relaxed">
@@ -255,22 +257,25 @@ export default function OnboardingFlow({ onComplete, session }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-[#050810] flex flex-col items-center justify-center p-6">
       {/* Logo */}
       <div className="flex items-center gap-3 mb-10">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-          <Compass size={20} className="text-white" />
+        <div className="p-[1.5px] rounded-[0.85rem] bg-gradient-to-b from-white/10 to-white/[0.03]">
+          <div className="w-10 h-10 rounded-[0.75rem] bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+            <Compass size={20} className="text-white" />
+          </div>
         </div>
         <div>
-          <p className="font-bold text-white">StudentAcademic</p>
-          <p className="text-xs text-slate-500">Setup profil — {step + 1} din {total}</p>
+          <p className="font-bold text-white text-[14px] tracking-tight">StudentCompass</p>
+          <p className="text-xs text-slate-600">Setup profil — {step + 1} din {total}</p>
         </div>
       </div>
 
       <div className="w-full max-w-xl">
         <ProgressBar step={step} total={total} />
 
-        <div className="glass-card p-8 animate-fade-in" key={q.id}>
+        <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.08] to-white/[0.02]" key={q.id}>
+        <div className="rounded-[calc(1rem-1px)] bg-[#0c1120] border border-white/[0.04] p-8 animate-fade-in">
           <div className="text-4xl mb-4">{q.emoji}</div>
           <h2 className="text-2xl font-bold text-white mb-2">{q.question}</h2>
           <p className="text-slate-400 mb-6 text-sm leading-relaxed">{q.subtitle}</p>
@@ -295,6 +300,7 @@ export default function OnboardingFlow({ onComplete, session }) {
           {q.type === 'tags' && (
             <TagOptions options={q.options} selected={answers[q.id] || []} onToggle={toggleTag} />
           )}
+        </div>
         </div>
 
         {/* Navigation */}

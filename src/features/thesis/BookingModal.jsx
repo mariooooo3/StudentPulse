@@ -24,24 +24,24 @@ export default function BookingModal({ professor, onClose, session }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl" onClick={e => e.stopPropagation()}>
-        {/* Header */}
-        <div className="flex items-start justify-between p-6 border-b border-slate-700/50">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.1] to-white/[0.03] w-full max-w-lg" onClick={e => e.stopPropagation()}>
+      <div className="bg-[#0c1120] border border-white/[0.05] rounded-[calc(1rem-1px)] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.8)] overflow-hidden">
+        <div className="flex items-start justify-between p-5 border-b border-white/[0.06]">
           <div>
-            <p className="text-xs text-slate-500 mb-1">Rezervare loc licență</p>
-            <h3 className="font-bold text-white text-lg">{professor.name}</h3>
-            <p className="text-sm text-slate-400">{professor.domain}</p>
+            <p className="section-label mb-1">Rezervare loc licență</p>
+            <h3 className="font-bold text-white text-[15px]">{professor.name}</h3>
+            <p className="text-[12px] text-slate-500 mt-0.5">{professor.domain}</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center hover:bg-slate-700 transition-colors">
-            <X size={16} className="text-slate-400" />
+          <button onClick={onClose} className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.08] transition-colors">
+            <X size={14} className="text-slate-500" strokeWidth={1.75} />
           </button>
         </div>
 
         {step === 1 ? (
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <form onSubmit={handleSubmit} className="p-5 space-y-4">
             <div>
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">
                 Idee preliminară de temă *
               </label>
               <textarea
@@ -49,12 +49,12 @@ export default function BookingModal({ professor, onClose, session }) {
                 rows={3}
                 value={form.idea}
                 onChange={e => setForm(p => ({ ...p, idea: e.target.value }))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-indigo-500/50 resize-none"
+                className="w-full bg-white/[0.03] border border-white/[0.07] focus:border-indigo-500/40 rounded-xl px-4 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none resize-none transition-colors"
                 placeholder="Descrie pe scurt ideea ta de temă pentru licență..."
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">
                 Motivație *
               </label>
               <textarea
@@ -62,42 +62,43 @@ export default function BookingModal({ professor, onClose, session }) {
                 rows={3}
                 value={form.motivation}
                 onChange={e => setForm(p => ({ ...p, motivation: e.target.value }))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-indigo-500/50 resize-none"
+                className="w-full bg-white/[0.03] border border-white/[0.07] focus:border-indigo-500/40 rounded-xl px-4 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none resize-none transition-colors"
                 placeholder="De ce vrei să lucrezi cu acest profesor și pe această temă?"
               />
             </div>
-            <label className="flex items-center gap-3 cursor-pointer">
+            <label className="flex items-center gap-3 cursor-pointer group">
               <div
                 onClick={() => setForm(p => ({ ...p, cv: !p.cv }))}
-                className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${form.cv ? 'bg-indigo-600 border-indigo-600' : 'border-slate-600'}`}
+                className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${form.cv ? 'bg-indigo-600 border-indigo-600' : 'border-white/[0.15] group-hover:border-white/[0.3]'}`}
               >
-                {form.cv && <CheckCircle size={12} className="text-white" />}
+                {form.cv && <CheckCircle size={10} className="text-white" />}
               </div>
-              <span className="text-sm text-slate-400">Atașez CV (opțional)</span>
+              <span className="text-[13px] text-slate-500 group-hover:text-slate-400 transition-colors">Atașez CV (opțional)</span>
             </label>
 
-            <div className="pt-2 flex gap-3">
+            <div className="pt-1 flex gap-3">
               <button type="button" onClick={onClose} className="btn-secondary flex-1">Anulează</button>
               <button type="submit" className="btn-primary flex-1 flex items-center justify-center gap-2">
-                <Send size={15} /> Trimite cererea
+                <Send size={14} /> Trimite cererea
               </button>
             </div>
           </form>
         ) : (
           <div className="p-8 text-center">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4">
-              <CheckCircle size={28} className="text-emerald-400" />
+            <div className="w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle size={24} className="text-emerald-400" strokeWidth={1.75} />
             </div>
-            <h4 className="font-bold text-white text-lg mb-2">Cerere trimisă cu succes!</h4>
-            <p className="text-sm text-slate-400 mb-2">
+            <h4 className="font-bold text-white text-[15px] mb-2">Cerere trimisă cu succes!</h4>
+            <p className="text-[13px] text-slate-400 mb-2 leading-relaxed">
               {professor.name} va reveni cu un răspuns în 2–5 zile lucrătoare.
             </p>
-            <p className="text-xs text-slate-500 mb-6">
+            <p className="text-[11px] text-slate-600 mb-6">
               Vei primi o notificare prin email și în aplicație la acceptare sau refuz.
             </p>
             <button onClick={onClose} className="btn-primary w-full">Închide</button>
           </div>
         )}
+      </div>
       </div>
     </div>
   )

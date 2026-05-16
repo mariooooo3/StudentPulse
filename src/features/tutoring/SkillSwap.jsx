@@ -17,7 +17,7 @@ function SkillSwapTab({ users }) {
               <span>✓</span> Ce știi bine
             </p>
             <div className="flex flex-wrap gap-1.5">
-              <button className="px-2.5 py-1 rounded-full text-xs bg-slate-700 border border-slate-600 text-slate-400 hover:bg-slate-600 transition-colors flex items-center gap-1">
+              <button className="px-2.5 py-1 rounded-full text-xs bg-white/[0.04] border border-white/[0.08] text-slate-400 hover:bg-white/[0.07] transition-colors flex items-center gap-1">
                 <Plus size={10} /> Adaugă skill
               </button>
             </div>
@@ -27,7 +27,7 @@ function SkillSwapTab({ users }) {
               <span>→</span> Ce vrei să înveți
             </p>
             <div className="flex flex-wrap gap-1.5">
-              <button className="px-2.5 py-1 rounded-full text-xs bg-slate-700 border border-slate-600 text-slate-400 hover:bg-slate-600 transition-colors flex items-center gap-1">
+              <button className="px-2.5 py-1 rounded-full text-xs bg-white/[0.04] border border-white/[0.08] text-slate-400 hover:bg-white/[0.07] transition-colors flex items-center gap-1">
                 <Plus size={10} /> Adaugă
               </button>
             </div>
@@ -142,7 +142,7 @@ export default function SkillSwap({ profile }) {
 
   return (
     <div>
-      <div className="flex gap-1 bg-slate-800 p-1 rounded-xl mb-4 w-fit">
+      <div className="flex gap-1 bg-white/[0.04] border border-white/[0.06] p-1 rounded-xl mb-4 w-fit">
         {['Skill Swap 1-la-1', 'Sesiuni de grup'].map((t, i) => (
           <button
             key={t}

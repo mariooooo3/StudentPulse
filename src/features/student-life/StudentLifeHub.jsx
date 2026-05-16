@@ -140,12 +140,12 @@ function SearchField({ value, onChange, placeholder }) {
   return (
     <label className="relative block min-w-0 flex-1">
       <span className="sr-only">{placeholder}</span>
-      <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+      <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" strokeWidth={1.75} />
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="h-10 w-full rounded-xl border border-slate-700/60 bg-slate-900/70 pl-9 pr-3 text-sm text-slate-200 outline-none transition-colors placeholder:text-slate-600 focus:border-slate-500"
+        className="h-10 w-full rounded-xl border border-white/[0.07] bg-white/[0.03] pl-9 pr-3 text-[13px] font-medium text-slate-300 outline-none transition-colors placeholder:text-slate-700 focus:border-white/[0.14] hover:bg-white/[0.05]"
       />
     </label>
   )
@@ -159,10 +159,10 @@ function FilterPills({ items, value, onChange }) {
           key={item}
           onClick={() => onChange(item)}
           className={clsx(
-            'h-9 rounded-xl border px-3 text-xs font-semibold transition-all active:scale-[0.98]',
+            'h-9 rounded-xl border px-3 text-[11px] font-semibold transition-all active:scale-[0.98]',
             value === item
-              ? 'border-slate-400 bg-slate-100 text-slate-950'
-              : 'border-slate-700/60 bg-slate-900/50 text-slate-400 hover:border-slate-600 hover:text-slate-200',
+              ? 'border-indigo-500/40 bg-indigo-600/20 text-indigo-300'
+              : 'border-white/[0.06] bg-white/[0.02] text-slate-500 hover:border-white/[0.1] hover:text-slate-300',
           )}
         >
           {item}
@@ -279,9 +279,9 @@ function CareerSection({ lifeProfile, applied, appliedOps }) {
 
   return (
     <section className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-700/60 bg-slate-900/50 px-4 py-3 text-sm text-slate-400">
-        <Award size={15} className="text-slate-300" />
-        <span><b className="text-slate-200">{lifeProfile.facultyName}</b> · Year {lifeProfile.year} · {lifeProfile.city}</span>
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-[13px] text-slate-500">
+        <Award size={14} className="text-slate-400" strokeWidth={1.75} />
+        <span><b className="text-slate-300 font-semibold">{lifeProfile.facultyName}</b> · Year {lifeProfile.year} · {lifeProfile.city}</span>
       </div>
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
         <SearchField value={query} onChange={setQuery} placeholder="Search positions, companies, skills..." />
@@ -331,8 +331,8 @@ function CareerSection({ lifeProfile, applied, appliedOps }) {
                   onClick={() => appliedOps.add(job.id)}
                   disabled={applied.has(job.id)}
                   className={clsx(
-                    'inline-flex h-10 min-w-28 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold transition-all active:scale-[0.98] disabled:cursor-default',
-                    applied.has(job.id) ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-100 text-slate-950 hover:bg-white',
+                    'inline-flex h-10 min-w-28 items-center justify-center gap-2 rounded-xl px-4 text-[13px] font-bold transition-all active:scale-[0.98] disabled:cursor-default',
+                    applied.has(job.id) ? 'bg-emerald-500/15 border border-emerald-500/25 text-emerald-300' : 'btn-primary',
                   )}
                 >
                   {applied.has(job.id) && <Check size={14} />}
@@ -366,14 +366,14 @@ function CommunitySection({ lifeProfile, joined, joinedOps }) {
 
   return (
     <section className="space-y-4">
-      <div className="rounded-xl border border-slate-700/60 bg-slate-900/50 p-3">
-        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">Quick join by activity</p>
+      <div className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-3">
+        <p className="mb-2 section-label">Quick join by activity</p>
         <div className="flex gap-2 overflow-x-auto pb-1">
           {studentLifeData.community.activities.map((activity) => (
             <button
               key={activity}
               onClick={() => setQuery(activity.split(' ')[0].toLowerCase())}
-              className="shrink-0 rounded-xl border border-slate-700/60 bg-slate-950/50 px-3 py-2 text-xs font-semibold text-slate-300 transition-colors hover:border-slate-500"
+              className="shrink-0 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-[11px] font-semibold text-slate-400 transition-colors hover:border-white/[0.1] hover:text-slate-200"
             >
               {activity}
             </button>
@@ -416,12 +416,12 @@ function CommunitySection({ lifeProfile, joined, joinedOps }) {
                   onClick={() => group.open && joinedOps.add(group.id)}
                   disabled={!group.open || joined.has(group.id)}
                   className={clsx(
-                    'h-9 rounded-xl border px-3 text-xs font-bold transition-all active:scale-[0.98] disabled:cursor-default',
+                    'h-9 rounded-xl border px-3 text-[11px] font-bold transition-all active:scale-[0.98] disabled:cursor-default',
                     joined.has(group.id)
                       ? 'border-emerald-400/30 bg-emerald-400/15 text-emerald-300'
                       : !group.open
-                        ? 'border-slate-700 bg-slate-900 text-slate-600'
-                        : 'border-slate-600 bg-slate-100 text-slate-950 hover:bg-white',
+                        ? 'border-white/[0.06] bg-white/[0.02] text-slate-600'
+                        : 'border-indigo-500/40 bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30',
                   )}
                 >
                   {joined.has(group.id) ? 'Joined' : group.open ? 'Request to join' : 'Unavailable'}
@@ -466,17 +466,17 @@ export default function StudentLifeHub({ activeSection = 'discounts', profile, s
             </p>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-xl border border-slate-700/60 bg-slate-950/40 px-4 py-3">
-              <p className="text-lg font-black text-white">{studentLifeData.discounts.offers.length}</p>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Offers</p>
+            <div className="stat-card">
+              <p className="font-mono text-xl font-bold text-white leading-none">{studentLifeData.discounts.offers.length}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 mt-1">Offers</p>
             </div>
-            <div className="rounded-xl border border-slate-700/60 bg-slate-950/40 px-4 py-3">
-              <p className="text-lg font-black text-white">{jobCount}</p>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Roles</p>
+            <div className="stat-card">
+              <p className="font-mono text-xl font-bold text-white leading-none">{jobCount}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 mt-1">Roles</p>
             </div>
-            <div className="rounded-xl border border-slate-700/60 bg-slate-950/40 px-4 py-3">
-              <p className="text-lg font-black text-white">{studentLifeData.community.groups.length}</p>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Groups</p>
+            <div className="stat-card">
+              <p className="font-mono text-xl font-bold text-white leading-none">{studentLifeData.community.groups.length}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 mt-1">Groups</p>
             </div>
           </div>
         </div>
