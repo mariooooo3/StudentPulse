@@ -99,9 +99,9 @@ function localCopilotAnswer(message, image) {
         buildingId: null,
       },
       actions: [
-        'Verifica indicatorul de etaj de langa scari.',
-        'Urmeaza traseul marcat pe planul interior.',
-        'Daca nu vezi sala, fa inca o poza cu panoul de pe coridor.',
+        'Check the floor indicator near the stairs.',
+        'Follow the route marked on the indoor map.',
+        'If you cannot find the room, take a photo of the corridor sign.',
       ],
       routeSuggestion: { type: 'indoor', from, to },
     }
@@ -125,9 +125,9 @@ function localCopilotAnswer(message, image) {
         buildingId: to,
       },
       actions: [
-        'Porneste spre axul central al campusului.',
-        'Evita zonele aglomerate daca este pauza intre cursuri.',
-        'Deschide harta pentru traseul complet.',
+        'Head towards the central campus path.',
+        'Avoid crowded areas during class breaks.',
+        'Open the map for the full route.',
       ],
       routeSuggestion: { type: 'outdoor', from: 'corp-c', to },
     }
@@ -151,8 +151,8 @@ function localCopilotAnswer(message, image) {
       buildingId: null,
     },
     actions: [
-      hasImage ? 'Spune-mi destinatia: C210, Secretariat, Biblioteca sau Cantina.' : 'Scrie destinatia exacta, de exemplu C210 sau Biblioteca.',
-      'Daca esti pe coridor, trimite o poza cu usa salii sau cu indicatorul.',
+      hasImage ? 'Tell me your destination: C210, Secretary Office, Library or Canteen.' : 'Type your destination, e.g. C210 or Library.',
+      'If you are in a corridor, send a photo of the room door or floor sign.',
     ],
     routeSuggestion: { type: 'none', from: null, to: null },
   }

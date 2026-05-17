@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MapPin, Camera, Sparkles, Send, X, Loader2, Navigation as NavIcon, Lightbulb, Route, ArrowRight, Users, Wifi, WifiOff, FlipHorizontal, ImagePlus } from 'lucide-react'
+import { MapPin, Camera, Sparkles, Send, X, Loader2, Navigation as NavIcon, Lightbulb, Route, ArrowRight, Users, Wifi, WifiOff, FlipHorizontal, ImagePlus, Play, CheckCircle, ChevronRight, ChevronLeft, Volume2, VolumeX } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import HeatmapLayer from './HeatmapLayer'
@@ -212,6 +212,74 @@ const AI_COMPASS_DESTINATIONS = [
   { label: 'Corp A', query: 'Vreau sa ajung la Corp A', type: 'Campus' },
 ]
 
+function speak(text, enabled) {
+  if (!enabled || typeof window === 'undefined' || !window.speechSynthesis) return
+  window.speechSynthesis.cancel()
+  const utt = new SpeechSynthesisUtterance(text)
+  utt.lang = 'en-US'
+  utt.rate = 0.92
+  window.speechSynthesis.speak(utt)
+}
+
+function buildIndoorCinematicSteps(nodePath) {
+  const steps = []
+  const startRoom = IND_ROOMS.find(r => r.id === nodePath[0])
+  steps.push({
+    instruction: `You are at ${startRoom?.label || nodePath[0]}${startRoom ? ` — ${startRoom.floor === 0 ? 'Ground Floor' : 'Floor ' + startRoom.floor}` : ''}`,
+    icon: '📍',
+    highlightRoom: nodePath[0],
+  })
+  for (let i = 1; i < nodePath.length; i++) {
+    const id = nodePath[i]
+    const room = IND_ROOMS.find(r => r.id === id)
+    const isLast = i === nodePath.length - 1
+    if (id.startsWith('stairs_')) {
+      const prevRoom = IND_ROOMS.find(r => r.id === nodePath[i - 1])
+      const nextRoom = IND_ROOMS.find(r => r.id === nodePath[i + 1])
+      const goingUp = nextRoom && prevRoom && nextRoom.floor > prevRoom.floor
+      steps.push({
+        instruction: goingUp
+          ? `Head to the stairs and go up to floor ${nextRoom?.floor ?? ''}`
+          : `Head to the stairs and go down to floor ${nextRoom?.floor ?? ''}`,
+        icon: '🪜',
+        highlightRoom: id,
+      })
+    } else if (room) {
+      steps.push({
+        instruction: isLast
+          ? `Room ${room.label} is right here — you've arrived!`
+          : `Continue through ${room.label} (${room.floor === 0 ? 'Ground Floor' : 'Floor ' + room.floor})`,
+        icon: isLast ? '✅' : '🚪',
+        highlightRoom: id,
+        isFinal: isLast,
+      })
+    }
+  }
+  return steps
+}
+
+function buildOutdoorCinematicSteps(pathData, actions, fromBuilding, toBuilding) {
+  const steps = []
+  steps.push({
+    instruction: `Starting from ${fromBuilding?.name || 'your current location'}`,
+    icon: '📍',
+    pathSlice: pathData.slice(0, Math.max(1, Math.floor(pathData.length * 0.05))),
+  })
+  const acts = actions?.length > 0 ? actions : []
+  acts.forEach((action, i) => {
+    const ratio = (i + 1) / (acts.length + 1)
+    const idx = Math.max(2, Math.floor(ratio * pathData.length))
+    steps.push({ instruction: action, icon: '🚶', pathSlice: pathData.slice(0, idx) })
+  })
+  steps.push({
+    instruction: `You've arrived!\n${toBuilding?.name || 'Destination'}`,
+    icon: '✅',
+    pathSlice: pathData,
+    isFinal: true,
+  })
+  return steps
+}
+
 function confidenceLabel(value) {
   if (!value) return 'neconfirmat'
   return `${Math.round(value * 100)}%`
@@ -223,7 +291,7 @@ function withDestinationQuestion(text) {
   return `${cleanText || 'Am analizat poza.'}\n\nUnde vrei sa ajungi de aici?`
 }
 
-function VisualCopilotCard({ result, onStartRoute }) {
+function VisualCopilotCard({ result, onStartRoute, onStartPresentation }) {
   if (!result) return null
   const canRoute = result.routeSuggestion?.type !== 'none' && result.routeSuggestion?.to
   return (
@@ -266,14 +334,25 @@ function VisualCopilotCard({ result, onStartRoute }) {
         </div>
       )}
 
-      <button
-        onClick={() => canRoute && onStartRoute(result.routeSuggestion)}
-        disabled={!canRoute}
-        className="w-full h-10 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 disabled:bg-white/[0.04] border border-sky-400/20 disabled:border-white/[0.06] text-sky-200 disabled:text-slate-600 text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-      >
-        <Route size={14} />
-        Ghideaza-ma de aici
-      </button>
+      <div className="flex gap-2">
+        <button
+          onClick={() => canRoute && onStartRoute(result.routeSuggestion)}
+          disabled={!canRoute}
+          className="flex-1 h-10 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 disabled:bg-white/[0.04] border border-sky-400/20 disabled:border-white/[0.06] text-sky-200 disabled:text-slate-600 text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+        >
+          <Route size={14} />
+          Ghidează-mă
+        </button>
+        {canRoute && (
+          <button
+            onClick={() => onStartPresentation?.(result)}
+            className="flex-1 h-10 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-indigo-500/25"
+          >
+            <Play size={13} fill="white" />
+            Start Prezentare
+          </button>
+        )}
+      </div>
     </div>
   )
 }
@@ -367,6 +446,11 @@ export default function CampusNavigator() {
   const [routeLoading, setRouteLoading] = useState(false)
   const [routeInfo, setRouteInfo] = useState(null)
 
+  const [cinematicMode, setCinematicMode] = useState(false)
+  const [cinematicStep, setCinematicStep] = useState(0)
+  const [cinematicSteps, setCinematicSteps] = useState([])
+  const [voiceEnabled, setVoiceEnabled] = useState(true)
+
   async function calculateOutdoorRoute(fromValue, toValue) {
     const from = buildings.find(b => String(b.id) === String(fromValue))
     const to = buildings.find(b => String(b.id) === String(toValue))
@@ -421,6 +505,82 @@ export default function CampusNavigator() {
       setActiveTab('map')
       calculateOutdoorRoute(from, to)
     }
+  }
+
+  function exitCinematicMode() {
+    setCinematicMode(false)
+    setCinematicStep(0)
+    setCinematicSteps([])
+    window.speechSynthesis?.cancel()
+  }
+
+  function goCinematicNext() {
+    setCinematicStep(prev => {
+      const next = Math.min(prev + 1, cinematicSteps.length - 1)
+      speak(cinematicSteps[next]?.instruction, voiceEnabled)
+      return next
+    })
+  }
+
+  function goCinematicPrev() {
+    setCinematicStep(prev => {
+      const p = Math.max(prev - 1, 0)
+      speak(cinematicSteps[p]?.instruction, voiceEnabled)
+      return p
+    })
+  }
+
+  async function startCinematicMode(copilotResult) {
+    const { routeSuggestion, actions } = copilotResult
+    let steps = []
+
+    if (routeSuggestion?.type === 'outdoor') {
+      const fromId = OUTDOOR_ROUTE_IDS[routeSuggestion.from] || routeSuggestion.from || '1'
+      const toId = OUTDOOR_ROUTE_IDS[routeSuggestion.to] || routeSuggestion.to
+      const fromB = buildings.find(b => String(b.id) === fromId)
+      const toB = buildings.find(b => String(b.id) === toId)
+      if (!fromB || !toB) return
+      setRouteFrom(fromId)
+      setRouteTo(toId)
+      setActiveTab('map')
+      let pathData = null
+      try {
+        const [lat1, lon1] = fromB.coords
+        const [lat2, lon2] = toB.coords
+        const res = await fetch(
+          `https://router.project-osrm.org/route/v1/foot/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`
+        )
+        const data = await res.json()
+        if (data.routes?.[0]) {
+          pathData = data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng])
+          const dist = data.routes[0].distance
+          const dur = Math.ceil(data.routes[0].duration / 60)
+          setRoutePath(pathData)
+          setRouteInfo({ distance: dist < 1000 ? `${Math.round(dist)}m` : `${(dist / 1000).toFixed(1)}km`, duration: `${dur} min` })
+        }
+      } catch {
+        pathData = [fromB.coords, toB.coords]
+        setRoutePath(pathData)
+      }
+      if (pathData) steps = buildOutdoorCinematicSteps(pathData, actions, fromB, toB)
+    } else if (routeSuggestion?.type === 'indoor') {
+      const start = routeSuggestion.from || 'c112'
+      const end = routeSuggestion.to
+      const path = bfsIndoor(start, end)
+      if (path) {
+        setFromRoom(start)
+        setToRoom(end)
+        setIndoorPath(path)
+        setActiveTab('indoor')
+        steps = buildIndoorCinematicSteps(path)
+      }
+    }
+
+    if (steps.length === 0) return
+    setCinematicSteps(steps)
+    setCinematicStep(0)
+    setCinematicMode(true)
+    speak(steps[0].instruction, voiceEnabled)
   }
 
   function makeCopilotContext() {
@@ -773,11 +933,16 @@ export default function CampusNavigator() {
                       </>
                     })()}
 
-                    {routePath && <>
-                      <Polyline positions={routePath} color="#f97316" weight={6} opacity={0.25} />
-                      <Polyline positions={routePath} color="#ffffff" weight={4} opacity={0.8} />
-                      <Polyline positions={routePath} color="#f97316" weight={3} opacity={1} dashArray="10 6" />
-                    </>}
+                    {routePath && (() => {
+                      const displayPath = cinematicMode && cinematicSteps[cinematicStep]?.pathSlice
+                        ? cinematicSteps[cinematicStep].pathSlice
+                        : routePath
+                      return <>
+                        <Polyline positions={displayPath} color="#f97316" weight={6} opacity={0.25} />
+                        <Polyline positions={displayPath} color="#ffffff" weight={4} opacity={0.8} />
+                        <Polyline positions={displayPath} color="#f97316" weight={3} opacity={1} dashArray="10 6" />
+                      </>
+                    })()}
 
                     <FlyTo coords={!routePath ? selectedBuilding?.coords : null} />
                     <FitRoute path={routePath} />
@@ -878,7 +1043,7 @@ export default function CampusNavigator() {
                         />
                       )}
                       {msg.copilot ? (
-                        <VisualCopilotCard result={msg.copilot} onStartRoute={applyCopilotRoute} />
+                        <VisualCopilotCard result={msg.copilot} onStartRoute={applyCopilotRoute} onStartPresentation={startCinematicMode} />
                       ) : (
                         <>
                           {msg.text}
@@ -1299,6 +1464,131 @@ export default function CampusNavigator() {
             </div>
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* Cinematic overlay */}
+      <AnimatePresence>
+        {cinematicMode && (() => {
+          const currentStep = cinematicSteps[cinematicStep]
+          const isLast = cinematicStep === cinematicSteps.length - 1
+          return (
+            <motion.div
+              key="cinematic-overlay"
+              initial={{ opacity: 0, y: 60 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 60 }}
+              transition={{ type: 'spring', damping: 24, stiffness: 260 }}
+              className="fixed bottom-0 left-0 right-0 z-[9998] px-3 pb-5 pt-2"
+            >
+              <div className="max-w-2xl mx-auto">
+                <div className="rounded-2xl bg-[#080d1a]/96 backdrop-blur-2xl border border-white/[0.12] shadow-2xl overflow-hidden">
+                  {/* Progress bar */}
+                  <div className="h-1 bg-white/[0.06]">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-500"
+                      animate={{ width: `${((cinematicStep + 1) / cinematicSteps.length) * 100}%` }}
+                      transition={{ duration: 0.5, ease: 'easeOut' }}
+                    />
+                  </div>
+
+                  <div className="p-4">
+                    {/* Header row */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center">
+                          <Play size={10} fill="white" className="text-white" />
+                        </div>
+                        <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest">
+                          Guided Tour
+                        </span>
+                        <span className="text-xs text-slate-500 font-medium">
+                          {cinematicStep + 1} / {cinematicSteps.length}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => {
+                            const next = !voiceEnabled
+                            setVoiceEnabled(next)
+                            if (!next) window.speechSynthesis?.cancel()
+                            else speak(currentStep?.instruction, true)
+                          }}
+                          className="w-7 h-7 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+                          title={voiceEnabled ? 'Mute voice' : 'Enable voice'}
+                        >
+                          {voiceEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
+                        </button>
+                        <button
+                          onClick={exitCinematicMode}
+                          className="w-7 h-7 rounded-lg bg-white/[0.06] hover:bg-red-500/20 flex items-center justify-center text-slate-400 hover:text-red-400 transition-colors"
+                          title="Exit tour"
+                        >
+                          <X size={13} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Step content */}
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={cinematicStep}
+                        initial={{ opacity: 0, x: 24 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -24 }}
+                        transition={{ duration: 0.22 }}
+                        className="flex items-start gap-3 mb-4"
+                      >
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0 ${
+                          currentStep?.isFinal
+                            ? 'bg-green-500/15 border border-green-500/25'
+                            : 'bg-indigo-500/15 border border-indigo-500/20'
+                        }`}>
+                          {currentStep?.icon}
+                        </div>
+                        <div className="flex-1 min-w-0 pt-1">
+                          <p className="text-sm font-semibold text-white leading-relaxed whitespace-pre-line">
+                            {currentStep?.instruction}
+                          </p>
+                          {currentStep?.isFinal && (
+                            <p className="text-xs text-green-400 mt-1 flex items-center gap-1.5">
+                              <CheckCircle size={11} /> Destination reached
+                            </p>
+                          )}
+                        </div>
+                      </motion.div>
+                    </AnimatePresence>
+
+                    {/* Navigation controls */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={goCinematicPrev}
+                        disabled={cinematicStep === 0}
+                        className="flex-1 h-9 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-25 border border-white/[0.07] text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+                      >
+                        <ChevronLeft size={15} /> Back
+                      </button>
+                      {!isLast ? (
+                        <button
+                          onClick={goCinematicNext}
+                          className="flex-1 h-9 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-[0.97]"
+                        >
+                          Next <ChevronRight size={15} />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={exitCinematicMode}
+                          className="flex-1 h-9 rounded-xl bg-green-600 hover:bg-green-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-[0.97]"
+                        >
+                          <CheckCircle size={14} /> Done
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )
+        })()}
       </AnimatePresence>
 
       {/* Camera modal */}
