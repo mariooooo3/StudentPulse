@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MapPin, Camera, Upload, Sparkles, Send, X, Loader2, Navigation as NavIcon, Lightbulb, Route, ArrowRight, Users, Wifi, WifiOff, FlipHorizontal } from 'lucide-react'
+import { MapPin, Camera, Sparkles, Send, X, Loader2, Navigation as NavIcon, Lightbulb, Route, ArrowRight, Users, Wifi, WifiOff, FlipHorizontal, ImagePlus } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import HeatmapLayer from './HeatmapLayer'
 import { useCrowdSocket } from '../../hooks/navigation/useCrowdSocket'
 import { useAuth } from '../../app/providers/AuthContext'
 import L from 'leaflet'
-import { askCampusAI, analyzePhoto, getSmartRecommendations } from '../../services/navigation/campusAI'
+import { askCampusAI, askCampusCopilot, analyzePhoto, getSmartRecommendations } from '../../services/navigation/campusAI'
 import Button from '../ui/Button'
 import Badge from '../ui/Badge'
 import { courses } from '../../shared/data/courses'
@@ -195,6 +195,89 @@ function makeLabel(letter, color) {
   })
 }
 
+const OUTDOOR_ROUTE_IDS = {
+  'corp-c': '1',
+  'corp-a': '2',
+  library: '3',
+  canteen: '4',
+  secretariat: '5',
+}
+
+const AI_COMPASS_DESTINATIONS = [
+  { label: 'C210', query: 'Vreau sa ajung la C210', type: 'Sala' },
+  { label: 'C308', query: 'Vreau sa ajung la C308', type: 'Sala' },
+  { label: 'Secretariat', query: 'Vreau sa ajung la Secretariat', type: 'Admin' },
+  { label: 'Biblioteca', query: 'Vreau sa ajung la Biblioteca', type: 'Campus' },
+  { label: 'Cantina', query: 'Vreau sa ajung la Cantina', type: 'Campus' },
+  { label: 'Corp A', query: 'Vreau sa ajung la Corp A', type: 'Campus' },
+]
+
+function confidenceLabel(value) {
+  if (!value) return 'neconfirmat'
+  return `${Math.round(value * 100)}%`
+}
+
+function withDestinationQuestion(text) {
+  const cleanText = String(text || '').trim()
+  if (/unde\s+vrei\s+sa\s+ajungi/i.test(cleanText)) return cleanText
+  return `${cleanText || 'Am analizat poza.'}\n\nUnde vrei sa ajungi de aici?`
+}
+
+function VisualCopilotCard({ result, onStartRoute }) {
+  if (!result) return null
+  const canRoute = result.routeSuggestion?.type !== 'none' && result.routeSuggestion?.to
+  return (
+    <div className="mt-3 rounded-2xl border border-sky-500/20 bg-sky-500/[0.06] p-3 space-y-3">
+      <div className="flex items-start gap-3">
+        <div className="w-9 h-9 rounded-xl bg-sky-500/15 border border-sky-400/20 flex items-center justify-center shrink-0">
+          <Sparkles size={16} className="text-sky-300" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-sky-300">AI Compass</p>
+          <p className="text-sm text-slate-200 leading-relaxed mt-1">{result.answer}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.04] p-3">
+          <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Unde esti</p>
+          <p className="text-xs text-white font-semibold mt-1">{result.detectedLocation?.label || 'Locatie neconfirmata'}</p>
+          <p className="text-[11px] text-slate-500 mt-0.5">Incredere: {confidenceLabel(result.detectedLocation?.confidence)}</p>
+        </div>
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.04] p-3">
+          <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Destinatie</p>
+          <p className="text-xs text-white font-semibold mt-1">{result.destination?.label || 'Nespecificata'}</p>
+          <p className="text-[11px] text-slate-500 mt-0.5">
+            {result.routeSuggestion?.type === 'indoor' ? 'Ruta interioara' : result.routeSuggestion?.type === 'outdoor' ? 'Ruta pe harta' : 'Fara ruta'}
+          </p>
+        </div>
+      </div>
+
+      {result.actions?.length > 0 && (
+        <div className="space-y-1.5">
+          {result.actions.map((action, index) => (
+            <div key={index} className="flex items-start gap-2 text-xs text-slate-300">
+              <span className="mt-0.5 w-4 h-4 rounded-full bg-white/[0.07] border border-white/[0.08] text-[10px] text-sky-300 flex items-center justify-center shrink-0">
+                {index + 1}
+              </span>
+              <span className="leading-relaxed">{action}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <button
+        onClick={() => canRoute && onStartRoute(result.routeSuggestion)}
+        disabled={!canRoute}
+        className="w-full h-10 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 disabled:bg-white/[0.04] border border-sky-400/20 disabled:border-white/[0.06] text-sky-200 disabled:text-slate-600 text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+      >
+        <Route size={14} />
+        Ghideaza-ma de aici
+      </button>
+    </div>
+  )
+}
+
 export default function CampusNavigator() {
   const [selectedBuilding, setSelectedBuilding] = useState(null)
   const [activeTab, setActiveTab] = useState('map')
@@ -202,17 +285,16 @@ export default function CampusNavigator() {
     { role: 'model', text: 'Salut! Sunt asistentul tău de navigare pentru campusul UAIC. Cum te pot ajuta?' }
   ])
   const [chatInput, setChatInput] = useState('')
+  const [chatAttachment, setChatAttachment] = useState(null)
   const [chatLoading, setChatLoading] = useState(false)
-  const [photoResult, setPhotoResult] = useState(null)
-  const [photoLoading, setPhotoLoading] = useState(false)
-  const [photoPreview, setPhotoPreview] = useState(null)
+  const [lastPhotoContext, setLastPhotoContext] = useState(null)
   const [pulseData, setPulseData] = useState(null)
   const [pulseLoading, setPulseLoading] = useState(false)
   const [pulseLoaded, setPulseLoaded] = useState(false)
   const [cameraOpen, setCameraOpen] = useState(false)
   const [cameraStream, setCameraStream] = useState(null)
   const [cameraFacing, setCameraFacing] = useState('environment')
-  const fileInputRef = useRef(null)
+  const chatFileInputRef = useRef(null)
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
   const chatBottomRef = useRef(null)
@@ -285,9 +367,9 @@ export default function CampusNavigator() {
   const [routeLoading, setRouteLoading] = useState(false)
   const [routeInfo, setRouteInfo] = useState(null)
 
-  async function fetchRoute() {
-    const from = buildings.find(b => String(b.id) === routeFrom)
-    const to = buildings.find(b => String(b.id) === routeTo)
+  async function calculateOutdoorRoute(fromValue, toValue) {
+    const from = buildings.find(b => String(b.id) === String(fromValue))
+    const to = buildings.find(b => String(b.id) === String(toValue))
     if (!from || !to) return
     setRouteLoading(true)
     setRoutePath(null)
@@ -313,23 +395,105 @@ export default function CampusNavigator() {
     setRouteLoading(false)
   }
 
-  async function sendChat(e) {
-    e.preventDefault()
-    if (!chatInput.trim() || chatLoading) return
+  async function fetchRoute() {
+    await calculateOutdoorRoute(routeFrom, routeTo)
+  }
 
-    const userMsg = chatInput.trim()
+  function applyCopilotRoute(routeSuggestion) {
+    if (!routeSuggestion?.type || routeSuggestion.type === 'none') return
+
+    if (routeSuggestion.type === 'indoor') {
+      const start = routeSuggestion.from || 'c112'
+      const path = bfsIndoor(start, routeSuggestion.to)
+      if (!path) return
+      setFromRoom(start)
+      setToRoom(routeSuggestion.to)
+      setIndoorPath(path)
+      setActiveTab('indoor')
+      return
+    }
+
+    if (routeSuggestion.type === 'outdoor') {
+      const from = OUTDOOR_ROUTE_IDS[routeSuggestion.from] || routeSuggestion.from || '1'
+      const to = OUTDOOR_ROUTE_IDS[routeSuggestion.to] || routeSuggestion.to
+      setRouteFrom(from)
+      setRouteTo(to)
+      setActiveTab('map')
+      calculateOutdoorRoute(from, to)
+    }
+  }
+
+  function makeCopilotContext() {
+    return {
+      campus: 'UAIC',
+      currentTime: new Date().toISOString(),
+      schedule: courses.slice(0, 4),
+      buildings: buildings.map(({ id, name, type }) => ({ id, name, type })),
+      indoorRooms: IND_ROOMS.map(({ id, label, floor }) => ({ id, label, floor })),
+    }
+  }
+
+  async function submitAiCompass(message, attachment) {
+    if ((!message.trim() && !attachment) || chatLoading) return
+
+    const hasTypedMessage = Boolean(message.trim())
+    const userMsg = hasTypedMessage ? message.trim() : 'Analizeaza poza'
+    const apiMessage = hasTypedMessage ? userMsg : ''
     setChatInput('')
-    setChatMessages((prev) => [...prev, { role: 'user', text: userMsg }])
+    if (!attachment || attachment === chatAttachment) setChatAttachment(null)
+    setChatMessages((prev) => [...prev, { role: 'user', text: userMsg, imagePreview: attachment?.preview }])
     setChatLoading(true)
 
     try {
-      const response = await askCampusAI(userMsg, chatHistory.current)
-      chatHistory.current = [
-        ...chatHistory.current,
-        { role: 'user', content: userMsg },
-        { role: 'assistant', content: response },
-      ]
-      setChatMessages((prev) => [...prev, { role: 'model', text: response }])
+      if (attachment) {
+        if (!hasTypedMessage) {
+          const photoAnswer = await analyzePhoto(attachment.base64, attachment.mimeType)
+          const answer = withDestinationQuestion(photoAnswer)
+          setLastPhotoContext({ image: attachment, visualAnswer: photoAnswer })
+          chatHistory.current = [
+            ...chatHistory.current,
+            { role: 'user', content: '[poza atasata]' },
+            { role: 'assistant', content: answer },
+          ]
+          setChatMessages((prev) => [...prev, { role: 'model', text: answer, destinationOptions: AI_COMPASS_DESTINATIONS }])
+        } else {
+          const response = await askCampusCopilot({
+            message: apiMessage,
+            image: { base64: attachment.base64, mimeType: attachment.mimeType },
+            history: chatHistory.current,
+            context: makeCopilotContext(),
+          })
+          chatHistory.current = [
+            ...chatHistory.current,
+            { role: 'user', content: `${userMsg} [poza atasata]` },
+            { role: 'assistant', content: response.answer },
+          ]
+          setChatMessages((prev) => [...prev, { role: 'model', text: response.answer, copilot: response }])
+        }
+      } else {
+        if (lastPhotoContext) {
+          const response = await askCampusCopilot({
+            message: userMsg,
+            image: { base64: lastPhotoContext.image.base64, mimeType: lastPhotoContext.image.mimeType },
+            history: chatHistory.current,
+            context: { ...makeCopilotContext(), visualAnswer: lastPhotoContext.visualAnswer },
+          })
+          chatHistory.current = [
+            ...chatHistory.current,
+            { role: 'user', content: userMsg },
+            { role: 'assistant', content: response.answer },
+          ]
+          setChatMessages((prev) => [...prev, { role: 'model', text: response.answer, copilot: response }])
+        } else {
+          const response = await askCampusAI(userMsg, chatHistory.current)
+          chatHistory.current = [
+            ...chatHistory.current,
+            { role: 'user', content: userMsg },
+            { role: 'assistant', content: response },
+          ]
+          setChatMessages((prev) => [...prev, { role: 'model', text: response }])
+        }
+      }
     } catch (err) {
       setChatMessages((prev) => [...prev, { role: 'model', text: `Eroare: ${err.message}` }])
     }
@@ -337,27 +501,31 @@ export default function CampusNavigator() {
     setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
   }
 
-  async function handlePhoto(e) {
+  async function sendChat(e) {
+    e.preventDefault()
+    await submitAiCompass(chatInput, chatAttachment)
+  }
+
+  function selectAiCompassDestination(option) {
+    if (chatLoading) return
+    submitAiCompass(option.query, null)
+  }
+
+  function attachmentFromDataUrl(dataUrl, mimeType = 'image/jpeg') {
+    return {
+      preview: dataUrl,
+      base64: dataUrl.split(',')[1],
+      mimeType,
+    }
+  }
+
+  async function handleChatPhoto(e) {
     const file = e.target.files?.[0]
     if (!file) return
-
     const reader = new FileReader()
-    reader.onload = async (ev) => {
-      const dataUrl = ev.target.result
-      setPhotoPreview(dataUrl)
-      setPhotoResult(null)
-      setPhotoLoading(true)
-
-      const base64 = dataUrl.split(',')[1]
-      const mimeType = file.type
-
-      try {
-        const result = await analyzePhoto(base64, mimeType)
-        setPhotoResult(result)
-      } catch (err) {
-        setPhotoResult(`Eroare: ${err.message}`)
-      }
-      setPhotoLoading(false)
+    reader.onload = (ev) => {
+      submitAiCompass(chatInput, attachmentFromDataUrl(ev.target.result, file.type || 'image/jpeg'))
+      e.target.value = ''
     }
     reader.readAsDataURL(file)
   }
@@ -402,13 +570,8 @@ export default function CampusNavigator() {
     canvas.getContext('2d').drawImage(video, 0, 0)
     const dataUrl = canvas.toDataURL('image/jpeg', 0.92)
     closeCamera()
-    setPhotoPreview(dataUrl)
-    setPhotoResult(null)
-    setPhotoLoading(true)
-    analyzePhoto(dataUrl.split(',')[1], 'image/jpeg')
-      .then(r => setPhotoResult(r))
-      .catch(e => setPhotoResult(`Eroare: ${e.message}`))
-      .finally(() => setPhotoLoading(false))
+    setActiveTab('chat')
+    submitAiCompass(chatInput, attachmentFromDataUrl(dataUrl, 'image/jpeg'))
   }
 
   return (
@@ -421,8 +584,7 @@ export default function CampusNavigator() {
       <div className="flex gap-2 flex-wrap">
         {[
           { id: 'map', label: 'Hartă', icon: MapPin },
-          { id: 'chat', label: 'AI Chat', icon: Sparkles },
-          { id: 'photo', label: 'Recunoaștere Poză', icon: Camera },
+          { id: 'chat', label: 'AI Compass', icon: Sparkles },
           { id: 'reco', label: 'Recomandări Smart', icon: Lightbulb },
           { id: 'indoor', label: 'Plan Interior', icon: Route },
         ].map((tab) => (
@@ -693,8 +855,8 @@ export default function CampusNavigator() {
                 <Sparkles size={18} className="text-white" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">AI Campus Assistant</p>
-                <p className="text-xs text-slate-500">Powered by Groq / Llama</p>
+                <p className="text-sm font-semibold text-white">AI Compass</p>
+                <p className="text-xs text-slate-500">Chat, poza si ghidare campus</p>
               </div>
             </div>
 
@@ -703,12 +865,41 @@ export default function CampusNavigator() {
                 {chatMessages.map((msg, i) => (
                   <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                     className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap ${
+                    <div className={`max-w-[88%] px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap ${
                       msg.role === 'user'
                         ? 'bg-indigo-600 text-white rounded-br-md'
                         : 'bg-white/[0.05] text-slate-200 rounded-bl-md'
                     }`}>
-                      {msg.text}
+                      {msg.imagePreview && (
+                        <img
+                          src={msg.imagePreview}
+                          alt="Poza atasata pentru analiza de navigatie"
+                          className="mb-2 max-h-44 w-full rounded-xl object-cover border border-white/[0.12]"
+                        />
+                      )}
+                      {msg.copilot ? (
+                        <VisualCopilotCard result={msg.copilot} onStartRoute={applyCopilotRoute} />
+                      ) : (
+                        <>
+                          {msg.text}
+                          {msg.destinationOptions?.length > 0 && (
+                            <div className="mt-3 grid grid-cols-2 gap-2">
+                              {msg.destinationOptions.map(option => (
+                                <button
+                                  key={option.label}
+                                  type="button"
+                                  onClick={() => selectAiCompassDestination(option)}
+                                  disabled={chatLoading}
+                                  className="min-h-11 rounded-xl border border-indigo-400/20 bg-indigo-500/10 px-3 py-2 text-left hover:bg-indigo-500/20 disabled:opacity-50 transition-colors"
+                                >
+                                  <span className="block text-sm font-semibold text-white">{option.label}</span>
+                                  <span className="block text-[10px] uppercase tracking-widest text-indigo-200/70">{option.type}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
                   </motion.div>
                 ))}
@@ -725,7 +916,44 @@ export default function CampusNavigator() {
             </div>
 
             <form onSubmit={sendChat} className="p-4 border-t border-white/[0.05]">
+              {chatAttachment && (
+                <div className="mb-3 flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.03] p-2">
+                  <img
+                    src={chatAttachment.preview}
+                    alt="Preview poza atasata"
+                    className="h-14 w-20 rounded-lg object-cover border border-white/[0.08]"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-slate-200">Poza atasata pentru Copilot</p>
+                    <p className="text-[11px] text-slate-500">Scrie destinatia sau intreaba unde esti.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setChatAttachment(null)}
+                    className="w-8 h-8 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-slate-400"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              )}
               <div className="flex gap-3">
+                <input ref={chatFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleChatPhoto} />
+                <button
+                  type="button"
+                  onClick={() => chatFileInputRef.current?.click()}
+                  className="p-2.5 rounded-xl bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] border border-white/[0.07] transition-colors cursor-pointer"
+                  title="Ataseaza poza"
+                >
+                  <ImagePlus size={18} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openCamera('environment')}
+                  className="p-2.5 rounded-xl bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] border border-white/[0.07] transition-colors cursor-pointer"
+                  title="Fa poza"
+                >
+                  <Camera size={18} />
+                </button>
                 <input
                   type="text"
                   placeholder="Unde e sala C310? Cum ajung la cantină?..."
@@ -733,62 +961,12 @@ export default function CampusNavigator() {
                   onChange={(e) => setChatInput(e.target.value)}
                   className="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.03] text-slate-200 border border-white/[0.07] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm placeholder:text-slate-600"
                 />
-                <button type="submit" disabled={!chatInput.trim() || chatLoading}
+                <button type="submit" disabled={(!chatInput.trim() && !chatAttachment) || chatLoading}
                   className="p-2.5 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-50 cursor-pointer">
                   <Send size={18} />
                 </button>
               </div>
             </form>
-          </motion.div>
-        )}
-
-        {activeTab === 'photo' && (
-          <motion.div key="photo" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-            className="bg-white/[0.02] rounded-2xl border border-white/[0.06] p-6 space-y-6">
-            <div>
-              <h2 className="text-base font-semibold text-white">Recunoaștere Vizuală</h2>
-              <p className="text-sm text-slate-400 mt-1">Fă o poză la o clădire și AI-ul îți spune unde ești și cum navighezi.</p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-white/[0.08] rounded-2xl p-8 text-center cursor-pointer hover:border-indigo-500/50 hover:bg-indigo-900/10 transition-all group"
-              >
-                <Upload size={28} className="text-slate-500 group-hover:text-indigo-400 mx-auto mb-2 transition-colors" />
-                <p className="text-sm font-medium text-slate-200">Alege poză</p>
-                <p className="text-xs text-slate-500 mt-1">Din galerie / fișiere</p>
-              </div>
-              <div
-                onClick={() => openCamera()}
-                className="border-2 border-dashed border-white/[0.08] rounded-2xl p-8 text-center cursor-pointer hover:border-violet-500/50 hover:bg-violet-900/10 transition-all group"
-              >
-                <Camera size={28} className="text-slate-500 group-hover:text-violet-400 mx-auto mb-2 transition-colors" />
-                <p className="text-sm font-medium text-slate-200">Fă o poză</p>
-                <p className="text-xs text-slate-500 mt-1">Cu camera live</p>
-              </div>
-            </div>
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
-
-            {photoPreview && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                <img src={photoPreview} alt="Preview" className="w-full max-h-64 object-cover rounded-xl border border-white/[0.06]" />
-                {photoLoading ? (
-                  <div className="flex items-center gap-3 p-4 rounded-xl bg-indigo-900/20 border border-indigo-500/30">
-                    <Loader2 size={18} className="animate-spin text-indigo-400" />
-                    <span className="text-sm text-indigo-300">AI analizează imaginea...</span>
-                  </div>
-                ) : photoResult ? (
-                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Sparkles size={15} className="text-indigo-400" />
-                      <p className="text-xs font-semibold text-indigo-400 uppercase tracking-wide">Analiză AI</p>
-                    </div>
-                    <p className="text-sm text-slate-200 whitespace-pre-wrap">{photoResult}</p>
-                  </div>
-                ) : null}
-              </motion.div>
-            )}
           </motion.div>
         )}
 
@@ -1136,8 +1314,8 @@ export default function CampusNavigator() {
             {/* Top bar */}
             <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-b from-black/80 to-transparent absolute top-0 inset-x-0 z-10">
               <div>
-                <p className="text-white font-semibold text-sm">Recunoaștere vizuală</p>
-                <p className="text-white/50 text-xs">Îndreaptă camera spre o clădire</p>
+                <p className="text-white font-semibold text-sm">AI Compass</p>
+                <p className="text-white/50 text-xs">Fotografia devine context pentru ghidare</p>
               </div>
               <div className="flex items-center gap-3">
                 <button

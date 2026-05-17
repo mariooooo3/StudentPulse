@@ -14,6 +14,163 @@ const SYSTEM_PROMPT = `Esti asistentul de navigatie pentru platforma StudentComp
 Raspunzi concis in romana, doar despre campus, trasee, cladiri, servicii, intervale aglomerate si orientare indoor.
 Nu inventa date sensibile si nu mentiona cheia API.`
 
+const COPILOT_JSON_SCHEMA = `{
+  "answer": "Raspuns scurt, conversational, in romana.",
+  "detectedLocation": {
+    "type": "indoor|outdoor|unknown",
+    "label": "Locatia probabila",
+    "building": "Cladirea probabila sau null",
+    "room": "id sala cunoscuta sau null",
+    "confidence": 0.82
+  },
+  "destination": {
+    "type": "indoor|outdoor|unknown",
+    "label": "Destinatia ceruta sau null",
+    "room": "id sala cunoscuta sau null",
+    "buildingId": "id cladire cunoscuta sau null"
+  },
+  "actions": ["Pas concret 1", "Pas concret 2", "Pas concret 3"],
+  "routeSuggestion": {
+    "type": "indoor|outdoor|none",
+    "from": "id start sau null",
+    "to": "id destinatie sau null"
+  }
+}`
+
+const KNOWN_INDOOR_ROOMS = ['secretariat', 'lab101', 'lab102', 'c2', 'c112', 'c118', 'c210', 'c308', 'c315', 'c420']
+const KNOWN_BUILDINGS = ['corp-c', 'corp-a', 'library', 'canteen', 'secretariat']
+
+function safeJson(raw, fallback) {
+  try {
+    const parsed = JSON.parse(raw)
+    return parsed && typeof parsed === 'object' ? parsed : fallback
+  } catch {
+    const match = String(raw || '').match(/\{[\s\S]*\}/)
+    if (!match) return fallback
+    try {
+      const parsed = JSON.parse(match[0])
+      return parsed && typeof parsed === 'object' ? parsed : fallback
+    } catch {
+      return fallback
+    }
+  }
+}
+
+function normalizeCopilotPayload(payload, fallbackAnswer = '') {
+  const detected = payload.detectedLocation || {}
+  const destination = payload.destination || {}
+  const route = payload.routeSuggestion || {}
+
+  const routeType = ['indoor', 'outdoor', 'none'].includes(route.type) ? route.type : 'none'
+  const from = typeof route.from === 'string' ? route.from : null
+  const to = typeof route.to === 'string' ? route.to : null
+
+  return {
+    answer: String(payload.answer || fallbackAnswer || 'Am analizat contextul, dar am nevoie de o poza mai clara sau o destinatie.'),
+    detectedLocation: {
+      type: ['indoor', 'outdoor', 'unknown'].includes(detected.type) ? detected.type : 'unknown',
+      label: detected.label ? String(detected.label) : 'Locatie neconfirmata',
+      building: detected.building ? String(detected.building) : null,
+      room: KNOWN_INDOOR_ROOMS.includes(detected.room) ? detected.room : null,
+      confidence: Math.max(0, Math.min(1, Number(detected.confidence) || 0)),
+    },
+    destination: {
+      type: ['indoor', 'outdoor', 'unknown'].includes(destination.type) ? destination.type : 'unknown',
+      label: destination.label ? String(destination.label) : null,
+      room: KNOWN_INDOOR_ROOMS.includes(destination.room) ? destination.room : null,
+      buildingId: KNOWN_BUILDINGS.includes(destination.buildingId) ? destination.buildingId : null,
+    },
+    actions: Array.isArray(payload.actions) ? payload.actions.slice(0, 4).map(String) : [],
+    routeSuggestion: {
+      type: routeType,
+      from: routeType === 'indoor' && KNOWN_INDOOR_ROOMS.includes(from) ? from : routeType === 'outdoor' && KNOWN_BUILDINGS.includes(from) ? from : null,
+      to: routeType === 'indoor' && KNOWN_INDOOR_ROOMS.includes(to) ? to : routeType === 'outdoor' && KNOWN_BUILDINGS.includes(to) ? to : null,
+    },
+  }
+}
+
+function inferVisualLocation(text) {
+  const normalized = String(text || '').toLowerCase()
+  if (
+    normalized.includes('informatic') ||
+    normalized.includes('corp c') ||
+    normalized.includes('facultatea de info') ||
+    normalized.includes('fii')
+  ) {
+    return {
+      type: 'outdoor',
+      label: 'Facultatea de Informatica',
+      building: 'Facultatea de Informatica',
+      room: null,
+      confidence: 0.82,
+    }
+  }
+  return null
+}
+
+function normalizeVisibleLocationText(text, inferredLocation) {
+  if (!inferredLocation?.label) return String(text || '')
+  return String(text || '')
+    .replace(/\bCorpul C\b/gi, inferredLocation.label)
+    .replace(/\bCorp C\b/gi, inferredLocation.label)
+}
+
+function applyVisualLocation(payload, visualAnswer) {
+  const inferred = inferVisualLocation(visualAnswer)
+  if (!inferred) return payload
+
+  payload.detectedLocation = {
+    ...(payload.detectedLocation || {}),
+    ...inferred,
+  }
+  payload.answer = normalizeVisibleLocationText(payload.answer, inferred)
+  return payload
+}
+
+function inferIndoorRoom(...texts) {
+  const normalized = texts.map(text => String(text || '').toLowerCase()).join(' ')
+  for (const room of KNOWN_INDOOR_ROOMS) {
+    if (normalized.includes(room)) return room
+  }
+  if (normalized.includes('c 210')) return 'c210'
+  if (normalized.includes('c 308')) return 'c308'
+  if (normalized.includes('c 112')) return 'c112'
+  return null
+}
+
+function inferOutdoorBuilding(...texts) {
+  const normalized = texts.map(text => String(text || '').toLowerCase()).join(' ')
+  if (normalized.includes('biblioteca')) return 'library'
+  if (normalized.includes('cantina')) return 'canteen'
+  if (normalized.includes('corp a')) return 'corp-a'
+  if (normalized.includes('corp c') || normalized.includes('informatic') || normalized.includes('fii')) return 'corp-c'
+  if (normalized.includes('secretariat')) return 'secretariat'
+  return null
+}
+
+function withImageOnlyPrompt(payload, visualAnswer, message) {
+  const normalizedMessage = String(message || '').trim()
+  const inferred = inferVisualLocation(visualAnswer)
+  const hasDestination = payload.destination?.room || payload.destination?.buildingId
+
+  applyVisualLocation(payload, visualAnswer)
+
+  if (!hasDestination && !normalizedMessage) {
+    const cleanVisionAnswer = normalizeVisibleLocationText(String(visualAnswer || '').trim(), inferred)
+    payload.answer = inferred
+      ? `${cleanVisionAnswer || `Recunosc zona: pare sa fie ${inferred.label}.`} Unde vrei sa ajungi de aici?`
+      : 'Am analizat poza, dar am nevoie de un reper mai clar. Unde vrei sa ajungi?'
+    payload.destination = { type: 'unknown', label: null, room: null, buildingId: null }
+    payload.routeSuggestion = { type: 'none', from: null, to: null }
+    payload.actions = [
+      'Spune destinatia, de exemplu C210, Secretariat, Biblioteca sau Cantina.',
+      'Daca esti pe coridor, trimite o poza cu usa salii sau cu indicatorul de etaj.',
+    ]
+  }
+
+  return payload
+}
+
 function navigationKey() {
   if (process.env.GROK_API_KEY) return process.env.GROK_API_KEY.trim()
   if (process.env.GROQ_API_KEY) return process.env.GROQ_API_KEY.trim()
@@ -90,7 +247,7 @@ async function handleAssistant(req, res) {
 async function handlePhoto(req, res) {
   const body = await readJson(req)
   const mimeType = body.mimeType || 'image/jpeg'
-  const answer = await grokChat({
+  const rawAnswer = await grokChat({
     model: VISION_MODEL,
     messages: [
       {
@@ -99,14 +256,116 @@ async function handlePhoto(req, res) {
           { type: 'image_url', image_url: { url: `data:${mimeType};base64,${body.base64 || ''}` } },
           {
             type: 'text',
-            text: 'Analizeaza imaginea ca ghid de campus. Identifica posibila cladire sau reper, descrie ce vezi si da urmatorul pas de orientare. Raspunde concis in romana.',
+            text: `Esti AI Compass pentru StudentCompass.
+Analizeaza imaginea strict ca recunoastere de locatie in campus.
+Daca poza arata cladirea Facultatii de Informatica / FII / zona Corpului C de la Informatica, raspunde vizibil cu numele "Facultatea de Informatica", nu doar "Corp C".
+Raspunde in romana, in 1-2 fraze: locatia probabila si indiciul vizual care te-a facut sa o recunosti.
+Nu genera traseu si nu intreba destinatia; aplicatia va intreba automat dupa raspunsul tau.`,
           },
         ],
       },
     ],
     max_tokens: 420,
   })
+  const inferred = inferVisualLocation(rawAnswer)
+  const answer = normalizeVisibleLocationText(rawAnswer, inferred)
   sendJson(res, 200, { answer })
+}
+
+async function handleCopilot(req, res) {
+  const body = await readJson(req)
+  const message = String(body.message || '')
+  const image = body.image || null
+  const context = body.context || {}
+  let visualAnswer = String(context.visualAnswer || '')
+
+  if (image?.base64 && !visualAnswer) {
+    visualAnswer = await grokChat({
+      model: VISION_MODEL,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'image_url', image_url: { url: `data:${image.mimeType || 'image/jpeg'};base64,${image.base64}` } },
+            {
+              type: 'text',
+              text: `Analizeaza imaginea ca ghid de campus UAIC.
+Identifica daca este Facultatea de Informatica, Corp C, o intrare, un coridor, o sala sau un panou.
+Raspunde concis in romana cu:
+- locatia probabila
+- indicii vizuale observate
+- cat de sigur esti
+- daca nu exista destinatie in mesaj, intreaba unde vrea studentul sa ajunga.`,
+            },
+          ],
+        },
+      ],
+      max_tokens: 420,
+    })
+  }
+
+  const text = `Mesaj student: "${message || 'Nu a scris mesaj.'}"
+Analiza vizuala preliminara: ${visualAnswer || 'Nu exista poza atasata.'}
+
+Context cunoscut:
+- Campus: ${context.campus || 'UAIC'}
+- Sali indoor disponibile: ${JSON.stringify(KNOWN_INDOOR_ROOMS)}
+- Cladiri outdoor disponibile: ${JSON.stringify(KNOWN_BUILDINGS)}
+- Orar apropiat: ${JSON.stringify(context.schedule || [])}
+- Ora curenta: ${context.currentTime || new Date().toISOString()}
+
+Comporta-te ca AI Compass pentru StudentCompass. Foloseste analiza vizuala preliminara ca sursa principala pentru locatie. Daca exista poza si nu exista destinatie in mesaj, recunoaste zona si intreaba explicit unde vrea studentul sa ajunga. Daca utilizatorul cere C210, C308, C112, secretariat sau alta sala cunoscuta, propune ruta indoor. Daca cere biblioteca, cantina, Corp A sau Corp C, propune ruta outdoor.
+
+Raspunde strict cu JSON valid in schema:
+${COPILOT_JSON_SCHEMA}`
+
+  const raw = await grokChat({
+    model: TEXT_MODEL,
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      ...(Array.isArray(body.history) ? body.history.slice(-6) : []),
+      { role: 'user', content: text },
+    ],
+    max_tokens: 650,
+    response_format: { type: 'json_object' },
+  })
+
+  const parsed = safeJson(raw, { answer: raw })
+  const normalized = normalizeCopilotPayload(parsed, visualAnswer || raw)
+  applyVisualLocation(normalized, visualAnswer)
+
+  const inferredRoom = inferIndoorRoom(message, normalized.answer, normalized.destination.label)
+  const inferredBuilding = inferOutdoorBuilding(message, normalized.answer, normalized.destination.label)
+  if (inferredRoom && !normalized.destination.room) {
+    normalized.destination = {
+      ...normalized.destination,
+      type: 'indoor',
+      label: normalized.destination.label || inferredRoom.toUpperCase(),
+      room: inferredRoom,
+    }
+  }
+  if (inferredRoom && (!normalized.routeSuggestion.to || normalized.routeSuggestion.type === 'none')) {
+    normalized.routeSuggestion = { type: 'indoor', from: normalized.detectedLocation.room || 'c112', to: inferredRoom }
+  }
+  if (!inferredRoom && inferredBuilding && !normalized.destination.buildingId) {
+    normalized.destination = {
+      ...normalized.destination,
+      type: 'outdoor',
+      label: normalized.destination.label || inferredBuilding,
+      buildingId: inferredBuilding,
+    }
+  }
+  if (!inferredRoom && inferredBuilding && (!normalized.routeSuggestion.to || normalized.routeSuggestion.type === 'none')) {
+    normalized.routeSuggestion = { type: 'outdoor', from: 'corp-c', to: inferredBuilding }
+  }
+
+  if (normalized.routeSuggestion.type === 'indoor' && normalized.routeSuggestion.to && !normalized.routeSuggestion.from) {
+    normalized.routeSuggestion.from = normalized.detectedLocation.room || 'c112'
+  }
+  if (normalized.routeSuggestion.type === 'outdoor' && normalized.routeSuggestion.to && !normalized.routeSuggestion.from) {
+    normalized.routeSuggestion.from = 'corp-c'
+  }
+  sendJson(res, 200, withImageOnlyPrompt(normalized, visualAnswer, message))
 }
 
 async function handleRecommendations(req, res) {
@@ -207,6 +466,10 @@ export function createNavigationApiServer(port = 3000) {
       }
       if (req.url === '/api/navigation/photo') {
         await handlePhoto(req, res)
+        return
+      }
+      if (req.url === '/api/navigation/copilot') {
+        await handleCopilot(req, res)
         return
       }
       if (req.url === '/api/navigation/recommendations') {
