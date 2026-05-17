@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Search, Star, Calendar, Clock, Check, MessageSquare, ArrowLeftRight } from 'lucide-react'
+import { Search, Star, Calendar, Clock, Check, MessageSquare, ArrowLeftRight, Users } from 'lucide-react'
 import { getSubjectFilters, getTutors } from '../../shared/data/facultyCatalog'
 import SkillSwap from './SkillSwap'
 import clsx from 'clsx'
+import { useToast } from '../../shared/components/Toast'
 
 const TABS = ['Tutori disponibili', 'Skill Swap & Grupuri']
 
@@ -44,6 +45,12 @@ function TutorSkeleton() {
 function TutorCard({ t }) {
   const [booked, setBooked] = useState(false)
   const [showSlots, setShowSlots] = useState(false)
+  const toast = useToast()
+
+  function handleBook() {
+    setBooked(true)
+    toast({ type: 'success', title: 'Sesiune rezervată!', message: `${t.name} te va contacta pentru confirmare.` })
+  }
 
   return (
     <div className="glass-card flex flex-col hover:border-slate-600 transition-all duration-200">
@@ -118,7 +125,7 @@ function TutorCard({ t }) {
             </div>
           ) : (
             <button
-              onClick={() => setBooked(true)}
+              onClick={handleBook}
               className="flex-1 btn-primary text-sm flex items-center justify-center gap-2"
             >
               <Calendar size={14} /> Rezervă sesiune
@@ -203,12 +210,20 @@ export default function PeerTutoring({ profile }) {
         {tab === 0 && (
           <>
             <p className="text-[12px] text-slate-500 font-medium mb-4">{loading ? '...' : `${filtered.length} tutori disponibili`}</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {loading
-                ? Array.from({ length: 6 }).map((_, i) => <TutorSkeleton key={i} />)
-                : filtered.map(t => <TutorCard key={t.id} t={t} />)
-              }
-            </div>
+            {!loading && filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <Users size={36} className="text-slate-800 mb-4" strokeWidth={1.5} />
+                <p className="text-slate-500 text-sm font-semibold">Niciun tutor găsit</p>
+                <p className="text-slate-700 text-xs mt-1">Încearcă alt filtru sau terge căutarea</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {loading
+                  ? Array.from({ length: 6 }).map((_, i) => <TutorSkeleton key={i} />)
+                  : filtered.map(t => <TutorCard key={t.id} t={t} />)
+                }
+              </div>
+            )}
           </>
         )}
         {tab === 1 && <SkillSwap profile={profile} />}

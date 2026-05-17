@@ -22,7 +22,7 @@ const MODES = [
   { id: 'life',     label: 'Life',     icon: Sparkles },
 ]
 
-export default function Header({ platformMode = 'academic', onModeChange, currentView, profile, session, onMenuClick }) {
+export default function Header({ platformMode = 'academic', onModeChange, currentView, profile, session, onMenuClick, onSearchOpen }) {
   const { title, sub } = VIEW_TITLES[currentView] || VIEW_TITLES.dashboard
   const [notifOpen, setNotifOpen] = useState(false)
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications(session?.userId)
@@ -82,13 +82,14 @@ export default function Header({ platformMode = 'academic', onModeChange, curren
       </div>
 
       {/* Search */}
-      <div className="hidden xl:flex items-center gap-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.07] focus-within:border-white/[0.14] rounded-xl px-3 py-2 w-56 transition-all duration-200">
+      <button
+        onClick={onSearchOpen}
+        className="hidden xl:flex items-center gap-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.07] rounded-xl px-3 py-2 w-56 transition-all duration-200 text-left"
+      >
         <Search size={13} className="text-slate-600 shrink-0" strokeWidth={1.75} />
-        <input
-          className="bg-transparent text-[13px] text-slate-300 placeholder-slate-700 outline-none w-full font-medium"
-          placeholder="Cauta..."
-        />
-      </div>
+        <span className="text-[13px] text-slate-700 font-medium flex-1">Caută...</span>
+        <kbd className="text-[10px] text-slate-700 border border-white/[0.07] rounded px-1.5 py-0.5">⌘K</kbd>
+      </button>
 
       {/* Notifications */}
       <div className="relative">

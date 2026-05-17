@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Compass, Mail, ArrowRight, Check, Loader2, Shield, ChevronLeft, Zap } from 'lucide-react'
 import { UNIVERSITIES } from '../../shared/config/universities'
 import { useAuth } from '../../app/providers/AuthContext'
+import { createUserId } from '../../shared/services/auth.service'
 import clsx from 'clsx'
 
 const STEP = { SELECT_UNI: 0, ENTER_EMAIL: 1, VERIFYING: 2, CONFIRMED: 3 }
@@ -229,7 +230,7 @@ export default function AuthFlow() {
 
   function handleContinue() {
     login({
-      userId: `mock-${Date.now()}`,
+      userId: createUserId('mock'),
       email: email ? `${email}@${university.emailDomain}` : `student@${university.emailDomain}`,
       university, detectedFaculty, isNewUser: true,
     })

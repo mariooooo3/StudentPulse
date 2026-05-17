@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Send, Search, Wifi, WifiOff, Users, ShieldCheck } from 'lucide-react'
 import { useMessages } from '../../shared/hooks/useMessages'
 import { socketService } from '../../shared/services/socket.service'
+import { useOnlineCount } from '../../shared/hooks/useOnlineCount'
+import { createUserId } from '../../shared/services/auth.service'
 import clsx from 'clsx'
 
 function nameFromEmail(email) {
@@ -13,22 +15,6 @@ function nameFromEmail(email) {
 function avatarLetters(name) {
   const parts = name.trim().split(' ')
   return parts.length >= 2 ? parts[0][0] + parts[1][0] : name.slice(0, 2).toUpperCase()
-}
-
-function profileScope(profile, session) {
-  const universityId = profile?.university?.id || session?.university?.id || 'unknown-university'
-  const facultyCode = profile?.facultyCode || session?.detectedFaculty?.code || 'unknown-faculty'
-  return `${universityId}:${facultyCode}`
-}
-
-function profileMeta(profile, session, scope) {
-  return {
-    universityId: profile?.university?.id || session?.university?.id || '',
-    universityName: profile?.university?.shortName || session?.university?.shortName || '',
-    facultyCode: profile?.facultyCode || session?.detectedFaculty?.code || '',
-    facultyName: profile?.faculty || session?.detectedFaculty?.name || '',
-    scope,
-  }
 }
 
 const COLORS = [
@@ -47,6 +33,7 @@ function colorFor(userId) {
 }
 
 function ChatThread({ contact, currentUserId, currentName, scope }) {
+  const isSelfConversation = contact.userId === currentUserId
   const channel = `dm:${scope}:${[currentUserId, contact.userId].sort().join(':')}`
   const { messages, sendMessage, connected } = useMessages(channel, currentUserId)
   const [input, setInput] = useState('')
@@ -58,14 +45,14 @@ function ChatThread({ contact, currentUserId, currentName, scope }) {
 
   function send() {
     const text = input.trim()
-    if (!text) return
+    if (!text || isSelfConversation) return
     sendMessage(text, currentName)
     setInput('')
   }
 
   return (
     <div className="flex-1 flex flex-col min-w-0">
-      <div className="h-16 border-b border-slate-700/50 flex items-center px-6 gap-4 bg-slate-900 shrink-0">
+      <div className="h-16 border-b border-white/[0.05] flex items-center px-6 gap-4 bg-[#070b14]/90 backdrop-blur-xl shrink-0">
         <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${colorFor(contact.userId)} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
           {avatarLetters(contact.name)}
         </div>
@@ -99,7 +86,7 @@ function ChatThread({ contact, currentUserId, currentName, scope }) {
                   'px-4 py-2.5 rounded-2xl text-sm leading-relaxed',
                   isMe
                     ? 'bg-indigo-600 text-white rounded-tr-sm'
-                    : 'bg-slate-800 border border-slate-700/50 text-slate-200 rounded-tl-sm',
+                    : 'bg-white/[0.05] border border-white/[0.06] text-slate-200 rounded-tl-sm',
                 )}>
                   {msg.content}
                 </div>
@@ -113,22 +100,23 @@ function ChatThread({ contact, currentUserId, currentName, scope }) {
         <div ref={bottomRef} />
       </div>
 
-      <div className="p-4 border-t border-slate-700/50 bg-slate-900">
-        <div className="flex items-center gap-3 bg-slate-800 border border-slate-700/50 rounded-2xl px-4 py-3">
+      <div className="p-4 border-t border-white/[0.05] bg-[#070b14]/90">
+        <div className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.07] rounded-2xl px-4 py-3">
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && send()}
             placeholder="Scrie un mesaj..."
+            disabled={isSelfConversation}
             className="flex-1 bg-transparent text-sm text-slate-200 placeholder-slate-600 outline-none"
           />
           <button
             onClick={send}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isSelfConversation}
             className={clsx('w-8 h-8 rounded-xl flex items-center justify-center transition-all',
-              input.trim() ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-slate-700')}
+              input.trim() && !isSelfConversation ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-white/[0.06]')}
           >
-            <Send size={14} className={input.trim() ? 'text-white' : 'text-slate-500'} />
+            <Send size={14} className={input.trim() && !isSelfConversation ? 'text-white' : 'text-slate-500'} />
           </button>
         </div>
       </div>
@@ -137,20 +125,41 @@ function ChatThread({ contact, currentUserId, currentName, scope }) {
 }
 
 export default function DirectMessages({ session, profile }) {
-  const currentUserId = session?.userId || `guest-${Math.random().toString(36).slice(2, 8)}`
+  // Stabilize currentUserId — generate guest ID once, never regenerate
+  const currentUserId = useMemo(
+    () => session?.userId || createUserId('guest'),
+    [session?.userId]
+  )
   const currentName = nameFromEmail(session?.email)
-  const scope = profileScope(profile, session)
-  const meta = profileMeta(profile, session, scope)
+
+  const scope = useMemo(() => {
+    const universityId = profile?.university?.id || session?.university?.id || 'unknown-university'
+    const facultyCode = profile?.facultyCode || session?.detectedFaculty?.code || 'unknown-faculty'
+    return `${universityId}:${facultyCode}`
+  }, [profile?.university?.id, profile?.facultyCode, session?.university?.id, session?.detectedFaculty?.code])
+
+  // Stabilize meta — prevent infinite useEffect re-runs
+  const meta = useMemo(() => ({
+    universityId: profile?.university?.id || session?.university?.id || '',
+    universityName: profile?.university?.shortName || session?.university?.shortName || '',
+    facultyCode: profile?.facultyCode || session?.detectedFaculty?.code || '',
+    facultyName: profile?.faculty || session?.detectedFaculty?.name || '',
+    scope,
+  }), [scope, profile?.university?.id, profile?.university?.shortName, profile?.facultyCode, profile?.faculty,
+      session?.university?.id, session?.university?.shortName, session?.detectedFaculty?.code, session?.detectedFaculty?.name])
+
   const scopeLabel = `${meta.universityName || 'Universitate'} · ${meta.facultyName || 'Facultate'}`
 
   const [onlineUsers, setOnlineUsers] = useState([])
   const [active, setActive] = useState(null)
   const [search, setSearch] = useState('')
+  const { report: reportOnlineCount } = useOnlineCount()
 
-  function eligibleUsers(users) {
+  const eligibleUsers = useCallback((users) => {
     return (users || []).filter(u => u.userId !== currentUserId && u.scope === scope)
-  }
+  }, [currentUserId, scope])
 
+  // Auth + initial presence fetch — runs only when stable deps change
   useEffect(() => {
     socketService.auth(currentUserId, currentName, meta)
 
@@ -158,19 +167,22 @@ export default function DirectMessages({ session, profile }) {
       .then(({ users }) => {
         const others = eligibleUsers(users)
         setOnlineUsers(others)
+        reportOnlineCount(others.length)
         setActive(prev => (prev && others.some(u => u.userId === prev.userId)) ? prev : (others[0] || null))
       })
       .catch(() => {})
-  }, [currentUserId, currentName, scope, meta])
+  }, [currentUserId, currentName, meta, eligibleUsers])
 
+  // Subscribe to live presence updates
   useEffect(() => {
     const unsub = socketService.subscribe('presence:online', (users) => {
       const others = eligibleUsers(users)
       setOnlineUsers(others)
+      reportOnlineCount(others.length)
       setActive(prev => (prev && others.some(u => u.userId === prev.userId)) ? prev : (others[0] || null))
     })
     return unsub
-  }, [currentUserId, scope])
+  }, [eligibleUsers])
 
   const contacts = onlineUsers.filter(u =>
     u.name.toLowerCase().includes(search.toLowerCase())
@@ -178,9 +190,9 @@ export default function DirectMessages({ session, profile }) {
 
   return (
     <div className="flex h-full animate-fade-in">
-      <div className="w-72 border-r border-slate-700/50 flex flex-col bg-slate-900 shrink-0">
-        <div className="p-4 border-b border-slate-700/50">
-          <div className="flex items-center gap-2 bg-slate-800 border border-slate-700/50 rounded-xl px-3 py-2">
+      <div className="w-72 border-r border-white/[0.05] flex flex-col bg-[#070b14] shrink-0">
+        <div className="p-4 border-b border-white/[0.05]">
+          <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2">
             <Search size={14} className="text-slate-500" />
             <input
               value={search}
@@ -199,7 +211,7 @@ export default function DirectMessages({ session, profile }) {
           </div>
         </div>
 
-        <div className="px-4 py-2 border-b border-slate-800">
+        <div className="px-4 py-2 border-b border-white/[0.04]">
           <p className="text-[10px] text-slate-600 uppercase tracking-wider mb-1">Tu esti</p>
           <div className="flex items-center gap-2">
             <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${colorFor(currentUserId)} flex items-center justify-center text-white text-[9px] font-bold`}>
@@ -226,15 +238,15 @@ export default function DirectMessages({ session, profile }) {
                 key={u.userId}
                 onClick={() => setActive(u)}
                 className={clsx(
-                  'w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-800 transition-colors text-left',
-                  active?.userId === u.userId && 'bg-slate-800 border-r-2 border-indigo-500',
+                  'w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.04] transition-colors text-left',
+                  active?.userId === u.userId && 'bg-white/[0.05] border-r-2 border-indigo-500',
                 )}
               >
                 <div className="relative shrink-0">
                   <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${colorFor(u.userId)} flex items-center justify-center text-white text-xs font-bold`}>
                     {avatarLetters(u.name)}
                   </div>
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-slate-900" />
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-[#070b14]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-slate-200 truncate">{u.name}</p>

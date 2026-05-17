@@ -9,9 +9,10 @@
  * Future: replace with Supabase client or fetch wrapper.
  */
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || ''
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const CLIENT_ENV = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : {}
+const BASE_URL = CLIENT_ENV.VITE_API_URL || 'http://localhost:3000/api'
+const SUPABASE_URL = CLIENT_ENV.VITE_SUPABASE_URL || ''
+const SUPABASE_ANON_KEY = CLIENT_ENV.VITE_SUPABASE_ANON_KEY || ''
 
 const IS_MOCK = !SUPABASE_URL  // true in prototype mode
 

@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_NAVIGATION_API_URL || 'http://localhost:3000/api/navigation'
+const NAVIGATION_ENV = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : {}
+const API_URL = NAVIGATION_ENV.VITE_NAVIGATION_API_URL || 'http://localhost:3001/api/navigation'
 
 async function post(endpoint, body) {
   const response = await fetch(`${API_URL}${endpoint}`, {
@@ -30,10 +31,20 @@ export async function analyzeNavigationPhoto({ base64, mimeType }) {
 
 export async function getNavigationRecommendations(scheduleItems = []) {
   try {
-    const data = await post('/recommendations', { schedule: scheduleItems })
-    return data.answer
+    return await post('/recommendations', scheduleItems)
   } catch {
-    return 'Recomandare locala: pleaca spre urmatorul curs cu 8 minute inainte, evita cantina intre 12:00 si 13:15 si foloseste biblioteca drept zona de lucru intre cursuri.'
+    return {
+      briefing: 'Recomandare locala: evita intervalele aglomerate si pleaca cu 8 minute inainte de urmatorul curs.',
+      cards: [
+        {
+          id: 'fallback-1',
+          emoji: '🚶',
+          title: 'Pleaca mai devreme',
+          desc: 'Ai suficient timp sa ajungi fara graba la urmatorul curs daca iesi cu 8 minute inainte.',
+          urgency: 'medium',
+        },
+      ],
+    }
   }
 }
 

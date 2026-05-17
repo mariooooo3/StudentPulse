@@ -5,6 +5,7 @@ import { resolve } from 'node:path'
 const TEXT_MODEL = 'llama-3.3-70b-versatile'
 const VISION_MODEL = 'meta-llama/llama-4-scout-17b-16e-instruct'
 const KEY_FILES = [
+  resolve(process.cwd(), '.env'),
   resolve(process.cwd(), '..', '..', '..', 'navigatie', 'key.txt'),
   resolve(process.cwd(), '..', '..', '..', 'navigatie', 'navigator-export', 'key.txt'),
 ]
@@ -16,8 +17,15 @@ Nu inventa date sensibile si nu mentiona cheia API.`
 function navigationKey() {
   if (process.env.GROK_API_KEY) return process.env.GROK_API_KEY.trim()
   if (process.env.GROQ_API_KEY) return process.env.GROQ_API_KEY.trim()
-  const keyFile = KEY_FILES.find((file) => existsSync(file))
-  if (keyFile) return readFileSync(keyFile, 'utf8').trim()
+  for (const keyFile of KEY_FILES) {
+    if (!existsSync(keyFile)) continue
+    const raw = readFileSync(keyFile, 'utf8').trim()
+    const envKey = raw
+      .split(/\r?\n/)
+      .map(line => line.match(/^\s*(?:GROQ_API_KEY|GROK_API_KEY|VITE_GROQ_API_KEY)\s*=\s*(.+?)\s*$/)?.[1])
+      .find(Boolean)
+    return envKey || raw
+  }
   return ''
 }
 
@@ -103,18 +111,83 @@ async function handlePhoto(req, res) {
 
 async function handleRecommendations(req, res) {
   const body = await readJson(req)
-  const answer = await grokChat({
-    model: TEXT_MODEL,
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
+  const hour = Number.isFinite(Number(body.hour)) ? Number(body.hour) : new Date().getHours()
+  const totalUsers = Number.isFinite(Number(body.totalUsers)) ? Number(body.totalUsers) : 0
+  const crowdLevel = totalUsers === 0 ? 'necunoscut' : totalUsers < 80 ? 'scazut' : totalUsers < 160 ? 'moderat' : 'ridicat'
+  const timeSlot = hour < 10 ? 'dimineata' : hour < 13 ? 'la pranz' : hour < 17 ? 'dupa-amiaza' : 'seara'
+
+  const fallback = {
+    briefing: `Campusul este ${crowdLevel}, iar tu esti in intervalul ${timeSlot}.`,
+    cards: [
       {
-        role: 'user',
-        content: `Pe baza acestui orar JSON, ofera 3 recomandari concrete de navigatie si evitare aglomeratie: ${JSON.stringify(body.schedule || [])}`,
+        id: 'route-now',
+        emoji: '🧭',
+        title: 'Pleaca acum',
+        desc: 'Porneste spre urmatorul curs cu 8 minute inainte pentru a evita pauzele aglomerate.',
+        urgency: 'medium',
+      },
+      {
+        id: 'quiet-zone',
+        emoji: '📚',
+        title: 'Zona linistita',
+        desc: 'Biblioteca este o alegere buna intre cursuri daca vrei lucru concentrat.',
+        urgency: 'low',
+      },
+      {
+        id: 'canteen-window',
+        emoji: '🍽️',
+        title: 'Evita cantina',
+        desc: 'Intervalul de la pranz este cel mai aglomerat; mergi mai devreme sau mai tarziu.',
+        urgency: 'high',
+      },
+      {
+        id: 'next-stop',
+        emoji: '📍',
+        title: 'Urmatorul reper',
+        desc: `Verifica traseul dupa orar pentru ${Array.isArray(body.schedule) && body.schedule.length ? 'urmatorul curs' : 'urmatorul reper'}.`,
+        urgency: 'low',
       },
     ],
-    max_tokens: 320,
-  })
-  sendJson(res, 200, { answer })
+  }
+
+  try {
+    const raw = await grokChat({
+      model: TEXT_MODEL,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        {
+          role: 'user',
+          content: `Ora curenta: ${hour}:00. Trafic campus: ${crowdLevel} (${totalUsers} studenti activi).
+Orar student: ${JSON.stringify(body.schedule || [])}.
+
+Genereaza exact 4 recomandari smart si practice. Raspunde doar cu JSON valid in formatul:
+{
+  "briefing": "O propozitie scurta despre starea campusului acum.",
+  "cards": [
+    {
+      "id": "unic-id",
+      "emoji": "emoji relevant",
+      "title": "Titlu scurt",
+      "desc": "Descriere practica, specifica.",
+      "urgency": "low|medium|high"
+    }
+  ]
+}`,
+        },
+      ],
+      max_tokens: 600,
+      response_format: { type: 'json_object' },
+    })
+
+    const parsed = JSON.parse(raw)
+    if (!parsed || !Array.isArray(parsed.cards)) throw new Error('Invalid recommendations payload')
+    sendJson(res, 200, {
+      briefing: parsed.briefing || fallback.briefing,
+      cards: parsed.cards.slice(0, 4),
+    })
+  } catch {
+    sendJson(res, 200, fallback)
+  }
 }
 
 export function createNavigationApiServer(port = 3000) {

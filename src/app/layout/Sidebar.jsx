@@ -28,7 +28,7 @@ const NAV_BY_MODE = {
     { id: 'schedule', label: 'Schedule Hub', icon: Calendar },
     { id: 'thesis', label: 'Thesis Finder', icon: BookOpen },
     { id: 'tutoring', label: 'Peer Tutoring', icon: Users },
-    { id: 'messages', label: 'Mesaje', icon: MessageSquare, badge: 3 },
+    { id: 'messages', label: 'Mesaje', icon: MessageSquare },
   ],
   life: [
     { id: 'discounts', label: 'Discounts & Benefits', icon: Tag },
@@ -158,7 +158,7 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
   )
 }
 
-export default function Sidebar({ platformMode = 'academic', currentView, onNavigate, profile, session, open, onClose }) {
+export default function Sidebar({ platformMode = 'academic', currentView, onNavigate, profile, session, open, onClose, onlineCount = 0 }) {
   const { logout } = useAuth()
   const [showProfile, setShowProfile] = useState(false)
   const university = session?.university
@@ -222,7 +222,8 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
       <nav key={platformMode} className="flex-1 px-3 space-y-0.5 overflow-y-auto">
         <p className="section-label px-3 pb-3">{modeCopy.label}</p>
 
-        {nav.map(({ id, label, icon: Icon, badge }, i) => {
+        {nav.map(({ id, label, icon: Icon }, i) => {
+          const badge = id === 'messages' && onlineCount > 0 ? onlineCount : null
           const active = currentView === id
           return (
             <button

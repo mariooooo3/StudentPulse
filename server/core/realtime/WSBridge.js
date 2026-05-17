@@ -1,7 +1,17 @@
 import { WebSocketServer } from 'ws'
 import { eventBus } from '../events/EventBus.js'
 
-const PORT = 8080
+const PORT = Number(process.env.WS_PORT || 8081)
+
+export function parseDirectMessageChannel(channel) {
+  if (!channel?.startsWith('dm:')) return null
+  const parts = channel.split(':')
+  if (parts.length !== 5) return null
+  const scope = `${parts[1]}:${parts[2]}`
+  const participants = parts.slice(3)
+  if (new Set(participants).size !== 2) return null
+  return { scope, participants }
+}
 
 export class WSBridge {
   #wss
@@ -60,6 +70,7 @@ export class WSBridge {
     const { type, reqId, channel, data, key, value, ttl, userId, name, profile } = msg
 
     const reply = (payload) => {
+      if (!reqId) return
       ws.send(JSON.stringify({ type: 'REPLY', reqId, ...payload }))
     }
 
@@ -123,38 +134,32 @@ export class WSBridge {
         break
 
       case 'GET': {
-        const val = this.#store.get(key)
-        reply({ ok: true, value: val })
+        reply({ ok: false, error: 'Store commands are not available over WebSocket' })
         break
       }
 
       case 'SET': {
-        const result = this.#store.set(key, value, ttl)
-        reply({ ok: true, result })
+        reply({ ok: false, error: 'Store commands are not available over WebSocket' })
         break
       }
 
       case 'DEL': {
-        const n = this.#store.del(key)
-        reply({ ok: true, deleted: n })
+        reply({ ok: false, error: 'Store commands are not available over WebSocket' })
         break
       }
 
       case 'PEXPIRE': {
-        const n = this.#store.pexpire(key, ttl)
-        reply({ ok: true, set: n })
+        reply({ ok: false, error: 'Store commands are not available over WebSocket' })
         break
       }
 
       case 'PTTL': {
-        const remaining = this.#store.pttl(key)
-        reply({ ok: true, pttl: remaining })
+        reply({ ok: false, error: 'Store commands are not available over WebSocket' })
         break
       }
 
       case 'KEYS': {
-        const keys = this.#store.keys(key || '*')
-        reply({ ok: true, keys })
+        reply({ ok: false, error: 'Store commands are not available over WebSocket' })
         break
       }
 
@@ -207,7 +212,11 @@ export class WSBridge {
       }
 
       case 'SWAP_REQUEST': {
-        const result = this.#handlers.schedule.submitSwap(data, ws)
+        if (!ws.userId) {
+          reply({ ok: false, error: 'Authentication required' })
+          break
+        }
+        const result = this.#handlers.schedule.submitSwap({ ...data, userId: ws.userId }, ws)
         reply({ ok: true, ...result })
         break
       }
@@ -218,12 +227,23 @@ export class WSBridge {
   }
 
   #canAccessChannel(ws, channel) {
-    if (!channel?.startsWith('dm:')) return true
-    const parts = channel.split(':')
-    if (parts.length < 5) return false
-    const scope = `${parts[1]}:${parts[2]}`
-    const participants = parts.slice(3)
-    return Boolean(ws.userId && ws.scope === scope && participants.includes(ws.userId))
+    if (!channel) return false
+    if (channel.startsWith('notifications:')) {
+      const [, userId] = channel.split(':')
+      return this.#canAccessUser(ws, userId)
+    }
+    if (channel.startsWith('user:') && channel.endsWith(':swaps')) {
+      const parts = channel.split(':')
+      return parts.length === 3 && this.#canAccessUser(ws, parts[1])
+    }
+    if (!channel.startsWith('dm:')) return true
+    const dm = parseDirectMessageChannel(channel)
+    return Boolean(
+      dm &&
+      ws.userId &&
+      ws.scope === dm.scope &&
+      dm.participants.includes(ws.userId),
+    )
   }
 
   #canAccessUser(ws, userId) {
@@ -231,8 +251,9 @@ export class WSBridge {
   }
 
   #isChatMessage(channel, data) {
+    const dm = parseDirectMessageChannel(channel)
     return Boolean(
-      channel?.startsWith('dm:') &&
+      dm &&
       data &&
       typeof data.id === 'string' &&
       typeof data.senderId === 'string' &&
