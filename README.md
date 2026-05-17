@@ -87,7 +87,7 @@ Built at **FiiPractic Hackathon 2026** in 48 hours.
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                  FRONTEND (React 18)                 │
+│                  FRONTEND (React 18)                │
 │  Auth → Onboarding → Dashboard                      │
 │  CampusNavigator ←→ AI Chat (Groq)                  │
 │  ScheduleHub     ←→ WebSocket (real-time)           │
