@@ -35,6 +35,7 @@ function AppShell() {
   const { authState, profileStage, session, profile, completeOnboarding } = useAuth()
   const [platformMode, setPlatformMode] = useState('academic')
   const [currentViewByMode, setCurrentViewByMode] = useState(DEFAULT_VIEW_BY_MODE)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const theme = getUniversityTheme(session?.university)
   const currentView = currentViewByMode[platformMode]
 
@@ -101,9 +102,11 @@ function AppShell() {
       <Sidebar
         platformMode={platformMode}
         currentView={currentView}
-        onNavigate={handleNavigate}
+        onNavigate={(v) => { handleNavigate(v); setSidebarOpen(false) }}
         profile={profile}
         session={session}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
       <div className="flex-1 flex flex-col min-w-0">
         <Header
@@ -112,20 +115,23 @@ function AppShell() {
           currentView={currentView}
           profile={profile}
           session={session}
+          onMenuClick={() => setSidebarOpen(true)}
         />
         <main className="flex-1 overflow-auto flex flex-col">
           <Suspense fallback={<PageLoader />}>
-            {platformMode === 'academic' && currentView === 'dashboard'  && <Dashboard profile={profile} session={session} onNavigate={handleNavigate} />}
-            {platformMode === 'academic' && currentView === 'navigator' && <CampusNavigator />}
-            {platformMode === 'academic' && currentView === 'schedule'  && <ScheduleHub profile={profile} session={session} />}
-            {platformMode === 'academic' && currentView === 'thesis'    && <ThesisFinder profile={profile} session={session} />}
-            {platformMode === 'academic' && currentView === 'tutoring'  && <PeerTutoring profile={profile} />}
-            {platformMode === 'academic' && currentView === 'messages'  && <DirectMessages session={session} profile={profile} />}
+            <div key={`${platformMode}:${currentView}`} className="flex-1 flex flex-col animate-fade-in">
+              {platformMode === 'academic' && currentView === 'dashboard'  && <Dashboard profile={profile} session={session} onNavigate={handleNavigate} />}
+              {platformMode === 'academic' && currentView === 'navigator' && <CampusNavigator />}
+              {platformMode === 'academic' && currentView === 'schedule'  && <ScheduleHub profile={profile} session={session} />}
+              {platformMode === 'academic' && currentView === 'thesis'    && <ThesisFinder profile={profile} session={session} />}
+              {platformMode === 'academic' && currentView === 'tutoring'  && <PeerTutoring profile={profile} />}
+              {platformMode === 'academic' && currentView === 'messages'  && <DirectMessages session={session} profile={profile} />}
 
-            {platformMode === 'life' && ['discounts', 'career', 'community'].includes(currentView) && (
-              <StudentLifeHub activeSection={currentView} profile={profile} session={session} />
-            )}
-            {platformMode === 'life' && currentView === 'citylife' && <CityAdaptation profile={profile} session={session} />}
+              {platformMode === 'life' && ['discounts', 'career', 'community'].includes(currentView) && (
+                <StudentLifeHub activeSection={currentView} profile={profile} session={session} />
+              )}
+              {platformMode === 'life' && currentView === 'citylife' && <CityAdaptation profile={profile} session={session} />}
+            </div>
           </Suspense>
         </main>
       </div>

@@ -1,8 +1,35 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, BookOpen, Star, Users, ChevronDown, Check, AlertCircle, X } from 'lucide-react'
 import { getProfessors, getThesisDomains } from '../../shared/data/facultyCatalog'
 import BookingModal from './BookingModal'
 import clsx from 'clsx'
+
+function ProfessorSkeleton() {
+  return (
+    <div className="glass-card animate-pulse">
+      <div className="h-1.5 rounded-t-2xl bg-white/[0.05]" />
+      <div className="p-5 space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 rounded-xl bg-white/[0.06] shrink-0" />
+          <div className="flex-1 space-y-2 pt-1">
+            <div className="h-3.5 bg-white/[0.06] rounded w-3/4" />
+            <div className="h-2.5 bg-white/[0.03] rounded w-1/2" />
+          </div>
+          <div className="h-5 w-16 bg-white/[0.04] rounded-full shrink-0" />
+        </div>
+        <div className="h-2.5 bg-white/[0.04] rounded w-2/3" />
+        <div className="flex gap-1.5">
+          {[48, 60, 40].map(w => <div key={w} className="h-5 bg-white/[0.04] rounded-full" style={{ width: w }} />)}
+        </div>
+        <div className="h-2 bg-white/[0.04] rounded-full" />
+        <div className="grid grid-cols-2 gap-2">
+          {[0, 1, 2, 3].map(i => <div key={i} className="h-12 bg-white/[0.03] rounded-lg" />)}
+        </div>
+        <div className="h-9 bg-white/[0.04] rounded-xl" />
+      </div>
+    </div>
+  )
+}
 
 function SlotBar({ left, total }) {
   const pct = (left / total) * 100
@@ -136,6 +163,12 @@ export default function ThesisFinder({ profile, session }) {
   const [domain, setDomain] = useState('Toate')
   const [onlyAvailable, setOnlyAvailable] = useState(false)
   const [booking, setBooking] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 400)
+    return () => clearTimeout(t)
+  }, [])
 
   const filtered = professors.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -194,9 +227,10 @@ export default function ThesisFinder({ profile, session }) {
           <p className="text-[11px] text-slate-700">{filtered.filter(p => p.available).length} cu locuri disponibile</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map(p => (
-            <ProfessorCard key={p.id} p={p} onBook={setBooking} />
-          ))}
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => <ProfessorSkeleton key={i} />)
+            : filtered.map(p => <ProfessorCard key={p.id} p={p} onBook={setBooking} />)
+          }
         </div>
       </div>
 
