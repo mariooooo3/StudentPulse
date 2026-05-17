@@ -221,3 +221,10 @@ Configured for **Render** via `render.yaml`. Set `GROQ_API_KEY` as an environmen
 ---
 
 *FiiPractic Hackathon 2026 — UAIC Iași*
+
+---
+
+## License
+
+Copyright (c) 2026 Bighiu Rares, Afrasinei Mario, Mocanu Claudiu, Ignat Denis — All Rights Reserved.
+See [LICENSE](LICENSE) for details.
