@@ -1,4 +1,7 @@
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8081'
+const WS_URL = import.meta.env.VITE_WS_URL || (() => {
+  const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+  return `${proto}//${window.location.host}`
+})()
 const MAX_RECONNECT_DELAY = 30_000
 const REQUEST_TIMEOUT = 5_000
 

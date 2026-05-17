@@ -1,3 +1,7 @@
+import { createServer } from 'node:http'
+import { existsSync, readFileSync, statSync } from 'node:fs'
+import { resolve, extname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { Store } from './core/redis/Store.js'
 import { PubSub } from './core/redis/PubSub.js'
 import { eventBus } from './core/events/EventBus.js'
@@ -8,11 +12,50 @@ import { createMessagesHandler } from './handlers/messages.js'
 import { createScheduleHandler } from './handlers/schedule.js'
 import { createNotificationsHandler } from './handlers/notifications.js'
 import { createSessionHandler } from './handlers/session.js'
-import { createNavigationApiServer } from './handlers/navigation.js'
+import { createNavigationRequestHandler } from './handlers/navigation.js'
+
+const PORT = Number(process.env.PORT || 3001)
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
+const DIST = resolve(__dirname, '..', 'dist')
+
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'application/javascript',
+  '.mjs': 'application/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.webp': 'image/webp',
+}
+
+function serveStatic(req, res) {
+  const url = req.url.split('?')[0]
+  let filePath = join(DIST, url === '/' ? 'index.html' : url)
+
+  if (!existsSync(filePath) || statSync(filePath).isDirectory()) {
+    filePath = join(DIST, 'index.html')
+  }
+
+  if (!existsSync(filePath)) {
+    res.writeHead(404, { 'Content-Type': 'text/plain' })
+    res.end('Not found')
+    return
+  }
+
+  const mime = MIME[extname(filePath)] || 'application/octet-stream'
+  res.writeHead(200, { 'Content-Type': mime })
+  res.end(readFileSync(filePath))
+}
 
 const store = new Store()
 const pubsub = new PubSub()
-
 const notifications = createNotificationsHandler(store, pubsub)
 
 const handlers = {
@@ -22,21 +65,36 @@ const handlers = {
   session: createSessionHandler(store),
 }
 
-// TCP binary server (Redis-compatible, port 1234)
+const handleNavigation = createNavigationRequestHandler()
+
+const httpServer = createServer(async (req, res) => {
+  if (req.url?.startsWith('/api/navigation')) {
+    return handleNavigation(req, res)
+  }
+  if (existsSync(DIST)) {
+    serveStatic(req, res)
+  } else {
+    res.writeHead(200, { 'Content-Type': 'text/plain' })
+    res.end('StudentCompass API running')
+  }
+})
+
+// TCP binary server (internal, not exposed externally)
 const dispatch = createDispatcher(store)
 createTCPServer(dispatch)
 
-// WebSocket bridge (JSON protocol, port 8080)
-const wsBridge = new WSBridge(pubsub, store, handlers)
-createNavigationApiServer(Number(process.env.NAV_PORT || 3001))
+// WebSocket attached to the same HTTP server
+const wsBridge = new WSBridge(pubsub, store, handlers, httpServer)
 
-// TTL expiry timer — equivalent to process_timers() called from event loop in C++
+httpServer.listen(PORT, () => {
+  console.log(`[StudentCompass] Server started on port ${PORT}`)
+})
+
 setInterval(() => {
   const expired = store.processExpired()
   if (expired > 0) console.log(`[Store] Expired ${expired} keys`)
 }, 100)
 
-// Metrics broadcast every second
 setInterval(() => {
   const metrics = {
     ...store.stats(),
@@ -47,9 +105,6 @@ setInterval(() => {
   eventBus.emitMetrics(metrics)
 }, 1000)
 
-console.log('[StudentCompass] Server started')
-
-// Graceful shutdown
 process.on('SIGINT', () => {
   console.log('\n[StudentCompass] Shutting down...')
   process.exit(0)

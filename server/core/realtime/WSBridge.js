@@ -20,13 +20,18 @@ export class WSBridge {
   #handlers
   #presence = new Map()
 
-  constructor(pubsub, store, handlers) {
+  constructor(pubsub, store, handlers, httpServer = null) {
     this.#pubsub = pubsub
     this.#store = store
     this.#handlers = handlers
 
-    this.#wss = new WebSocketServer({ port: PORT })
-    console.log(`[WS] WebSocket bridge listening on port ${PORT}`)
+    if (httpServer) {
+      this.#wss = new WebSocketServer({ server: httpServer })
+      console.log('[WS] WebSocket bridge attached to HTTP server')
+    } else {
+      this.#wss = new WebSocketServer({ port: PORT })
+      console.log(`[WS] WebSocket bridge listening on port ${PORT}`)
+    }
 
     this.#wss.on('connection', ws => this.#onConnect(ws))
 
