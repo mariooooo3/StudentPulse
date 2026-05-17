@@ -28,7 +28,7 @@ createTCPServer(dispatch)
 
 // WebSocket bridge (JSON protocol, port 8080)
 const wsBridge = new WSBridge(pubsub, store, handlers)
-createNavigationApiServer()
+createNavigationApiServer(Number(process.env.NAV_PORT || 3001))
 
 // TTL expiry timer — equivalent to process_timers() called from event loop in C++
 setInterval(() => {
@@ -47,7 +47,7 @@ setInterval(() => {
   eventBus.emitMetrics(metrics)
 }, 1000)
 
-console.log('[StudentCompass] Server started — TCP:1234  WS:8080')
+console.log('[StudentCompass] Server started')
 
 // Graceful shutdown
 process.on('SIGINT', () => {

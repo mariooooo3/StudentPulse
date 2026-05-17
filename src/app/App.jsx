@@ -4,8 +4,10 @@ import { AUTH_STATE, PROFILE_STAGE } from '../shared/config/constants'
 import Sidebar from './layout/Sidebar'
 import Header from './layout/Header'
 import { Loader2 } from 'lucide-react'
-import { socketService } from '../shared/services/socket.service'
 import { getUniversityTheme } from '../shared/utils/theme'
+import { ToastProvider } from '../shared/components/Toast'
+import GlobalSearch from '../shared/components/GlobalSearch'
+import { OnlineCountProvider, useOnlineCount } from '../shared/hooks/useOnlineCount'
 
 const AuthFlow       = lazy(() => import('../features/auth/AuthFlow'))
 const OnboardingFlow = lazy(() => import('../features/onboarding/OnboardingFlow'))
@@ -36,6 +38,16 @@ function AppShell() {
   const [platformMode, setPlatformMode] = useState('academic')
   const [currentViewByMode, setCurrentViewByMode] = useState(DEFAULT_VIEW_BY_MODE)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const { count: onlineCount } = useOnlineCount()
+
+  useEffect(() => {
+    function onKey(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setSearchOpen(v => !v) }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
   const theme = getUniversityTheme(session?.university)
   const currentView = currentViewByMode[platformMode]
 
@@ -51,17 +63,6 @@ function AppShell() {
     setCurrentViewByMode((views) => ({ ...views, [platformMode]: view }))
   }
 
-  useEffect(() => {
-    if (authState !== AUTH_STATE.AUTHENTICATED || !session?.userId) return
-    const name = session.email?.split('@')[0] || session.userId
-    socketService.auth(session.userId, name, {
-      universityId: profile?.university?.id || session.university?.id || '',
-      universityName: profile?.university?.shortName || session.university?.shortName || '',
-      facultyCode: profile?.facultyCode || session.detectedFaculty?.code || '',
-      facultyName: profile?.faculty || session.detectedFaculty?.name || '',
-      scope: `${profile?.university?.id || session.university?.id || 'unknown-university'}:${profile?.facultyCode || session.detectedFaculty?.code || 'unknown-faculty'}`,
-    })
-  }, [authState, session, profile])
 
   if (authState === AUTH_STATE.LOADING) {
     return (
@@ -107,6 +108,7 @@ function AppShell() {
         session={session}
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        onlineCount={onlineCount}
       />
       <div className="flex-1 flex flex-col min-w-0">
         <Header
@@ -116,10 +118,11 @@ function AppShell() {
           profile={profile}
           session={session}
           onMenuClick={() => setSidebarOpen(true)}
+          onSearchOpen={() => setSearchOpen(true)}
         />
         <main className="flex-1 overflow-auto flex flex-col">
           <Suspense fallback={<PageLoader />}>
-            <div key={`${platformMode}:${currentView}`} className="flex-1 flex flex-col animate-fade-in">
+            <div className="flex-1 flex flex-col">
               {platformMode === 'academic' && currentView === 'dashboard'  && <Dashboard profile={profile} session={session} onNavigate={handleNavigate} />}
               {platformMode === 'academic' && currentView === 'navigator' && <CampusNavigator />}
               {platformMode === 'academic' && currentView === 'schedule'  && <ScheduleHub profile={profile} session={session} />}
@@ -135,6 +138,18 @@ function AppShell() {
           </Suspense>
         </main>
       </div>
+
+      {searchOpen && (
+        <GlobalSearch
+          profile={profile}
+          onNavigate={(view, mode) => {
+            if (mode) handleModeChange(mode)
+            handleNavigate(view)
+            setSearchOpen(false)
+          }}
+          onClose={() => setSearchOpen(false)}
+        />
+      )}
     </div>
   )
 }
@@ -142,7 +157,11 @@ function AppShell() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppShell />
+      <OnlineCountProvider>
+        <ToastProvider>
+          <AppShell />
+        </ToastProvider>
+      </OnlineCountProvider>
     </AuthProvider>
   )
 }

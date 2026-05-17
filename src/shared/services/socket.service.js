@@ -1,4 +1,4 @@
-const WS_URL = 'ws://localhost:8080'
+const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8081'
 const MAX_RECONNECT_DELAY = 30_000
 const REQUEST_TIMEOUT = 5_000
 

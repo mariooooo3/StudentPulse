@@ -79,7 +79,7 @@ export const UNIVERSITIES = [
     country: 'Romania',
     emailDomain: 'student.uaic.ro',
     adminDomain: 'uaic.ro',
-    color: '#6366f1',
+    color: '#ef4444',
     avatar: 'UAIC',
     established: 1860,
     faculties: [
@@ -109,7 +109,7 @@ export const UNIVERSITIES = [
     country: 'Romania',
     emailDomain: 'student.ubbcluj.ro',
     adminDomain: 'ubbcluj.ro',
-    color: '#ef4444',
+    color: '#6366f1',
     avatar: 'UBB',
     established: 1872,
     faculties: [

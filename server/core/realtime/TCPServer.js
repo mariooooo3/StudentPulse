@@ -1,7 +1,7 @@
 import net from 'net'
 import { Connection } from './Connection.js'
 
-const PORT = 1234
+const PORT = Number(process.env.TCP_PORT || 1235)
 
 export function createTCPServer(dispatchFn) {
   const server = net.createServer(socket => {

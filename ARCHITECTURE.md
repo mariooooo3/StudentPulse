@@ -81,7 +81,7 @@ Backend-ul ruleaza doua interfete:
 ```text
 Feature component
   -> shared/services/socket.service.js
-  -> WebSocket ws://localhost:8080
+  -> WebSocket ws://localhost:8081
   -> server/core/realtime/WSBridge.js
   -> handler
   -> Store / PubSub / EventBus

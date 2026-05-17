@@ -443,7 +443,7 @@ export default function CampusNavigator() {
           <motion.div key="map" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             className="space-y-4">
 
-            <div className="bg-slate-900 rounded-2xl border border-slate-700/60 p-4">
+            <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] p-4">
               <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
                 <Route size={15} className="text-indigo-400" /> Calculează traseu
               </h2>
@@ -451,7 +451,7 @@ export default function CampusNavigator() {
                 <div className="flex-1 min-w-36">
                   <label className="text-xs text-slate-400 mb-1 block">De la</label>
                   <select value={routeFrom} onChange={e => { setRouteFrom(e.target.value); setRoutePath(null) }}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950/60 text-slate-200 text-sm border border-slate-700/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                    className="w-full px-3 py-2 rounded-xl bg-white/[0.03] text-slate-200 text-sm border border-white/[0.07] focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
                     <option value="">Alege punct de start...</option>
                     {buildings.map(b => <option key={b.id} value={b.id} className="bg-slate-900">{b.name}</option>)}
                   </select>
@@ -460,7 +460,7 @@ export default function CampusNavigator() {
                 <div className="flex-1 min-w-36">
                   <label className="text-xs text-slate-400 mb-1 block">La</label>
                   <select value={routeTo} onChange={e => { setRouteTo(e.target.value); setRoutePath(null) }}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950/60 text-slate-200 text-sm border border-slate-700/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                    className="w-full px-3 py-2 rounded-xl bg-white/[0.03] text-slate-200 text-sm border border-white/[0.07] focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
                     <option value="">Alege destinație...</option>
                     {buildings.map(b => <option key={b.id} value={b.id} className="bg-slate-900">{b.name}</option>)}
                   </select>
@@ -491,12 +491,12 @@ export default function CampusNavigator() {
               )}
             </div>
 
-            <div className="bg-slate-900 rounded-2xl border border-slate-700/60 px-4 py-3 flex flex-wrap items-center gap-4">
+            <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] px-4 py-3 flex flex-wrap items-center gap-4">
               <button
                 onClick={() => setShowCrowd(v => !v)}
                 className="flex items-center gap-3 select-none cursor-pointer"
               >
-                <div className={`w-10 h-6 rounded-full transition-colors relative flex-shrink-0 ${showCrowd ? 'bg-indigo-600' : 'bg-slate-700'}`}>
+                <div className={`w-10 h-6 rounded-full transition-colors relative flex-shrink-0 ${showCrowd ? 'bg-indigo-600' : 'bg-white/[0.12]'}`}>
                   <div className={`w-4 h-4 rounded-full bg-white absolute top-1 shadow transition-transform ${showCrowd ? 'translate-x-5' : 'translate-x-1'}`} />
                 </div>
                 <span className="text-sm font-medium text-slate-200">
@@ -523,12 +523,12 @@ export default function CampusNavigator() {
                 </motion.div>
               )}
 
-              <div className="w-px h-6 bg-slate-700 flex-shrink-0" />
+              <div className="w-px h-6 bg-white/[0.08] flex-shrink-0" />
               <button
                 onClick={() => setShowPOI(v => !v)}
                 className="flex items-center gap-3 select-none cursor-pointer"
               >
-                <div className={`w-10 h-6 rounded-full transition-colors relative flex-shrink-0 ${showPOI ? 'bg-purple-600' : 'bg-slate-700'}`}>
+                <div className={`w-10 h-6 rounded-full transition-colors relative flex-shrink-0 ${showPOI ? 'bg-purple-600' : 'bg-white/[0.12]'}`}>
                   <div className={`w-4 h-4 rounded-full bg-white absolute top-1 shadow transition-transform ${showPOI ? 'translate-x-5' : 'translate-x-1'}`} />
                 </div>
                 <span className="text-sm font-medium text-slate-200 flex items-center gap-1.5">
@@ -551,10 +551,10 @@ export default function CampusNavigator() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2">
-                <div className="rounded-2xl overflow-hidden border border-slate-700/60 relative" style={{ height: 460 }}>
+                <div className="rounded-2xl overflow-hidden border border-white/[0.06] relative" style={{ height: 460 }}>
                   <MapContainer center={CAMPUS_CENTER} zoom={16} style={{ height: '100%', width: '100%' }} zoomControl={true}>
                     <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                      attribution='&copy; <a href="https://carto.com/">CARTO</a>'
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
 
@@ -623,7 +623,7 @@ export default function CampusNavigator() {
 
                   {selectedBuilding && !routePath && (
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                      className="absolute bottom-4 left-4 right-4 bg-slate-900 rounded-xl shadow-lg p-4 border border-slate-700/60 z-[1000]">
+                      className="absolute bottom-4 left-4 right-4 bg-[#0c1120] rounded-xl shadow-lg p-4 border border-white/[0.07] z-[1000]">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-white">{selectedBuilding.name}</p>
@@ -658,7 +658,7 @@ export default function CampusNavigator() {
                         ? 'border-blue-500/40 bg-blue-900/20'
                         : String(building.id) === routeTo
                         ? 'border-green-500/40 bg-green-900/20'
-                        : 'border-slate-700/60 bg-slate-900'
+                        : 'border-white/[0.05] bg-white/[0.02]'
                     }`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
@@ -687,8 +687,8 @@ export default function CampusNavigator() {
 
         {activeTab === 'chat' && (
           <motion.div key="chat" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-            className="bg-slate-900 rounded-2xl border border-slate-700/60 overflow-hidden h-[520px] flex flex-col">
-            <div className="p-4 border-b border-slate-700/60 flex items-center gap-3">
+            className="bg-white/[0.02] rounded-2xl border border-white/[0.06] overflow-hidden h-[520px] flex flex-col">
+            <div className="p-4 border-b border-white/[0.05] flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center">
                 <Sparkles size={18} className="text-white" />
               </div>
@@ -706,7 +706,7 @@ export default function CampusNavigator() {
                     <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap ${
                       msg.role === 'user'
                         ? 'bg-indigo-600 text-white rounded-br-md'
-                        : 'bg-slate-800 text-slate-200 rounded-bl-md'
+                        : 'bg-white/[0.05] text-slate-200 rounded-bl-md'
                     }`}>
                       {msg.text}
                     </div>
@@ -714,7 +714,7 @@ export default function CampusNavigator() {
                 ))}
                 {chatLoading && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-                    <div className="bg-slate-800 px-4 py-3 rounded-2xl rounded-bl-md flex items-center gap-2">
+                    <div className="bg-white/[0.05] px-4 py-3 rounded-2xl rounded-bl-md flex items-center gap-2">
                       <Loader2 size={14} className="animate-spin text-indigo-400" />
                       <span className="text-sm text-slate-400">Gândesc...</span>
                     </div>
@@ -724,14 +724,14 @@ export default function CampusNavigator() {
               <div ref={chatBottomRef} />
             </div>
 
-            <form onSubmit={sendChat} className="p-4 border-t border-slate-700/60">
+            <form onSubmit={sendChat} className="p-4 border-t border-white/[0.05]">
               <div className="flex gap-3">
                 <input
                   type="text"
                   placeholder="Unde e sala C310? Cum ajung la cantină?..."
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-slate-950/60 text-slate-200 border border-slate-700/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm placeholder:text-slate-600"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.03] text-slate-200 border border-white/[0.07] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm placeholder:text-slate-600"
                 />
                 <button type="submit" disabled={!chatInput.trim() || chatLoading}
                   className="p-2.5 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-50 cursor-pointer">
@@ -744,7 +744,7 @@ export default function CampusNavigator() {
 
         {activeTab === 'photo' && (
           <motion.div key="photo" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-            className="bg-slate-900 rounded-2xl border border-slate-700/60 p-6 space-y-6">
+            className="bg-white/[0.02] rounded-2xl border border-white/[0.06] p-6 space-y-6">
             <div>
               <h2 className="text-base font-semibold text-white">Recunoaștere Vizuală</h2>
               <p className="text-sm text-slate-400 mt-1">Fă o poză la o clădire și AI-ul îți spune unde ești și cum navighezi.</p>
@@ -753,7 +753,7 @@ export default function CampusNavigator() {
             <div className="grid grid-cols-2 gap-3">
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-700/60 rounded-2xl p-8 text-center cursor-pointer hover:border-indigo-500/50 hover:bg-indigo-900/10 transition-all group"
+                className="border-2 border-dashed border-white/[0.08] rounded-2xl p-8 text-center cursor-pointer hover:border-indigo-500/50 hover:bg-indigo-900/10 transition-all group"
               >
                 <Upload size={28} className="text-slate-500 group-hover:text-indigo-400 mx-auto mb-2 transition-colors" />
                 <p className="text-sm font-medium text-slate-200">Alege poză</p>
@@ -761,7 +761,7 @@ export default function CampusNavigator() {
               </div>
               <div
                 onClick={() => openCamera()}
-                className="border-2 border-dashed border-slate-700/60 rounded-2xl p-8 text-center cursor-pointer hover:border-violet-500/50 hover:bg-violet-900/10 transition-all group"
+                className="border-2 border-dashed border-white/[0.08] rounded-2xl p-8 text-center cursor-pointer hover:border-violet-500/50 hover:bg-violet-900/10 transition-all group"
               >
                 <Camera size={28} className="text-slate-500 group-hover:text-violet-400 mx-auto mb-2 transition-colors" />
                 <p className="text-sm font-medium text-slate-200">Fă o poză</p>
@@ -772,14 +772,14 @@ export default function CampusNavigator() {
 
             {photoPreview && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                <img src={photoPreview} alt="Preview" className="w-full max-h-64 object-cover rounded-xl border border-slate-700/60" />
+                <img src={photoPreview} alt="Preview" className="w-full max-h-64 object-cover rounded-xl border border-white/[0.06]" />
                 {photoLoading ? (
                   <div className="flex items-center gap-3 p-4 rounded-xl bg-indigo-900/20 border border-indigo-500/30">
                     <Loader2 size={18} className="animate-spin text-indigo-400" />
                     <span className="text-sm text-indigo-300">AI analizează imaginea...</span>
                   </div>
                 ) : photoResult ? (
-                  <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/60">
+                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                     <div className="flex items-center gap-2 mb-2">
                       <Sparkles size={15} className="text-indigo-400" />
                       <p className="text-xs font-semibold text-indigo-400 uppercase tracking-wide">Analiză AI</p>
@@ -862,7 +862,7 @@ export default function CampusNavigator() {
                 <div className="flex gap-2 flex-wrap">
                   {QUICK_CHIPS.map(chip => (
                     <button key={chip.label} onClick={() => sendQuickChat(chip.q)}
-                      className="flex items-center gap-1.5 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-indigo-500/50 text-slate-300 hover:text-white transition-all px-3 py-1.5 rounded-xl cursor-pointer">
+                      className="flex items-center gap-1.5 text-xs bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.07] hover:border-indigo-500/50 text-slate-300 hover:text-white transition-all px-3 py-1.5 rounded-xl cursor-pointer">
                       <span>{chip.icon}</span> {chip.label}
                     </button>
                   ))}
@@ -878,13 +878,13 @@ export default function CampusNavigator() {
                 {pulseLoading && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {[...Array(4)].map((_, i) => (
-                      <div key={i} className="bg-slate-800/60 rounded-2xl border border-slate-700/40 p-4 animate-pulse">
+                      <div key={i} className="bg-white/[0.03] rounded-2xl border border-white/[0.05] p-4 animate-pulse">
                         <div className="flex gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-slate-700 shrink-0" />
+                          <div className="w-10 h-10 rounded-xl bg-white/[0.07] shrink-0" />
                           <div className="flex-1 space-y-2 pt-1">
-                            <div className="h-3 bg-slate-700 rounded w-3/4" />
-                            <div className="h-2.5 bg-slate-700/60 rounded w-full" />
-                            <div className="h-2.5 bg-slate-700/60 rounded w-2/3" />
+                            <div className="h-3 bg-white/[0.07] rounded w-3/4" />
+                            <div className="h-2.5 bg-white/[0.04] rounded w-full" />
+                            <div className="h-2.5 bg-white/[0.04] rounded w-2/3" />
                           </div>
                         </div>
                       </div>
@@ -935,13 +935,13 @@ export default function CampusNavigator() {
         {activeTab === 'indoor' && (
           <motion.div key="indoor" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             className="space-y-4">
-            <div className="bg-slate-900 rounded-2xl border border-slate-700/60 p-4 space-y-3">
+            <div className="bg-white/[0.02] rounded-2xl border border-white/[0.06] p-4 space-y-3">
               <h2 className="text-sm font-semibold text-white">Navigare interioară – Corp C</h2>
               <div className="flex flex-wrap gap-3 items-end">
                 <div className="flex-1 min-w-36">
                   <label className="text-xs text-slate-400 mb-1 block">De la</label>
                   <select value={fromRoom} onChange={e => { setFromRoom(e.target.value); setIndoorPath(null) }}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950/60 text-slate-200 text-sm border border-slate-700/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                    className="w-full px-3 py-2 rounded-xl bg-white/[0.03] text-slate-200 text-sm border border-white/[0.07] focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
                     <option value="">Alege sala...</option>
                     {IND_ROOMS.map(r => (
                       <option key={r.id} value={r.id} className="bg-slate-900">{r.label} ({r.floor === 0 ? 'Parter' : `Etaj ${r.floor}`})</option>
@@ -951,7 +951,7 @@ export default function CampusNavigator() {
                 <div className="flex-1 min-w-36">
                   <label className="text-xs text-slate-400 mb-1 block">La</label>
                   <select value={toRoom} onChange={e => { setToRoom(e.target.value); setIndoorPath(null) }}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950/60 text-slate-200 text-sm border border-slate-700/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                    className="w-full px-3 py-2 rounded-xl bg-white/[0.03] text-slate-200 text-sm border border-white/[0.07] focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
                     <option value="">Alege sala...</option>
                     {IND_ROOMS.map(r => (
                       <option key={r.id} value={r.id} className="bg-slate-900">{r.label} ({r.floor === 0 ? 'Parter' : `Etaj ${r.floor}`})</option>
@@ -988,7 +988,7 @@ export default function CampusNavigator() {
               )}
             </div>
 
-            <div className="rounded-2xl overflow-hidden border border-slate-700/60">
+            <div className="rounded-2xl overflow-hidden border border-white/[0.06]">
               <svg viewBox="0 0 555 495" style={{ display: 'block', maxHeight: '420px' }} className="w-full select-none">
                 <defs>
                   <marker id="arrowOrange" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">

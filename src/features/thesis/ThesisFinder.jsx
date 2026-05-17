@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, BookOpen, Star, Users, ChevronDown, Check, AlertCircle, X } from 'lucide-react'
+import { Search, BookOpen, Star, Users, ChevronDown, Check, AlertCircle, X, GraduationCap } from 'lucide-react'
 import { getProfessors, getThesisDomains } from '../../shared/data/facultyCatalog'
 import BookingModal from './BookingModal'
 import clsx from 'clsx'
@@ -226,12 +226,20 @@ export default function ThesisFinder({ profile, session }) {
           <p className="text-[12px] text-slate-500 font-medium">{filtered.length} profesori găsiți</p>
           <p className="text-[11px] text-slate-700">{filtered.filter(p => p.available).length} cu locuri disponibile</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {loading
-            ? Array.from({ length: 6 }).map((_, i) => <ProfessorSkeleton key={i} />)
-            : filtered.map(p => <ProfessorCard key={p.id} p={p} onBook={setBooking} />)
-          }
-        </div>
+        {!loading && filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <GraduationCap size={36} className="text-slate-800 mb-4" strokeWidth={1.5} />
+            <p className="text-slate-500 text-sm font-semibold">Niciun profesor găsit</p>
+            <p className="text-slate-700 text-xs mt-1">Încearcă un alt domeniu sau șterge filtrele</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {loading
+              ? Array.from({ length: 6 }).map((_, i) => <ProfessorSkeleton key={i} />)
+              : filtered.map(p => <ProfessorCard key={p.id} p={p} onBook={setBooking} />)
+            }
+          </div>
+        )}
       </div>
 
       {booking && <BookingModal professor={booking} session={session} onClose={() => setBooking(null)} />}

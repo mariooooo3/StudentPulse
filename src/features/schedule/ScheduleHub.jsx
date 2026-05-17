@@ -28,8 +28,9 @@ function RecoveryModal({ slot, subject, onClose, onConfirm }) {
   const [reason, setReason] = useState('')
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <div className="p-6 border-b border-slate-700/50">
+      <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.1] to-white/[0.03] w-full max-w-md" onClick={e => e.stopPropagation()}>
+      <div className="rounded-[calc(1rem-1px)] bg-[#0c1120] border border-white/[0.05]">
+        <div className="p-6 border-b border-white/[0.05]">
           <h3 className="font-bold text-white">Cerere Recuperare</h3>
           <p className="text-sm text-slate-400 mt-1">{subject} — Grupa {slot.group}</p>
         </div>
@@ -38,7 +39,7 @@ function RecoveryModal({ slot, subject, onClose, onConfirm }) {
             {[['Zi', DAYS[slot.day - 1]], ['Interval', `${slot.start}:00–${slot.end}:00`],
               ['Sală', slot.room], ['Profesor', slot.professor],
               ['Locuri rămase', `${slot.total - slot.enrolled}/${slot.total}`]].map(([k, v]) => (
-              <div key={k} className="bg-slate-800 rounded-lg p-2.5">
+              <div key={k} className="bg-white/[0.04] rounded-lg p-2.5">
                 <p className="text-[9px] text-slate-600 uppercase font-semibold">{k}</p>
                 <p className="text-xs text-slate-200 font-medium">{v}</p>
               </div>
@@ -49,7 +50,7 @@ function RecoveryModal({ slot, subject, onClose, onConfirm }) {
               Motivul recuperării *
             </label>
             <textarea rows={3} value={reason} onChange={e => setReason(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-indigo-500/50 resize-none"
+              className="w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-indigo-500/50 resize-none"
               placeholder="Ex: Am absentat din motive medicale / suprapunere cu alt curs..." />
           </div>
           <div className="flex gap-3">
@@ -60,6 +61,7 @@ function RecoveryModal({ slot, subject, onClose, onConfirm }) {
             </button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )
@@ -106,28 +108,28 @@ function RecoveryGrid({ recoverySlots, onNotify }) {
       </div>
 
       {/* Grid container */}
-      <div className="overflow-x-auto rounded-xl border border-slate-700/50">
+      <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
         <table className="border-collapse w-full min-w-[700px]" style={{ tableLayout: 'auto' }}>
           <thead>
             {/* Day header row */}
-            <tr className="bg-slate-800/80">
-              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 border-b border-r border-slate-700/50 w-48 sticky left-0 bg-slate-800/90 z-10">
+            <tr className="bg-white/[0.04]">
+              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 border-b border-r border-white/[0.05] w-48 sticky left-0 bg-[#0c1120] z-10">
                 Materie
               </th>
               {Object.entries(byDay).map(([day, combos]) => (
                 <th key={day} colSpan={combos.length}
-                  className="px-2 py-3 text-xs font-bold text-slate-300 border-b border-r border-slate-700/50 text-center bg-slate-800/60">
+                  className="px-2 py-3 text-xs font-bold text-slate-300 border-b border-r border-white/[0.05] text-center bg-white/[0.02]">
                   {DAYS[Number(day) - 1]}
                 </th>
               ))}
             </tr>
             {/* Time sub-header row */}
-            <tr className="bg-slate-800/60">
-              <th className="border-b border-r border-slate-700/50 sticky left-0 bg-slate-800/80 z-10" />
+            <tr className="bg-white/[0.02]">
+              <th className="border-b border-r border-white/[0.05] sticky left-0 bg-[#0c1120] z-10" />
               {allCombos.map(combo => {
                 const [, start] = combo.split('|').map(Number)
                 return (
-                  <th key={combo} className="px-3 py-2 text-[10px] font-semibold text-slate-500 border-b border-r border-slate-700/30 text-center whitespace-nowrap">
+                  <th key={combo} className="px-3 py-2 text-[10px] font-semibold text-slate-500 border-b border-r border-white/[0.04] text-center whitespace-nowrap">
                     {start}:00–{start + 2}:00
                   </th>
                 )
@@ -136,9 +138,9 @@ function RecoveryGrid({ recoverySlots, onNotify }) {
           </thead>
           <tbody>
             {subjects.map((subj, ri) => (
-              <tr key={subj} className={ri % 2 === 0 ? 'bg-slate-900' : 'bg-slate-900/60'}>
+              <tr key={subj} className={ri % 2 === 0 ? 'bg-[#070b14]' : 'bg-white/[0.01]'}>
                 {/* Subject label */}
-                <td className="px-4 py-3 border-r border-slate-700/30 sticky left-0 bg-inherit z-10">
+                <td className="px-4 py-3 border-r border-white/[0.04] sticky left-0 bg-inherit z-10">
                   <p className="text-xs font-semibold text-slate-200 max-w-[160px] leading-tight">{subj}</p>
                 </td>
                 {/* Cells */}
@@ -147,7 +149,7 @@ function RecoveryGrid({ recoverySlots, onNotify }) {
                   const key = `${subj}|${combo}`
                   if (confirmed[key]) {
                     return (
-                      <td key={combo} className="px-2 py-2 border-r border-slate-700/20 text-center">
+                      <td key={combo} className="px-2 py-2 border-r border-white/[0.03] text-center">
                         <div className="flex items-center justify-center gap-1 text-emerald-400 text-[10px] font-semibold">
                           <Check size={10} /> Trimis
                         </div>
@@ -155,7 +157,7 @@ function RecoveryGrid({ recoverySlots, onNotify }) {
                     )
                   }
                   if (!slot) {
-                    return <td key={combo} className="px-2 py-2 border-r border-slate-700/20" />
+                    return <td key={combo} className="px-2 py-2 border-r border-white/[0.03]" />
                   }
                   const free = slot.total - slot.enrolled
                   const clickable = !slot.isMine && free > 0
@@ -264,7 +266,7 @@ function SlotSwapView({ recoverySlots, swapRequests, userId, onNotify }) {
                     </div>
                     <p className="text-xs text-slate-500 mb-1.5">{req.offersSubject}</p>
                     <div className="flex items-center gap-2 text-xs">
-                      <span className="px-2 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300">
+                      <span className="px-2 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-slate-300">
                         Oferă: {DAYS[req.offersSlot.day - 1]} {req.offersSlot.start}:00 · Gr.{req.offersSlot.group}
                       </span>
                       <ArrowLeftRight size={12} className="text-slate-600" />
@@ -323,8 +325,8 @@ function SlotSwapView({ recoverySlots, swapRequests, userId, onNotify }) {
                   <button key={subject + slot.day + slot.start}
                     onClick={() => setSwapOffer({ subject, slot })}
                     className={clsx('flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all',
-                      swapOffer?.subject === subject ? 'bg-indigo-600/20 border-indigo-500/50' : 'bg-slate-800/50 border-slate-700/50 hover:border-slate-600')}>
-                    <div className={clsx('w-3 h-3 rounded-full border-2 shrink-0', swapOffer?.subject === subject ? 'border-indigo-500 bg-indigo-500' : 'border-slate-600')} />
+                      swapOffer?.subject === subject ? 'bg-indigo-600/20 border-indigo-500/50' : 'bg-white/[0.03] border-white/[0.05] hover:border-white/[0.1]')}>
+                    <div className={clsx('w-3 h-3 rounded-full border-2 shrink-0', swapOffer?.subject === subject ? 'border-indigo-500 bg-indigo-500' : 'border-white/[0.2]')} />
                     <div>
                       <p className="text-xs font-semibold text-slate-200">{subject}</p>
                       <p className="text-[10px] text-slate-500">{DAYS[slot.day - 1]} {slot.start}:00–{slot.end}:00 · {slot.room} · Gr.{slot.group}</p>
@@ -345,8 +347,8 @@ function SlotSwapView({ recoverySlots, swapRequests, userId, onNotify }) {
                       <button key={slot.day + '|' + slot.start}
                         onClick={() => setSwapWant(slot)}
                         className={clsx('flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all',
-                          swapWant === slot ? 'bg-violet-600/20 border-violet-500/50' : 'bg-slate-800/50 border-slate-700/50 hover:border-slate-600')}>
-                        <div className={clsx('w-3 h-3 rounded-full border-2 shrink-0', swapWant === slot ? 'border-violet-500 bg-violet-500' : 'border-slate-600')} />
+                          swapWant === slot ? 'bg-violet-600/20 border-violet-500/50' : 'bg-white/[0.03] border-white/[0.05] hover:border-white/[0.1]')}>
+                        <div className={clsx('w-3 h-3 rounded-full border-2 shrink-0', swapWant === slot ? 'border-violet-500 bg-violet-500' : 'border-white/[0.2]')} />
                         <div className="flex-1">
                           <p className="text-[10px] text-slate-200 font-medium">{DAYS[slot.day - 1]} {slot.start}:00–{slot.end}:00 · {slot.room} · Gr.{slot.group}</p>
                           <p className="text-[9px] text-slate-600">{slot.professor}</p>
@@ -367,7 +369,7 @@ function SlotSwapView({ recoverySlots, swapRequests, userId, onNotify }) {
               <div>
                 <p className="text-xs text-slate-400 font-semibold mb-2">3. Mesaj opțional</p>
                 <textarea rows={2} value={message} onChange={e => setMessage(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-indigo-500/50 resize-none"
+                  className="w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-indigo-500/50 resize-none"
                   placeholder="Ex: Marțea nu pot, am practică..." />
                 <button onClick={() => {
                   const request = {
@@ -416,10 +418,10 @@ const ROW_H = 52
 function WeeklyView({ schedule }) {
   return (
     <div className="flex overflow-x-auto">
-      <div className="shrink-0 w-14 border-r border-slate-700/50">
-        <div className="h-10 border-b border-slate-700/50" />
+      <div className="shrink-0 w-14 border-r border-white/[0.05]">
+        <div className="h-10 border-b border-white/[0.05]" />
         {HOURS.map(h => (
-          <div key={h} className="border-b border-slate-700/20 text-right pr-2 text-[10px] text-slate-600 flex items-start justify-end pt-1" style={{ height: ROW_H }}>
+          <div key={h} className="border-b border-white/[0.03] text-right pr-2 text-[10px] text-slate-600 flex items-start justify-end pt-1" style={{ height: ROW_H }}>
             {h}:00
           </div>
         ))}
@@ -427,12 +429,12 @@ function WeeklyView({ schedule }) {
       {DAYS.map((day, di) => {
         const dayCourses = schedule.filter(c => c.day === di + 1)
         return (
-          <div key={day} className="flex-1 min-w-[120px] relative border-r border-slate-700/30 last:border-r-0">
-            <div className="h-10 border-b border-slate-700/50 flex items-center justify-center sticky top-0 bg-slate-900 z-10">
+          <div key={day} className="flex-1 min-w-[120px] relative border-r border-white/[0.04] last:border-r-0">
+            <div className="h-10 border-b border-white/[0.05] flex items-center justify-center sticky top-0 bg-[#070b14] z-10">
               <span className={clsx('text-xs font-semibold', di === 0 ? 'text-indigo-400' : 'text-slate-400')}>{day}</span>
             </div>
             <div className="relative" style={{ height: HOURS.length * ROW_H }}>
-              {HOURS.map(h => <div key={h} className="border-b border-slate-700/20 absolute left-0 right-0" style={{ top: (h - 8) * ROW_H, height: ROW_H }} />)}
+              {HOURS.map(h => <div key={h} className="border-b border-white/[0.03] absolute left-0 right-0" style={{ top: (h - 8) * ROW_H, height: ROW_H }} />)}
               {dayCourses.map(c => (
                 <div key={c.id}
                   className={clsx('absolute left-1 right-1 rounded-lg border-l-2 px-2 py-1.5 overflow-hidden cursor-pointer hover:brightness-110 transition-all', c.color)}
@@ -476,7 +478,7 @@ function AllGroupsView({ schedule }) {
     <div className="p-4 space-y-4">
       <input value={search} onChange={e => setSearch(e.target.value)}
         placeholder="Caută materie sau grupă..."
-        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-indigo-500/50" />
+        className="w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-indigo-500/50" />
       <div className="grid gap-3 sm:grid-cols-2">
         {filtered.map(g => (
           <div key={g.group} className="glass-card p-4">
@@ -487,7 +489,7 @@ function AllGroupsView({ schedule }) {
               <span className="text-sm font-semibold text-slate-200">Grupa {g.group}</span>
             </div>
             {g.courses.map((c, i) => (
-              <div key={i} className="flex items-center gap-3 bg-slate-800/50 rounded-lg px-3 py-2 mb-1.5">
+              <div key={i} className="flex items-center gap-3 bg-white/[0.03] rounded-lg px-3 py-2 mb-1.5">
                 <div className="w-2 h-2 rounded-full bg-indigo-500 shrink-0" />
                 <span className="text-xs font-semibold text-slate-200 w-12">{c.name}</span>
                 <span className="text-xs text-slate-500">{c.day} {c.time}</span>
@@ -514,7 +516,7 @@ export default function ScheduleHub({ profile, session }) {
 
   return (
     <div className="flex flex-col h-full animate-fade-in">
-      <div className="px-6 py-4 border-b border-slate-700/50 flex items-center gap-4 bg-slate-900 shrink-0 flex-wrap gap-y-2">
+      <div className="px-6 py-4 border-b border-white/[0.05] flex items-center gap-4 bg-[#070b14]/90 backdrop-blur-xl shrink-0 flex-wrap gap-y-2">
         <div className="flex items-center gap-2">
           {[
             { key: 'prev', icon: <ChevronLeft />, dir: -1 },
@@ -522,14 +524,14 @@ export default function ScheduleHub({ profile, session }) {
             { key: 'next', icon: <ChevronRight />, dir: 1 },
           ].map(({ key, icon, dir }) => icon ? (
             <button key={key} onClick={() => setWeek(w => w + dir)}
-              className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 text-slate-400">
+              className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.07] text-slate-400">
               {icon}
             </button>
           ) : (
             <span key={key} className="text-sm text-slate-300 w-36 text-center">{weekLabel}</span>
           ))}
         </div>
-        <div className="flex gap-1 bg-slate-800 p-1 rounded-xl ml-auto">
+        <div className="flex gap-1 bg-white/[0.04] border border-white/[0.06] p-1 rounded-xl ml-auto">
           {TABS.map((t, i) => (
             <button key={t} onClick={() => setTab(i)}
               className={clsx('px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150',

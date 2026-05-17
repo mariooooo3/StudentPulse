@@ -13,6 +13,11 @@
 import { apiPost } from '../api/client'
 import { validateInstitutionalEmail, detectFacultyFromEmail } from '../config/universities'
 
+export function createUserId(prefix = 'user') {
+  if (globalThis.crypto?.randomUUID) return `${prefix}-${globalThis.crypto.randomUUID()}`
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 // Simulates sending a magic link / OTP
 export async function sendVerificationEmail(email, university) {
   if (!validateInstitutionalEmail(email, university)) {
@@ -31,7 +36,7 @@ export async function verifyOTP(email, otp, university) {
   const faculty = detectFacultyFromEmail(email, university)
 
   return {
-    userId: `mock-uid-${Date.now()}`,
+    userId: createUserId('mock-uid'),
     email,
     university,
     detectedFaculty: faculty,

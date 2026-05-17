@@ -1,6 +1,20 @@
 # StudentCompass
 
-StudentCompass este un demo pentru hackathon orientat pe onboarding universitar, navigare campus, orar, mesagerie, coordonatori de licenta, tutoring si adaptare in oras.
+**Platformă de onboarding universitar** construită pentru hackathon. Ajută studenții noi să navigheze campusul, să-și gestioneze orarul, să găsească coordonatori de licență, tutori și să se adapteze în orașul universitar.
+
+---
+
+## Tech Stack
+
+| Layer | Tehnologii |
+|-------|-----------|
+| Frontend | React 18, Vite, Tailwind CSS, Framer Motion |
+| Realtime | WebSocket (ws), TCP demo protocol |
+| Hărți | Leaflet + react-leaflet |
+| AI | Groq SDK (LLM) |
+| Backend | Node.js, in-memory store cu TTL + PubSub |
+
+---
 
 ## Start rapid
 
@@ -9,62 +23,148 @@ npm install
 npm run dev:all
 ```
 
-Frontend:
+| Serviciu | URL |
+|---------|-----|
+| Frontend | http://127.0.0.1:5173 |
+| WebSocket | ws://localhost:8080 |
+| Navigation API | http://localhost:3001/api/navigation |
+| TCP demo | localhost:1234 |
 
-```text
-http://localhost:5173
+> **Demo credentials:** orice email instituțional + cod `0000`
+
+---
+
+## Funcționalități
+
+### Autentificare & Onboarding
+- Selectare din 19+ universități din România cu validare email instituțional
+- Onboarding personalizat pe bază de facultate: an de studiu, interese, stil de învățare, tip cazare, preferințe notificări
+- Session persistată în `AuthContext`
+
+### Dashboard
+- Curs următor în timp real
+- Statistici academice: credite, medii, ore, cursuri
+- Acces rapid la toate modulele
+- Program zilei + notificări academice
+- Temă vizuală per universitate
+
+### Orar (`ScheduleHub`)
+- **Orarul meu** — calendar interactiv săptămânal
+- **Toate grupele** — vizualizare comparativă
+- **Recuperări** — grid cu disponibilități alte grupe + cerere în timp real
+- **Slot Swap** — sistem P2P: dacă A oferă ce B vrea și invers, swap-ul se acceptă automat
+
+### Găsire Coordonator Licență (`ThesisFinder`)
+- Carduri profesori cu domenii, medie minimă, limbă, locuri disponibile
+- Filtrare pe domeniu de teză
+- Teme anterioare expandabile
+- Modal de rezervare loc
+
+### Tutoring Peer-to-Peer (`PeerTutoring`)
+- Marketplace tutori: rating, preț/sesiune, materii, disponibilitate
+- **Skill Swap**: matching automat — A predă C++ și vrea Python, B face invers → match instant
+- Sesiuni de grup cu profesor
+
+### Mesagerie (`DirectMessages`)
+- Chat 1-la-1 cu colegi din aceeași universitate și facultate
+- Prezență live (online/offline)
+- Istoric 24h, maxim 100 mesaje per canal
+
+### Adaptare în Oraș (`CityAdaptation`)
+- Checklist sosire
+- Ghid locuințe (cămine, chirii, avertismente escrocherii)
+- 12+ locuri cu reduceri studențești verificate
+- Sfaturi de la studenți
+- Rute transport + abonament student
+- Harta zone sigure + contacte urgență
+
+### Navigator Campus
+- Hartă interactivă Leaflet
+- AI-powered (Groq) pentru descrieri clădiri și rute
+
+---
+
+## Arhitectură
+
 ```
-
-Backend realtime:
-
-```text
-WebSocket: ws://localhost:8080
-TCP demo protocol: localhost:1234
-```
-
-## Structura
-
-```text
 src/
   main.jsx
   index.css
   app/
-    App.jsx
+    App.jsx              # Routing principal: Auth → Onboarding → App
     layout/
+      Header.jsx
+      Sidebar.jsx
     providers/
-  features/
+      AuthContext.jsx    # Session + profil utilizator global
+  features/             # Module independente per funcționalitate
     auth/
     onboarding/
     dashboard/
-    navigator/
     schedule/
     thesis/
     tutoring/
-    city/
     messages/
-  shared/
-    api/
-    config/
-    data/
-    hooks/
-    services/
+    city/
+  shared/               # Infrastructură comună
+    api/                # HTTP client
+    config/             # Universități, constante
+    data/               # Mock data per facultate
+    hooks/              # useMessages, useNow, useSocket, useOnlineCount
+    services/           # Auth, Socket, AI, Cache
     utils/
 
 server/
-  index.js
+  index.js              # Entry point — inițializare Store, PubSub, TCP, WS
   core/
-    events/
     realtime/
-    redis/
+      TCPServer.js      # Protocol Redis-like pe port 1234 (demo tehnic)
+      WSBridge.js       # WebSocket bridge pe port 8080
+    events/             # EventBus intern
   handlers/
+    messages.js         # Istoric + trimitere mesaje
+    schedule.js         # Swap matching logic
+    notifications.js    # Push + markRead
+    session.js          # Auth state
+    navigation.js       # REST API campus (port 3001)
 ```
 
-## Arhitectura pe scurt
+### Flux realtime
 
-Frontend-ul este React + Vite + Tailwind. `src/app` contine shell-ul aplicatiei, provider-ele globale si layout-ul. `src/features` contine modulele vizibile in demo. `src/shared` contine cod reutilizabil: date mock, servicii, hook-uri, configurari si utilitare.
+```
+Component
+  → socketService.sendMessage()
+  → WebSocket ws://localhost:8080
+  → WSBridge → Handler
+  → Store (in-memory + TTL) / PubSub
+  → publish(channel)
+  → Client re-render
+```
 
-Backend-ul este Node.js si ofera un layer realtime prin WebSocket. Intern are un store in-memory de tip Redis, pub/sub, TTL si handler-e pentru mesaje, notificari, sesiune si schedule.
+---
 
-## Status demo
+## Variabile de mediu
 
-Aplicatia este optimizata pentru prezentare de hackathon. Datele sunt in mare parte mock/local, iar backend-ul realtime demonstreaza arhitectura si fluxul live fara sa impuna o baza de date externa.
+Creează un fișier `.env` în rădăcina proiectului:
+
+```env
+GROQ_API_KEY=your_groq_api_key
+```
+
+---
+
+## Scripts
+
+| Comandă | Descriere |
+|---------|-----------|
+| `npm run dev` | Doar frontend Vite |
+| `npm run dev:server` | Doar backend Node.js |
+| `npm run dev:all` | Frontend + backend în paralel |
+| `npm run build` | Build producție → `dist/` |
+| `npm run preview` | Preview build local |
+
+---
+
+## Status
+
+Proiect demo pentru hackathon. Datele sunt mock/locale — backend-ul realtime demonstrează arhitectura și fluxul live fără bază de date externă. Structura este pregătită pentru migrare la Supabase/Postgres.
