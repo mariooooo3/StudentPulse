@@ -1,10 +1,45 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, Star, Calendar, Clock, Check, MessageSquare, ArrowLeftRight } from 'lucide-react'
 import { getSubjectFilters, getTutors } from '../../shared/data/facultyCatalog'
 import SkillSwap from './SkillSwap'
 import clsx from 'clsx'
 
 const TABS = ['Tutori disponibili', 'Skill Swap & Grupuri']
+
+function TutorSkeleton() {
+  return (
+    <div className="glass-card animate-pulse">
+      <div className="h-1 rounded-t-2xl bg-white/[0.05]" />
+      <div className="p-5 space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 rounded-full bg-white/[0.06] shrink-0" />
+          <div className="flex-1 space-y-2 pt-1">
+            <div className="h-3.5 bg-white/[0.06] rounded w-3/4" />
+            <div className="h-2.5 bg-white/[0.03] rounded w-1/2" />
+            <div className="flex gap-0.5">
+              {[0,1,2,3,4].map(i => <div key={i} className="w-2.5 h-2.5 rounded bg-white/[0.04]" />)}
+            </div>
+          </div>
+          <div className="text-right shrink-0 space-y-1">
+            <div className="h-5 w-10 bg-white/[0.06] rounded" />
+            <div className="h-2.5 w-14 bg-white/[0.03] rounded" />
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <div className="h-2 bg-white/[0.03] rounded w-1/3" />
+          <div className="flex gap-1.5">
+            {[56, 72, 50].map(w => <div key={w} className="h-5 bg-white/[0.04] rounded-full" style={{ width: w }} />)}
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="h-12 bg-white/[0.03] rounded-lg" />
+          <div className="h-12 bg-white/[0.03] rounded-lg" />
+        </div>
+        <div className="h-9 bg-white/[0.04] rounded-xl" />
+      </div>
+    </div>
+  )
+}
 
 function TutorCard({ t }) {
   const [booked, setBooked] = useState(false)
@@ -102,6 +137,12 @@ export default function PeerTutoring({ profile }) {
   const [tab, setTab] = useState(0)
   const [search, setSearch] = useState('')
   const [subject, setSubject] = useState('Toate')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 400)
+    return () => clearTimeout(t)
+  }, [])
 
   const filtered = tutors.filter(t => {
     const matchSearch = t.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -161,9 +202,12 @@ export default function PeerTutoring({ profile }) {
       <div className="flex-1 overflow-auto p-5">
         {tab === 0 && (
           <>
-            <p className="text-[12px] text-slate-500 font-medium mb-4">{filtered.length} tutori disponibili</p>
+            <p className="text-[12px] text-slate-500 font-medium mb-4">{loading ? '...' : `${filtered.length} tutori disponibili`}</p>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {filtered.map(t => <TutorCard key={t.id} t={t} />)}
+              {loading
+                ? Array.from({ length: 6 }).map((_, i) => <TutorSkeleton key={i} />)
+                : filtered.map(t => <TutorCard key={t.id} t={t} />)
+              }
             </div>
           </>
         )}

@@ -1,4 +1,4 @@
-import { Bell, Compass, Search, Settings, Sparkles, X } from 'lucide-react'
+import { Bell, Compass, Menu, Search, Settings, Sparkles, X } from 'lucide-react'
 import clsx from 'clsx'
 import { useState } from 'react'
 import { useNotifications } from '../../shared/hooks/useNotifications'
@@ -22,7 +22,7 @@ const MODES = [
   { id: 'life',     label: 'Life',     icon: Sparkles },
 ]
 
-export default function Header({ platformMode = 'academic', onModeChange, currentView, profile, session }) {
+export default function Header({ platformMode = 'academic', onModeChange, currentView, profile, session, onMenuClick }) {
   const { title, sub } = VIEW_TITLES[currentView] || VIEW_TITLES.dashboard
   const [notifOpen, setNotifOpen] = useState(false)
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications(session?.userId)
@@ -32,6 +32,14 @@ export default function Header({ platformMode = 'academic', onModeChange, curren
 
   return (
     <header className="h-[3.75rem] bg-[#070b14]/90 backdrop-blur-xl border-b border-white/[0.05] flex items-center px-5 gap-4 shrink-0 relative z-30">
+
+      {/* Hamburger — mobile only */}
+      <button
+        onClick={onMenuClick}
+        className="sm:hidden w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.07] transition-all duration-200 shrink-0"
+      >
+        <Menu size={14} className="text-slate-400" strokeWidth={1.75} />
+      </button>
 
       {/* Title */}
       <div className="min-w-0 flex-1">
