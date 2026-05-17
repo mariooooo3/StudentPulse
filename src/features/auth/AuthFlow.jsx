@@ -206,7 +206,7 @@ export default function AuthFlow() {
   const [step, setStep] = useState(STEP.SELECT_UNI)
   const [university, setUniversity] = useState(null)
   const [email, setEmail] = useState('')
-  const [accessCode, setAccessCode] = useState('')
+  const [accessCode, setAccessCode] = useState('0000')
   const [accessCodeError, setAccessCodeError] = useState('')
   const [loading, setLoading] = useState(false)
   const [detectedFaculty, setDetectedFaculty] = useState(null)

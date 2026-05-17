@@ -11,27 +11,27 @@ async function post(endpoint, body) {
   return response.json()
 }
 
-export async function askNavigationAssistant(message, history = []) {
+export async function askNavigationAssistant(message, history = [], university = '') {
   try {
-    const data = await post('/assistant', { message, history })
+    const data = await post('/assistant', { message, history, university })
     return data.answer
   } catch {
     return localAssistantAnswer(message)
   }
 }
 
-export async function analyzeNavigationPhoto({ base64, mimeType }) {
+export async function analyzeNavigationPhoto({ base64, mimeType, university = '' }) {
   try {
-    const data = await post('/photo', { base64, mimeType })
+    const data = await post('/photo', { base64, mimeType, university })
     return data.answer
   } catch {
     return 'Analiza locala: imaginea a fost preluata. Cel mai probabil esti in zona Corp C sau langa intrarea principala. Pentru recunoastere reala porneste API-ul de navigatie cu cheia GROQ server-side.'
   }
 }
 
-export async function getNavigationRecommendations(scheduleItems = []) {
+export async function getNavigationRecommendations({ hour, totalUsers, schedule, university = '' } = {}) {
   try {
-    return await post('/recommendations', scheduleItems)
+    return await post('/recommendations', { hour, totalUsers, schedule, university })
   } catch {
     return {
       briefing: 'Recomandare locala: evita intervalele aglomerate si pleaca cu 8 minute inainte de urmatorul curs.',

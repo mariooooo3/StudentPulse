@@ -224,8 +224,9 @@ export default function CampusNavigator() {
   const [showCrowd, setShowCrowd] = useState(false)
   const { zones, totalUsers, connected, mode } = useCrowdSocket(showCrowd)
 
-  const { profile } = useAuth()
+  const { profile, session } = useAuth()
   const firstName = profile?.name?.split(' ')[0] ?? 'Student'
+  const universityName = session?.university?.shortName || session?.university?.name || ''
 
   useEffect(() => {
     if (activeTab !== 'reco' || pulseLoaded) return
@@ -242,7 +243,7 @@ export default function CampusNavigator() {
     setPulseLoading(true)
     try {
       const h = new Date().getHours()
-      const result = await getSmartRecommendations({ hour: h, totalUsers, schedule: courses.slice(0, 4) })
+      const result = await getSmartRecommendations({ hour: h, totalUsers, schedule: courses.slice(0, 4), university: universityName })
       setPulseData(result)
       setPulseLoaded(true)
     } catch {
@@ -256,7 +257,7 @@ export default function CampusNavigator() {
     setChatMessages(prev => [...prev, { role: 'user', text: question }])
     setChatLoading(true)
     try {
-      const response = await askCampusAI(question, chatHistory.current)
+      const response = await askCampusAI(question, chatHistory.current, universityName)
       chatHistory.current = [
         ...chatHistory.current,
         { role: 'user', content: question },
@@ -323,7 +324,7 @@ export default function CampusNavigator() {
     setChatLoading(true)
 
     try {
-      const response = await askCampusAI(userMsg, chatHistory.current)
+      const response = await askCampusAI(userMsg, chatHistory.current, universityName)
       chatHistory.current = [
         ...chatHistory.current,
         { role: 'user', content: userMsg },
@@ -352,7 +353,7 @@ export default function CampusNavigator() {
       const mimeType = file.type
 
       try {
-        const result = await analyzePhoto(base64, mimeType)
+        const result = await analyzePhoto(base64, mimeType, universityName)
         setPhotoResult(result)
       } catch (err) {
         setPhotoResult(`Eroare: ${err.message}`)
@@ -552,6 +553,29 @@ export default function CampusNavigator() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2">
                 <div className="rounded-2xl overflow-hidden border border-white/[0.06] relative" style={{ height: 460 }}>
+                  {/* Crowd badge */}
+                  <div className="absolute top-3 left-3 z-[999] pointer-events-none">
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-sm border shadow-lg transition-all ${
+                      !connected
+                        ? 'bg-slate-900/80 border-slate-700/60 text-slate-400'
+                        : totalUsers < 80
+                        ? 'bg-emerald-900/80 border-emerald-500/40 text-emerald-300'
+                        : totalUsers < 160
+                        ? 'bg-amber-900/80 border-amber-500/40 text-amber-300'
+                        : 'bg-red-900/80 border-red-500/40 text-red-300'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                        !connected ? 'bg-slate-500'
+                        : totalUsers < 80 ? 'bg-emerald-400 animate-pulse'
+                        : totalUsers < 160 ? 'bg-amber-400 animate-pulse'
+                        : 'bg-red-400 animate-pulse'
+                      }`} />
+                      {!connected ? 'Se conectează...'
+                        : totalUsers < 80 ? `🟢 Liniștit · ${totalUsers} activi`
+                        : totalUsers < 160 ? `🟡 Moderat · ${totalUsers} activi`
+                        : `🔴 Aglomerat · ${totalUsers} activi`}
+                    </div>
+                  </div>
                   <MapContainer center={CAMPUS_CENTER} zoom={16} style={{ height: '100%', width: '100%' }} zoomControl={true}>
                     <TileLayer
                       attribution='&copy; <a href="https://carto.com/">CARTO</a>'
@@ -1128,9 +1152,10 @@ export default function CampusNavigator() {
         {cameraOpen && (
           <motion.div
             key="camera-modal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, y: '100%' }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: '100%' }}
+            transition={{ type: 'spring', damping: 32, stiffness: 320 }}
             className="fixed inset-0 z-[9999] bg-black flex flex-col"
           >
             {/* Top bar */}
@@ -1167,11 +1192,16 @@ export default function CampusNavigator() {
 
             {/* Viewfinder overlay */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="relative w-72 h-72">
+              <div className="relative w-72 h-72 overflow-hidden">
                 <span className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white rounded-tl-lg" />
                 <span className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white rounded-tr-lg" />
                 <span className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white rounded-bl-lg" />
                 <span className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white rounded-br-lg" />
+                <motion.div
+                  className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-indigo-400 to-transparent"
+                  animate={{ top: ['0%', '100%', '0%'] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }}
+                />
               </div>
             </div>
 
