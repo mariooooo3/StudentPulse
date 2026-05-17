@@ -1,17 +1,22 @@
 import {
   analyzeNavigationPhoto,
+  askNavigationCopilot,
   askNavigationAssistant,
   getNavigationRecommendations,
 } from './navigationApi'
 
-export async function askCampusAI(userMessage, history = [], university = '') {
-  return askNavigationAssistant(userMessage, history, university)
+export async function askCampusAI(userMessage, history = []) {
+  return askNavigationAssistant(userMessage, history)
 }
 
-export async function analyzePhoto(base64Image, mimeType = 'image/jpeg', university = '') {
-  return analyzeNavigationPhoto({ base64: base64Image, mimeType, university })
+export async function askCampusCopilot(payload) {
+  return askNavigationCopilot(payload)
 }
 
-export async function getSmartRecommendations({ hour, totalUsers, schedule, university = '' }) {
-  return getNavigationRecommendations({ hour, totalUsers, schedule, university })
+export async function analyzePhoto(base64Image, mimeType = 'image/jpeg') {
+  return analyzeNavigationPhoto({ base64: base64Image, mimeType })
+}
+
+export async function getSmartRecommendations({ schedule }) {
+  return getNavigationRecommendations({ schedule })
 }
