@@ -4,53 +4,53 @@
 
 An all-in-one platform for Romanian university students — AI-powered campus navigation, real-time messaging, schedule management, and peer collaboration.
 
-Built at **FiiPractic Hackathon 2025** in 48 hours.
+Built at **FiiPractic Hackathon 2026** in 48 hours.
 
 ---
 
 ## Features
 
-### 🗺️ Campus Navigator
+### Campus Navigator
 - Interactive map with **real pedestrian routing** via OSRM (not straight lines)
 - **Live crowd heatmap** — know if the cafeteria has a queue before you go
 - **8 points of interest** with hours and ratings (café, pharmacy, ATM, supermarket, etc.)
 - **AI photo recognition** — take a photo of a building, the AI identifies where you are
 - **Cinematic Guided Tour** — animated route walkthrough with step-by-step voice narration (Web Speech API, zero external dependencies)
 
-### 🏢 Indoor Navigation — Corp C
+### Indoor Navigation — Corp C
 - SVG floor plan across 5 levels (Ground + Floors 1–4)
 - **BFS pathfinding** — optimal route between any two rooms
 - Animated path drawing with Framer Motion `pathLength`
 - Click-to-select rooms
 
-### 🤖 AI Campus Assistant
+### AI Campus Assistant
 - Powered by **Groq — Llama 3.3 70B** (text) + **Llama 4 Scout 17B** (vision)
 - Knows the full UAIC campus: rooms, floors, schedules, restaurants, services
 - Returns structured JSON: detected location, destination, route suggestion, action steps
 - Sub-second responses
 
-### 💬 Direct Messages
+### Direct Messages
 - Real-time WebSocket chat between students
 - **Academic filter** — only students from the same university and faculty can DM each other
 - Live presence (online/offline)
 - 24h message history, TTL-based expiry in the in-memory store
 
-### 📅 Schedule Hub
+### Schedule Hub
 - Weekly interactive calendar
 - **P2P Slot Swap** — the server auto-matches two students wanting each other's time slots; both get a real-time WebSocket notification
 - Recovery slots — browse availability across other groups
 
-### 🎓 Thesis Finder
+### Thesis Finder
 - Professor cards with: research domains, minimum GPA, language, available spots
 - Dynamic filtering by thesis domain
 - Booking modal for advisor slots
 
-### 🤝 Peer Tutoring
+### Peer Tutoring
 - Tutor marketplace with rating, price/session, subjects, availability
 - **Skill Swap** — automatic bilateral matching: A teaches C++/wants Python, B is the inverse → instant match
 - Group sessions with professors
 
-### 🏙️ City Adaptation — 6 modules
+### City Adaptation — 6 modules
 
 | Module | Content |
 |--------|---------|
@@ -61,7 +61,7 @@ Built at **FiiPractic Hackathon 2025** in 48 hours.
 | Safe Zones | Safety map, emergency contacts |
 | Local Tips | Advice from senior students |
 
-### 🔐 Auth & Onboarding
+### Auth & Onboarding
 - Institutional email validation per university (domain regex)
 - **7 universities**: UAIC, UBB, UniBuc, Politehnica București, Politehnica Timișoara, UMF Cluj, UVT
 - **50+ faculties** with study year specifics (3/4/5/6 year programs)
@@ -220,4 +220,4 @@ Configured for **Render** via `render.yaml`. Set `GROQ_API_KEY` as an environmen
 
 ---
 
-*FiiPractic Hackathon 2025 — UAIC Iași*
+*FiiPractic Hackathon 2026 — UAIC Iași*
