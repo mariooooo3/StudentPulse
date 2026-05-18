@@ -16,6 +16,7 @@ const FACULTY_CODE_KEY = {
   CHIM: 'CHEMISTRY',
   PHYS: 'PHYSICS',
   MATH: 'MATHEMATICS',
+  FMIM: 'MATH_CS',
 }
 
 export function getFacultyKey(profile) {
@@ -179,6 +180,27 @@ const OVERRIDES = {
         { icon: '📐', text: 'Seminarul de Algebră Liniară se mută în S.12', time: '5 min în urmă', type: 'warn' },
         { icon: '📝', text: 'Tema de analiză are deadline mâine la 23:59', time: '2 ore în urmă', type: 'danger' },
         { icon: '✅', text: 'Ai fost acceptat în grupa de pregătire pentru sesiune', time: 'Ieri', type: 'success' },
+      ],
+    },
+  },
+  MATH_CS: {
+    dashboard: {
+      nextCourse: { in: '1h 30m', label: 'Structuri de Date · Amf. A2' },
+      stats: [
+        { val: '3', label: 'Cursuri azi', icon: '📚' },
+        { val: '2', label: 'Teme în așteptare', icon: '📝' },
+        { val: '9', label: 'Zile până la sesiune', icon: '⏳' },
+        { val: '3', label: 'Coordonatori disponibili', icon: '🎓' },
+      ],
+      upcoming: [
+        { time: '08:00', name: 'Analiză Matematică', room: 'Amf. C1', type: 'Curs', in: '1h 30m', color: 'bg-indigo-500' },
+        { time: '10:00', name: 'Structuri de Date', room: 'Amf. A2', type: 'Curs', in: '3h 30m', color: 'bg-amber-500' },
+        { time: '12:00', name: 'Baze de Date', room: 'Lab. 3', type: 'Laborator', in: '5h 30m', color: 'bg-cyan-500' },
+      ],
+      alerts: [
+        { icon: '📐', text: 'Seminarul de Algebră Liniară se mută în Amf. C4 săptămâna viitoare', time: '10 min în urmă', type: 'warn' },
+        { icon: '💻', text: 'Laboratorul de Structuri de Date: tema 3 are deadline mâine la 23:59', time: '2 ore în urmă', type: 'danger' },
+        { icon: '✅', text: 'Prof. Leustean a confirmat subiectul propus pentru lucrarea de licență', time: 'Ieri', type: 'success' },
       ],
     },
   },

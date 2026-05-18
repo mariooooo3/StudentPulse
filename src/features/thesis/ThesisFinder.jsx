@@ -74,10 +74,14 @@ function ProfessorCard({ p, onBook }) {
         </div>
 
         {/* Domain */}
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-2">
           <BookOpen size={13} className="text-slate-500 shrink-0" />
           <span className="text-xs font-semibold text-slate-300">{p.domain}</span>
         </div>
+
+        {p.requirementsNote && (
+          <p className="text-[11px] text-slate-500 leading-relaxed mb-3">{p.requirementsNote}</p>
+        )}
 
         {/* Tags */}
         <div className="flex flex-wrap gap-1.5 mb-4">

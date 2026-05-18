@@ -7,7 +7,7 @@ import HeatmapLayer from './HeatmapLayer'
 import { useCrowdSocket } from '../../hooks/navigation/useCrowdSocket'
 import { useAuth } from '../../app/providers/AuthContext'
 import L from 'leaflet'
-import { askCampusAI, askCampusCopilot, analyzePhoto, getSmartRecommendations } from '../../services/navigation/campusAI'
+import { askCampusAI, askRecoAI, askCampusCopilot, analyzePhoto, getSmartRecommendations } from '../../services/navigation/campusAI'
 import Button from '../ui/Button'
 import Badge from '../ui/Badge'
 import { courses } from '../../shared/data/courses'
@@ -378,6 +378,11 @@ export default function CampusNavigator() {
   const canvasRef = useRef(null)
   const chatBottomRef = useRef(null)
   const chatHistory = useRef([])
+  const recoHistory = useRef([])
+  const recoChatBottomRef = useRef(null)
+  const [recoMessages, setRecoMessages] = useState([])
+  const [recoInput, setRecoInput] = useState('')
+  const [recoLoading, setRecoLoading] = useState(false)
   const [fromRoom, setFromRoom] = useState('')
   const [toRoom, setToRoom] = useState('')
   const [indoorPath, setIndoorPath] = useState(null)
@@ -392,6 +397,10 @@ export default function CampusNavigator() {
     if (activeTab !== 'reco' || pulseLoaded) return
     loadPulse()
   }, [activeTab])
+
+  useEffect(() => {
+    recoChatBottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [recoMessages])
 
   useEffect(() => {
     if (cameraOpen && videoRef.current && cameraStream) {
@@ -429,6 +438,26 @@ export default function CampusNavigator() {
     }
     setChatLoading(false)
     setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+  }
+
+  async function sendRecoChat(question) {
+    const q = (question ?? recoInput).trim()
+    if (!q || recoLoading) return
+    setRecoMessages(prev => [...prev, { role: 'user', text: q }])
+    setRecoInput('')
+    setRecoLoading(true)
+    try {
+      const response = await askRecoAI(q, recoHistory.current)
+      recoHistory.current = [
+        ...recoHistory.current,
+        { role: 'user', content: q },
+        { role: 'assistant', content: response },
+      ]
+      setRecoMessages(prev => [...prev, { role: 'model', text: response }])
+    } catch {
+      setRecoMessages(prev => [...prev, { role: 'model', text: 'Momentan nu pot răspunde. Încearcă din nou.' }])
+    }
+    setRecoLoading(false)
   }
 
   const [showPOI, setShowPOI] = useState(false)
@@ -1152,10 +1181,10 @@ export default function CampusNavigator() {
           const QUICK_CHIPS = [
             { label: 'Unde mănânc?',        icon: '🍽️', q: 'Unde pot mânca acum pe campus? Ce opțiuni am?' },
             { label: 'Săli libere?',         icon: '🚪', q: 'Ce săli sunt disponibile acum în Corp C?' },
-            { label: 'Cel mai scurt traseu', icon: '🛤️', q: 'Care e cel mai scurt traseu de la intrarea principală la Biblioteca Centrală?' },
-            { label: 'ATM sau bancă?',       icon: '🏧', q: 'Unde e cel mai apropiat ATM de Corp C?' },
             { label: 'Secretariatul?',       icon: '📋', q: 'Secretariatul FII e deschis acum? Unde se află?' },
             { label: 'O cafea rapidă',       icon: '☕', q: 'Unde fac o cafea rapidă lângă campus?' },
+            { label: 'Studiu azi?',          icon: '📚', q: 'Ce zone de studiu sunt disponibile acum pe campus? Biblioteca e aglomerată?' },
+            { label: 'Examene în sesiune',   icon: '🎓', q: 'Cum mă pregătesc eficient pentru sesiunea de examene? Sfaturi practice.' },
           ]
 
           return (
@@ -1204,7 +1233,7 @@ export default function CampusNavigator() {
                 </p>
                 <div className="flex gap-2 flex-wrap">
                   {QUICK_CHIPS.map(chip => (
-                    <button key={chip.label} onClick={() => sendQuickChat(chip.q)}
+                    <button key={chip.label} onClick={() => sendRecoChat(chip.q)}
                       className="flex items-center gap-1.5 text-xs bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.07] hover:border-indigo-500/50 text-slate-300 hover:text-white transition-all px-3 py-1.5 rounded-xl cursor-pointer">
                       <span>{chip.icon}</span> {chip.label}
                     </button>
@@ -1270,6 +1299,73 @@ export default function CampusNavigator() {
                     Nu s-au putut genera recomandări.
                   </div>
                 )}
+              </div>
+
+              {/* Reco AI Chat Zone */}
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
+                <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/[0.05]">
+                  <div className="w-7 h-7 rounded-lg bg-indigo-600/20 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                    <Sparkles size={13} className="text-indigo-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold text-white">Asistent Campus</p>
+                    <p className="text-[10px] text-slate-600 truncate">Întreabă despre campus, sesiune, viața studențească</p>
+                  </div>
+                  {recoMessages.length > 0 && (
+                    <button
+                      onClick={() => { setRecoMessages([]); recoHistory.current = [] }}
+                      className="text-slate-700 hover:text-slate-400 transition-colors shrink-0"
+                      title="Șterge conversația"
+                    >
+                      <X size={13} />
+                    </button>
+                  )}
+                </div>
+
+                {recoMessages.length > 0 && (
+                  <div className="max-h-72 overflow-y-auto p-4 space-y-3">
+                    {recoMessages.map((msg, i) => (
+                      <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
+                          msg.role === 'user'
+                            ? 'bg-indigo-600/25 border border-indigo-500/25 text-slate-200 rounded-br-sm'
+                            : 'bg-white/[0.05] border border-white/[0.07] text-slate-300 rounded-bl-sm'
+                        }`}>
+                          {msg.text}
+                        </div>
+                      </div>
+                    ))}
+                    {recoLoading && (
+                      <div className="flex justify-start">
+                        <div className="bg-white/[0.05] border border-white/[0.07] rounded-2xl rounded-bl-sm px-3.5 py-2.5 flex items-center gap-2">
+                          <Loader2 size={12} className="animate-spin text-indigo-400" />
+                          <span className="text-[12px] text-slate-500">Analizez...</span>
+                        </div>
+                      </div>
+                    )}
+                    <div ref={recoChatBottomRef} />
+                  </div>
+                )}
+
+                <form
+                  onSubmit={e => { e.preventDefault(); sendRecoChat(recoInput) }}
+                  className="flex items-center gap-2 p-3 border-t border-white/[0.05]"
+                >
+                  <input
+                    value={recoInput}
+                    onChange={e => setRecoInput(e.target.value)}
+                    disabled={recoLoading}
+                    placeholder="Întreabă ceva despre campus sau sesiune..."
+                    className="flex-1 bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2 text-[13px] text-slate-300 placeholder-slate-700 outline-none focus:border-indigo-500/40 transition-colors disabled:opacity-50 min-w-0"
+                  />
+                  <button
+                    type="submit"
+                    disabled={recoLoading || !recoInput.trim()}
+                    className="w-9 h-9 rounded-xl bg-indigo-600/30 border border-indigo-500/30 flex items-center justify-center hover:bg-indigo-600/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                  >
+                    <Send size={13} className="text-indigo-400" />
+                  </button>
+                </form>
               </div>
             </motion.div>
           )

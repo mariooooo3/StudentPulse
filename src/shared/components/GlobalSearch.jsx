@@ -10,8 +10,8 @@ const MODULES = [
   { id: 'thesis',     label: 'Thesis Finder',         icon: BookOpen,     mode: 'academic' },
   { id: 'tutoring',   label: 'Peer Tutoring',         icon: Users,        mode: 'academic' },
   { id: 'messages',   label: 'Mesaje',                icon: MessageSquare,mode: 'academic' },
-  { id: 'discounts',  label: 'Discounts & Benefits',  icon: Tag,          mode: 'life' },
-  { id: 'career',     label: 'Career & Internships',  icon: Briefcase,    mode: 'life' },
+  { id: 'discounts',  label: 'Reduceri & Beneficii',   icon: Tag,          mode: 'life' },
+  { id: 'career',     label: 'Carieră & Internship-uri', icon: Briefcase, mode: 'life' },
   { id: 'citylife',   label: 'Viața în Oraș',         icon: MapPin,       mode: 'life' },
 ]
 
@@ -31,7 +31,7 @@ export default function GlobalSearch({ profile, onNavigate, onClose }) {
   const results = q.length < 1 ? [] : [
     ...MODULES
       .filter(m => m.label.toLowerCase().includes(q))
-      .map(m => ({ type: 'module', label: m.label, sub: m.mode === 'academic' ? 'Academic' : 'Student Life', icon: m.icon, action: () => onNavigate(m.id, m.mode) })),
+      .map(m => ({ type: 'module', label: m.label, sub: m.mode === 'academic' ? 'Academic' : 'Viața Studențească', icon: m.icon, action: () => onNavigate(m.id, m.mode) })),
     ...professors
       .filter(p => p.name.toLowerCase().includes(q) || p.domain.toLowerCase().includes(q) || p.tags.some(t => t.toLowerCase().includes(q)))
       .slice(0, 4)

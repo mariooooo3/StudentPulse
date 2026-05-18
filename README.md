@@ -40,6 +40,8 @@ npm run dev:all
 - Selectare din 19+ universități din România cu validare email instituțional
 - Onboarding personalizat pe bază de facultate: an de studiu, interese, stil de învățare, tip cazare, preferințe notificări
 - Session persistată în `AuthContext`
+- La logout, utilizatorul este redirecționat la pagina de welcome (nu la formularul de autentificare)
+- Badge-ul de confirmare în onboarding afișează doar numele universității, nu și facultatea (aceasta se alege ulterior)
 
 ### Dashboard
 - Curs următor în timp real
@@ -56,9 +58,10 @@ npm run dev:all
 
 ### Găsire Coordonator Licență (`ThesisFinder`)
 - Carduri profesori cu domenii, medie minimă, limbă, locuri disponibile
+- **Cerințe licență** — fiecare profesor afișează o notă scurtă cu ce solicită (CV, plan cercetare, portofoliu etc.)
 - Filtrare pe domeniu de teză
 - Teme anterioare expandabile
-- Modal de rezervare loc
+- Modal de rezervare cu afișarea cerințelor profesorului și **atașare fișier real** (CV, portofoliu, plan de cercetare — `.pdf`, `.doc`, `.docx`)
 
 ### Tutoring Peer-to-Peer (`PeerTutoring`)
 - Marketplace tutori: rating, preț/sesiune, materii, disponibilitate
@@ -78,9 +81,29 @@ npm run dev:all
 - Rute transport + abonament student
 - Harta zone sigure + contacte urgență
 
-### Navigator Campus
+### Student Life (`StudentLifeHub`) — date reale pentru Iași
+- **Reduceri reale**: CTP Iași (–90%), Spotify Student (14 RON/lună), Apple Music (11,99 RON/lună), Adobe CC (–65%), GitHub Student Pack (gratuit), Microsoft 365 (gratuit cu @student.uaic.ro), Canva Pro, Notion, NordVPN (–76%), ISIC Card, Cinema City, Teatrul Național Iași (–75%), cantinele UAIC
+- **Cariere reale Iași**: Amazon Development Center, Endava, Bitdefender, Cegeka, evozon, Spitalul Sf. Spiridon, Antibiotice SA, Deloitte, BCR, ELSA Iași
+- **Comunități reale**: ASII, ESN Iași, LSAC, ELSA Iași, V7 Startup Studio, grupuri sport și cinefili
+
+### Navigator Campus (`CampusNavigator`)
 - Hartă interactivă Leaflet
-- AI-powered (Groq) pentru descrieri clădiri și rute
+- **AI Compass** (tab Chat) — răspunde exclusiv la întrebări de navigare și trasee pe campus
+- **Recomandări Smart** (tab Recomandări) — Campus Pulse cu starea campusului în timp real
+- **Asistent Campus** (zonă AI dedicată în Recomandări Smart) — AI separat care răspunde la întrebări despre viața studențească: mâncare, locuri de studiu, secretariat, reduceri, transport CTP, sesiune de examene, comunități, WiFi eduroam, cazare
+
+---
+
+## Universități & Facultăți suportate
+
+Aplicația include date personalizate pentru **19+ universități** din România. UAIC Iași are suport complet pentru:
+
+| Facultate | Cod | Date complete |
+|-----------|-----|---------------|
+| Facultatea de Matematică-Informatică | FMIM | ✅ Orar, profesori, tutori, teze, domenii |
+| Facultatea de Informatică | FII | ✅ Orar, profesori, tutori, teze, domenii |
+
+Și date generice (orar, profesori, teze) pentru: Drept, Geografie, Psihologie, Sport, Muzică, Teologie, Arhitectură, Teatru, Științe, Umaniste, Economie, Medicină, Farmacie, Inginerie, Arte.
 
 ---
 
@@ -106,6 +129,7 @@ src/
     tutoring/
     messages/
     city/
+    student-life/
   shared/               # Infrastructură comună
     api/                # HTTP client
     config/             # Universități, constante
@@ -113,6 +137,10 @@ src/
     hooks/              # useMessages, useNow, useSocket, useOnlineCount
     services/           # Auth, Socket, AI, Cache
     utils/
+  services/
+    navigation/
+      campusAI.js       # askCampusAI (navigare) + askRecoAI (campus life)
+      navigationApi.js  # Fallback local cu răspunsuri per domeniu
 
 server/
   index.js              # Entry point — inițializare Store, PubSub, TCP, WS

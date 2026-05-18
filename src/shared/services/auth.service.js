@@ -1,17 +1,26 @@
-/**
- * Auth Service — wraps authentication logic.
- * Currently mocked. Future: swap body for Supabase Auth calls.
- *
- * Supabase integration points:
- *   import { createClient } from '@supabase/supabase-js'
- *   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
- *   supabase.auth.signInWithOtp({ email })
- *   supabase.auth.getSession()
- *   supabase.auth.signOut()
- */
-
 import { apiPost } from '../api/client'
 import { validateInstitutionalEmail, detectFacultyFromEmail } from '../config/universities'
+
+// ── localStorage profile store ────────────────────────────────────────────────
+// Structure: { [email]: profileObject }
+const USERS_KEY = 'sc_users'
+
+export function getUserProfile(email) {
+  if (!email) return null
+  try {
+    const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}')
+    return users[email] || null
+  } catch { return null }
+}
+
+export function saveUserProfile(email, profile) {
+  if (!email) return
+  try {
+    const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}')
+    users[email] = profile
+    localStorage.setItem(USERS_KEY, JSON.stringify(users))
+  } catch {}
+}
 
 export function createUserId(prefix = 'user') {
   if (globalThis.crypto?.randomUUID) return `${prefix}-${globalThis.crypto.randomUUID()}`

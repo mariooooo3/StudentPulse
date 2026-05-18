@@ -83,6 +83,7 @@ export const UNIVERSITIES = [
     avatar: 'UAIC',
     established: 1860,
     faculties: [
+      { code: 'FMIM',  name: 'Facultatea de Matematică-Informatică',                   type: 'MATH_CS',     years: Y3, emailPrefix: 'fmim'  },
       { code: 'FII',   name: 'Facultatea de Informatică',                              type: 'CS',          years: Y3, emailPrefix: 'info'  },
       { code: 'MATH',  name: 'Facultatea de Matematică',                               type: 'SCIENCES',    years: Y3, emailPrefix: 'math'  },
       { code: 'PHYS',  name: 'Facultatea de Fizică',                                   type: 'SCIENCES',    years: Y3, emailPrefix: 'phys'  },

@@ -184,7 +184,6 @@ function ConfirmedStep({ university, detectedFaculty, onContinue }) {
           style={{ background: university.color + '12', borderColor: university.color + '35', color: university.color }}
         >
           <span>{university.shortName}</span>
-          {detectedFaculty && <><span className="opacity-40">·</span><span>{detectedFaculty.name}</span></>}
         </div>
       </div>
       <p className="text-[13px] text-slate-500 leading-relaxed">
@@ -217,14 +216,14 @@ export default function AuthFlow() {
     if (accessCode !== '0000') { setAccessCodeError('Cod institutional invalid. Pentru demo foloseste 0000.'); return }
     setAccessCodeError(''); setLoading(true); setStep(STEP.VERIFYING)
     await new Promise(r => setTimeout(r, 2600))
-    setDetectedFaculty(university.faculties[0] || null)
+    setDetectedFaculty(null)
     setLoading(false); setStep(STEP.CONFIRMED)
   }
 
   async function handleDemoSkip() {
     setAccessCode('0000'); setAccessCodeError(''); setLoading(true); setStep(STEP.VERIFYING)
     await new Promise(r => setTimeout(r, 2600))
-    setDetectedFaculty(university.faculties[0] || null)
+    setDetectedFaculty(null)
     setLoading(false); setStep(STEP.CONFIRMED)
   }
 

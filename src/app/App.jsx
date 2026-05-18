@@ -8,6 +8,7 @@ import { getUniversityTheme } from '../shared/utils/theme'
 import { ToastProvider } from '../shared/components/Toast'
 import GlobalSearch from '../shared/components/GlobalSearch'
 import { OnlineCountProvider, useOnlineCount } from '../shared/hooks/useOnlineCount'
+import LandingPage from '../features/landing/LandingPage'
 
 const AuthFlow       = lazy(() => import('../features/auth/AuthFlow'))
 const OnboardingFlow = lazy(() => import('../features/onboarding/OnboardingFlow'))
@@ -35,6 +36,7 @@ const DEFAULT_VIEW_BY_MODE = {
 
 function AppShell() {
   const { authState, profileStage, session, profile, completeOnboarding } = useAuth()
+  const [showAuth, setShowAuth] = useState(false)
   const [platformMode, setPlatformMode] = useState('academic')
   const [currentViewByMode, setCurrentViewByMode] = useState(DEFAULT_VIEW_BY_MODE)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -48,6 +50,10 @@ function AppShell() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
+
+  useEffect(() => {
+    if (authState === AUTH_STATE.UNAUTHENTICATED) setShowAuth(false)
+  }, [authState])
   const theme = getUniversityTheme(session?.university)
   const currentView = currentViewByMode[platformMode]
 
@@ -76,6 +82,7 @@ function AppShell() {
   }
 
   if (authState === AUTH_STATE.UNAUTHENTICATED) {
+    if (!showAuth) return <LandingPage onStart={() => setShowAuth(true)} />
     return <Suspense fallback={null}><AuthFlow /></Suspense>
   }
 

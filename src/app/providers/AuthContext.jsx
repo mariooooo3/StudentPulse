@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { restoreSession, persistSession, clearSession } from '../../shared/services/auth.service'
+import { restoreSession, persistSession, clearSession, getUserProfile, saveUserProfile } from '../../shared/services/auth.service'
 import { AUTH_STATE, PROFILE_STAGE } from '../../shared/config/constants'
 
 const AuthContext = createContext(null)
@@ -38,13 +38,24 @@ export function AuthProvider({ children }) {
   function login(sessionData) {
     persistSession(sessionData)
     setSession(sessionData)
-    setProfileStage(sessionData.isNewUser ? PROFILE_STAGE.ONBOARDING : PROFILE_STAGE.COMPLETE)
+
+    // Check if this email already has a saved profile in localStorage
+    const savedProfile = getUserProfile(sessionData.email)
+    if (savedProfile) {
+      sessionStorage.setItem('sc_profile', JSON.stringify(savedProfile))
+      setProfile(savedProfile)
+      setProfileStage(PROFILE_STAGE.COMPLETE)
+    } else {
+      setProfileStage(PROFILE_STAGE.ONBOARDING)
+    }
     setAuthState(AUTH_STATE.AUTHENTICATED)
   }
 
   function completeOnboarding(profileData) {
     const enriched = { ...profileData, university: session?.university, detectedFaculty: session?.detectedFaculty }
     sessionStorage.setItem('sc_profile', JSON.stringify(enriched))
+    // Persist profile to localStorage so returning users skip onboarding
+    saveUserProfile(session?.email, enriched)
     setProfile(enriched)
     setProfileStage(PROFILE_STAGE.COMPLETE)
   }

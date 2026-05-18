@@ -5,21 +5,21 @@ import { useNotifications } from '../../shared/hooks/useNotifications'
 import { getUniversityTheme } from '../../shared/utils/theme'
 
 const VIEW_TITLES = {
-  dashboard:  { title: 'Dashboard',                  sub: 'Bun venit inapoi' },
-  navigator:  { title: 'Campus Navigator',            sub: 'Gaseste orice loc in campus' },
-  schedule:   { title: 'Schedule Hub',                sub: 'Orarul tau academic complet' },
-  thesis:     { title: 'Thesis Finder',               sub: 'Gaseste indrumatorul potrivit' },
-  tutoring:   { title: 'Peer Tutoring',               sub: 'Invata de la colegi, invata colegi' },
-  messages:   { title: 'Mesaje',                      sub: 'Comunicare academica directa' },
-  discounts:  { title: 'Discounts & Benefits',        sub: 'Oferte studentesti si beneficii locale' },
-  career:     { title: 'Career & Internships',        sub: 'Oportunitati personalizate pe facultate' },
-  community:  { title: 'Community',                   sub: 'Grupuri, mentori si evenimente studentesti' },
-  citylife:   { title: 'Viata in Oras',               sub: 'Transport, locuire, siguranta si ghid urban' },
+  dashboard:  { title: 'Dashboard',                  sub: 'Bun venit înapoi' },
+  navigator:  { title: 'Campus Navigator',            sub: 'Găsește orice loc în campus' },
+  schedule:   { title: 'Schedule Hub',                sub: 'Orarul tău academic complet' },
+  thesis:     { title: 'Thesis Finder',               sub: 'Găsește îndrumătorul potrivit' },
+  tutoring:   { title: 'Peer Tutoring',               sub: 'Învață de la colegi, ajută colegii' },
+  messages:   { title: 'Mesaje',                      sub: 'Comunicare academică directă' },
+  discounts:  { title: 'Reduceri & Beneficii',        sub: 'Oferte studențești și beneficii locale' },
+  career:     { title: 'Carieră & Internship-uri',    sub: 'Oportunități personalizate pe facultate' },
+  community:  { title: 'Comunitate',                  sub: 'Grupuri, mentori și evenimente studențești' },
+  citylife:   { title: 'Viața în Oraș',               sub: 'Transport, locuire, siguranță și ghid urban' },
 }
 
 const MODES = [
   { id: 'academic', label: 'Academic', icon: Compass },
-  { id: 'life',     label: 'Life',     icon: Sparkles },
+  { id: 'life',     label: 'Viață',    icon: Sparkles },
 ]
 
 export default function Header({ platformMode = 'academic', onModeChange, currentView, profile, session, onMenuClick, onSearchOpen }) {

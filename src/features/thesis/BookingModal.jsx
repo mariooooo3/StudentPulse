@@ -1,14 +1,26 @@
-import { useState } from 'react'
-import { X, Send, CheckCircle, Loader2 } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { X, Send, CheckCircle, Loader2, Paperclip, FileText, Info } from 'lucide-react'
 import { useNotifications } from '../../shared/hooks/useNotifications'
 import { useToast } from '../../shared/components/Toast'
 
 export default function BookingModal({ professor, onClose, session }) {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState({ idea: '', motivation: '', cv: false })
+  const [form, setForm] = useState({ idea: '', motivation: '' })
+  const [attachedFile, setAttachedFile] = useState(null)
+  const fileInputRef = useRef(null)
   const { pushNotification } = useNotifications(session?.userId)
   const toast = useToast()
+
+  function handleFileChange(e) {
+    const file = e.target.files[0]
+    if (file) setAttachedFile(file)
+  }
+
+  function handleRemoveFile() {
+    setAttachedFile(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -44,6 +56,13 @@ export default function BookingModal({ professor, onClose, session }) {
 
           {step === 1 ? (
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
+              {professor.requirementsNote && (
+                <div className="flex gap-2.5 bg-indigo-500/[0.08] border border-indigo-500/20 rounded-xl px-4 py-3">
+                  <Info size={14} className="text-indigo-400 shrink-0 mt-0.5" strokeWidth={1.75} />
+                  <p className="text-[12px] text-indigo-200/80 leading-relaxed">{professor.requirementsNote}</p>
+                </div>
+              )}
+
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Idee preliminară de temă *</label>
@@ -59,6 +78,7 @@ export default function BookingModal({ professor, onClose, session }) {
                   placeholder="Descrie pe scurt ideea ta de temă pentru licență..."
                 />
               </div>
+
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Motivație *</label>
@@ -74,15 +94,46 @@ export default function BookingModal({ professor, onClose, session }) {
                   placeholder="De ce vrei să lucrezi cu acest profesor și pe această temă?"
                 />
               </div>
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div
-                  onClick={() => setForm(p => ({ ...p, cv: !p.cv }))}
-                  className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${form.cv ? 'bg-indigo-600 border-indigo-600' : 'border-white/[0.15] group-hover:border-white/[0.3]'}`}
-                >
-                  {form.cv && <CheckCircle size={10} className="text-white" />}
-                </div>
-                <span className="text-[13px] text-slate-500 group-hover:text-slate-400 transition-colors">Atașez CV (opțional)</span>
-              </label>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">
+                  Document atașat <span className="normal-case font-normal text-slate-700">(CV, portofoliu, plan — opțional)</span>
+                </label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                {attachedFile ? (
+                  <div className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.07] rounded-xl px-4 py-3">
+                    <FileText size={15} className="text-indigo-400 shrink-0" strokeWidth={1.5} />
+                    <span className="text-[13px] text-slate-300 truncate flex-1">{attachedFile.name}</span>
+                    <span className="text-[11px] text-slate-700 shrink-0">
+                      {(attachedFile.size / 1024).toFixed(0)} KB
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleRemoveFile}
+                      className="text-slate-600 hover:text-slate-300 transition-colors shrink-0"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full flex items-center gap-3 bg-white/[0.03] border border-dashed border-white/[0.1] hover:border-white/[0.22] hover:bg-white/[0.05] rounded-xl px-4 py-3 transition-all group"
+                  >
+                    <Paperclip size={15} className="text-slate-600 group-hover:text-slate-400 transition-colors shrink-0" strokeWidth={1.75} />
+                    <span className="text-[13px] text-slate-600 group-hover:text-slate-400 transition-colors text-left">
+                      Adaugă fișier <span className="text-slate-700">(.pdf, .doc, .docx)</span>
+                    </span>
+                  </button>
+                )}
+              </div>
 
               <div className="pt-1 flex gap-3">
                 <button type="button" onClick={onClose} disabled={loading} className="btn-secondary flex-1">Anulează</button>
@@ -104,6 +155,14 @@ export default function BookingModal({ professor, onClose, session }) {
               <p className="text-[13px] text-slate-400 mb-2 leading-relaxed">
                 {professor.name} va reveni cu un răspuns în 2–5 zile lucrătoare.
               </p>
+              {attachedFile && (
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <FileText size={13} className="text-slate-600" strokeWidth={1.5} />
+                  <p className="text-[11px] text-slate-600">
+                    Document atașat: <span className="text-slate-500">{attachedFile.name}</span>
+                  </p>
+                </div>
+              )}
               <p className="text-[11px] text-slate-600 mb-6">
                 Vei primi o notificare prin email și în aplicație la acceptare sau refuz.
               </p>

@@ -2,11 +2,16 @@ import {
   analyzeNavigationPhoto,
   askNavigationCopilot,
   askNavigationAssistant,
+  askRecoAssistant,
   getNavigationRecommendations,
 } from './navigationApi'
 
 export async function askCampusAI(userMessage, history = []) {
   return askNavigationAssistant(userMessage, history)
+}
+
+export async function askRecoAI(userMessage, history = []) {
+  return askRecoAssistant(userMessage, history)
 }
 
 export async function askCampusCopilot(payload) {

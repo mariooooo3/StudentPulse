@@ -31,16 +31,16 @@ const NAV_BY_MODE = {
     { id: 'messages', label: 'Mesaje', icon: MessageSquare },
   ],
   life: [
-    { id: 'discounts', label: 'Discounts & Benefits', icon: Tag },
-    { id: 'career', label: 'Career & Internships', icon: Briefcase },
-    { id: 'community', label: 'Community', icon: Users },
+    { id: 'discounts', label: 'Reduceri & Beneficii', icon: Tag },
+    { id: 'career', label: 'Carieră & Internship-uri', icon: Briefcase },
+    { id: 'community', label: 'Comunitate', icon: Users },
     { id: 'citylife', label: 'Viața în Oraș', icon: MapPin },
   ],
 }
 
 const MODE_COPY = {
   academic: { name: 'StudentCompass', subtitle: 'Academic', label: 'Academic', icon: Compass },
-  life: { name: 'StudentCompass', subtitle: 'Student Life', label: 'Student Life', icon: Sparkles },
+  life: { name: 'StudentCompass', subtitle: 'Viața Studențească', label: 'Viața Studențească', icon: Sparkles },
 }
 
 function ProfileModal({ profile, session, theme, initials, onClose }) {
