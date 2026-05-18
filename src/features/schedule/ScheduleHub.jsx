@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, ArrowLeftRight, X, Check, Send, Zap, MessageSquare } from 'lucide-react'
 import { DAYS, HOURS } from '../../shared/data/mockData'
 import { getScheduleData } from '../../shared/data/facultyCatalog'
 import { useNotifications } from '../../shared/hooks/useNotifications'
 import { socketService } from '../../shared/services/socket.service'
+import { createRecoveryRequest, getRecoveryRequestsForUser } from '../../shared/services/professorPortal.service'
 import clsx from 'clsx'
 
 const TABS = ['Orarul Meu', 'Toate Grupele', 'Recuperări', 'Slot Swap']
@@ -68,9 +69,14 @@ function RecoveryModal({ slot, subject, onClose, onConfirm }) {
 }
 
 // ── Excel Recovery Grid ───────────────────────────────────────────────────────
-function RecoveryGrid({ recoverySlots, onNotify }) {
+function studentNameFromSession(session) {
+  return session?.email?.split('@')[0]?.split('.').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ') || 'Student'
+}
+
+function RecoveryGrid({ recoverySlots, onNotify, session }) {
   const [pendingModal, setPendingModal] = useState(null)
   const [confirmed, setConfirmed] = useState({})
+  const [studentRequests, setStudentRequests] = useState(() => getRecoveryRequestsForUser(session?.userId))
 
   const subjects = Object.keys(recoverySlots)
 
@@ -96,8 +102,42 @@ function RecoveryGrid({ recoverySlots, onNotify }) {
     return recoverySlots[subject]?.find(s => s.day === day && s.start === start) || null
   }
 
+  function refreshRequests() {
+    setStudentRequests(getRecoveryRequestsForUser(session?.userId))
+  }
+
+  useEffect(() => {
+    refreshRequests()
+    function onChange() { refreshRequests() }
+    window.addEventListener('sc:recovery-requests', onChange)
+    return () => window.removeEventListener('sc:recovery-requests', onChange)
+  }, [session?.userId])
+
   return (
     <div className="p-4 space-y-4">
+      {studentRequests.length > 0 && (
+        <div className="glass-card p-4">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Cererile tale de recuperare</p>
+          <div className="space-y-2">
+            {studentRequests.slice(0, 3).map(request => (
+              <div key={request.id} className="flex items-center gap-3 rounded-xl bg-white/[0.03] border border-white/[0.05] px-3 py-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-slate-200 truncate">{request.subject}</p>
+                  <p className="text-[11px] text-slate-600 truncate">Gr. {request.group} · {request.room}</p>
+                </div>
+                <span className={clsx(
+                  'rounded-full px-2 py-1 text-[10px] font-bold',
+                  request.status === 'accepted' ? 'bg-emerald-500/15 text-emerald-300' :
+                  request.status === 'rejected' ? 'bg-red-500/15 text-red-300' :
+                  'bg-amber-500/15 text-amber-300',
+                )}>
+                  {request.status === 'accepted' ? 'Aprobata' : request.status === 'rejected' ? 'Respinsa' : 'In asteptare'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="glass-card p-4 border-indigo-500/20 bg-indigo-500/5">
         <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400">
           <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-indigo-600/40 border border-indigo-400" /> Ora ta curentă</div>
@@ -189,8 +229,20 @@ function RecoveryGrid({ recoverySlots, onNotify }) {
           slot={pendingModal.slot}
           subject={pendingModal.subject}
           onClose={() => setPendingModal(null)}
-          onConfirm={() => {
+          onConfirm={(reason) => {
             setConfirmed(p => ({ ...p, [pendingModal.key]: true }))
+            createRecoveryRequest({
+              slot: pendingModal.slot,
+              subject: pendingModal.subject,
+              reason,
+              student: {
+                userId: session?.userId,
+                email: session?.email,
+                name: studentNameFromSession(session),
+                facultyName: session?.detectedFaculty?.name || 'Facultatea de Matematica-Informatica',
+              },
+            })
+            refreshRequests()
             onNotify?.({
               title: 'Cerere recuperare trimisa',
               body: `${pendingModal.subject} - grupa ${pendingModal.slot.group}, ${DAYS[pendingModal.slot.day - 1]} ${pendingModal.slot.start}:00.`,
@@ -545,7 +597,7 @@ export default function ScheduleHub({ profile, session }) {
       <div className="flex-1 overflow-auto">
         {tab === 0 && <WeeklyView schedule={schedule} />}
         {tab === 1 && <AllGroupsView schedule={schedule} />}
-        {tab === 2 && <RecoveryGrid recoverySlots={recoverySlots} onNotify={pushNotification} />}
+        {tab === 2 && <RecoveryGrid recoverySlots={recoverySlots} onNotify={pushNotification} session={session} />}
         {tab === 3 && (
           <SlotSwapView
             recoverySlots={recoverySlots}

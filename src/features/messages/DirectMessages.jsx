@@ -4,6 +4,7 @@ import { useMessages } from '../../shared/hooks/useMessages'
 import { socketService } from '../../shared/services/socket.service'
 import { useOnlineCount } from '../../shared/hooks/useOnlineCount'
 import { createUserId } from '../../shared/services/auth.service'
+import { listPortalThreadsForUser, sendPortalMessage } from '../../shared/services/professorPortal.service'
 import clsx from 'clsx'
 
 function nameFromEmail(email) {
@@ -177,6 +178,84 @@ function ChatThread({ contact, currentUserId, currentName, scope }) {
   )
 }
 
+function PortalThread({ thread, currentUserId, currentName }) {
+  const [input, setInput] = useState('')
+  const [localThread, setLocalThread] = useState(thread)
+  const bottomRef = useRef(null)
+
+  useEffect(() => {
+    setLocalThread(thread)
+  }, [thread])
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [localThread?.messages])
+
+  function send() {
+    if (!input.trim()) return
+    const updated = sendPortalMessage(localThread.id, {
+      senderId: currentUserId,
+      senderName: currentName,
+      senderRole: 'student',
+      text: input.trim(),
+    })
+    setLocalThread(updated)
+    setInput('')
+  }
+
+  return (
+    <div className="flex-1 flex flex-col min-w-0">
+      <div className="h-16 border-b border-white/[0.05] flex items-center px-6 gap-4 bg-[#070b14]/90 backdrop-blur-xl shrink-0">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-xs font-bold shrink-0">AM</div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-white text-sm truncate">{localThread.professorName}</p>
+          <p className="text-xs text-slate-500 truncate">{localThread.subject}</p>
+        </div>
+        <span className="text-[10px] text-amber-300">Portal profesor</span>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-6 space-y-3">
+        {localThread.messages.length === 0 && (
+          <p className="text-center text-slate-600 text-sm py-8">Nu exista mesaje inca.</p>
+        )}
+        {localThread.messages.map(msg => {
+          const isMe = msg.senderRole === 'student'
+          return (
+            <div key={msg.id} className={clsx('flex', isMe ? 'justify-end' : 'justify-start')}>
+              <div className={clsx(
+                'max-w-sm rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+                isMe ? 'bg-indigo-600 text-white rounded-tr-sm' : 'bg-white/[0.05] border border-white/[0.06] text-slate-200 rounded-tl-sm',
+              )}>
+                {msg.text}
+              </div>
+            </div>
+          )
+        })}
+        <div ref={bottomRef} />
+      </div>
+
+      <div className="p-4 border-t border-white/[0.05] bg-[#070b14]/90">
+        <div className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.07] rounded-2xl px-4 py-3">
+          <input
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && send()}
+            placeholder="Raspunde profesorului..."
+            className="flex-1 bg-transparent text-sm text-slate-200 placeholder-slate-600 outline-none"
+          />
+          <button
+            onClick={send}
+            disabled={!input.trim()}
+            className={clsx('w-8 h-8 rounded-xl flex items-center justify-center transition-all', input.trim() ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-white/[0.06]')}
+          >
+            <Send size={14} className={input.trim() ? 'text-white' : 'text-slate-500'} />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function DirectMessages({ session, profile }) {
   // Stabilize currentUserId — generate guest ID once, never regenerate
   const currentUserId = useMemo(
@@ -205,6 +284,8 @@ export default function DirectMessages({ session, profile }) {
 
   const [onlineUsers, setOnlineUsers] = useState([])
   const [active, setActive] = useState(null)
+  const [activePortal, setActivePortal] = useState(null)
+  const [portalThreads, setPortalThreads] = useState(() => listPortalThreadsForUser(currentUserId))
   const [search, setSearch] = useState('')
   const { report: reportOnlineCount } = useOnlineCount()
 
@@ -236,6 +317,17 @@ export default function DirectMessages({ session, profile }) {
     })
     return unsub
   }, [eligibleUsers])
+
+  useEffect(() => {
+    function refresh() {
+      const threads = listPortalThreadsForUser(currentUserId)
+      setPortalThreads(threads)
+      setActivePortal(prev => prev ? threads.find(thread => thread.id === prev.id) || null : null)
+    }
+    refresh()
+    window.addEventListener('sc:portal-messages', refresh)
+    return () => window.removeEventListener('sc:portal-messages', refresh)
+  }, [currentUserId])
 
   const contacts = onlineUsers.filter(u =>
     u.name.toLowerCase().includes(search.toLowerCase())
@@ -277,6 +369,29 @@ export default function DirectMessages({ session, profile }) {
         </div>
 
         <div className="flex-1 overflow-y-auto py-2">
+          {portalThreads.length > 0 && (
+            <div className="px-4 pb-3">
+              <p className="text-[10px] text-slate-600 uppercase tracking-wider mb-2">Profesori</p>
+              <div className="space-y-1">
+                {portalThreads.map(thread => (
+                  <button
+                    key={thread.id}
+                    onClick={() => { setActivePortal(thread); setActive(null) }}
+                    className={clsx(
+                      'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-white/[0.04] transition-colors',
+                      activePortal?.id === thread.id && 'bg-amber-500/10 border border-amber-500/20',
+                    )}
+                  >
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">AM</div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-slate-200 truncate">{thread.professorName}</p>
+                      <p className="text-xs text-slate-600 truncate">{thread.messages.at(-1)?.text || thread.subject}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {contacts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
               <Users size={28} className="text-slate-700 mb-3" />
@@ -289,7 +404,7 @@ export default function DirectMessages({ session, profile }) {
             contacts.map(u => (
               <button
                 key={u.userId}
-                onClick={() => setActive(u)}
+                onClick={() => { setActive(u); setActivePortal(null) }}
                 className={clsx(
                   'w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.04] transition-colors text-left',
                   active?.userId === u.userId && 'bg-white/[0.05] border-r-2 border-indigo-500',
@@ -311,7 +426,14 @@ export default function DirectMessages({ session, profile }) {
         </div>
       </div>
 
-      {active ? (
+      {activePortal ? (
+        <PortalThread
+          key={activePortal.id}
+          thread={activePortal}
+          currentUserId={currentUserId}
+          currentName={currentName}
+        />
+      ) : active ? (
         <ChatThread
           key={active.userId}
           contact={active}

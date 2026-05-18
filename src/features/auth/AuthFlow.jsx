@@ -1,11 +1,14 @@
 import { useState } from 'react'
-import { Compass, Mail, ArrowRight, Check, Loader2, Shield, ChevronLeft, Zap } from 'lucide-react'
+import { Compass, Mail, ArrowRight, Check, Loader2, Shield, ChevronLeft, Zap, GraduationCap } from 'lucide-react'
 import { UNIVERSITIES } from '../../shared/config/universities'
 import { useAuth } from '../../app/providers/AuthContext'
 import { createUserId } from '../../shared/services/auth.service'
+import { DEMO_PROFESSOR } from '../../shared/services/professorPortal.service'
 import clsx from 'clsx'
 
 const STEP = { SELECT_UNI: 0, ENTER_EMAIL: 1, VERIFYING: 2, CONFIRMED: 3 }
+const UAIC = UNIVERSITIES.find(u => u.id === 'uaic')
+const FMIM = UAIC?.faculties.find(f => f.code === 'FMIM')
 
 function UniversityGrid({ onSelect }) {
   const [search, setSearch] = useState('')
@@ -138,6 +141,67 @@ function EmailStep({ university, email, setEmail, accessCode, setAccessCode, err
   )
 }
 
+function ProfessorLogin({ email, setEmail, accessCode, setAccessCode, error, onSubmit, loading }) {
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
+        <p className="text-[13px] font-semibold text-amber-200">{DEMO_PROFESSOR.name}</p>
+        <p className="text-[11px] text-amber-200/70 mt-0.5">{DEMO_PROFESSOR.facultyName} - UAIC</p>
+      </div>
+
+      <div>
+        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block mb-2">Email profesor</label>
+        <div className="flex items-center bg-white/[0.03] border border-white/[0.07] rounded-xl overflow-hidden focus-within:border-white/[0.15] transition-colors">
+          <Mail size={13} className="text-slate-600 ml-4 shrink-0" strokeWidth={1.75} />
+          <input
+            autoFocus
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && onSubmit()}
+            className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none font-medium"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block mb-2">Cod cont facultate</label>
+        <div className="flex items-center bg-white/[0.03] border border-white/[0.07] rounded-xl overflow-hidden focus-within:border-white/[0.15] transition-colors">
+          <Shield size={13} className="text-slate-600 ml-4 shrink-0" strokeWidth={1.75} />
+          <input
+            type="password"
+            inputMode="numeric"
+            maxLength={4}
+            value={accessCode}
+            onChange={e => setAccessCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
+            onKeyDown={e => e.key === 'Enter' && onSubmit()}
+            placeholder="0000"
+            className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none tracking-[0.35em] font-mono"
+          />
+        </div>
+        <p className="text-[11px] text-slate-700 mt-1.5 pl-1">
+          Demo: <span className="text-slate-500 font-mono">{DEMO_PROFESSOR.email}</span> / <span className="text-slate-500 font-mono">0000</span>
+        </p>
+        {error && <p className="text-[11px] text-red-400 mt-1.5 pl-1">{error}</p>}
+      </div>
+
+      <button
+        onClick={onSubmit}
+        disabled={!email.trim() || accessCode.length !== 4 || loading}
+        className={clsx(
+          'w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-[13px] transition-all duration-200',
+          email.trim() && accessCode.length === 4 && !loading
+            ? 'bg-amber-600 hover:bg-amber-500 text-white active:scale-[0.98]'
+            : 'bg-white/[0.03] text-slate-600 cursor-not-allowed border border-white/[0.06]',
+        )}
+      >
+        {loading ? <Loader2 size={15} className="animate-spin" /> : <ArrowRight size={15} />}
+        Intra in portalul profesorului
+      </button>
+    </div>
+  )
+}
+
 function VerifyingStep({ email, university }) {
   return (
     <div className="text-center py-6 space-y-6">
@@ -202,9 +266,11 @@ function ConfirmedStep({ university, detectedFaculty, onContinue }) {
 
 export default function AuthFlow() {
   const { login } = useAuth()
+  const [role, setRole] = useState('student')
   const [step, setStep] = useState(STEP.SELECT_UNI)
   const [university, setUniversity] = useState(null)
   const [email, setEmail] = useState('')
+  const [professorEmail, setProfessorEmail] = useState(DEMO_PROFESSOR.email)
   const [accessCode, setAccessCode] = useState('0000')
   const [accessCodeError, setAccessCodeError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -229,9 +295,36 @@ export default function AuthFlow() {
 
   function handleContinue() {
     login({
+      role: 'student',
       userId: createUserId('mock'),
       email: email ? `${email}@${university.emailDomain}` : `student@${university.emailDomain}`,
       university, detectedFaculty, isNewUser: true,
+    })
+  }
+
+  async function handleProfessorSubmit() {
+    if (professorEmail.trim().toLowerCase() !== DEMO_PROFESSOR.email || accessCode !== DEMO_PROFESSOR.password) {
+      setAccessCodeError('Cont profesor invalid. Pentru demo foloseste andrei.munteanu@uaic.ro si codul 0000.')
+      return
+    }
+    setAccessCodeError('')
+    setLoading(true)
+    await new Promise(r => setTimeout(r, 900))
+    setLoading(false)
+    login({
+      role: 'professor',
+      userId: DEMO_PROFESSOR.id,
+      email: DEMO_PROFESSOR.email,
+      university: UAIC,
+      detectedFaculty: FMIM,
+      profile: {
+        ...DEMO_PROFESSOR,
+        university: UAIC,
+        detectedFaculty: FMIM,
+        facultyCode: 'FMIM',
+        facultyType: 'MATH_CS',
+      },
+      isNewUser: false,
     })
   }
 
@@ -257,9 +350,34 @@ export default function AuthFlow() {
         {/* Card — double bezel */}
         <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.08] to-white/[0.02]">
           <div className="bg-[#0c1120] border border-white/[0.04] rounded-[calc(1rem-1px)] p-6 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.8)]">
+            <div className="grid grid-cols-2 gap-2 mb-5">
+              {[
+                ['student', 'Student', Compass],
+                ['professor', 'Profesor', GraduationCap],
+              ].map(([id, label, Icon]) => (
+                <button
+                  key={id}
+                  onClick={() => {
+                    setRole(id)
+                    setAccessCodeError('')
+                    setStep(STEP.SELECT_UNI)
+                    if (id === 'professor') setAccessCode('0000')
+                  }}
+                  className={clsx(
+                    'h-10 rounded-xl border text-[12px] font-bold flex items-center justify-center gap-2 transition-all',
+                    role === id
+                      ? id === 'professor' ? 'border-amber-500/40 bg-amber-500/15 text-amber-200' : 'border-indigo-500/40 bg-indigo-500/15 text-indigo-200'
+                      : 'border-white/[0.06] bg-white/[0.03] text-slate-500 hover:text-slate-300',
+                  )}
+                >
+                  <Icon size={14} />
+                  {label}
+                </button>
+              ))}
+            </div>
 
             {/* Step indicator */}
-            <div className="flex items-center gap-2 mb-6">
+            {role === 'student' && <div className="flex items-center gap-2 mb-6">
               {step > STEP.SELECT_UNI && (
                 <button onClick={() => setStep(s => s - 1)}
                   className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.08] transition-colors mr-1">
@@ -279,30 +397,45 @@ export default function AuthFlow() {
                   )}
                 </div>
               ))}
-            </div>
+            </div>}
 
             {/* Step title */}
             <div className="mb-5">
               <h2 className="text-[16px] font-bold text-white">
-                {step === STEP.SELECT_UNI && 'Selectează universitatea'}
-                {step === STEP.ENTER_EMAIL && 'Autentifică-te'}
-                {step === STEP.VERIFYING && 'Verificare în curs'}
-                {step === STEP.CONFIRMED && 'Identitate confirmată'}
+                {role === 'professor' && 'Autentificare profesor'}
+                {role === 'student' && step === STEP.SELECT_UNI && 'Selectează universitatea'}
+                {role === 'student' && step === STEP.ENTER_EMAIL && 'Autentifică-te'}
+                {role === 'student' && step === STEP.VERIFYING && 'Verificare în curs'}
+                {role === 'student' && step === STEP.CONFIRMED && 'Identitate confirmată'}
               </h2>
-              {step === STEP.SELECT_UNI && (
+              {role === 'student' && step === STEP.SELECT_UNI && (
                 <p className="text-[11px] text-slate-600 mt-0.5">Disponibil pentru {UNIVERSITIES.length} universități din România</p>
+              )}
+              {role === 'professor' && (
+                <p className="text-[11px] text-slate-600 mt-0.5">Profesorii intra direct cu contul emis de facultate.</p>
               )}
             </div>
 
-            {step === STEP.SELECT_UNI && <UniversityGrid onSelect={selectUniversity} />}
-            {step === STEP.ENTER_EMAIL && (
+            {role === 'professor' && (
+              <ProfessorLogin
+                email={professorEmail}
+                setEmail={setProfessorEmail}
+                accessCode={accessCode}
+                setAccessCode={setAccessCode}
+                error={accessCodeError}
+                onSubmit={handleProfessorSubmit}
+                loading={loading}
+              />
+            )}
+            {role === 'student' && step === STEP.SELECT_UNI && <UniversityGrid onSelect={selectUniversity} />}
+            {role === 'student' && step === STEP.ENTER_EMAIL && (
               <EmailStep university={university} email={email} setEmail={setEmail}
                 accessCode={accessCode} setAccessCode={setAccessCode}
                 error={accessCodeError} onSubmit={handleEmailSubmit}
                 onDemoSkip={handleDemoSkip} loading={loading} />
             )}
-            {step === STEP.VERIFYING && <VerifyingStep email={email} university={university} />}
-            {step === STEP.CONFIRMED && (
+            {role === 'student' && step === STEP.VERIFYING && <VerifyingStep email={email} university={university} />}
+            {role === 'student' && step === STEP.CONFIRMED && (
               <ConfirmedStep university={university} detectedFaculty={detectedFaculty} onContinue={handleContinue} />
             )}
           </div>

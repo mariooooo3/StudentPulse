@@ -44,12 +44,18 @@ function TutorSkeleton() {
 
 function TutorCard({ t }) {
   const [booked, setBooked] = useState(false)
+  const [contacted, setContacted] = useState(false)
   const [showSlots, setShowSlots] = useState(false)
   const toast = useToast()
 
   function handleBook() {
     setBooked(true)
     toast({ type: 'success', title: 'Sesiune rezervată!', message: `${t.name} te va contacta pentru confirmare.` })
+  }
+
+  function handleContact() {
+    setContacted(true)
+    toast({ type: 'info', title: 'Contact cerut', message: `Ai cerut contact cu ${t.name}. Cand este online, il gasesti in Mesaje.` })
   }
 
   return (
@@ -116,8 +122,17 @@ function TutorCard({ t }) {
 
         {/* Action */}
         <div className="mt-auto flex gap-2">
-          <button className="w-9 h-9 rounded-xl bg-white/[0.03] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.07] transition-colors shrink-0">
-            <MessageSquare size={14} className="text-slate-500" strokeWidth={1.75} />
+          <button
+            onClick={handleContact}
+            className={clsx(
+              'w-9 h-9 rounded-xl border flex items-center justify-center transition-colors shrink-0',
+              contacted
+                ? 'bg-emerald-600/20 border-emerald-500/30'
+                : 'bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.07]',
+            )}
+            title={contacted ? 'Contact cerut' : 'Cere contact'}
+          >
+            {contacted ? <Check size={14} className="text-emerald-400" /> : <MessageSquare size={14} className="text-slate-500" strokeWidth={1.75} />}
           </button>
           {booked ? (
             <div className="flex-1 flex items-center justify-center gap-2 bg-emerald-600/20 border border-emerald-500/30 rounded-xl text-emerald-400 text-sm font-semibold">

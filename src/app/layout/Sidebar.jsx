@@ -44,6 +44,7 @@ const MODE_COPY = {
 }
 
 function ProfileModal({ profile, session, theme, initials, onClose }) {
+  const { updateProfile } = useAuth()
   const displayName = profile?.name || session?.email?.split('@')[0] || 'Student'
   const [name, setName] = useState(displayName)
   const [year, setYear] = useState(profile?.year || '')
@@ -51,6 +52,14 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
   const [saved, setSaved] = useState(false)
 
   function handleSave() {
+    updateProfile({
+      name: name.trim() || displayName,
+      year,
+      interests: interests
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean),
+    })
     setSaved(true)
     setTimeout(() => { setSaved(false); onClose() }, 800)
   }

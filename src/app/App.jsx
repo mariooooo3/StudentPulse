@@ -20,6 +20,7 @@ const PeerTutoring   = lazy(() => import('../features/tutoring/PeerTutoring'))
 const DirectMessages = lazy(() => import('../features/messages/DirectMessages'))
 const CityAdaptation = lazy(() => import('../features/city/CityAdaptation'))
 const StudentLifeHub = lazy(() => import('../features/student-life/StudentLifeHub'))
+const ProfessorApp = lazy(() => import('../features/professor/ProfessorApp'))
 
 function PageLoader() {
   return (
@@ -90,6 +91,14 @@ function AppShell() {
     return (
       <Suspense fallback={null}>
         <OnboardingFlow session={session} onComplete={(p) => completeOnboarding(p)} />
+      </Suspense>
+    )
+  }
+
+  if (session?.role === 'professor') {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <ProfessorApp />
       </Suspense>
     )
   }
