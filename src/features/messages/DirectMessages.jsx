@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import { Send, Search, Wifi, WifiOff, Users, ShieldCheck } from 'lucide-react'
+import { Send, Search, Wifi, WifiOff, Users, ShieldCheck, Paperclip, X, FileText } from 'lucide-react'
 import { useMessages } from '../../shared/hooks/useMessages'
 import { socketService } from '../../shared/services/socket.service'
 import { useOnlineCount } from '../../shared/hooks/useOnlineCount'
@@ -37,17 +37,30 @@ function ChatThread({ contact, currentUserId, currentName, scope }) {
   const channel = `dm:${scope}:${[currentUserId, contact.userId].sort().join(':')}`
   const { messages, sendMessage, connected } = useMessages(channel, currentUserId)
   const [input, setInput] = useState('')
+  const [attachment, setAttachment] = useState(null)
   const bottomRef = useRef(null)
+  const fileRef = useRef(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  function onFile(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) { alert('Fișierul e prea mare. Maxim 5MB.'); return }
+    const reader = new FileReader()
+    reader.onload = ev => setAttachment({ base64: ev.target.result.split(',')[1], mimeType: file.type, name: file.name, size: file.size })
+    reader.readAsDataURL(file)
+    e.target.value = ''
+  }
+
   function send() {
-    const text = input.trim()
-    if (!text || isSelfConversation) return
-    sendMessage(text, currentName)
+    if (isSelfConversation) return
+    if (!input.trim() && !attachment) return
+    sendMessage(input.trim(), currentName, attachment)
     setInput('')
+    setAttachment(null)
   }
 
   return (
@@ -83,12 +96,30 @@ function ChatThread({ contact, currentUserId, currentName, scope }) {
               )}
               <div className="max-w-sm">
                 <div className={clsx(
-                  'px-4 py-2.5 rounded-2xl text-sm leading-relaxed',
+                  'rounded-2xl text-sm leading-relaxed overflow-hidden',
                   isMe
                     ? 'bg-indigo-600 text-white rounded-tr-sm'
                     : 'bg-white/[0.05] border border-white/[0.06] text-slate-200 rounded-tl-sm',
                 )}>
-                  {msg.content}
+                  {msg.attachment?.mimeType?.startsWith('image/') && (
+                    <img
+                      src={`data:${msg.attachment.mimeType};base64,${msg.attachment.base64}`}
+                      alt={msg.attachment.name}
+                      className="max-w-full max-h-64 object-contain"
+                    />
+                  )}
+                  {msg.attachment && !msg.attachment.mimeType?.startsWith('image/') && (
+                    <a
+                      href={`data:${msg.attachment.mimeType};base64,${msg.attachment.base64}`}
+                      download={msg.attachment.name}
+                      className="flex items-center gap-2 px-4 py-2.5 hover:opacity-80 transition-opacity"
+                    >
+                      <FileText size={16} className="shrink-0" />
+                      <span className="truncate text-xs">{msg.attachment.name}</span>
+                      <span className="text-[10px] opacity-60 shrink-0">{(msg.attachment.size / 1024).toFixed(0)}KB</span>
+                    </a>
+                  )}
+                  {msg.content && <p className="px-4 py-2.5">{msg.content}</p>}
                 </div>
                 <p className={clsx('text-[10px] text-slate-600 mt-1', isMe ? 'text-right' : 'text-left')}>
                   {new Date(msg.timestamp).toLocaleTimeString('ro', { hour: '2-digit', minute: '2-digit' })}
@@ -101,7 +132,29 @@ function ChatThread({ contact, currentUserId, currentName, scope }) {
       </div>
 
       <div className="p-4 border-t border-white/[0.05] bg-[#070b14]/90">
+        {attachment && (
+          <div className="mb-2 flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2">
+            {attachment.mimeType.startsWith('image/') ? (
+              <img src={`data:${attachment.mimeType};base64,${attachment.base64}`} className="h-10 w-10 object-cover rounded-lg" alt="" />
+            ) : (
+              <FileText size={20} className="text-slate-400 shrink-0" />
+            )}
+            <span className="text-xs text-slate-300 truncate flex-1">{attachment.name}</span>
+            <span className="text-[10px] text-slate-600 shrink-0">{(attachment.size / 1024).toFixed(0)}KB</span>
+            <button onClick={() => setAttachment(null)} className="text-slate-500 hover:text-slate-300 transition-colors">
+              <X size={14} />
+            </button>
+          </div>
+        )}
         <div className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.07] rounded-2xl px-4 py-3">
+          <input ref={fileRef} type="file" className="hidden" onChange={onFile} />
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={isSelfConversation}
+            className="text-slate-500 hover:text-slate-300 transition-colors"
+          >
+            <Paperclip size={16} />
+          </button>
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
@@ -112,11 +165,11 @@ function ChatThread({ contact, currentUserId, currentName, scope }) {
           />
           <button
             onClick={send}
-            disabled={!input.trim() || isSelfConversation}
+            disabled={(!input.trim() && !attachment) || isSelfConversation}
             className={clsx('w-8 h-8 rounded-xl flex items-center justify-center transition-all',
-              input.trim() && !isSelfConversation ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-white/[0.06]')}
+              (input.trim() || attachment) && !isSelfConversation ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-white/[0.06]')}
           >
-            <Send size={14} className={input.trim() && !isSelfConversation ? 'text-white' : 'text-slate-500'} />
+            <Send size={14} className={(input.trim() || attachment) && !isSelfConversation ? 'text-white' : 'text-slate-500'} />
           </button>
         </div>
       </div>

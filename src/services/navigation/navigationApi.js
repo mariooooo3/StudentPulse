@@ -1,5 +1,5 @@
 const NAVIGATION_ENV = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : {}
-const API_URL = NAVIGATION_ENV.VITE_NAVIGATION_API_URL || 'http://localhost:3001/api/navigation'
+const API_URL = NAVIGATION_ENV.VITE_NAVIGATION_API_URL || '/api/navigation'
 
 async function post(endpoint, body) {
   const response = await fetch(`${API_URL}${endpoint}`, {

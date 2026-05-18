@@ -489,6 +489,22 @@ Genereaza exact 4 recomandari smart si practice. Raspunde doar cu JSON valid in 
   }
 }
 
+export function createNavigationRequestHandler() {
+  return async (req, res) => {
+    try {
+      if (req.method === 'OPTIONS') { sendJson(res, 204, {}); return }
+      if (req.method !== 'POST') { sendJson(res, 404, { error: 'Not found' }); return }
+      if (req.url === '/api/navigation/assistant') { await handleAssistant(req, res); return }
+      if (req.url === '/api/navigation/photo') { await handlePhoto(req, res); return }
+      if (req.url === '/api/navigation/copilot') { await handleCopilot(req, res); return }
+      if (req.url === '/api/navigation/recommendations') { await handleRecommendations(req, res); return }
+      sendJson(res, 404, { error: 'Not found' })
+    } catch (error) {
+      sendJson(res, error.statusCode || 500, { error: error.message || 'Navigation API error' })
+    }
+  }
+}
+
 export function createNavigationApiServer(port = 3000) {
   const server = createServer(async (req, res) => {
     try {

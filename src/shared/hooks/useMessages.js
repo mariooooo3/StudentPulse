@@ -51,8 +51,8 @@ export function useMessages(channel, currentUserId) {
     }
   }, [channel])
 
-  const sendMessage = useCallback((content, senderName) => {
-    if (!content?.trim() || !channel || !currentUserId) return
+  const sendMessage = useCallback((content, senderName, attachment = null) => {
+    if ((!content?.trim() && !attachment) || !channel || !currentUserId) return
 
     const msg = {
       id: `${currentUserId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -61,6 +61,7 @@ export function useMessages(channel, currentUserId) {
       content: content.trim(),
       timestamp: new Date().toISOString(),
       channel,
+      ...(attachment && { attachment }),
     }
 
     // Optimistic add — server will echo back but dedup check prevents duplicate
