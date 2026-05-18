@@ -1,198 +1,271 @@
 # StudentCompass
 
-**Platformă de onboarding universitar** construită pentru hackathon. Ajută studenții noi să navigheze campusul, să-și gestioneze orarul, să găsească coordonatori de licență, tutori și să se adapteze în orașul universitar.
+> *"De la pierdut, la acasă."*
+
+An all-in-one platform for Romanian university students — AI-powered campus navigation, real-time messaging, schedule management, and peer collaboration.
+
+Built at **FiiPractic Hackathon 2026** in 48 hours.
+
+---
+
+## Features
+
+### Campus Navigator
+- Interactive map with **real pedestrian routing** via OSRM (not straight lines)
+- **Live crowd heatmap** — know if the cafeteria has a queue before you go
+- **8 points of interest** with hours and ratings (café, pharmacy, ATM, supermarket, etc.)
+- **AI photo recognition** — take a photo of a building, the AI identifies where you are
+- **Cinematic Guided Tour** — animated route walkthrough with step-by-step voice narration (Web Speech API, zero external dependencies)
+
+### Indoor Navigation — Corp C
+- SVG floor plan across 5 levels (Ground + Floors 1–4)
+- **BFS pathfinding** — optimal route between any two rooms
+- Animated path drawing with Framer Motion `pathLength`
+- Click-to-select rooms
+
+### AI Campus Assistant
+- Powered by **Groq — Llama 3.3 70B** (text) + **Llama 4 Scout 17B** (vision)
+- Knows the full UAIC campus: rooms, floors, schedules, restaurants, services
+- Returns structured JSON: detected location, destination, route suggestion, action steps
+- Sub-second responses
+
+### Smart Recommendations — AI Campus Life Assistant
+- **Dedicated AI chat zone** inside the Recomandări Smart tab — completely separate from the navigation AI
+- Answers campus life questions: canteen hours, study spots, library access, CTP student passes, dorm availability, Wi-Fi (eduroam), exams prep, local discounts, events
+- **Diacritic-insensitive matching** — understands Romanian with or without diacritics
+- Falls back to a rich local knowledge base when the API is unavailable
+- Quick-access chips for the most common questions (Mâncare azi, Studiu azi, etc.)
+
+### Direct Messages
+- Real-time WebSocket chat between students
+- **Academic filter** — only students from the same university and faculty can DM each other
+- Live presence (online/offline)
+- 24h message history, TTL-based expiry in the in-memory store
+
+### Schedule Hub
+- Weekly interactive calendar
+- **P2P Slot Swap** — the server auto-matches two students wanting each other's time slots; both get a real-time WebSocket notification
+- Recovery slots — browse availability across other groups
+
+### Thesis Finder
+- Professor cards with: research domains, minimum GPA, language, available spots
+- **Requirements note** — each professor lists exactly what they expect (CV, 1-page research plan, portfolio, motivation letter, etc.)
+- Dynamic filtering by thesis domain, availability, and keyword search
+- **Booking modal with real file attachment** — attach your CV or research plan as `.pdf`, `.doc`, or `.docx` directly in the booking form
+- **62 professors** across 16 faculties and specializations (CS, Math, Medicine, Law, Architecture, Arts, Music, Theology, and more)
+- Supports **FMIM** (Facultatea de Matematică și Informatică) and all major UAIC faculties
+
+### Peer Tutoring
+- Tutor marketplace with rating, price/session, subjects, availability
+- **Skill Swap** — automatic bilateral matching: A teaches C++/wants Python, B is the inverse → instant match
+- Group sessions with professors
+
+### City Adaptation — 6 modules
+
+| Module | Content |
+|--------|---------|
+| Arrival Assistant | Moving-in checklist for new students |
+| Student Housing | Dorms, rent ranges, scam warnings |
+| Student Discounts | 12+ verified local discounts |
+| Student Transport | Routes, student transit passes |
+| Safe Zones | Safety map, emergency contacts |
+| Local Tips | Advice from senior students |
+
+### Student Life Hub
+- Real, curated data for UAIC students: canteen menus, library hours, student clubs, cultural events
+- Expanded dataset covering housing, transport (CTP student pass), discounts, and campus services
+- Integrated with Smart Recommendations AI for instant answers
+
+### Auth & Onboarding
+- Institutional email validation per university (domain regex)
+- **7 universities**: UAIC, UBB, UniBuc, Politehnica București, Politehnica Timișoara, UMF Cluj, UVT
+- **50+ faculties** with study year specifics (3/4/5/6 year programs)
+- Multi-step onboarding: year, interests, learning style, housing type, notification preferences
+- Landing page with feature highlights before sign-up
 
 ---
 
 ## Tech Stack
 
-| Layer | Tehnologii |
+| Layer | Technology |
 |-------|-----------|
 | Frontend | React 18, Vite, Tailwind CSS, Framer Motion |
-| Realtime | WebSocket (ws), TCP demo protocol |
-| Hărți | Leaflet + react-leaflet |
-| AI | Groq SDK (LLM) |
-| Backend | Node.js, in-memory store cu TTL + PubSub |
+| Maps | Leaflet + react-leaflet, OSRM (real routing) |
+| AI / LLM | Groq SDK — Llama 3.3 70B (text), Llama 4 Scout 17B (vision) |
+| Realtime | WebSocket (ws), custom TCP protocol |
+| Backend | Node.js ESM — no framework |
+| State | React Context + custom hooks |
+| PWA | Service Worker + Web Manifest |
 
 ---
 
-## Start rapid
+## Architecture
 
-```powershell
+
+```
+┌─────────────────────────────────────────────────────┐
+│                  FRONTEND (React 18)                │
+│  Auth → Onboarding → Dashboard                      │
+│  CampusNavigator ←→ AI Compass (navigation/routes)  │
+│  SmartReco       ←→ AI Campus Life (campus Q&A)     │
+│  ScheduleHub     ←→ WebSocket (real-time)           │
+│  DirectMessages  ←→ Presence & DM channels          │
+└──────────────────────┬──────────────────────────────┘
+                       │ HTTP + WebSocket (single port)
+          ┌────────────▼─────────────┐
+          │     BACKEND (Node.js)    │
+          │                          │
+          │  Navigation API → Groq   │
+          │  Reco API → Groq         │
+          │  WebSocket Bridge        │
+          │  TCP Server (Redis-like) │  ← internal
+          │  In-memory Store + TTL   │
+          │  PubSub + EventBus       │
+          └──────────────────────────┘
+```
+
+
+
+### Server internals
+
+**Store** — custom key-value store with lazy TTL expiry. Min-heap internally for O(log n) expiration. Inspired by Redis, implemented from scratch in ~200 lines.
+
+**PubSub** — internal publish/subscribe. Decouples producers from consumers; used for DM delivery, swap matching, and presence broadcasting.
+
+**WSBridge** — WebSocket server with academic scoping. DM channels are namespaced `dm:<universityId>:<facultyCode>:<userA>:<userB>`, enforced server-side. Users from different faculties cannot exchange messages.
+
+**TCPServer** — Redis-like text protocol (`SET key value`, `GET key`, `SUBSCRIBE channel`) on an internal port. Demonstrates understanding of distributed systems primitives.
+
+**EventBus** — internal event bus for `metrics`, `notification`, `swap_match` — propagated to connected WebSocket clients.
+
+---
+
+## Project Structure
+
+
+```
+studentcompass/
+├── src/
+│   ├── app/
+│   │   ├── App.jsx                  # Router: Auth → Onboarding → App
+│   │   ├── layout/Header.jsx + Sidebar.jsx
+│   │   └── providers/AuthContext.jsx
+│   │
+│   ├── features/
+│   │   ├── auth/AuthFlow.jsx
+│   │   ├── landing/LandingPage.jsx  # Feature highlights before sign-up
+│   │   ├── onboarding/OnboardingFlow.jsx
+│   │   ├── dashboard/Dashboard.jsx
+│   │   ├── schedule/ScheduleHub.jsx
+│   │   ├── thesis/ThesisFinder.jsx + BookingModal.jsx
+│   │   ├── tutoring/PeerTutoring.jsx + SkillSwap.jsx
+│   │   ├── messages/DirectMessages.jsx
+│   │   └── city/ (6 sub-modules)
+│   │
+│   ├── components/navigation/
+│   │   ├── CampusNavigator.jsx      # Map + AI Compass + Cinematic Tour + Reco AI
+│   │   └── HeatmapLayer.jsx
+│   │
+│   └── shared/
+│       ├── config/universities.js   # 7 universities, 50+ faculties
+│       ├── data/
+│       │   ├── mockData.js          # CS professors with requirementsNote
+│       │   ├── domainPersonalization.js  # 62 professors, 16 faculties
+│       │   └── facultyCatalog.js
+│       ├── hooks/                   # useSocket, useMessages, useNow
+│       └── services/                # auth, socket, ai, cache
+│
+└── server/
+    ├── index.js
+    ├── core/
+    │   ├── redis/Store.js           # Key-value + TTL (min-heap)
+    │   ├── redis/PubSub.js
+    │   ├── realtime/WSBridge.js     # WebSocket server
+    │   ├── realtime/TCPServer.js    # Redis-like protocol
+    │   └── events/EventBus.js
+    └── handlers/
+        ├── navigation.js            # REST API → Groq AI (routes)
+        ├── reco.js                  # REST API → Groq AI (campus life Q&A)
+        ├── messages.js              # 1-on-1 chat
+        ├── schedule.js              # P2P slot swap matching
+        ├── notifications.js
+        └── session.js
+```
+
+
+
+---
+
+## Running locally
+
+**Prerequisites:** Node.js 18+, [Groq API key](https://console.groq.com)
+
+
+```bash
+git clone https://github.com/mariooooo3/FiiPractic-Hackathon.git
+cd FiiPractic-Hackathon
 npm install
-npm run dev:all
 ```
 
-| Serviciu | URL |
+
+
+Create `.env` in the project root:
+
+
+```
+GROQ_API_KEY=your_key_here
+```
+
+
+
+
+```bash
+npm run dev:all     # Frontend + backend together
+```
+
+
+
+| Service | URL |
 |---------|-----|
-| Frontend | http://127.0.0.1:5173 |
-| WebSocket | ws://localhost:8080 |
-| Navigation API | http://localhost:3001/api/navigation |
-| TCP demo | localhost:1234 |
+| Frontend | http://localhost:5173 |
+| Backend | http://localhost:3001 |
+| WebSocket | ws://localhost:8081 |
 
-> **Demo credentials:** orice email instituțional + cod `0000`
-
----
-
-## Funcționalități
-
-### Autentificare & Onboarding
-- Selectare din 19+ universități din România cu validare email instituțional
-- Onboarding personalizat pe bază de facultate: an de studiu, interese, stil de învățare, tip cazare, preferințe notificări
-- Session persistată în `AuthContext`
-- La logout, utilizatorul este redirecționat la pagina de welcome (nu la formularul de autentificare)
-- Badge-ul de confirmare în onboarding afișează doar numele universității, nu și facultatea (aceasta se alege ulterior)
-
-### Dashboard
-- Curs următor în timp real
-- Statistici academice: credite, medii, ore, cursuri
-- Acces rapid la toate modulele
-- Program zilei + notificări academice
-- Temă vizuală per universitate
-
-### Orar (`ScheduleHub`)
-- **Orarul meu** — calendar interactiv săptămânal
-- **Toate grupele** — vizualizare comparativă
-- **Recuperări** — grid cu disponibilități alte grupe + cerere în timp real
-- **Slot Swap** — sistem P2P: dacă A oferă ce B vrea și invers, swap-ul se acceptă automat
-
-### Găsire Coordonator Licență (`ThesisFinder`)
-- Carduri profesori cu domenii, medie minimă, limbă, locuri disponibile
-- **Cerințe licență** — fiecare profesor afișează o notă scurtă cu ce solicită (CV, plan cercetare, portofoliu etc.)
-- Filtrare pe domeniu de teză
-- Teme anterioare expandabile
-- Modal de rezervare cu afișarea cerințelor profesorului și **atașare fișier real** (CV, portofoliu, plan de cercetare — `.pdf`, `.doc`, `.docx`)
-
-### Tutoring Peer-to-Peer (`PeerTutoring`)
-- Marketplace tutori: rating, preț/sesiune, materii, disponibilitate
-- **Skill Swap**: matching automat — A predă C++ și vrea Python, B face invers → match instant
-- Sesiuni de grup cu profesor
-
-### Mesagerie (`DirectMessages`)
-- Chat 1-la-1 cu colegi din aceeași universitate și facultate
-- Prezență live (online/offline)
-- Istoric 24h, maxim 100 mesaje per canal
-
-### Adaptare în Oraș (`CityAdaptation`)
-- Checklist sosire
-- Ghid locuințe (cămine, chirii, avertismente escrocherii)
-- 12+ locuri cu reduceri studențești verificate
-- Sfaturi de la studenți
-- Rute transport + abonament student
-- Harta zone sigure + contacte urgență
-
-### Student Life (`StudentLifeHub`) — date reale pentru Iași
-- **Reduceri reale**: CTP Iași (–90%), Spotify Student (14 RON/lună), Apple Music (11,99 RON/lună), Adobe CC (–65%), GitHub Student Pack (gratuit), Microsoft 365 (gratuit cu @student.uaic.ro), Canva Pro, Notion, NordVPN (–76%), ISIC Card, Cinema City, Teatrul Național Iași (–75%), cantinele UAIC
-- **Cariere reale Iași**: Amazon Development Center, Endava, Bitdefender, Cegeka, evozon, Spitalul Sf. Spiridon, Antibiotice SA, Deloitte, BCR, ELSA Iași
-- **Comunități reale**: ASII, ESN Iași, LSAC, ELSA Iași, V7 Startup Studio, grupuri sport și cinefili
-
-### Navigator Campus (`CampusNavigator`)
-- Hartă interactivă Leaflet
-- **AI Compass** (tab Chat) — răspunde exclusiv la întrebări de navigare și trasee pe campus
-- **Recomandări Smart** (tab Recomandări) — Campus Pulse cu starea campusului în timp real
-- **Asistent Campus** (zonă AI dedicată în Recomandări Smart) — AI separat care răspunde la întrebări despre viața studențească: mâncare, locuri de studiu, secretariat, reduceri, transport CTP, sesiune de examene, comunități, WiFi eduroam, cazare
+> Demo: any institutional email + code `0000`
 
 ---
 
-## Universități & Facultăți suportate
+## Deployment
 
-Aplicația include date personalizate pentru **19+ universități** din România. UAIC Iași are suport complet pentru:
+Single-process deployment — frontend served directly from the Node.js backend.
 
-| Facultate | Cod | Date complete |
-|-----------|-----|---------------|
-| Facultatea de Matematică-Informatică | FMIM | ✅ Orar, profesori, tutori, teze, domenii |
-| Facultatea de Informatică | FII | ✅ Orar, profesori, tutori, teze, domenii |
 
-Și date generice (orar, profesori, teze) pentru: Drept, Geografie, Psihologie, Sport, Muzică, Teologie, Arhitectură, Teatru, Științe, Umaniste, Economie, Medicină, Farmacie, Inginerie, Arte.
-
----
-
-## Arhitectură
-
-```
-src/
-  main.jsx
-  index.css
-  app/
-    App.jsx              # Routing principal: Auth → Onboarding → App
-    layout/
-      Header.jsx
-      Sidebar.jsx
-    providers/
-      AuthContext.jsx    # Session + profil utilizator global
-  features/             # Module independente per funcționalitate
-    auth/
-    onboarding/
-    dashboard/
-    schedule/
-    thesis/
-    tutoring/
-    messages/
-    city/
-    student-life/
-  shared/               # Infrastructură comună
-    api/                # HTTP client
-    config/             # Universități, constante
-    data/               # Mock data per facultate
-    hooks/              # useMessages, useNow, useSocket, useOnlineCount
-    services/           # Auth, Socket, AI, Cache
-    utils/
-  services/
-    navigation/
-      campusAI.js       # askCampusAI (navigare) + askRecoAI (campus life)
-      navigationApi.js  # Fallback local cu răspunsuri per domeniu
-
-server/
-  index.js              # Entry point — inițializare Store, PubSub, TCP, WS
-  core/
-    realtime/
-      TCPServer.js      # Protocol Redis-like pe port 1234 (demo tehnic)
-      WSBridge.js       # WebSocket bridge pe port 8080
-    events/             # EventBus intern
-  handlers/
-    messages.js         # Istoric + trimitere mesaje
-    schedule.js         # Swap matching logic
-    notifications.js    # Push + markRead
-    session.js          # Auth state
-    navigation.js       # REST API campus (port 3001)
+```bash
+npm run build   # Build frontend to dist/
+npm start       # Serve everything on $PORT
 ```
 
-### Flux realtime
 
-```
-Component
-  → socketService.sendMessage()
-  → WebSocket ws://localhost:8080
-  → WSBridge → Handler
-  → Store (in-memory + TTL) / PubSub
-  → publish(channel)
-  → Client re-render
-```
+Configured for **Render** via `render.yaml`. Set `GROQ_API_KEY` as an environment variable.
 
 ---
 
-## Variabile de mediu
+## Team
 
-Creează un fișier `.env` în rădăcina proiectului:
-
-```env
-GROQ_API_KEY=your_groq_api_key
-```
-
----
-
-## Scripts
-
-| Comandă | Descriere |
-|---------|-----------|
-| `npm run dev` | Doar frontend Vite |
-| `npm run dev:server` | Doar backend Node.js |
-| `npm run dev:all` | Frontend + backend în paralel |
-| `npm run build` | Build producție → `dist/` |
-| `npm run preview` | Preview build local |
+| Name |
+|------|
+| Bighiu Rareș |
+| Afrasinei Mario |
+| Mocanu Claudiu |
+| Ignat Denis |
 
 ---
 
-## Status
+*FiiPractic Hackathon 2026 — UAIC Iași*
 
-Proiect demo pentru hackathon. Datele sunt mock/locale — backend-ul realtime demonstrează arhitectura și fluxul live fără bază de date externă. Structura este pregătită pentru migrare la Supabase/Postgres.
+---
+
+## License
+
+Copyright (c) 2026 Bighiu Rares, Afrasinei Mario, Mocanu Claudiu, Ignat Denis — All Rights Reserved.
+See [LICENSE](LICENSE) for details.
