@@ -18,7 +18,10 @@ export function AuthProvider({ children }) {
         const savedProfile = sessionStorage.getItem('sc_profile')
         if (saved) {
           setSession(saved)
-          if (savedProfile) {
+          if (saved.role === 'professor') {
+            setProfile(saved.profile || null)
+            setProfileStage(PROFILE_STAGE.COMPLETE)
+          } else if (savedProfile) {
             setProfile(JSON.parse(savedProfile))
             setProfileStage(PROFILE_STAGE.COMPLETE)
           } else {
@@ -38,6 +41,13 @@ export function AuthProvider({ children }) {
   function login(sessionData) {
     persistSession(sessionData)
     setSession(sessionData)
+
+    if (sessionData.role === 'professor') {
+      setProfile(sessionData.profile || null)
+      setProfileStage(PROFILE_STAGE.COMPLETE)
+      setAuthState(AUTH_STATE.AUTHENTICATED)
+      return
+    }
 
     // Check if this email already has a saved profile in localStorage
     const savedProfile = getUserProfile(sessionData.email)
@@ -60,6 +70,15 @@ export function AuthProvider({ children }) {
     setProfileStage(PROFILE_STAGE.COMPLETE)
   }
 
+  function updateProfile(patch) {
+    const updated = { ...(profile || {}), ...patch }
+    sessionStorage.setItem('sc_profile', JSON.stringify(updated))
+    saveUserProfile(session?.email, updated)
+    setProfile(updated)
+    setProfileStage(PROFILE_STAGE.COMPLETE)
+    return updated
+  }
+
   function logout() {
     clearSession()
     setSession(null)
@@ -69,7 +88,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ authState, session, profile, profileStage, login, completeOnboarding, logout }}>
+    <AuthContext.Provider value={{ authState, session, profile, profileStage, login, completeOnboarding, updateProfile, logout }}>
       {children}
     </AuthContext.Provider>
   )

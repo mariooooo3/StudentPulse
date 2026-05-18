@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { X, Send, CheckCircle, Loader2, Paperclip, FileText, Info } from 'lucide-react'
 import { useNotifications } from '../../shared/hooks/useNotifications'
 import { useToast } from '../../shared/components/Toast'
+import { createThesisRequest } from '../../shared/services/professorPortal.service'
 
 export default function BookingModal({ professor, onClose, session }) {
   const [step, setStep] = useState(1)
@@ -32,6 +33,17 @@ export default function BookingModal({ professor, onClose, session }) {
         type: 'info',
         action: 'thesis.booking.requested',
         meta: { professorId: professor.id, professorName: professor.name, domain: professor.domain },
+      })
+      createThesisRequest({
+        professor,
+        student: {
+          userId: session?.userId,
+          email: session?.email,
+          name: session?.email?.split('@')[0]?.split('.').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ') || 'Student',
+          facultyName: session?.detectedFaculty?.name || 'Facultatea de Matematica-Informatica',
+        },
+        form,
+        attachedFile,
       })
       toast({ type: 'success', title: 'Cerere trimisă!', message: `${professor.name} va răspunde în 2–5 zile.` })
       setLoading(false)

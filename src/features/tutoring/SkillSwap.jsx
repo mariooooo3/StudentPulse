@@ -2,9 +2,30 @@ import { useState } from 'react'
 import { ArrowLeftRight, Plus, Users, Calendar, Check, Zap } from 'lucide-react'
 import { getGroupSessions, getSkillSwapUsers } from '../../shared/data/facultyCatalog'
 import clsx from 'clsx'
+import { useToast } from '../../shared/components/Toast'
 
 function SkillSwapTab({ users }) {
   const [contacted, setContacted] = useState({})
+  const [skills, setSkills] = useState(() => JSON.parse(localStorage.getItem('sc_swap_skills') || '[]'))
+  const [wants, setWants] = useState(() => JSON.parse(localStorage.getItem('sc_swap_wants') || '[]'))
+  const toast = useToast()
+
+  function addSkill(type) {
+    const suggestions = type === 'skill'
+      ? ['React', 'Algoritmica', 'Baze de date', 'Python']
+      : ['Machine Learning', 'UI Design', 'Docker', 'Statistica']
+    const current = type === 'skill' ? skills : wants
+    const nextItem = suggestions.find(item => !current.includes(item)) || `Skill ${current.length + 1}`
+    const next = [...current, nextItem]
+    if (type === 'skill') {
+      setSkills(next)
+      localStorage.setItem('sc_swap_skills', JSON.stringify(next))
+    } else {
+      setWants(next)
+      localStorage.setItem('sc_swap_wants', JSON.stringify(next))
+    }
+    toast({ type: 'success', title: 'Profil actualizat', message: `${nextItem} a fost adaugat in profilul de Skill Swap.` })
+  }
 
   return (
     <div className="space-y-4">
@@ -17,7 +38,8 @@ function SkillSwapTab({ users }) {
               <span>✓</span> Ce știi bine
             </p>
             <div className="flex flex-wrap gap-1.5">
-              <button className="px-2.5 py-1 rounded-full text-xs bg-white/[0.04] border border-white/[0.08] text-slate-400 hover:bg-white/[0.07] transition-colors flex items-center gap-1">
+              {skills.map(skill => <span key={skill} className="tag text-xs">{skill}</span>)}
+              <button onClick={() => addSkill('skill')} className="px-2.5 py-1 rounded-full text-xs bg-white/[0.04] border border-white/[0.08] text-slate-400 hover:bg-white/[0.07] transition-colors flex items-center gap-1">
                 <Plus size={10} /> Adaugă skill
               </button>
             </div>
@@ -27,7 +49,8 @@ function SkillSwapTab({ users }) {
               <span>→</span> Ce vrei să înveți
             </p>
             <div className="flex flex-wrap gap-1.5">
-              <button className="px-2.5 py-1 rounded-full text-xs bg-white/[0.04] border border-white/[0.08] text-slate-400 hover:bg-white/[0.07] transition-colors flex items-center gap-1">
+              {wants.map(skill => <span key={skill} className="tag text-xs">{skill}</span>)}
+              <button onClick={() => addSkill('want')} className="px-2.5 py-1 rounded-full text-xs bg-white/[0.04] border border-white/[0.08] text-slate-400 hover:bg-white/[0.07] transition-colors flex items-center gap-1">
                 <Plus size={10} /> Adaugă
               </button>
             </div>
@@ -80,16 +103,38 @@ function SkillSwapTab({ users }) {
 
 function GroupSessionsTab({ sessions }) {
   const [joined, setJoined] = useState({})
+  const [created, setCreated] = useState([])
+  const toast = useToast()
+
+  function createSession() {
+    const id = `local-${Date.now()}`
+    const session = {
+      id,
+      type: 'study',
+      topic: 'Sesiune noua de recapitulare',
+      host: 'Tu',
+      date: 'Saptamana aceasta',
+      time: '18:00',
+      totalSpots: 6,
+      spots: 5,
+      tags: ['recapitulare', 'peer learning'],
+    }
+    setCreated(prev => [session, ...prev])
+    setJoined(prev => ({ ...prev, [id]: true }))
+    toast({ type: 'success', title: 'Sesiune creata', message: 'Noua sesiune apare acum in lista si esti inscris ca organizator.' })
+  }
+
+  const visibleSessions = [...created, ...sessions]
 
   return (
     <div className="space-y-4">
-      <button className="btn-primary flex items-center gap-2 text-sm">
+      <button onClick={createSession} className="btn-primary flex items-center gap-2 text-sm">
         <Plus size={15} /> Creează sesiune de grup
       </button>
 
       <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Sesiuni disponibile</p>
 
-      {sessions.map(s => (
+      {visibleSessions.map(s => (
         <div key={s.id} className="glass-card p-4">
           <div className="flex items-start justify-between gap-3 mb-3">
             <div>

@@ -10,6 +10,41 @@ Built at **FiiPractic Hackathon 2026** in 48 hours.
 
 ## Features
 
+### Multi-role Platform (Student + Profesor)
+- Login/Register cu selectie rol: `Student` sau `Profesor`
+- Fluxuri separate in aceeasi aplicatie, cu UX dedicat pe fiecare rol
+- Profesor demo UAIC FMIM:
+  - email: `andrei.munteanu@uaic.ro`
+  - cod/parola: `0000`
+- Profesorul intra direct in aplicatie (fara onboarding), studentul pastreaza onboarding-ul complet
+
+### Portal Profesor (nou)
+- Dashboard profesor cu statistici live:
+  - cereri licenta noi
+  - recuperari noi
+  - studenti acceptati
+  - conversatii active
+- Modul `Cereri licenta` cu decizie `Accepta/Respinge` + nota catre student
+- Modul `Recuperari` cu decizie `Accepta/Respinge`
+- Modul `Mesaje` pentru conversatii profesor-student
+- Modul `Profil academic` extins:
+  - domeniu coordonare
+  - birou
+  - telefon
+  - asistent
+  - directii cercetare
+  - cursuri publicate
+  - program de consultatii
+
+### Notificari Student-Profesor (nou)
+- Cererile studentilor (licenta/recuperari) ajung in portalul profesorului
+- Actiunile profesorului (accept/reject/raspuns mesaj) trimit notificari catre student
+- Notificarile profesorului sunt clickabile si duc direct in zona corecta:
+  - `Cereri licenta`
+  - `Recuperari`
+  - `Mesaje` (cu selectarea conversatiei relevante)
+- Sincronizare notificari si date prin evenimente locale + storage (fallback robust pentru demo local)
+
 ### Campus Navigator
 - Interactive map with **real pedestrian routing** via OSRM (not straight lines)
 - **Live crowd heatmap** — know if the cafeteria has a queue before you go

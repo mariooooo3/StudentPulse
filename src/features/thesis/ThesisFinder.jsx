@@ -3,6 +3,29 @@ import { Search, BookOpen, Star, Users, ChevronDown, Check, AlertCircle, X, Grad
 import { getProfessors, getThesisDomains } from '../../shared/data/facultyCatalog'
 import BookingModal from './BookingModal'
 import clsx from 'clsx'
+import { DEMO_PROFESSOR, getThesisRequestsForUser } from '../../shared/services/professorPortal.service'
+
+const DEMO_THESIS_PROFESSOR = {
+  id: DEMO_PROFESSOR.id,
+  name: DEMO_PROFESSOR.name,
+  title: DEMO_PROFESSOR.title,
+  domain: DEMO_PROFESSOR.domain,
+  tags: ['Algoritmica', 'Structuri discrete', 'AI aplicat', 'FMIM'],
+  available: true,
+  slotsLeft: 3,
+  totalSlots: 6,
+  minGrade: 8.0,
+  language: 'Romana / Engleza',
+  acceptsOther: true,
+  previousTheses: [
+    { title: 'Modele graf pentru recomandari academice', year: 2025 },
+    { title: 'Optimizari euristice pentru orare universitare', year: 2024 },
+  ],
+  contact: 'Email / Teams',
+  avatar: DEMO_PROFESSOR.avatar,
+  color: 'from-amber-600 to-orange-600',
+  requirementsNote: 'Pentru demo, acest profesor este conectat cu portalul Profesor. Cererile trimise aici apar direct in contul lui.',
+}
 
 function ProfessorSkeleton() {
   return (
@@ -160,7 +183,10 @@ function ProfessorCard({ p, onBook }) {
 }
 
 export default function ThesisFinder({ profile, session }) {
-  const professors = getProfessors(profile)
+  const baseProfessors = getProfessors(profile)
+  const professors = baseProfessors.some(p => p.id === DEMO_THESIS_PROFESSOR.id)
+    ? baseProfessors
+    : [DEMO_THESIS_PROFESSOR, ...baseProfessors]
   const DOMAINS = getThesisDomains(profile)
 
   const [search, setSearch] = useState('')
@@ -168,11 +194,21 @@ export default function ThesisFinder({ profile, session }) {
   const [onlyAvailable, setOnlyAvailable] = useState(false)
   const [booking, setBooking] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [myRequests, setMyRequests] = useState(() => getThesisRequestsForUser(session?.userId))
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 400)
     return () => clearTimeout(t)
   }, [])
+
+  useEffect(() => {
+    function refresh() {
+      setMyRequests(getThesisRequestsForUser(session?.userId))
+    }
+    refresh()
+    window.addEventListener('sc:thesis-requests', refresh)
+    return () => window.removeEventListener('sc:thesis-requests', refresh)
+  }, [session?.userId])
 
   const filtered = professors.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -226,6 +262,29 @@ export default function ThesisFinder({ profile, session }) {
 
       {/* Results */}
       <div className="flex-1 overflow-auto p-5">
+        {myRequests.length > 0 && (
+          <div className="mb-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
+            <p className="text-[11px] uppercase tracking-widest text-slate-500 font-bold mb-3">Cererile tale</p>
+            <div className="space-y-2">
+              {myRequests.slice(0, 3).map(request => (
+                <div key={request.id} className="flex items-center gap-3 rounded-xl bg-[#070b14]/70 border border-white/[0.05] px-3 py-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-slate-200 truncate">{request.professorName}</p>
+                    <p className="text-xs text-slate-600 truncate">{request.idea}</p>
+                  </div>
+                  <span className={clsx(
+                    'rounded-full px-2 py-1 text-[10px] font-bold',
+                    request.status === 'accepted' ? 'bg-emerald-500/15 text-emerald-300' :
+                    request.status === 'rejected' ? 'bg-red-500/15 text-red-300' :
+                    'bg-amber-500/15 text-amber-300',
+                  )}>
+                    {request.status === 'accepted' ? 'Acceptata' : request.status === 'rejected' ? 'Respinsa' : 'In asteptare'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="flex items-center justify-between mb-4">
           <p className="text-[12px] text-slate-500 font-medium">{filtered.length} profesori găsiți</p>
           <p className="text-[11px] text-slate-700">{filtered.filter(p => p.available).length} cu locuri disponibile</p>
