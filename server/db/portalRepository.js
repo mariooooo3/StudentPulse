@@ -211,8 +211,8 @@ export function createPortalRepository() {
 
     upsertThread({ student, professor, subject }) {
       if (!student?.userId) throw new Error('Student is required for portal thread')
-      const professorId = professor?.id || professor?.name || 'prof-andrei-munteanu'
-      const professorName = professor?.name || 'Conf. dr. Andrei Munteanu'
+      const professorId = professor?.id || professor?.name || 'prof-mihai-ciobanu'
+      const professorName = professor?.name || 'Prof. dr. ing. Mihai Ciobanu'
       const existing = db.prepare(`
         SELECT * FROM portal_threads WHERE student_id = ? AND professor_id = ?
       `).get(student.userId, professorId)

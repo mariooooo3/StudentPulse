@@ -70,6 +70,33 @@ const Y4_EFS = [
 
 // ── Universities ──────────────────────────────────────────────────────────────
 export const UNIVERSITIES = [
+  // ── TUIASI Iași (Gheorghe Asachi) ─────────────────────────────────────────
+  {
+    id: 'tuiasi',
+    name: 'Universitatea Tehnică „Gheorghe Asachi" din Iași',
+    shortName: 'Gheorghe Asachi',
+    city: 'Iași',
+    country: 'Romania',
+    emailDomain: 'student.tuiasi.ro',
+    adminDomain: 'academic.tuiasi.ro',
+    color: '#2563eb',
+    avatar: 'TUIASI',
+    established: 1937,
+    faculties: [
+      { code: 'AC',    name: 'Facultatea de Automatică și Calculatoare',                                  type: 'ENGINEERING_CS',  years: Y4,       emailPrefix: 'ac'   },
+      { code: 'ETTI',  name: 'Facultatea de Electronică, Telecomunicații și Tehnologia Informației',       type: 'ENGINEERING',     years: Y4,       emailPrefix: 'etti' },
+      { code: 'IEEIA', name: 'Facultatea de Inginerie Electrică, Energetică și Informatică Aplicată',      type: 'ENGINEERING',     years: Y4,       emailPrefix: 'ee'   },
+      { code: 'CI',    name: 'Facultatea de Construcții și Instalații',                                    type: 'ENGINEERING',     years: Y4,       emailPrefix: 'ci'   },
+      { code: 'MEC',   name: 'Facultatea de Mecanică',                                                     type: 'ENGINEERING',     years: Y4,       emailPrefix: 'mec'  },
+      { code: 'HGIM',  name: 'Facultatea de Hidrotehnică, Geodezie și Ingineria Mediului',                 type: 'ENGINEERING',     years: Y4,       emailPrefix: 'hg'   },
+      { code: 'ICPM',  name: 'Facultatea de Inginerie Chimică și Protecția Mediului „Cristofor Simionescu"', type: 'ENGINEERING',   years: Y4,       emailPrefix: 'ch'   },
+      { code: 'SIM',   name: 'Facultatea de Știința și Ingineria Materialelor',                            type: 'ENGINEERING',     years: Y4,       emailPrefix: 'sim'  },
+      { code: 'CMMI',  name: 'Facultatea de Construcții de Mașini și Management Industrial',               type: 'ENGINEERING',     years: Y4,       emailPrefix: 'cm'   },
+      { code: 'DIMA',  name: 'Facultatea de Design Industrial și Managementul Afacerilor',                 type: 'ECONOMICS',       years: Y4,       emailPrefix: 'dima' },
+      { code: 'ARH',   name: 'Facultatea de Arhitectură „G.M. Cantacuzino"',                               type: 'ARCHITECTURE',    years: Y6_ARCH,  emailPrefix: 'arh'  },
+    ],
+  },
+
   // ── UAIC Iași ──────────────────────────────────────────────────────────────
   {
     id: 'uaic',

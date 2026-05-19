@@ -167,13 +167,26 @@ export default function OnboardingFlow({ onComplete, session }) {
     ]
     const steps = [
       { id: 'faculty', emoji: '🎓', question: 'La ce facultate ești înscris?', subtitle: university ? `Facultățile disponibile la ${university.shortName}` : 'Selectează sau caută facultatea ta', type: 'faculty' },
-      {
-        id: 'year', emoji: '📅', question: 'În ce an de studiu ești?',
-        subtitle: 'Vom prioritiza informațiile relevante pentru anul tău',
-        type: 'cards',
-        options: faculty?.years || defaultYears,
-      },
     ]
+
+    if (faculty?.code === 'AC') {
+      steps.push({
+        id: 'specialization', emoji: '🖥️', question: 'Ce specializare urmezi?',
+        subtitle: 'Fiecare specializare are materii, profesori și structură diferite',
+        type: 'cards',
+        options: [
+          { label: 'CTI', desc: 'Calculatoare și Tehnologia Informației — Dep. Calculatoare (DC)' },
+          { label: 'IS', desc: 'Informatică Aplicată / Automatică — Dep. Automatică și Informatică Aplicată (DAIA)' },
+        ],
+      })
+    }
+
+    steps.push({
+      id: 'year', emoji: '📅', question: 'În ce an de studiu ești?',
+      subtitle: 'Vom prioritiza informațiile relevante pentru anul tău',
+      type: 'cards',
+      options: faculty?.years || defaultYears,
+    })
 
     if (facultyQ) {
       steps.push({
@@ -242,6 +255,7 @@ export default function OnboardingFlow({ onComplete, session }) {
               faculty: answers.faculty?.name || university?.shortName || 'FII',
               facultyCode: answers.faculty?.code || '',
               facultyType: answers.faculty?.type || 'CS',
+              specialization: answers.specialization?.label || null,
               year: answers.year?.label || 'Anul 1',
               interests: answers.interests || [],
               learningStyle: answers.learning_style?.label,

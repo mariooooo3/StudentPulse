@@ -10,45 +10,48 @@ const KEY_FILES = [
   resolve(process.cwd(), '..', '..', '..', 'navigatie', 'navigator-export', 'key.txt'),
 ]
 
-const SYSTEM_PROMPT = `Ești Campus AI, asistentul inteligent al studenților de la UAIC Iași (Universitatea Alexandru Ioan Cuza).
+const SYSTEM_PROMPT = `Ești Campus AI, asistentul inteligent al studenților de la Universitatea Tehnică "Gheorghe Asachi" din Iași (TUIASI).
 Răspunzi ÎNTOTDEAUNA în română, concis și practic. Ești prietenos dar la obiect — nu filozofa, nu da răspunsuri vagi.
 
 ═══════════════════════════════════════
-CORP C — FACULTATEA DE INFORMATICĂ
+CORP C – DEP. CALCULATOARE (CTI)
 ═══════════════════════════════════════
-PARTER:
-- Secretariat FII: intrare stânga, program L-V 09:00-13:00
-- C2 (Aula Mare): 250 locuri, amfiteatru principal, parter dreapta
-- Lab 101, Lab 102: laboratoare PC, parter mijloc
-
-ETAJ 1: C112, C114, C116, C118 (~80 locuri), birouri profesori
-ETAJ 2: C210, C212 (~60 locuri), Lab 205, Lab 206
-ETAJ 3: C308, C310, C315 (~60 locuri), Sala consiliu C305
-ETAJ 4: C420 Amfiteatru Mare (300 locuri), C418 conferințe
-SCARA: dreapta intrării principale. LIFT: lângă secretariat.
+PARTER: Secretariat AC (L-V 09:00-13:00), Amf. AC0-1, Lab. A0-1, Sala AC0-2
+ETAJ 1: Lab. C1-1, Lab. C1-2
+ETAJ 2: Lab. C2-1, Birou C2-5 (Prof. Ciobanu)
+ETAJ 3: Lab. A3-1 (DAIA), Sala A3-2
+ETAJ 4: Sala Conferințe
+SCARA: la capătul coridorului principal.
 
 ═══════════════════════════════════════
-ALTE CLĂDIRI & SERVICII
+CORP A – DEP. AUTOMATICĂ (IS/DAIA)
 ═══════════════════════════════════════
-- Corp A (Matematică): 5 min pe jos prin curtea interioară
-- Biblioteca Centrală: L-V 08:00-20:00, S 09:00-14:00; 3 min din Corp C (ușa din spate); necesită legitimație
-- Cantina Studențească: L-V 11:00-15:00, prânz ~15 lei; 8 min din Corp C
-- Coffee Campus (cafenea): L-V 07:30-19:00, Wi-Fi gratuit
-- Magazin Petru Luca (minimarket): L-D 07:00-22:00, 2 min de Corp C
-- Kebab & Pizza Express: L-D 10:00-24:00
-- Profi Copou (supermarket): 5 min pe jos, L-D 07:00-22:00
-- ATM BRD: lângă Corp C, 24/7
-- Copisterie FII: Corp C, L-V 08:00-17:00
-- Farmacia Catena: Bd. Carol I, L-V 08:00-20:00
+Birouri profesori DAIA, laboratoare de control și automatizare, săli de seminar.
+
+═══════════════════════════════════════
+ALTE CLĂDIRI TUIASI & SERVICII
+═══════════════════════════════════════
+- Biblioteca Gh. Asachi: L-V 08:00-20:00, S 09:00-14:00; ~9 min de la AC
+- Cantina Studențească TUIASI: L-V 11:00-15:00, prânz ~15 lei; 2 min de la AC
+- Facultatea ETTI: Bd. Carol I 11, cartier Copou; ~12 min cu tramvaiul
+- Facultatea IEEIA: Bd. Prof. D. Mangeron, ~5 min pe jos
+- Facultatea MEC: Bd. Prof. D. Mangeron, ~3 min pe jos
+- Cămine Tudor Vladimirescu (C1-C8): ~500m de facultate, 7 min pe jos
+- Iulius Mall: 2km nord-vest; acces tramvai, L-D 10:00-22:00
+- ATM BRD Mangeron: la intrarea AC, 24/7
+- Cafenea Corner: lângă Corp A, L-V 07:30-19:00, Wi-Fi gratuit
+- Magazin Petru / Magazin Luca: L-D 07:00-22:00, 2 min de facultate
+- Copisterie Mangeron: lângă AC, L-V 08:00-17:00
+- Farmacie Dacia: Bd. Mangeron, L-V 08:00-20:00
 
 ═══════════════════════════════════════
 REGULI DE RĂSPUNS
 ═══════════════════════════════════════
-1. Sală (ex: "unde e C310"): spune ETAJUL și cum se ajunge.
+1. Sală (ex: "unde e Lab C1-1"): spune ETAJUL și cum se ajunge.
 2. Traseu: pași clari și concreți.
 3. Orar (secretariat, cantină, bibliotecă): ore exacte.
-4. Mâncare: Cantina (prânz ieftin), Kebab (non-stop), Coffee Campus (mic dejun/gustare), Profi (supermarket).
-5. Dacă NU e despre campus: "Nu am informații despre asta, dar te pot ajuta să navighezi campusul UAIC."
+4. Mâncare: Cantina TUIASI (prânz ieftin), Cafenea Corner (mic dejun), Magazin Petru/Luca (snacks).
+5. Dacă NU e despre campus: "Nu am informații despre asta, dar te pot ajuta să navighezi campusul TUIASI."
 6. NU inventa. Dacă nu știi sigur: "Nu am date exacte despre asta."
 7. Maxim 4-5 propoziții. Fii specific.`
 
@@ -75,8 +78,8 @@ const COPILOT_JSON_SCHEMA = `{
   }
 }`
 
-const KNOWN_INDOOR_ROOMS = ['secretariat', 'lab101', 'lab102', 'c2', 'c112', 'c118', 'c210', 'c308', 'c315', 'c420']
-const KNOWN_BUILDINGS = ['corp-c', 'corp-a', 'library', 'canteen', 'secretariat']
+const KNOWN_INDOOR_ROOMS = ['secretariat-ac', 'amf-ac0-1', 'lab-a0-1', 'sala-ac0-2', 'lab-c1-1', 'lab-c1-2', 'lab-c2-1', 'birou-c2-5', 'lab-a3-1', 'sala-a3-2', 'sala-conf']
+const KNOWN_BUILDINGS = ['corp-c', 'corp-a', 'library', 'canteen', 'secretariat', 'etti', 'ieeia', 'mec', 'ci', 'icpm', 'arh', 'cmmi', 'hgim', 'sim', 'dima']
 
 function safeJson(raw, fallback) {
   try {
@@ -137,8 +140,8 @@ function inferVisualLocation(text) {
   ) {
     return {
       type: 'outdoor',
-      label: 'Facultatea de Informatica',
-      building: 'Facultatea de Informatica',
+      label: 'Facultatea de Automatica si Calculatoare TUIASI',
+      building: 'Facultatea de Automatica si Calculatoare TUIASI',
       room: null,
       confidence: 0.82,
     }
@@ -170,9 +173,9 @@ function inferIndoorRoom(...texts) {
   for (const room of KNOWN_INDOOR_ROOMS) {
     if (normalized.includes(room)) return room
   }
-  if (normalized.includes('c 210')) return 'c210'
-  if (normalized.includes('c 308')) return 'c308'
-  if (normalized.includes('c 112')) return 'c112'
+  if (normalized.includes('c 210') || normalized.includes('c210') || normalized.includes('lab c2')) return 'lab-c2-1'
+  if (normalized.includes('c 308') || normalized.includes('c308') || normalized.includes('a3') || normalized.includes('daia')) return 'lab-a3-1'
+  if (normalized.includes('c 112') || normalized.includes('c112') || normalized.includes('lab c1')) return 'lab-c1-1'
   return null
 }
 
@@ -296,7 +299,7 @@ async function handlePhoto(req, res) {
             type: 'text',
             text: `Esti AI Compass pentru StudentCompass.
 Analizeaza imaginea strict ca recunoastere de locatie in campus.
-Daca poza arata cladirea Facultatii de Informatica / FII / zona Corpului C de la Informatica, raspunde vizibil cu numele "Facultatea de Informatica", nu doar "Corp C".
+Daca poza arata cladirea Facultatii de Automatica si Calculatoare TUIASI, Corp C sau Corp A, numeste-o exact "Facultatea de Automatica si Calculatoare TUIASI". Nu folosi "Facultatea de Informatica", "FII" sau "UAIC".
 Raspunde in romana, in 1-2 fraze: locatia probabila si indiciul vizual care te-a facut sa o recunosti.
 Nu genera traseu si nu intreba destinatia; aplicatia va intreba automat dupa raspunsul tau.`,
           },
@@ -327,8 +330,8 @@ async function handleCopilot(req, res) {
             { type: 'image_url', image_url: { url: `data:${image.mimeType || 'image/jpeg'};base64,${image.base64}` } },
             {
               type: 'text',
-              text: `Analizeaza imaginea ca ghid de campus UAIC.
-Identifica daca este Facultatea de Informatica, Corp C, o intrare, un coridor, o sala sau un panou.
+              text: `Analizeaza imaginea ca ghid de campus TUIASI (Gheorghe Asachi).
+Identifica daca este Corp C (CTI), Corp A (DAIA), o intrare, un coridor, o sala sau un panou.
 Raspunde concis in romana cu:
 - locatia probabila
 - indicii vizuale observate
@@ -346,7 +349,7 @@ Raspunde concis in romana cu:
 Analiza vizuala preliminara: ${visualAnswer || 'Nu exista poza atasata.'}
 
 Context cunoscut:
-- Campus: ${context.campus || 'UAIC'}
+- Campus: ${context.campus || 'TUIASI Gheorghe Asachi'}
 - Sali indoor disponibile: ${JSON.stringify(KNOWN_INDOOR_ROOMS)}
 - Cladiri outdoor disponibile: ${JSON.stringify(KNOWN_BUILDINGS)}
 - Orar apropiat: ${JSON.stringify(context.schedule || [])}
@@ -385,7 +388,7 @@ IMPORTANT: Campul "actions" trebuie scris INTOTDEAUNA in engleza (este folosit p
     }
   }
   if (inferredRoom && (!normalized.routeSuggestion.to || normalized.routeSuggestion.type === 'none')) {
-    normalized.routeSuggestion = { type: 'indoor', from: normalized.detectedLocation.room || 'c112', to: inferredRoom }
+    normalized.routeSuggestion = { type: 'indoor', from: normalized.detectedLocation.room || 'secretariat-ac', to: inferredRoom }
   }
   if (!inferredRoom && inferredBuilding && !normalized.destination.buildingId) {
     normalized.destination = {
@@ -400,7 +403,7 @@ IMPORTANT: Campul "actions" trebuie scris INTOTDEAUNA in engleza (este folosit p
   }
 
   if (normalized.routeSuggestion.type === 'indoor' && normalized.routeSuggestion.to && !normalized.routeSuggestion.from) {
-    normalized.routeSuggestion.from = normalized.detectedLocation.room || 'c112'
+    normalized.routeSuggestion.from = normalized.detectedLocation.room || 'secretariat-ac'
   }
   if (normalized.routeSuggestion.type === 'outdoor' && normalized.routeSuggestion.to && !normalized.routeSuggestion.from) {
     normalized.routeSuggestion.from = 'corp-c'
@@ -493,32 +496,32 @@ async function handleSupportAssistant(req, res) {
   const body = await readJson(req)
   const context = body.context || {}
   const fallbackSuggestions = context.role === 'professor'
-    ? ['What can I manage here?', 'How do thesis requests work?', 'How do messages work?']
-    : ['What can I do here?', 'Open Campus Navigator', 'How do thesis requests work?']
+    ? ['Ce pot gestiona aici?', 'Cum functioneaza cererile de licenta?', 'Cum functioneaza mesajele?']
+    : ['Ce pot face aici?', 'Deschide Campus Navigator', 'Cum functioneaza cererile de licenta?']
 
   const raw = await grokChat({
     model: TEXT_MODEL,
     messages: [
       {
         role: 'system',
-        content: `You are the virtual support assistant inside StudentCompass.
-Answer in the same language as the user when possible. Be concise, practical, and product-aware.
+        content: `Esti asistentul virtual de suport din StudentCompass.
+Raspunde intotdeauna in romana. Fii concis, practic si orientat pe produs.
 
-You can help with:
-- account access, institutional email, onboarding, profile basics
-- student modules: Dashboard, Campus Navigator, Schedule Hub, Thesis Finder, Peer Tutoring, Messages, Student Life, City Adaptation
-- professor modules: dashboard, academic profile, thesis requests, recovery requests, messages
-- basic student-life questions
+Poti ajuta cu:
+- acces la cont, email institutional, onboarding si profil
+- module de student: Dashboard, Campus Navigator, Schedule Hub, Thesis Finder, Peer Tutoring, Messages, Student Life, City Adaptation
+- module de profesor: dashboard, profil academic, cereri de licenta, cereri de recuperare si mesaje
+- intrebari de baza despre viata studenteasca
 
-Rules:
-- Do not claim you changed account data unless the user explicitly used an app control.
-- Do not invent policies, grades, legal/medical/financial advice, or private data.
-- If the user asks for something outside StudentCompass, answer briefly if it is basic; otherwise redirect to what the app can help with.
-- Return JSON only with this shape: {"answer":"...", "suggestions":["...", "...", "..."]}.`,
+Reguli:
+- Nu spune ca ai modificat datele contului daca utilizatorul nu a folosit un control din aplicatie.
+- Nu inventa politici, note, sfaturi juridice/medicale/financiare sau date private.
+- Daca intrebarea este in afara StudentCompass, raspunde scurt daca este ceva de baza; altfel redirectioneaza catre ce poate face aplicatia.
+- Returneaza doar JSON cu forma: {"answer":"...", "suggestions":["...", "...", "..."]}.`,
       },
       {
         role: 'user',
-        content: `Current app context:
+        content: `Contextul curent al aplicatiei:
 ${JSON.stringify({
   role: context.role,
   university: context.university,
@@ -529,10 +532,10 @@ ${JSON.stringify({
   currentLabel: context.currentLabel,
 })}
 
-Recent conversation:
+Conversatia recenta:
 ${JSON.stringify(Array.isArray(body.history) ? body.history.slice(-8) : [])}
 
-User question:
+Intrebarea utilizatorului:
 ${String(body.message || '')}`,
       },
     ],
@@ -542,7 +545,7 @@ ${String(body.message || '')}`,
 
   const parsed = safeJson(raw, { answer: raw, suggestions: fallbackSuggestions })
   sendJson(res, 200, {
-    answer: String(parsed.answer || raw || 'I can help with StudentCompass account, modules, messages, schedules, thesis requests, and basic student-life questions.'),
+    answer: String(parsed.answer || raw || 'Te pot ajuta cu intrebari despre cont, module, mesaje, orar, cereri de licenta si viata studenteasca.'),
     suggestions: Array.isArray(parsed.suggestions)
       ? parsed.suggestions.slice(0, 3).map(String)
       : fallbackSuggestions,

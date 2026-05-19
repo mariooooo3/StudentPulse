@@ -17,10 +17,17 @@ const FACULTY_CODE_KEY = {
   PHYS: 'PHYSICS',
   MATH: 'MATHEMATICS',
   FMIM: 'MATH_CS',
+  AC: 'ENGINEERING_CS',
 }
 
 export function getFacultyKey(profile) {
-  return FACULTY_CODE_KEY[profile?.facultyCode] || profile?.facultyType || 'CS'
+  const base = FACULTY_CODE_KEY[profile?.facultyCode] || profile?.facultyType || 'CS'
+  if (base === 'ENGINEERING_CS') {
+    if (profile?.specialization === 'IS') return 'ENGINEERING_CS_IS'
+    if (profile?.specialization === 'CTI') return 'ENGINEERING_CS_CTI'
+    return 'ENGINEERING_CS_CTI'
+  }
+  return base
 }
 
 const scienceColors = [
@@ -201,6 +208,48 @@ const OVERRIDES = {
         { icon: '📐', text: 'Seminarul de Algebră Liniară se mută în Amf. C4 săptămâna viitoare', time: '10 min în urmă', type: 'warn' },
         { icon: '💻', text: 'Laboratorul de Structuri de Date: tema 3 are deadline mâine la 23:59', time: '2 ore în urmă', type: 'danger' },
         { icon: '✅', text: 'Prof. Leustean a confirmat subiectul propus pentru lucrarea de licență', time: 'Ieri', type: 'success' },
+      ],
+    },
+  },
+  ENGINEERING_CS_CTI: {
+    dashboard: {
+      nextCourse: { in: '1h 15m', label: 'POO · Lab. C1-1' },
+      stats: [
+        { val: '3', label: 'Cursuri azi', icon: '📚' },
+        { val: '2', label: 'Teme în așteptare', icon: '📝' },
+        { val: '7', label: 'Zile până la sesiune', icon: '⏳' },
+        { val: '4', label: 'Coordonatori disponibili', icon: '🎓' },
+      ],
+      upcoming: [
+        { time: '08:00', name: 'Programare Orientată Obiect', room: 'Lab. C1-1', type: 'Laborator', in: '1h 15m', color: 'bg-indigo-500' },
+        { time: '10:00', name: 'Electronică Digitală Avansată', room: 'Amf. AC0-1', type: 'Curs', in: '3h 15m', color: 'bg-amber-500' },
+        { time: '14:00', name: 'Tehnici de Simulare', room: 'Lab. C2-1', type: 'Laborator', in: '7h 15m', color: 'bg-emerald-500' },
+      ],
+      alerts: [
+        { icon: '💻', text: 'POO: tema 4 (Design Patterns) are deadline mâine la 23:59', time: '5 min în urmă', type: 'danger' },
+        { icon: '🏫', text: 'Laboratorul EDA din joi se mută în Lab. C2-2', time: '30 min în urmă', type: 'warn' },
+        { icon: '✅', text: 'Prof. dr. ing. Florin Leon a confirmat tema de licență propusă', time: 'Ieri', type: 'success' },
+      ],
+    },
+  },
+  ENGINEERING_CS_IS: {
+    dashboard: {
+      nextCourse: { in: '0h 50m', label: 'Matematici Numerice · Lab. A1-1' },
+      stats: [
+        { val: '3', label: 'Cursuri azi', icon: '📚' },
+        { val: '1', label: 'Raport laborator', icon: '📝' },
+        { val: '7', label: 'Zile până la sesiune', icon: '⏳' },
+        { val: '4', label: 'Coordonatori disponibili', icon: '🎓' },
+      ],
+      upcoming: [
+        { time: '08:00', name: 'Matematici Numerice', room: 'Lab. A1-1', type: 'Laborator', in: '0h 50m', color: 'bg-violet-500' },
+        { time: '10:00', name: 'Sisteme cu Dispozitive Numerice', room: 'Amf. AC0-1', type: 'Curs', in: '2h 50m', color: 'bg-indigo-500' },
+        { time: '14:00', name: 'Matematica Sistemelor Fizice', room: 'Lab. A2-1', type: 'Laborator', in: '6h 50m', color: 'bg-cyan-500' },
+      ],
+      alerts: [
+        { icon: '📊', text: 'Raportul de laborator MN are deadline vineri la 18:00', time: '15 min în urmă', type: 'danger' },
+        { icon: '🏫', text: 'Cursul ASDN din marți se mută în sala A0-2', time: '1 oră în urmă', type: 'warn' },
+        { icon: '✅', text: 'Conf. dr. ing. Anca Maxim a confirmat cererea de consultație', time: 'Ieri', type: 'success' },
       ],
     },
   },

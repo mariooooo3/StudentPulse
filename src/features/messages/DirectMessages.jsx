@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import { Send, Search, Wifi, WifiOff, Users, ShieldCheck, Paperclip, X, FileText, ArrowLeft, Hash } from 'lucide-react'
+import { Send, Search, Wifi, WifiOff, Users, ShieldCheck, Paperclip, X, FileText, ArrowLeft, Hash, Check, CheckCheck } from 'lucide-react'
 import { useMessages } from '../../shared/hooks/useMessages'
 import { socketService } from '../../shared/services/socket.service'
 import { useOnlineCount } from '../../shared/hooks/useOnlineCount'
@@ -220,7 +220,12 @@ function ChatThread({ contact, currentUserId, currentName, scope, onBack }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-white text-sm truncate">{contact.name}</p>
-          <p className="text-xs text-slate-500 truncate">{contact.facultyName || 'Aceeasi facultate'}</p>
+          <p className="text-xs truncate">
+            {Object.keys(typingUsers).length > 0
+              ? <span className="text-indigo-400 italic">scrie...</span>
+              : <span className="text-emerald-400">● Online</span>
+            }
+          </p>
         </div>
         <span className={clsx('flex items-center gap-1 text-[10px]', connected ? 'text-emerald-400' : 'text-slate-500')}>
           {connected ? <Wifi size={11} /> : <WifiOff size={11} />}
@@ -279,8 +284,10 @@ function ChatThread({ contact, currentUserId, currentName, scope, onBack }) {
                   <p className="text-[10px] text-slate-600">
                     {new Date(msg.timestamp).toLocaleTimeString('ro', { hour: '2-digit', minute: '2-digit' })}
                   </p>
-                  {isSeen && (
-                    <span className="text-[10px] text-indigo-400 font-medium">· Văzut</span>
+                  {isMe && (
+                    isSeen
+                      ? <CheckCheck size={11} className="text-indigo-400" />
+                      : <Check size={11} className="text-slate-600" />
                   )}
                 </div>
               </div>
@@ -352,18 +359,64 @@ function ChatThread({ contact, currentUserId, currentName, scope, onBack }) {
 function PortalThread({ thread, currentUserId, currentName }) {
   const [input, setInput] = useState('')
   const [localThread, setLocalThread] = useState(thread)
+  const [typingUsers, setTypingUsers] = useState({})
+  const [contactSeenAt, setContactSeenAt] = useState(null)
   const bottomRef = useRef(null)
+  const typingTimer = useRef(null)
+  const threadChannel = `portal-thread:${thread.id}`
+  const typingChannel = `typing:${threadChannel}`
+  const readChannel = `read:${threadChannel}`
 
   useEffect(() => {
     setLocalThread(thread)
   }, [thread])
 
   useEffect(() => {
+    setTypingUsers({})
+    setContactSeenAt(null)
+  }, [thread.id])
+
+  useEffect(() => {
+    const unsubTyping = socketService.subscribe(typingChannel, ({ userId, name, isTyping }) => {
+      if (userId === currentUserId) return
+      setTypingUsers(prev => {
+        const next = { ...prev }
+        if (isTyping) next[userId] = name || localThread.professorName
+        else delete next[userId]
+        return next
+      })
+    })
+    const unsubRead = socketService.subscribe(readChannel, ({ userId, seenAt }) => {
+      if (userId === currentUserId) return
+      setContactSeenAt(seenAt)
+    })
+    return () => {
+      unsubTyping()
+      unsubRead()
+    }
+  }, [currentUserId, localThread.professorName, readChannel, typingChannel])
+
+  useEffect(() => {
+    socketService.publish(readChannel, { userId: currentUserId, seenAt: new Date().toISOString() }).catch(() => {})
+  }, [currentUserId, localThread?.messages?.length, readChannel])
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [localThread?.messages])
 
+  function handleInput(e) {
+    setInput(e.target.value)
+    socketService.publish(typingChannel, { userId: currentUserId, name: currentName, isTyping: true }).catch(() => {})
+    clearTimeout(typingTimer.current)
+    typingTimer.current = setTimeout(() => {
+      socketService.publish(typingChannel, { userId: currentUserId, name: currentName, isTyping: false }).catch(() => {})
+    }, 2000)
+  }
+
   async function send() {
     if (!input.trim()) return
+    clearTimeout(typingTimer.current)
+    socketService.publish(typingChannel, { userId: currentUserId, name: currentName, isTyping: false }).catch(() => {})
     const updated = await sendPortalMessage(localThread.id, {
       senderId: currentUserId,
       senderName: currentName,
@@ -380,7 +433,12 @@ function PortalThread({ thread, currentUserId, currentName }) {
         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-xs font-bold shrink-0">AM</div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-white text-sm truncate">{localThread.professorName}</p>
-          <p className="text-xs text-slate-500 truncate">{localThread.subject}</p>
+          <p className="text-xs truncate">
+            {Object.keys(typingUsers).length > 0
+              ? <span className="text-amber-300 italic">scrie...</span>
+              : <span className="text-slate-500">{localThread.subject}</span>
+            }
+          </p>
         </div>
         <span className="text-[10px] text-amber-300">Portal profesor</span>
       </div>
@@ -391,13 +449,28 @@ function PortalThread({ thread, currentUserId, currentName }) {
         )}
         {localThread.messages.map(msg => {
           const isMe = msg.senderRole === 'student'
+          const myMessages = localThread.messages.filter(item => item.senderRole === 'student')
+          const lastMyMessage = myMessages[myMessages.length - 1]
+          const isSeen = isMe && contactSeenAt && msg.id === lastMyMessage?.id && new Date(contactSeenAt) >= new Date(msg.timestamp)
           return (
             <div key={msg.id} className={clsx('flex', isMe ? 'justify-end' : 'justify-start')}>
-              <div className={clsx(
-                'max-w-sm rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
-                isMe ? 'bg-indigo-600 text-white rounded-tr-sm' : 'bg-white/[0.05] border border-white/[0.06] text-slate-200 rounded-tl-sm',
-              )}>
-                {msg.text}
+              <div className="max-w-sm">
+                <div className={clsx(
+                  'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+                  isMe ? 'bg-indigo-600 text-white rounded-tr-sm' : 'bg-white/[0.05] border border-white/[0.06] text-slate-200 rounded-tl-sm',
+                )}>
+                  {msg.text}
+                </div>
+                <div className={clsx('mt-1 flex items-center gap-1', isMe ? 'justify-end' : 'justify-start')}>
+                  <p className="text-[10px] text-slate-600">
+                    {new Date(msg.timestamp).toLocaleTimeString('ro', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                  {isMe && (
+                    isSeen
+                      ? <CheckCheck size={11} className="text-indigo-400" />
+                      : <Check size={11} className="text-slate-600" />
+                  )}
+                </div>
               </div>
             </div>
           )
@@ -405,11 +478,24 @@ function PortalThread({ thread, currentUserId, currentName }) {
         <div ref={bottomRef} />
       </div>
 
+      {Object.keys(typingUsers).length > 0 && (
+        <div className="flex items-center gap-2 px-6 py-1.5">
+          <div className="flex gap-0.5 items-end">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+          <p className="text-xs text-slate-500 italic">
+            {Object.values(typingUsers).join(', ')} scrie...
+          </p>
+        </div>
+      )}
+
       <div className="p-4 border-t border-white/[0.05] bg-[#070b14]/90">
         <div className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.07] rounded-2xl px-4 py-3">
           <input
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={handleInput}
             onKeyDown={e => e.key === 'Enter' && send()}
             placeholder="Raspunde profesorului..."
             className="flex-1 bg-transparent text-sm text-slate-200 placeholder-slate-600 outline-none"

@@ -19,81 +19,58 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 })
 
-const CAMPUS_CENTER = [47.1764, 27.5733]
+// TUIASI AC – Bd. Prof. Dimitrie Mangeron 67, Iași
+const CAMPUS_CENTER = [47.154082, 27.5940514]
 
 const buildings = [
-  { id: 1, name: 'Corp C - Informatică', distance: '350m', time: '5 min', type: 'Cursuri', coords: [47.1771, 27.5742] },
-  { id: 2, name: 'Corp A - Matematică', distance: '520m', time: '7 min', type: 'Seminarii', coords: [47.1758, 27.5728] },
-  { id: 3, name: 'Biblioteca Centrală', distance: '200m', time: '3 min', type: 'Studiu', coords: [47.1753, 27.5747] },
-  { id: 4, name: 'Cantina Studențească', distance: '180m', time: '2 min', type: 'Servicii', coords: [47.1783, 27.5718] },
-  { id: 5, name: 'Secretariat FII', distance: '400m', time: '5 min', type: 'Admin', coords: [47.1771, 27.5742] },
+  { id: 1,  name: 'Facultatea de Automatica si Calculatoare', distance: '0m',    time: '-',      type: 'Cursuri', coords: [47.154082, 27.594051] },
+  { id: 2,  name: 'Corp A - Departamentul Automatica',         distance: '80m',   time: '1 min',  type: 'Cursuri', coords: [47.154300, 27.594300] },
+  { id: 3,  name: 'Biblioteca Gh. Asachi',                     distance: '650m',  time: '9 min',  type: 'Studiu',  coords: [47.157000, 27.590300] },
+  { id: 4,  name: 'Cantina TUIASI Tudor Vladimirescu',          distance: '1.3km', time: '17 min', type: 'Servicii', coords: [47.149650, 27.607650] },
+  { id: 5,  name: 'Secretariat AC',                             distance: '30m',   time: '1 min',  type: 'Admin',   coords: [47.154082, 27.594051] },
+  { id: 6,  name: 'Facultatea ETTI - Bd. Carol I nr. 11',       distance: '2.7km', time: '12 min', type: 'Cursuri', coords: [47.177300, 27.572600] },
+  { id: 7,  name: 'Rectorat TUIASI',                            distance: '500m',  time: '7 min',  type: 'Admin',   coords: [47.157500, 27.592000] },
+  { id: 8,  name: 'Facultatea IEEIA',                           distance: '370m',  time: '5 min',  type: 'Cursuri', coords: [47.156200, 27.591200] },
+  { id: 9,  name: 'Facultatea de Mecanica',                     distance: '200m',  time: '3 min',  type: 'Cursuri', coords: [47.153800, 27.595500] },
+  { id: 10, name: 'Facultatea de Constructii si Instalatii',    distance: '290m',  time: '4 min',  type: 'Cursuri', coords: [47.155200, 27.592500] },
+  { id: 11, name: 'Facultatea ICPM C. Simionescu',              distance: '180m',  time: '3 min',  type: 'Cursuri', coords: [47.153700, 27.595200] },
+  { id: 12, name: 'Facultatea de Arhitectura G.M. Cantacuzino', distance: '450m',  time: '6 min',  type: 'Cursuri', coords: [47.155800, 27.591800] },
+  { id: 13, name: 'Facultatea CMMI',                            distance: '240m',  time: '4 min',  type: 'Cursuri', coords: [47.153950, 27.596050] },
+  { id: 14, name: 'Facultatea HGIM',                            distance: '230m',  time: '4 min',  type: 'Cursuri', coords: [47.154700, 27.593200] },
+  { id: 15, name: 'Facultatea SIM',                             distance: '210m',  time: '3 min',  type: 'Cursuri', coords: [47.153600, 27.595900] },
+  { id: 16, name: 'Facultatea DIMA',                            distance: '120m',  time: '2 min',  type: 'Cursuri', coords: [47.154500, 27.594900] },
 ]
 
 const POIS = [
-  {
-    id: 1, name: 'Magazin Petru Luca', type: 'Minimarket',
-    lat: 47.1769, lng: 27.5757, emoji: '🛒', color: '#f97316',
-    desc: 'Minimarket cu produse alimentare, snacks și băuturi reci.',
-    rating: 4.2, hours: 'L–D: 07:00 – 22:00',
-  },
-  {
-    id: 2, name: 'Farmacia Catena', type: 'Farmacie',
-    lat: 47.1748, lng: 27.5737, emoji: '💊', color: '#22c55e',
-    desc: 'Farmacia studenților — consultanță gratuită.',
-    rating: 4.6, hours: 'L–V: 08:00–20:00 | S: 09:00–15:00',
-  },
-  {
-    id: 3, name: 'Coffee Campus', type: 'Cafenea',
-    lat: 47.1782, lng: 27.5722, emoji: '☕', color: '#8b5cf6',
-    desc: 'Cafenea cozy cu Wi‑Fi gratuit și prize lângă fiecare loc.',
-    rating: 4.5, hours: 'L–V: 07:30 – 19:00',
-  },
-  {
-    id: 4, name: 'Profi Copou', type: 'Supermarket',
-    lat: 47.1744, lng: 27.5768, emoji: '🏪', color: '#0ea5e9',
-    desc: 'Supermarket complet la 5 minute de campus.',
-    rating: 4.1, hours: 'L–D: 07:00 – 22:00',
-  },
-  {
-    id: 5, name: 'ATM BRD Campus', type: 'ATM',
-    lat: 47.1776, lng: 27.5730, emoji: '🏧', color: '#1d4ed8',
-    desc: 'Bancomat gratuit pentru studenții BRD.',
-    rating: null, hours: '24/7',
-  },
-  {
-    id: 6, name: 'Kebab & Pizza Express', type: 'Fast-food',
-    lat: 47.1762, lng: 27.5756, emoji: '🌯', color: '#ef4444',
-    desc: 'Mâncare rapidă și ieftină. Livrare disponibilă.',
-    rating: 4.0, hours: 'L–D: 10:00 – 24:00',
-  },
-  {
-    id: 7, name: 'Librărie Universității', type: 'Librărie',
-    lat: 47.1752, lng: 27.5720, emoji: '📚', color: '#92400e',
-    desc: 'Cărți, suporturi de curs și rechizite pentru studenți.',
-    rating: 4.3, hours: 'L–V: 09:00 – 18:00',
-  },
-  {
-    id: 8, name: 'Copisterie FII', type: 'Copisterie',
-    lat: 47.1774, lng: 27.5744, emoji: '🖨️', color: '#475569',
-    desc: 'Printare, laminare și spiralare. Prețuri studențești.',
-    rating: 4.4, hours: 'L–V: 08:00 – 17:00',
-  },
+  { id: 1, name: 'Magazin Petru', type: 'Minimarket', lat: 47.1538, lng: 27.5957, short: 'PET', color: '#f97316', desc: 'Minimarket frecventat de studenti - alimente, snacks, bauturi, rechizite.', rating: 4.3, hours: 'L-D: 07:00-22:00' },
+  { id: 2, name: 'Magazin Luca', type: 'Minimarket', lat: 47.1544, lng: 27.5960, short: 'LUC', color: '#fb923c', desc: 'Minimarket de proximitate langa complexul AC, ideal pentru pauze scurte.', rating: 4.1, hours: 'L-D: 07:00-21:00' },
+  { id: 3, name: 'Iulius Mall Iasi', type: 'Mall', lat: 47.1552, lng: 27.6057, short: 'MALL', color: '#8b5cf6', desc: 'Restaurante, Cinema City, supermarket si acces rapid din campusul Tudor Vladimirescu.', rating: 4.7, hours: 'L-D: 10:00-22:00' },
+  { id: 4, name: 'Complex Camine Tudor Vladimirescu', type: 'Camin', lat: 47.1498, lng: 27.6093, short: 'TUD', color: '#64748b', desc: 'Campus TUIASI cu 21 de camine si aproximativ 8.000 de locuri de cazare.', rating: 4.0, hours: '24/7' },
+  { id: 5, name: 'Cantina TUIASI', type: 'Cantina', lat: 47.14965, lng: 27.60765, short: 'CAN', color: '#ea580c', desc: 'Cantina oficiala din campus, Aleea Prof. Vasile Petrescu nr. 29. Program L-V 11:00-19:00.', rating: 4.4, hours: 'L-V: 11:00-19:00' },
+  { id: 6, name: 'Camine T1-T4', type: 'Camin', lat: 47.1507, lng: 27.6062, short: 'T1', color: '#475569', desc: 'Primele camine ale campusului Tudor Vladimirescu, aproape de zona centrala a campusului.', rating: 3.9, hours: '24/7' },
+  { id: 7, name: 'Camine T5-T11', type: 'Camin', lat: 47.1499, lng: 27.6084, short: 'T5', color: '#475569', desc: 'Zona cu camine, parc, spatii de recreere si acces rapid catre cantina.', rating: 4.0, hours: '24/7' },
+  { id: 8, name: 'Camine T12-T17', type: 'Camin', lat: 47.1489, lng: 27.6101, short: 'T12', color: '#475569', desc: 'Grup de camine in campusul Tudor Vladimirescu, aproape de Iulius Mall.', rating: 4.0, hours: '24/7' },
+  { id: 9, name: 'Camine T18-T19 / DSS', type: 'Camin', lat: 47.1481, lng: 27.6110, short: 'DSS', color: '#334155', desc: 'Camine T18-T19 si Directia Servicii Studentesti, parter. Program DSS L-V 07:00-15:00.', rating: 4.0, hours: '24/7' },
+  { id: 10, name: 'Biblioteca Facultatii AC', type: 'Biblioteca', lat: 47.1541, lng: 27.5941, short: 'BIB', color: '#f59e0b', desc: 'Sala de lectura si biblioteca proprie a Facultatii AC, in complexul Corp C.', rating: 4.3, hours: 'L-V: 09:00-17:00' },
+  { id: 11, name: 'ATM BRD Mangeron', type: 'ATM', lat: 47.1542, lng: 27.5935, short: 'ATM', color: '#1d4ed8', desc: 'Bancomat BRD la intrarea principala a complexului AC.', rating: null, hours: '24/7' },
+  { id: 12, name: 'Farmacie Dacia', type: 'Farmacie', lat: 47.1536, lng: 27.5962, short: 'RX', color: '#22c55e', desc: 'Farmacie pe Bd. Mangeron, la cateva minute de facultate.', rating: 4.4, hours: 'L-V: 08:00-20:00 | S: 09:00-15:00' },
+  { id: 13, name: 'Copisterie Mangeron', type: 'Copisterie', lat: 47.1540, lng: 27.5943, short: 'PRN', color: '#475569', desc: 'Printare, laminare si spiralare langa AC.', rating: 4.3, hours: 'L-V: 08:00-17:00' },
 ]
 
-function makePOIIcon(emoji, color) {
+function makePOIIcon(label, color) {
   return L.divIcon({
     className: '',
     html: `
       <div style="display:flex;flex-direction:column;align-items:center">
         <div style="
-          width:36px;height:36px;
+          min-width:36px;height:36px;padding:0 6px;
           background:${color};
           border:2.5px solid #fff;
-          border-radius:50%;
+          border-radius:999px;
           display:flex;align-items:center;justify-content:center;
-          font-size:17px;
+          font-size:10px;font-weight:800;color:#fff;
           box-shadow:0 2px 10px rgba(0,0,0,0.28);
-        ">${emoji}</div>
+        ">${label}</div>
         <div style="
           width:0;height:0;
           border-left:6px solid transparent;
@@ -102,8 +79,8 @@ function makePOIIcon(emoji, color) {
           margin-top:-1px;
         "></div>
       </div>`,
-    iconSize: [36, 46],
-    iconAnchor: [18, 46],
+    iconSize: [42, 46],
+    iconAnchor: [21, 46],
     popupAnchor: [0, -48],
   })
 }
@@ -111,35 +88,38 @@ function makePOIIcon(emoji, color) {
 const FLOOR_Y = [455, 352, 264, 176, 88]
 const STAIR_X = 510
 
+// Indoor map – Corp C/A, Facultatea AC TUIASI
 const IND_ROOMS = [
-  { id: 'secretariat', label: 'Secretariat', floor: 0, rx: 40, ry: 412, rw: 100, rh: 35, cx: 90 },
-  { id: 'lab101', label: 'Lab 101', floor: 0, rx: 165, ry: 412, rw: 70, rh: 35, cx: 200 },
-  { id: 'lab102', label: 'Lab 102', floor: 0, rx: 255, ry: 412, rw: 70, rh: 35, cx: 290 },
-  { id: 'c2', label: 'C2 Aula', floor: 0, rx: 355, ry: 412, rw: 85, rh: 35, cx: 397 },
-  { id: 'c112', label: 'C112', floor: 1, rx: 40, ry: 309, rw: 80, rh: 35, cx: 80 },
-  { id: 'c118', label: 'C118', floor: 1, rx: 300, ry: 309, rw: 80, rh: 35, cx: 340 },
-  { id: 'c210', label: 'C210', floor: 2, rx: 150, ry: 221, rw: 80, rh: 35, cx: 190 },
-  { id: 'c308', label: 'C308', floor: 3, rx: 40, ry: 133, rw: 80, rh: 35, cx: 80 },
-  { id: 'c315', label: 'C315', floor: 3, rx: 300, ry: 133, rw: 80, rh: 35, cx: 340 },
-  { id: 'c420', label: 'C420 Amfiteatru', floor: 4, rx: 80, ry: 40, rw: 200, rh: 40, cx: 180 },
+  { id: 'secretariat-ac', label: 'Secretariat AC',  floor: 0, rx: 40,  ry: 412, rw: 110, rh: 35, cx: 95  },
+  { id: 'amf-ac0-1',      label: 'Amf. AC0-1',      floor: 0, rx: 170, ry: 412, rw: 100, rh: 35, cx: 220 },
+  { id: 'lab-a0-1',       label: 'Lab. A0-1',        floor: 0, rx: 290, ry: 412, rw: 80,  rh: 35, cx: 330 },
+  { id: 'sala-ac0-2',     label: 'Sala AC0-2',       floor: 0, rx: 390, ry: 412, rw: 80,  rh: 35, cx: 430 },
+  { id: 'lab-c1-1',       label: 'Lab. C1-1',        floor: 1, rx: 40,  ry: 309, rw: 90,  rh: 35, cx: 85  },
+  { id: 'lab-c1-2',       label: 'Lab. C1-2',        floor: 1, rx: 300, ry: 309, rw: 90,  rh: 35, cx: 345 },
+  { id: 'lab-c2-1',       label: 'Lab. C2-1',        floor: 2, rx: 150, ry: 221, rw: 90,  rh: 35, cx: 195 },
+  { id: 'birou-c2-5',     label: 'Birou C2-5',       floor: 2, rx: 270, ry: 221, rw: 80,  rh: 35, cx: 310 },
+  { id: 'lab-a3-1',       label: 'Lab. A3-1 (DAIA)', floor: 3, rx: 40,  ry: 133, rw: 100, rh: 35, cx: 90  },
+  { id: 'sala-a3-2',      label: 'Sala A3-2',        floor: 3, rx: 300, ry: 133, rw: 80,  rh: 35, cx: 340 },
+  { id: 'sala-conf',      label: 'Sala Conferințe',  floor: 4, rx: 80,  ry: 40,  rw: 200, rh: 40, cx: 180 },
 ]
 
 const IND_GRAPH = {
-  secretariat: ['lab101', 'lab102', 'c2', 'stairs_0'],
-  lab101: ['secretariat', 'lab102', 'c2', 'stairs_0'],
-  lab102: ['secretariat', 'lab101', 'c2', 'stairs_0'],
-  c2: ['secretariat', 'lab101', 'lab102', 'stairs_0'],
-  stairs_0: ['secretariat', 'lab101', 'lab102', 'c2', 'stairs_1'],
-  c112: ['c118', 'stairs_1'],
-  c118: ['c112', 'stairs_1'],
-  stairs_1: ['c112', 'c118', 'stairs_0', 'stairs_2'],
-  c210: ['stairs_2'],
-  stairs_2: ['c210', 'stairs_1', 'stairs_3'],
-  c308: ['c315', 'stairs_3'],
-  c315: ['c308', 'stairs_3'],
-  stairs_3: ['c308', 'c315', 'stairs_2', 'stairs_4'],
-  c420: ['stairs_4'],
-  stairs_4: ['c420', 'stairs_3'],
+  'secretariat-ac': ['amf-ac0-1', 'lab-a0-1', 'sala-ac0-2', 'stairs_0'],
+  'amf-ac0-1':      ['secretariat-ac', 'lab-a0-1', 'stairs_0'],
+  'lab-a0-1':       ['secretariat-ac', 'amf-ac0-1', 'sala-ac0-2', 'stairs_0'],
+  'sala-ac0-2':     ['secretariat-ac', 'lab-a0-1', 'stairs_0'],
+  stairs_0:         ['secretariat-ac', 'amf-ac0-1', 'lab-a0-1', 'sala-ac0-2', 'stairs_1'],
+  'lab-c1-1':       ['lab-c1-2', 'stairs_1'],
+  'lab-c1-2':       ['lab-c1-1', 'stairs_1'],
+  stairs_1:         ['lab-c1-1', 'lab-c1-2', 'stairs_0', 'stairs_2'],
+  'lab-c2-1':       ['birou-c2-5', 'stairs_2'],
+  'birou-c2-5':     ['lab-c2-1', 'stairs_2'],
+  stairs_2:         ['lab-c2-1', 'birou-c2-5', 'stairs_1', 'stairs_3'],
+  'lab-a3-1':       ['sala-a3-2', 'stairs_3'],
+  'sala-a3-2':      ['lab-a3-1', 'stairs_3'],
+  stairs_3:         ['lab-a3-1', 'sala-a3-2', 'stairs_2', 'stairs_4'],
+  'sala-conf':      ['stairs_4'],
+  stairs_4:         ['sala-conf', 'stairs_3'],
 }
 
 function bfsIndoor(start, end) {
@@ -193,6 +173,26 @@ function makeLabel(letter, color) {
     iconSize: [28, 28],
     iconAnchor: [14, 14],
   })
+}
+
+function mapsQuery(item) {
+  const name = item?.name || 'TUIASI Iasi'
+  const coords = item?.coords || (item?.lat && item?.lng ? [item.lat, item.lng] : null)
+  return coords ? `${name} ${coords[0]},${coords[1]}` : name
+}
+
+function googleMapsUrl(item) {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery(item))}`
+}
+
+function wazeUrl(item) {
+  const coords = item?.coords || (item?.lat && item?.lng ? [item.lat, item.lng] : null)
+  if (coords) return `https://waze.com/ul?ll=${coords[0]},${coords[1]}&navigate=yes`
+  return `https://waze.com/ul?q=${encodeURIComponent(item?.name || 'TUIASI Iasi')}&navigate=yes`
+}
+
+function openExternalMap(item, provider = 'google') {
+  window.open(provider === 'waze' ? wazeUrl(item) : googleMapsUrl(item), '_blank', 'noopener,noreferrer')
 }
 
 const OUTDOOR_ROUTE_IDS = {
@@ -361,7 +361,7 @@ export default function CampusNavigator() {
   const [selectedBuilding, setSelectedBuilding] = useState(null)
   const [activeTab, setActiveTab] = useState('map')
   const [chatMessages, setChatMessages] = useState([
-    { role: 'model', text: 'Salut! Sunt asistentul tău de navigare pentru campusul UAIC. Cum te pot ajuta?' }
+    { role: 'model', text: 'Salut! Sunt asistentul tău de navigare pentru campusul TUIASI. Cum te pot ajuta?' }
   ])
   const [chatInput, setChatInput] = useState('')
   const [chatAttachment, setChatAttachment] = useState(null)
@@ -464,7 +464,7 @@ export default function CampusNavigator() {
   const poiIcons = useRef({})
   function getPoiIcon(poi) {
     if (!poiIcons.current[poi.id]) {
-      poiIcons.current[poi.id] = makePOIIcon(poi.emoji, poi.color)
+      poiIcons.current[poi.id] = makePOIIcon(poi.short, poi.color)
     }
     return poiIcons.current[poi.id]
   }
@@ -516,7 +516,7 @@ export default function CampusNavigator() {
     if (!routeSuggestion?.type || routeSuggestion.type === 'none') return
 
     if (routeSuggestion.type === 'indoor') {
-      const start = routeSuggestion.from || 'c112'
+      const start = routeSuggestion.from || 'secretariat-ac'
       const path = bfsIndoor(start, routeSuggestion.to)
       if (!path) return
       setFromRoom(start)
@@ -593,7 +593,7 @@ export default function CampusNavigator() {
       }
       if (pathData) steps = buildOutdoorCinematicSteps(pathData, actions, fromB, toB)
     } else if (routeSuggestion?.type === 'indoor') {
-      const start = routeSuggestion.from || 'c112'
+      const start = routeSuggestion.from || 'secretariat-ac'
       const end = routeSuggestion.to
       const path = bfsIndoor(start, end)
       if (path) {
@@ -614,7 +614,7 @@ export default function CampusNavigator() {
 
   function makeCopilotContext() {
     return {
-      campus: 'UAIC',
+      campus: 'TUIASI',
       currentTime: new Date().toISOString(),
       schedule: courses.slice(0, 4),
       buildings: buildings.map(({ id, name, type }) => ({ id, name, type })),
@@ -903,7 +903,7 @@ export default function CampusNavigator() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2">
                 <div className="rounded-2xl overflow-hidden border border-white/[0.06] relative" style={{ height: 460 }}>
-                  <MapContainer center={CAMPUS_CENTER} zoom={16} style={{ height: '100%', width: '100%' }} zoomControl={true}>
+                  <MapContainer center={CAMPUS_CENTER} zoom={15} style={{ height: '100%', width: '100%' }} zoomControl={true}>
                     <TileLayer
                       attribution='&copy; <a href="https://carto.com/">CARTO</a>'
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -916,7 +916,7 @@ export default function CampusNavigator() {
                         <Popup minWidth={210}>
                           <div style={{ fontFamily: 'system-ui, sans-serif', padding: '2px 0' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                              <span style={{ fontSize: 26, lineHeight: 1 }}>{poi.emoji}</span>
+                              <span style={{ fontSize: 26, lineHeight: 1 }}>{poi.short}</span>
                               <div>
                                 <div style={{ fontWeight: 700, fontSize: 14, color: '#1e293b', marginBottom: 3 }}>
                                   {poi.name}
@@ -942,6 +942,10 @@ export default function CampusNavigator() {
                             <div style={{ fontSize: 11, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
                               🕐 {poi.hours}
                             </div>
+                            <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
+                              <button type="button" onClick={() => openExternalMap(poi, 'google')} style={{ flex: 1, border: '1px solid #cbd5e1', borderRadius: 9, padding: '7px 8px', fontSize: 11, fontWeight: 700, color: '#1e293b', background: '#f8fafc' }}>Google Maps</button>
+                              <button type="button" onClick={() => openExternalMap(poi, 'waze')} style={{ flex: 1, border: '1px solid #cbd5e1', borderRadius: 9, padding: '7px 8px', fontSize: 11, fontWeight: 700, color: '#1e293b', background: '#f8fafc' }}>Waze</button>
+                            </div>
                           </div>
                         </Popup>
                       </Marker>
@@ -949,7 +953,15 @@ export default function CampusNavigator() {
 
                     {buildings.map((b) => (
                       <Marker key={b.id} position={b.coords} eventHandlers={{ click: () => setSelectedBuilding(b) }}>
-                        <Popup><strong>{b.name}</strong><br />{b.distance} • {b.time}</Popup>
+                        <Popup>
+                          <div style={{ fontFamily: 'system-ui, sans-serif', minWidth: 180 }}>
+                            <strong>{b.name}</strong><br />{b.distance} - {b.time}
+                            <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
+                              <button type="button" onClick={() => openExternalMap(b, 'google')} style={{ flex: 1, border: '1px solid #cbd5e1', borderRadius: 9, padding: '7px 8px', fontSize: 11, fontWeight: 700, color: '#1e293b', background: '#f8fafc' }}>Google Maps</button>
+                              <button type="button" onClick={() => openExternalMap(b, 'waze')} style={{ flex: 1, border: '1px solid #cbd5e1', borderRadius: 9, padding: '7px 8px', fontSize: 11, fontWeight: 700, color: '#1e293b', background: '#f8fafc' }}>Waze</button>
+                            </div>
+                          </div>
+                        </Popup>
                       </Marker>
                     ))}
 
@@ -986,6 +998,12 @@ export default function CampusNavigator() {
                           <p className="text-xs text-slate-400">{selectedBuilding.distance} • {selectedBuilding.time}</p>
                         </div>
                         <div className="flex gap-2">
+                          <Button size="sm" variant="secondary" onClick={() => openExternalMap(selectedBuilding, 'google')}>
+                            Google
+                          </Button>
+                          <Button size="sm" variant="secondary" onClick={() => openExternalMap(selectedBuilding, 'waze')}>
+                            Waze
+                          </Button>
                           <Button size="sm" onClick={() => { setRouteFrom(String(selectedBuilding.id)); setSelectedBuilding(null) }}>
                             <Route size={13} /> Start
                           </Button>
@@ -1181,7 +1199,7 @@ export default function CampusNavigator() {
           const QUICK_CHIPS = [
             { label: 'Unde mănânc?',        icon: '🍽️', q: 'Unde pot mânca acum pe campus? Ce opțiuni am?' },
             { label: 'Săli libere?',         icon: '🚪', q: 'Ce săli sunt disponibile acum în Corp C?' },
-            { label: 'Secretariatul?',       icon: '📋', q: 'Secretariatul FII e deschis acum? Unde se află?' },
+            { label: 'Secretariatul?',       icon: '📋', q: 'Secretariatul AC e deschis acum? Unde se afla?' },
             { label: 'O cafea rapidă',       icon: '☕', q: 'Unde fac o cafea rapidă lângă campus?' },
             { label: 'Studiu azi?',          icon: '📚', q: 'Ce zone de studiu sunt disponibile acum pe campus? Biblioteca e aglomerată?' },
             { label: 'Examene în sesiune',   icon: '🎓', q: 'Cum mă pregătesc eficient pentru sesiunea de examene? Sfaturi practice.' },

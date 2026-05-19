@@ -68,7 +68,7 @@ function ProfessorSidebar({ current, onNavigate, onLogout, profile }) {
           </div>
           <div className="min-w-0">
             <p className="text-sm font-bold text-white truncate">Portal Profesor</p>
-            <p className="text-[11px] text-slate-600 truncate">FMIM Â· UAIC</p>
+            <p className="text-[11px] text-slate-600 truncate">AC · TUIASI</p>
           </div>
         </div>
       </div>
@@ -537,10 +537,18 @@ function RecoveryView({ requests, onDecision }) {
   )
 }
 
-function MessagesView({ threads, onSend, selectedThreadId, onThreadSelect }) {
+function MessagesView({ threads, onSend, selectedThreadId, onThreadSelect, professor }) {
   const [activeId, setActiveId] = useState(threads[0]?.id || null)
   const [text, setText] = useState('')
+  const [typingUsers, setTypingUsers] = useState({})
+  const [contactSeenAt, setContactSeenAt] = useState(null)
+  const typingTimer = useRef(null)
   const active = threads.find(thread => thread.id === activeId) || threads[0]
+  const currentUserId = professor?.id || active?.professorId || DEMO_PROFESSOR.id
+  const currentName = professor?.name || active?.professorName || DEMO_PROFESSOR.name
+  const threadChannel = active ? `portal-thread:${active.id}` : null
+  const typingChannel = threadChannel ? `typing:${threadChannel}` : null
+  const readChannel = threadChannel ? `read:${threadChannel}` : null
   useEffect(() => {
     if (!activeId && threads[0]) setActiveId(threads[0].id)
   }, [threads, activeId])
@@ -550,6 +558,55 @@ function MessagesView({ threads, onSend, selectedThreadId, onThreadSelect }) {
       setActiveId(selectedThreadId)
     }
   }, [selectedThreadId, threads])
+
+  useEffect(() => {
+    setTypingUsers({})
+    setContactSeenAt(null)
+  }, [active?.id])
+
+  useEffect(() => {
+    if (!typingChannel || !readChannel) return undefined
+    const unsubTyping = socketService.subscribe(typingChannel, ({ userId, name, isTyping }) => {
+      if (userId === currentUserId) return
+      setTypingUsers(prev => {
+        const next = { ...prev }
+        if (isTyping) next[userId] = name || active?.studentName || 'Student'
+        else delete next[userId]
+        return next
+      })
+    })
+    const unsubRead = socketService.subscribe(readChannel, ({ userId, seenAt }) => {
+      if (userId === currentUserId) return
+      setContactSeenAt(seenAt)
+    })
+    return () => {
+      unsubTyping()
+      unsubRead()
+    }
+  }, [active?.studentName, currentUserId, readChannel, typingChannel])
+
+  useEffect(() => {
+    if (!readChannel || !active) return
+    socketService.publish(readChannel, { userId: currentUserId, seenAt: new Date().toISOString() }).catch(() => {})
+  }, [active, active?.messages?.length, currentUserId, readChannel])
+
+  function handleTextChange(event) {
+    setText(event.target.value)
+    if (!typingChannel) return
+    socketService.publish(typingChannel, { userId: currentUserId, name: currentName, isTyping: true }).catch(() => {})
+    clearTimeout(typingTimer.current)
+    typingTimer.current = setTimeout(() => {
+      socketService.publish(typingChannel, { userId: currentUserId, name: currentName, isTyping: false }).catch(() => {})
+    }, 2000)
+  }
+
+  function submitMessage() {
+    if (!active || !text.trim()) return
+    clearTimeout(typingTimer.current)
+    if (typingChannel) socketService.publish(typingChannel, { userId: currentUserId, name: currentName, isTyping: false }).catch(() => {})
+    onSend(active.id, text.trim())
+    setText('')
+  }
 
   return (
     <div className="p-6 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 h-full">
@@ -575,27 +632,54 @@ function MessagesView({ threads, onSend, selectedThreadId, onThreadSelect }) {
           <>
             <div className="px-4 py-3 border-b border-white/[0.05]">
               <p className="font-bold text-white">{active.studentName}</p>
-              <p className="text-xs text-slate-600">{active.subject}</p>
+              <p className="text-xs">
+                {Object.keys(typingUsers).length > 0
+                  ? <span className="text-amber-300 italic">{Object.values(typingUsers).join(', ')} scrie...</span>
+                  : <span className="text-slate-600">{active.subject}</span>
+                }
+              </p>
             </div>
             <div className="flex-1 overflow-auto p-4 space-y-3">
               {active.messages.length === 0 ? (
                 <p className="text-sm text-slate-600 text-center py-10">Incepe conversatia cu studentul.</p>
-              ) : active.messages.map(message => (
-                <div key={message.id} className={clsx('flex', message.senderRole === 'professor' ? 'justify-end' : 'justify-start')}>
-                  <div className={clsx('max-w-md rounded-2xl px-4 py-2 text-sm', message.senderRole === 'professor' ? 'bg-amber-600 text-white' : 'bg-white/[0.06] text-slate-200 border border-white/[0.07]')}>
-                    {message.text}
+              ) : active.messages.map(message => {
+                const isMe = message.senderRole === 'professor'
+                const myMessages = active.messages.filter(item => item.senderRole === 'professor')
+                const lastMyMessage = myMessages[myMessages.length - 1]
+                const isSeen = isMe && contactSeenAt && message.id === lastMyMessage?.id && new Date(contactSeenAt) >= new Date(message.timestamp)
+                return (
+                <div key={message.id} className={clsx('flex', isMe ? 'justify-end' : 'justify-start')}>
+                  <div className="max-w-md">
+                    <div className={clsx('rounded-2xl px-4 py-2 text-sm', isMe ? 'bg-amber-600 text-white' : 'bg-white/[0.06] text-slate-200 border border-white/[0.07]')}>
+                      {message.text}
+                    </div>
+                    <div className={clsx('mt-1 flex items-center gap-1', isMe ? 'justify-end' : 'justify-start')}>
+                      <p className="text-[10px] text-slate-600">
+                        {new Date(message.timestamp).toLocaleTimeString('ro', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      {isMe && (
+                        isSeen
+                          ? <CheckCheck size={11} className="text-amber-300" />
+                          : <Check size={11} className="text-slate-600" />
+                      )}
+                    </div>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
+            {Object.keys(typingUsers).length > 0 && (
+              <div className="flex items-center gap-2 px-4 py-1.5">
+                <div className="flex gap-0.5 items-end">
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+                <p className="text-xs text-slate-500 italic">{Object.values(typingUsers).join(', ')} scrie...</p>
+              </div>
+            )}
             <div className="p-4 border-t border-white/[0.05] flex gap-2">
-              <input value={text} onChange={e => setText(e.target.value)} onKeyDown={e => {
-                if (e.key === 'Enter' && text.trim()) {
-                  onSend(active.id, text.trim())
-                  setText('')
-                }
-              }} placeholder="Scrie raspuns..." className="flex-1 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 outline-none" />
-              <button onClick={() => { if (text.trim()) { onSend(active.id, text.trim()); setText('') } }} className="btn-primary px-4 text-sm">Trimite</button>
+              <input value={text} onChange={handleTextChange} onKeyDown={e => { if (e.key === 'Enter') submitMessage() }} placeholder="Scrie raspuns..." className="flex-1 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 outline-none" />
+              <button onClick={submitMessage} className="btn-primary px-4 text-sm">Trimite</button>
             </div>
           </>
         ) : (
@@ -786,7 +870,7 @@ export default function ProfessorApp() {
           {current === 'profile' && <ProfessorProfile professor={professor} onSave={handleProfessorSave} />}
           {current === 'thesis' && <ThesisRequests requests={sortedRequests} onDecision={handleDecision} />}
           {current === 'recovery' && <RecoveryView requests={recoveryRequests} onDecision={handleRecoveryDecision} />}
-          {current === 'messages' && <MessagesView threads={threads} onSend={handleSendMessage} selectedThreadId={selectedThreadId} onThreadSelect={setSelectedThreadId} />}
+          {current === 'messages' && <MessagesView threads={threads} onSend={handleSendMessage} selectedThreadId={selectedThreadId} onThreadSelect={setSelectedThreadId} professor={professor} />}
         </main>
       </div>
       <VirtualAssistant
