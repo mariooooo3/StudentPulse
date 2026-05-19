@@ -662,17 +662,44 @@ function PomodoroTimer() {
   )
 }
 
+// Primele 400 de zecimale ale lui π (fără "3.")
+const PI_DECIMALS = '14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196'
+
+// O cifră la fiecare 12 secunde → 25 min = ~125 cifre
+const SECS_PER_DIGIT = 12
+
 function FocusForest() {
   const [minutes, setMinutes] = useState(25)
   const [elapsed, setElapsed] = useState(0)
   const [running, setRunning] = useState(false)
   const [failed, setFailed] = useState(false)
+  const [justRevealed, setJustRevealed] = useState(false)
   const [completed, setCompleted] = useState(() => {
     try { return Number(localStorage.getItem('sc_focus_trees') || 0) } catch { return 0 }
   })
+  const [bestDigits, setBestDigits] = useState(() => {
+    try { return Number(localStorage.getItem('sc_pi_best') || 2) } catch { return 2 }
+  })
   const intervalRef = useRef(null)
+  const prevDigitsRef = useRef(2)
   const targetSeconds = minutes * 60
   const progress = Math.min(1, elapsed / targetSeconds)
+
+  // Câte zecimale sunt dezvăluite: încep cu 2 ("14"), cresc pe măsură ce studiezi
+  const revealedDecimals = Math.min(
+    PI_DECIMALS.length,
+    2 + Math.floor(elapsed / SECS_PER_DIGIT)
+  )
+
+  // Detectează o cifră nouă și declanșează animația
+  useEffect(() => {
+    if (revealedDecimals > prevDigitsRef.current) {
+      prevDigitsRef.current = revealedDecimals
+      setJustRevealed(true)
+      const t = setTimeout(() => setJustRevealed(false), 800)
+      return () => clearTimeout(t)
+    }
+  }, [revealedDecimals])
 
   useEffect(() => {
     if (!running) return undefined
@@ -702,9 +729,7 @@ function FocusForest() {
       setFailed(true)
       setElapsed(0)
     }
-    function handleVisibility() {
-      if (document.hidden) failSession()
-    }
+    function handleVisibility() { if (document.hidden) failSession() }
     document.addEventListener('visibilitychange', handleVisibility)
     window.addEventListener('blur', failSession)
     return () => {
@@ -717,52 +742,123 @@ function FocusForest() {
     setElapsed(0)
     setFailed(false)
     setRunning(true)
+    prevDigitsRef.current = 2
   }
 
   function reset() {
     clearInterval(intervalRef.current)
     setRunning(false)
     setFailed(false)
+    // Salvează recordul de cifre descoperite
+    if (revealedDecimals > bestDigits) {
+      setBestDigits(revealedDecimals)
+      localStorage.setItem('sc_pi_best', String(revealedDecimals))
+    }
     setElapsed(0)
   }
 
   const remaining = Math.max(0, targetSeconds - elapsed)
   const mins = String(Math.floor(remaining / 60)).padStart(2, '0')
   const secs = String(remaining % 60).padStart(2, '0')
-  const trunkHeight = 26 + progress * 42
-  const crownSize = 34 + progress * 70
+
+  // Grupează cifrele dezvăluite câte 5 pentru lizibilitate
+  const visibleStr = PI_DECIMALS.slice(0, revealedDecimals)
+  const hiddenStr  = PI_DECIMALS.slice(revealedDecimals, revealedDecimals + 30)
+  const groups = []
+  for (let i = 0; i < visibleStr.length; i += 5) groups.push(visibleStr.slice(i, i + 5))
+
+  const maxPossible = Math.min(PI_DECIMALS.length, 2 + Math.floor(targetSeconds / SECS_PER_DIGIT))
 
   return (
     <div className="glass-card overflow-hidden p-6">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
-        <div className="relative min-h-60 flex-1 rounded-2xl border border-emerald-500/20 bg-gradient-to-b from-emerald-500/[0.12] to-slate-950/40 p-5">
-          <div className="absolute inset-x-6 bottom-5 h-8 rounded-[100%] bg-emerald-950/70" />
-          <div className="absolute bottom-10 left-1/2 flex -translate-x-1/2 flex-col items-center">
-            <div
-              className="rounded-full border border-emerald-300/40 bg-emerald-500/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] transition-all duration-700"
-              style={{ width: crownSize, height: crownSize, opacity: progress > 0.05 ? 1 : 0.25 }}
-            />
-            <div
-              className="w-5 rounded-t-lg bg-amber-800 transition-all duration-700"
-              style={{ height: trunkHeight }}
-            />
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
+
+        {/* ── Vizualizare π ── */}
+        <div className="relative flex-1 min-h-64 rounded-2xl border border-violet-500/20 bg-gradient-to-br from-slate-900 via-violet-950/30 to-slate-900 p-5 overflow-hidden flex flex-col justify-between">
+
+          {/* π gigant în fundal */}
+          <div className="pointer-events-none absolute -right-4 -top-6 select-none text-[160px] font-black text-violet-500/[0.07] leading-none">π</div>
+
+          {/* Badge cifre */}
+          <div className="flex items-center justify-between">
+            <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1 text-[11px] font-bold text-violet-200">
+              <span>π</span>
+              {revealedDecimals} zecimale descoperite
+            </div>
+            {running && (
+              <div className="font-mono text-lg font-black text-white tabular-nums">
+                {mins}:{secs}
+              </div>
+            )}
           </div>
-          <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[11px] font-bold text-emerald-200">
-            <TreePine size={13} />
-            {Math.round(progress * 100)}% crestere
+
+          {/* Afișaj cifre */}
+          <div className="mt-4 font-mono leading-loose">
+            {/* "3." fix */}
+            <span className="text-2xl font-black text-violet-300">3.</span>
+
+            {/* Cifre dezvăluite grupate câte 5 */}
+            <span className="text-lg font-bold text-white">
+              {groups.map((g, gi) => (
+                <span key={gi}>
+                  {g.split('').map((d, di) => {
+                    const isLast = gi === groups.length - 1 && di === g.length - 1
+                    return (
+                      <span
+                        key={di}
+                        className={clsx(
+                          'transition-all duration-300',
+                          isLast && justRevealed
+                            ? 'text-teal-300 drop-shadow-[0_0_8px_rgba(94,234,212,0.9)]'
+                            : isLast
+                            ? 'text-teal-200'
+                            : 'text-white'
+                        )}
+                      >
+                        {d}
+                      </span>
+                    )
+                  })}
+                  <span className="text-slate-700 select-none"> </span>
+                </span>
+              ))}
+            </span>
+
+            {/* Cifre ascunse ca dots */}
+            {hiddenStr && (
+              <span className="text-slate-700 text-base select-none">
+                {hiddenStr.split('').map((_, i) => (
+                  <span key={i}>•</span>
+                ))}
+                ...
+              </span>
+            )}
           </div>
-          <div className="absolute bottom-4 right-4 text-right">
-            <p className="font-mono text-2xl font-black text-white">{mins}:{secs}</p>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">ramase</p>
+
+          {/* Bară progres */}
+          <div className="mt-4">
+            <div className="flex justify-between text-[10px] text-slate-500 mb-1.5 font-mono">
+              <span>3.14</span>
+              <span>{Math.round(progress * 100)}% din sesiune</span>
+              <span>+{maxPossible} zec. posibile</span>
+            </div>
+            <div className="h-1.5 w-full rounded-full bg-white/[0.05] overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-violet-500 to-teal-400 transition-all duration-1000"
+                style={{ width: `${progress * 100}%` }}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="w-full lg:w-80">
-          <p className="section-label">Focus Forest</p>
-          <h3 className="mt-2 text-lg font-bold text-white">Creste un copac ramanand pe tab.</h3>
+        {/* ── Controale ── */}
+        <div className="w-full lg:w-72">
+          <p className="section-label">π Focus</p>
+          <h3 className="mt-2 text-lg font-bold text-white">Descoperă zecimalele lui π studiind.</h3>
           <p className="mt-2 text-sm leading-relaxed text-slate-400">
-            Porneste sesiunea si ramai aici pana se termina. Daca schimbi tabul sau pierzi focusul ferestrei, copacul se reseteaza.
+            Pornești de la <span className="font-bold text-violet-300">3.14</span> — o cifră nouă din π apare la fiecare {SECS_PER_DIGIT} secunde de focus. Dacă schimbi tabul, sesiunea se pierde.
           </p>
+
           <div className="mt-4 grid grid-cols-3 gap-2">
             {[15, 25, 45].map(value => (
               <button
@@ -771,34 +867,48 @@ function FocusForest() {
                 disabled={running}
                 className={clsx(
                   'h-9 rounded-xl border text-xs font-bold transition-all active:scale-[0.98] disabled:cursor-default',
-                  minutes === value ? 'border-emerald-400/30 bg-emerald-400/15 text-emerald-200' : 'border-white/[0.06] bg-white/[0.03] text-slate-500 hover:text-slate-300',
+                  minutes === value
+                    ? 'border-violet-400/30 bg-violet-400/15 text-violet-200'
+                    : 'border-white/[0.06] bg-white/[0.03] text-slate-500 hover:text-slate-300',
                 )}
               >
                 {value} min
               </button>
             ))}
           </div>
+
+          <div className="mt-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-xs text-slate-400 font-mono">
+            {minutes} min → până la <span className="text-violet-300 font-bold">3.{PI_DECIMALS.slice(0, maxPossible)}</span>
+          </div>
+
           <div className="mt-4 flex items-center gap-2">
             <button
               onClick={running ? reset : start}
               className={clsx(
                 'inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold transition-all active:scale-[0.98]',
-                running ? 'border border-red-500/30 bg-red-500/10 text-red-300' : 'border border-emerald-400/30 bg-emerald-500/20 text-emerald-100',
+                running
+                  ? 'border border-red-500/30 bg-red-500/10 text-red-300'
+                  : 'border border-violet-400/30 bg-violet-500/20 text-violet-100',
               )}
             >
               {running ? <X size={15} /> : <Sprout size={15} />}
-              {running ? 'Opreste' : 'Porneste focus'}
+              {running ? 'Oprește' : 'Pornește focus'}
             </button>
             <button onClick={reset} className="h-10 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 text-slate-500 transition-all hover:text-slate-300 active:scale-[0.98]">
               <RotateCcw size={15} />
             </button>
           </div>
+
           {failed && (
             <p className="mt-3 rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-semibold text-amber-200">
-              Sesiunea a fost intrerupta fiindca ai parasit tabul.
+              Sesiunea a fost întreruptă. Ai descoperit {revealedDecimals} zecimale până acum.
             </p>
           )}
-          <p className="mt-3 text-xs text-slate-600">{completed} copaci finalizati in istoricul local</p>
+
+          <div className="mt-3 space-y-1 text-xs text-slate-600">
+            <p>🏆 Record personal: <span className="text-slate-400 font-bold">{bestDigits} zecimale</span></p>
+            <p>📚 Sesiuni completate: <span className="text-slate-400 font-bold">{completed}</span></p>
+          </div>
         </div>
       </div>
     </div>
