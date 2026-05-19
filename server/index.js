@@ -50,7 +50,15 @@ function serveStatic(req, res) {
   }
 
   const mime = MIME[extname(filePath)] || 'application/octet-stream'
-  res.writeHead(200, { 'Content-Type': mime })
+  const headers = { 'Content-Type': mime }
+  const path = filePath.replaceAll('\\', '/')
+  if (path.endsWith('/index.html') || path.endsWith('/sw.js')) {
+    headers['Cache-Control'] = 'no-cache'
+  } else if (path.includes('/assets/')) {
+    headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+  }
+
+  res.writeHead(200, headers)
   res.end(readFileSync(filePath))
 }
 

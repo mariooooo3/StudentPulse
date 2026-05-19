@@ -7,6 +7,7 @@ import { Loader2 } from 'lucide-react'
 import { getUniversityTheme } from '../shared/utils/theme'
 import { ToastProvider } from '../shared/components/Toast'
 import GlobalSearch from '../shared/components/GlobalSearch'
+import VirtualAssistant from '../shared/components/VirtualAssistant'
 import { OnlineCountProvider, useOnlineCount } from '../shared/hooks/useOnlineCount'
 import LandingPage from '../features/landing/LandingPage'
 
@@ -97,9 +98,18 @@ function AppShell() {
 
   if (session?.role === 'professor') {
     return (
-      <Suspense fallback={<PageLoader />}>
-        <ProfessorApp />
-      </Suspense>
+      <>
+        <Suspense fallback={<PageLoader />}>
+          <ProfessorApp />
+        </Suspense>
+        <VirtualAssistant
+          session={session}
+          profile={profile}
+          platformMode="professor"
+          currentView="professor"
+          currentLabel="Professor Portal"
+        />
+      </>
     )
   }
 
@@ -166,6 +176,17 @@ function AppShell() {
           onClose={() => setSearchOpen(false)}
         />
       )}
+
+      <VirtualAssistant
+        session={session}
+        profile={profile}
+        platformMode={platformMode}
+        currentView={currentView}
+        onNavigate={(view, mode) => {
+          if (mode) handleModeChange(mode)
+          handleNavigate(view)
+        }}
+      />
     </div>
   )
 }

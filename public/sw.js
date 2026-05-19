@@ -1,5 +1,5 @@
-const CACHE = 'studentcompass-v1'
-const PRECACHE = ['/', '/index.html']
+const CACHE = 'studentcompass-v2'
+const PRECACHE = ['/index.html']
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE)))
@@ -7,17 +7,28 @@ self.addEventListener('install', e => {
 })
 
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-  ))
-  self.clients.claim()
+  e.waitUntil((async () => {
+    const keys = await caches.keys()
+    await Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    await self.clients.claim()
+  })())
 })
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return
-  // Network first for API calls, cache first for assets
   const url = new URL(e.request.url)
   if (url.pathname.startsWith('/api') || url.hostname !== location.hostname) return
+
+  if (e.request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html')) {
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (res.ok) caches.open(CACHE).then(c => c.put('/index.html', res.clone()))
+        return res
+      }).catch(() => caches.match('/index.html'))
+    )
+    return
+  }
+
   e.respondWith(
     caches.match(e.request).then(cached => {
       const net = fetch(e.request).then(res => {
