@@ -4,6 +4,7 @@ import { AUTH_STATE, PROFILE_STAGE } from '../shared/config/constants'
 import Sidebar from './layout/Sidebar'
 import Header from './layout/Header'
 import { Loader2 } from 'lucide-react'
+import { PageSkeleton } from '../shared/components/Skeleton'
 import { getUniversityTheme } from '../shared/utils/theme'
 import { ToastProvider } from '../shared/components/Toast'
 import GlobalSearch from '../shared/components/GlobalSearch'
@@ -25,11 +26,7 @@ const StudentLifeHub = lazy(() => import('../features/student-life/StudentLifeHu
 const ProfessorApp = lazy(() => import('../features/professor/ProfessorApp'))
 
 function PageLoader() {
-  return (
-    <div className="flex-1 flex items-center justify-center">
-      <Loader2 size={24} className="text-indigo-400/50 animate-spin" />
-    </div>
-  )
+  return <PageSkeleton />
 }
 
 const DEFAULT_VIEW_BY_MODE = {
@@ -168,7 +165,7 @@ function AppShell() {
               {platformMode === 'academic' && currentView === 'tutoring'  && <PeerTutoring profile={profile} />}
               {platformMode === 'academic' && currentView === 'messages'  && <DirectMessages session={session} profile={profile} />}
 
-              {platformMode === 'life' && ['discounts', 'career', 'community'].includes(currentView) && (
+              {platformMode === 'life' && ['discounts', 'career', 'community', 'events', 'wellness', 'tools'].includes(currentView) && (
                 <StudentLifeHub activeSection={currentView} profile={profile} session={session} />
               )}
               {platformMode === 'life' && currentView === 'citylife' && <CityAdaptation profile={profile} session={session} />}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import { Send, Search, Wifi, WifiOff, Users, ShieldCheck, Paperclip, X, FileText } from 'lucide-react'
+import { Send, Search, Wifi, WifiOff, Users, ShieldCheck, Paperclip, X, FileText, ArrowLeft, Hash } from 'lucide-react'
 import { useMessages } from '../../shared/hooks/useMessages'
 import { socketService } from '../../shared/services/socket.service'
 import { useOnlineCount } from '../../shared/hooks/useOnlineCount'
@@ -34,14 +34,145 @@ function colorFor(userId) {
   return COLORS[Math.abs(hash) % COLORS.length]
 }
 
-function ChatThread({ contact, currentUserId, currentName, scope }) {
+const GROUP_CHANNELS = [
+  { id: 'general', label: '#general', description: 'Discuții generale' },
+  { id: 'cursuri', label: '#cursuri', description: 'Întrebări despre cursuri' },
+  { id: 'proiecte', label: '#proiecte', description: 'Colaborare la proiecte' },
+  { id: 'off-topic', label: '#off-topic', description: 'Orice altceva' },
+]
+
+function GroupThread({ groupId, groupLabel, scope, currentUserId, currentName, onBack }) {
+  const channel = `group:${scope}:${groupId}`
+  const { messages, sendMessage, connected, typingUsers, sendTyping } = useMessages(channel, currentUserId)
+  const [input, setInput] = useState('')
+  const bottomRef = useRef(null)
+  const typingTimer = useRef(null)
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  function handleInput(e) {
+    setInput(e.target.value)
+    sendTyping(true, currentName)
+    clearTimeout(typingTimer.current)
+    typingTimer.current = setTimeout(() => sendTyping(false, currentName), 2000)
+  }
+
+  function send() {
+    if (!input.trim()) return
+    clearTimeout(typingTimer.current)
+    sendTyping(false, currentName)
+    sendMessage(input.trim(), currentName)
+    setInput('')
+  }
+
+  return (
+    <div className="flex-1 flex flex-col min-w-0">
+      <div className="h-16 border-b border-white/[0.05] flex items-center px-4 gap-3 bg-[#070b14]/90 backdrop-blur-xl shrink-0">
+        {onBack && (
+          <button onClick={onBack} className="sm:hidden p-1.5 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-white/[0.05] transition-all">
+            <ArrowLeft size={16} />
+          </button>
+        )}
+        <div className="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
+          <Hash size={16} className="text-indigo-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-white text-sm truncate">{groupLabel}</p>
+          <p className="text-xs text-slate-500 truncate">Canal facultate</p>
+        </div>
+        <span className={clsx('flex items-center gap-1 text-[10px]', connected ? 'text-emerald-400' : 'text-slate-500')}>
+          {connected ? <Wifi size={11} /> : <WifiOff size={11} />}
+          {connected ? 'Live' : 'Offline'}
+        </span>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-6 space-y-3">
+        {messages.length === 0 && (
+          <p className="text-center text-slate-600 text-sm py-8">
+            Niciun mesaj inca. Fii primul care scrie!
+          </p>
+        )}
+        {messages.map(msg => {
+          const isMe = msg.senderId === currentUserId
+          return (
+            <div key={msg.id} className={clsx('flex', isMe ? 'justify-end' : 'justify-start')}>
+              {!isMe && (
+                <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${colorFor(msg.senderId)} flex items-center justify-center text-white text-[10px] font-bold mr-2 shrink-0 mt-1`}>
+                  {(msg.senderName || 'U').slice(0, 2).toUpperCase()}
+                </div>
+              )}
+              <div className="max-w-sm">
+                {!isMe && <p className="text-[10px] text-slate-500 mb-1 ml-1">{msg.senderName}</p>}
+                <div className={clsx(
+                  'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+                  isMe
+                    ? 'bg-indigo-600 text-white rounded-tr-sm'
+                    : 'bg-white/[0.05] border border-white/[0.06] text-slate-200 rounded-tl-sm',
+                )}>
+                  {msg.content}
+                </div>
+                <p className={clsx('text-[10px] text-slate-600 mt-1', isMe ? 'text-right' : 'text-left')}>
+                  {new Date(msg.timestamp).toLocaleTimeString('ro', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            </div>
+          )
+        })}
+        <div ref={bottomRef} />
+      </div>
+
+      {Object.keys(typingUsers).length > 0 && (
+        <div className="flex items-center gap-2 px-6 py-1.5">
+          <div className="flex gap-0.5 items-end">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+          <p className="text-xs text-slate-500 italic">
+            {Object.values(typingUsers).join(', ')} {Object.keys(typingUsers).length === 1 ? 'scrie...' : 'scriu...'}
+          </p>
+        </div>
+      )}
+
+      <div className="p-4 border-t border-white/[0.05] bg-[#070b14]/90">
+        <div className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.07] rounded-2xl px-4 py-3">
+          <input
+            value={input}
+            onChange={handleInput}
+            onKeyDown={e => e.key === 'Enter' && send()}
+            placeholder={`Scrie în ${groupLabel}...`}
+            className="flex-1 bg-transparent text-sm text-slate-200 placeholder-slate-600 outline-none"
+          />
+          <button
+            onClick={send}
+            disabled={!input.trim()}
+            className={clsx('w-8 h-8 rounded-xl flex items-center justify-center transition-all',
+              input.trim() ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-white/[0.06]')}
+          >
+            <Send size={14} className={input.trim() ? 'text-white' : 'text-slate-500'} />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ChatThread({ contact, currentUserId, currentName, scope, onBack }) {
   const isSelfConversation = contact.userId === currentUserId
   const channel = `dm:${scope}:${[currentUserId, contact.userId].sort().join(':')}`
-  const { messages, sendMessage, connected } = useMessages(channel, currentUserId)
+  const { messages, sendMessage, connected, typingUsers, sendTyping, contactSeenAt, sendRead } = useMessages(channel, currentUserId)
   const [input, setInput] = useState('')
   const [attachment, setAttachment] = useState(null)
   const bottomRef = useRef(null)
   const fileRef = useRef(null)
+  const typingTimer = useRef(null)
+
+  // Trimite read receipt când se deschide chat-ul sau vin mesaje noi de la contact
+  useEffect(() => {
+    if (!isSelfConversation) sendRead()
+  }, [channel, messages.length, isSelfConversation, sendRead])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -57,9 +188,20 @@ function ChatThread({ contact, currentUserId, currentName, scope }) {
     e.target.value = ''
   }
 
+  function handleInput(e) {
+    setInput(e.target.value)
+    if (!isSelfConversation) {
+      sendTyping(true, currentName)
+      clearTimeout(typingTimer.current)
+      typingTimer.current = setTimeout(() => sendTyping(false, currentName), 2000)
+    }
+  }
+
   function send() {
     if (isSelfConversation) return
     if (!input.trim() && !attachment) return
+    clearTimeout(typingTimer.current)
+    sendTyping(false, currentName)
     sendMessage(input.trim(), currentName, attachment)
     setInput('')
     setAttachment(null)
@@ -67,7 +209,12 @@ function ChatThread({ contact, currentUserId, currentName, scope }) {
 
   return (
     <div className="flex-1 flex flex-col min-w-0">
-      <div className="h-16 border-b border-white/[0.05] flex items-center px-6 gap-4 bg-[#070b14]/90 backdrop-blur-xl shrink-0">
+      <div className="h-16 border-b border-white/[0.05] flex items-center px-4 gap-3 bg-[#070b14]/90 backdrop-blur-xl shrink-0">
+        {onBack && (
+          <button onClick={onBack} className="sm:hidden p-1.5 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-white/[0.05] transition-all">
+            <ArrowLeft size={16} />
+          </button>
+        )}
         <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${colorFor(contact.userId)} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
           {avatarLetters(contact.name)}
         </div>
@@ -87,8 +234,13 @@ function ChatThread({ contact, currentUserId, currentName, scope }) {
             Niciun mesaj inca. Poti discuta doar cu studenti din aceeasi universitate si facultate.
           </p>
         )}
-        {messages.map(msg => {
+        {messages.map((msg, idx) => {
           const isMe = msg.senderId === currentUserId
+          // Ultimul mesaj trimis de mine văzut de contact
+          const myMsgs = messages.filter(m => m.senderId === currentUserId)
+          const lastMyMsg = myMsgs[myMsgs.length - 1]
+          const isSeen = isMe && contactSeenAt && msg.id === lastMyMsg?.id && new Date(contactSeenAt) >= new Date(msg.timestamp)
+
           return (
             <div key={msg.id} className={clsx('flex', isMe ? 'justify-end' : 'justify-start')}>
               {!isMe && (
@@ -123,15 +275,33 @@ function ChatThread({ contact, currentUserId, currentName, scope }) {
                   )}
                   {msg.content && <p className="px-4 py-2.5">{msg.content}</p>}
                 </div>
-                <p className={clsx('text-[10px] text-slate-600 mt-1', isMe ? 'text-right' : 'text-left')}>
-                  {new Date(msg.timestamp).toLocaleTimeString('ro', { hour: '2-digit', minute: '2-digit' })}
-                </p>
+                <div className={clsx('flex items-center gap-1 mt-1', isMe ? 'justify-end' : 'justify-start')}>
+                  <p className="text-[10px] text-slate-600">
+                    {new Date(msg.timestamp).toLocaleTimeString('ro', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                  {isSeen && (
+                    <span className="text-[10px] text-indigo-400 font-medium">· Văzut</span>
+                  )}
+                </div>
               </div>
             </div>
           )
         })}
         <div ref={bottomRef} />
       </div>
+
+      {Object.keys(typingUsers).length > 0 && (
+        <div className="flex items-center gap-2 px-6 py-1.5">
+          <div className="flex gap-0.5 items-end">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+          <p className="text-xs text-slate-500 italic">
+            {Object.values(typingUsers).join(', ')} {Object.keys(typingUsers).length === 1 ? 'scrie...' : 'scriu...'}
+          </p>
+        </div>
+      )}
 
       <div className="p-4 border-t border-white/[0.05] bg-[#070b14]/90">
         {attachment && (
@@ -159,7 +329,7 @@ function ChatThread({ contact, currentUserId, currentName, scope }) {
           </button>
           <input
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={handleInput}
             onKeyDown={e => e.key === 'Enter' && send()}
             placeholder="Scrie un mesaj..."
             disabled={isSelfConversation}
@@ -286,8 +456,11 @@ export default function DirectMessages({ session, profile }) {
   const [onlineUsers, setOnlineUsers] = useState([])
   const [active, setActive] = useState(null)
   const [activePortal, setActivePortal] = useState(null)
+  const [activeGroup, setActiveGroup] = useState(null)
   const [portalThreads, setPortalThreads] = useState([])
   const [search, setSearch] = useState('')
+  const [tab, setTab] = useState('dm') // 'dm' | 'channels'
+  const [mobileView, setMobileView] = useState('list') // 'list' | 'chat'
   const { report: reportOnlineCount } = useOnlineCount()
   const { notifications } = useNotifications(currentUserId)
 
@@ -356,28 +529,86 @@ export default function DirectMessages({ session, profile }) {
     u.name.toLowerCase().includes(search.toLowerCase())
   )
 
+  function openChat(contact) {
+    setActive(contact); setActivePortal(null); setActiveGroup(null); setMobileView('chat')
+  }
+  function openGroup(g) {
+    setActiveGroup(g); setActive(null); setActivePortal(null); setMobileView('chat')
+  }
+  function openPortal(thread) {
+    setActivePortal(thread); setActive(null); setActiveGroup(null); setMobileView('chat')
+  }
+  function goBack() { setMobileView('list') }
+
   return (
     <div className="flex h-full animate-fade-in">
-      <div className="w-72 border-r border-white/[0.05] flex flex-col bg-[#070b14] shrink-0">
-        <div className="p-4 border-b border-white/[0.05]">
-          <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2">
-            <Search size={14} className="text-slate-500" />
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Cauta colegi online..."
-              className="bg-transparent text-sm text-slate-300 placeholder-slate-600 outline-none flex-1"
-            />
-          </div>
-          <div className="mt-3 rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-3 py-2">
-            <p className="text-[10px] text-indigo-300 font-semibold flex items-center gap-1.5">
-              <ShieldCheck size={11} /> DM filtrat academic
-            </p>
-            <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
-              Poti comunica doar cu studenti din aceeasi universitate si facultate.
-            </p>
-          </div>
+      {/* Sidebar — full on desktop, hidden on mobile when chat open */}
+      <div className={clsx(
+        'border-r border-white/[0.05] flex flex-col bg-[#070b14] shrink-0',
+        'w-full sm:w-72',
+        mobileView === 'chat' ? 'hidden sm:flex' : 'flex',
+      )}>
+        {/* Tabs */}
+        <div className="flex border-b border-white/[0.05]">
+          <button
+            onClick={() => setTab('dm')}
+            className={clsx('flex-1 py-3 text-xs font-semibold transition-colors',
+              tab === 'dm' ? 'text-white border-b-2 border-indigo-500' : 'text-slate-600 hover:text-slate-400')}
+          >
+            Mesaje Directe
+          </button>
+          <button
+            onClick={() => setTab('channels')}
+            className={clsx('flex-1 py-3 text-xs font-semibold transition-colors',
+              tab === 'channels' ? 'text-white border-b-2 border-indigo-500' : 'text-slate-600 hover:text-slate-400')}
+          >
+            Canale
+          </button>
         </div>
+
+        {tab === 'channels' ? (
+          <div className="flex-1 overflow-y-auto py-2 px-3">
+            <p className="text-[10px] text-slate-600 uppercase tracking-wider px-2 py-2">Canale facultate</p>
+            {GROUP_CHANNELS.map(g => (
+              <button
+                key={g.id}
+                onClick={() => openGroup(g)}
+                className={clsx(
+                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-white/[0.04] transition-colors mb-0.5',
+                  activeGroup?.id === g.id && 'bg-indigo-500/10 border border-indigo-500/20',
+                )}
+              >
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center shrink-0">
+                  <Hash size={13} className="text-indigo-400" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-200">{g.label}</p>
+                  <p className="text-xs text-slate-600 truncate">{g.description}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className="p-4 border-b border-white/[0.05]">
+              <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2">
+                <Search size={14} className="text-slate-500" />
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Cauta colegi online..."
+                  className="bg-transparent text-sm text-slate-300 placeholder-slate-600 outline-none flex-1"
+                />
+              </div>
+              <div className="mt-3 rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-3 py-2">
+                <p className="text-[10px] text-indigo-300 font-semibold flex items-center gap-1.5">
+                  <ShieldCheck size={11} /> DM filtrat academic
+                </p>
+                <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                  Poti comunica doar cu studenti din aceeasi universitate si facultate.
+                </p>
+              </div>
+            </div>
 
         <div className="px-4 py-2 border-b border-white/[0.04]">
           <p className="text-[10px] text-slate-600 uppercase tracking-wider mb-1">Tu esti</p>
@@ -399,7 +630,7 @@ export default function DirectMessages({ session, profile }) {
                 {portalThreads.map(thread => (
                   <button
                     key={thread.id}
-                    onClick={() => { setActivePortal(thread); setActive(null) }}
+                    onClick={() => openPortal(thread)}
                     className={clsx(
                       'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-white/[0.04] transition-colors',
                       activePortal?.id === thread.id && 'bg-amber-500/10 border border-amber-500/20',
@@ -427,7 +658,7 @@ export default function DirectMessages({ session, profile }) {
             contacts.map(u => (
               <button
                 key={u.userId}
-                onClick={() => { setActive(u); setActivePortal(null) }}
+                onClick={() => openChat(u)}
                 className={clsx(
                   'w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.04] transition-colors text-left',
                   active?.userId === u.userId && 'bg-white/[0.05] border-r-2 border-indigo-500',
@@ -446,35 +677,51 @@ export default function DirectMessages({ session, profile }) {
               </button>
             ))
           )}
-        </div>
+          </div>
+        </>
+        )}
       </div>
 
-      {activePortal ? (
-        <PortalThread
-          key={activePortal.id}
-          thread={activePortal}
-          currentUserId={currentUserId}
-          currentName={currentName}
-        />
-      ) : active ? (
-        <ChatThread
-          key={active.userId}
-          contact={active}
-          currentUserId={currentUserId}
-          currentName={currentName}
-          scope={scope}
-        />
-      ) : (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center max-w-sm">
-            <Users size={40} className="text-slate-700 mx-auto mb-4" />
-            <p className="text-slate-500 text-sm">Selecteaza un coleg eligibil din stanga</p>
-            <p className="text-slate-700 text-xs mt-1">
-              Studentii din alte facultati sau universitati nu apar in lista si nu pot accesa canalul tau DM.
-            </p>
+      {/* Chat area — hidden on mobile when list is shown */}
+      <div className={clsx('flex-1 min-w-0', mobileView === 'list' ? 'hidden sm:flex flex-col' : 'flex flex-col')}>
+        {activeGroup ? (
+          <GroupThread
+            key={activeGroup.id}
+            groupId={activeGroup.id}
+            groupLabel={activeGroup.label}
+            scope={scope}
+            currentUserId={currentUserId}
+            currentName={currentName}
+            onBack={goBack}
+          />
+        ) : activePortal ? (
+          <PortalThread
+            key={activePortal.id}
+            thread={activePortal}
+            currentUserId={currentUserId}
+            currentName={currentName}
+          />
+        ) : active ? (
+          <ChatThread
+            key={active.userId}
+            contact={active}
+            currentUserId={currentUserId}
+            currentName={currentName}
+            scope={scope}
+            onBack={goBack}
+          />
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center max-w-sm">
+              <Users size={40} className="text-slate-700 mx-auto mb-4" />
+              <p className="text-slate-500 text-sm">Selecteaza un coleg sau un canal din stanga</p>
+              <p className="text-slate-700 text-xs mt-1">
+                Studentii din alte facultati sau universitati nu apar in lista DM.
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

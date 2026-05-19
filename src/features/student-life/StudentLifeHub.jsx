@@ -1,17 +1,31 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import clsx from 'clsx'
 import {
   Award,
   Bookmark,
+  BookOpen,
   Briefcase,
+  Calendar,
+  Car,
   Check,
+  ChevronRight,
   Clock,
+  Heart,
+  Pause,
+  Phone,
+  Play,
+  RotateCcw,
   Search,
   Sparkles,
   Tag,
+  Timer,
   Users,
+  Users2,
+  Wallet,
+  Wrench,
+  X,
 } from 'lucide-react'
-import { facultyCareerKeys, studentLifeData } from './studentLifeData'
+import { eventsData, booksData, carpoolData, roommateData, wellnessData, facultyCareerKeys, studentLifeData } from './studentLifeData'
 import { getUniversityTheme } from '../../shared/utils/theme'
 import { dateInDays, daysUntil, eventTiming, rollingDays } from '../../shared/utils/dateTime'
 import { useNow } from '../../shared/hooks/useNow'
@@ -34,6 +48,24 @@ const SECTION_META = {
     kicker: 'Integrare Socială',
     title: 'Găsește grupuri, întâlniri, mentorat și comunități de adaptare.',
     description: 'Alătură-te grupurilor conectate la interesele, facultatea și orașul tău.',
+  },
+  events: {
+    label: 'Evenimente',
+    kicker: 'Viața de Campus',
+    title: 'Ce se întâmplă în campusul tău.',
+    description: 'Concerte, hackathoane, cariere, sport, cultură — toate evenimentele studențești într-un loc.',
+  },
+  wellness: {
+    label: 'Wellness',
+    kicker: 'Sănătate & Echilibru',
+    title: 'Ai grijă de tine, nu doar de note.',
+    description: 'Resurse de sănătate mentală, sfaturi de wellbeing și timer Pomodoro integrat.',
+  },
+  tools: {
+    label: 'Unelte Studențești',
+    kicker: 'Tools Practice',
+    title: 'Tot ce-ți trebuie ca student.',
+    description: 'Budget tracker, schimb de cărți, carpool și găsit colegi de cameră.',
   },
 }
 
@@ -435,10 +467,399 @@ function CommunitySection({ lifeProfile, joined, joinedOps }) {
   )
 }
 
+const EVENT_CATEGORIES = ['Toate', 'Tech', 'Muzică', 'Carieră', 'Știință', 'Cultură', 'Social', 'Antreprenoriat']
+
+function EventsSection({ going, goingOps }) {
+  const [category, setCategory] = useState('Toate')
+  const [query, setQuery] = useState('')
+
+  const events = useMemo(() => {
+    const q = query.toLowerCase()
+    return eventsData
+      .filter(e => category === 'Toate' || e.category === category)
+      .filter(e => !q || e.title.toLowerCase().includes(q) || e.location.toLowerCase().includes(q))
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+  }, [category, query])
+
+  return (
+    <section className="space-y-4">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
+        <SearchField value={query} onChange={setQuery} placeholder="Caută evenimente, locații..." />
+        <FilterPills items={EVENT_CATEGORIES} value={category} onChange={setCategory} />
+        <span className="text-xs font-semibold text-slate-500">{events.length} evenimente</span>
+      </div>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        {events.map(ev => {
+          const d = new Date(ev.date)
+          const isGoing = going.has(ev.id)
+          return (
+            <article key={ev.id} className="glass-card p-4 flex gap-4">
+              <div className="shrink-0 text-center w-14">
+                <div className="text-2xl font-black text-white leading-none">{d.getDate()}</div>
+                <div className="text-[10px] font-bold text-slate-500 uppercase">{d.toLocaleString('ro', { month: 'short' })}</div>
+                <div className="mt-1 text-[10px] text-slate-600">{ev.time}</div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="inline-block rounded-full px-2 py-0.5 text-[10px] font-bold mb-1" style={{ background: ev.color + '22', color: ev.color }}>{ev.category}</span>
+                    <h3 className="font-bold text-white text-sm leading-tight">{ev.title}</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">{ev.location}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-400 mt-2 leading-relaxed line-clamp-2">{ev.description}</p>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-xs text-slate-600">{ev.going + (isGoing ? 1 : 0)} merg</span>
+                  <button
+                    onClick={() => goingOps.toggle(ev.id)}
+                    className={clsx('h-8 rounded-xl border px-3 text-[11px] font-bold transition-all active:scale-[0.98]',
+                      isGoing
+                        ? 'border-emerald-400/30 bg-emerald-400/15 text-emerald-300'
+                        : 'border-indigo-500/40 bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30'
+                    )}
+                  >
+                    {isGoing ? '✓ Merg' : 'Merg'}
+                  </button>
+                </div>
+              </div>
+            </article>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function PomodoroTimer() {
+  const [mode, setMode] = useState('work')
+  const [timeLeft, setTimeLeft] = useState(25 * 60)
+  const [running, setRunning] = useState(false)
+  const [sessions, setSessions] = useState(0)
+  const intervalRef = useRef(null)
+
+  const DURATIONS = { work: 25 * 60, shortBreak: 5 * 60, longBreak: 15 * 60 }
+  const LABELS = { work: 'Focus', shortBreak: 'Pauză scurtă', longBreak: 'Pauză lungă' }
+
+  const startStop = (shouldRun) => {
+    if (shouldRun) {
+      intervalRef.current = setInterval(() => {
+        setTimeLeft(t => {
+          if (t <= 1) {
+            setRunning(false)
+            clearInterval(intervalRef.current)
+            if (mode === 'work') setSessions(s => s + 1)
+            return 0
+          }
+          return t - 1
+        })
+      }, 1000)
+    } else {
+      clearInterval(intervalRef.current)
+    }
+  }
+
+  function switchMode(m) {
+    clearInterval(intervalRef.current)
+    setMode(m)
+    setTimeLeft(DURATIONS[m])
+    setRunning(false)
+  }
+
+  function handleToggle() {
+    const next = !running
+    setRunning(next)
+    startStop(next)
+  }
+
+  function handleReset() {
+    clearInterval(intervalRef.current)
+    setTimeLeft(DURATIONS[mode])
+    setRunning(false)
+  }
+
+  const mins = String(Math.floor(timeLeft / 60)).padStart(2, '0')
+  const secs = String(timeLeft % 60).padStart(2, '0')
+  const progress = 1 - timeLeft / DURATIONS[mode]
+
+  return (
+    <div className="glass-card p-6 text-center">
+      <h3 className="text-sm font-bold text-white mb-4">Timer Pomodoro</h3>
+      <div className="flex gap-2 justify-center mb-6">
+        {Object.entries(LABELS).map(([m, l]) => (
+          <button key={m} onClick={() => switchMode(m)}
+            className={clsx('px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all',
+              mode === m ? 'bg-indigo-600 text-white' : 'bg-white/[0.04] text-slate-500 hover:text-slate-300')}
+          >{l}</button>
+        ))}
+      </div>
+      <div className="relative w-32 h-32 mx-auto mb-6">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+          <circle cx="50" cy="50" r="45" fill="none" stroke="#6366f1" strokeWidth="8"
+            strokeDasharray={`${2 * Math.PI * 45}`}
+            strokeDashoffset={`${2 * Math.PI * 45 * (1 - progress)}`}
+            strokeLinecap="round" className="transition-all duration-1000" />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-2xl font-black text-white font-mono">{mins}:{secs}</span>
+          <span className="text-[10px] text-slate-500 mt-1">{LABELS[mode]}</span>
+        </div>
+      </div>
+      <div className="flex items-center justify-center gap-3">
+        <button onClick={handleReset} className="p-2 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-white/[0.05] transition-all">
+          <RotateCcw size={16} />
+        </button>
+        <button onClick={handleToggle}
+          className="w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center transition-all active:scale-95">
+          {running ? <Pause size={18} className="text-white" /> : <Play size={18} className="text-white ml-0.5" />}
+        </button>
+      </div>
+      <p className="text-xs text-slate-600 mt-4">{sessions} sesiuni completate azi</p>
+    </div>
+  )
+}
+
+function WellnessSection() {
+  return (
+    <section className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <PomodoroTimer />
+        <div className="lg:col-span-2 space-y-3">
+          <h3 className="text-sm font-bold text-white">Sfaturi de Wellbeing</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {wellnessData.tips.map(tip => (
+              <div key={tip.id} className="glass-card p-4 flex gap-3">
+                <span className="text-2xl leading-none">{tip.icon}</span>
+                <div>
+                  <p className="text-sm font-bold text-white">{tip.title}</p>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">{tip.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 className="text-sm font-bold text-white mb-3">Contacte Utile</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {wellnessData.contacts.map(c => (
+            <div key={c.id} className="glass-card p-4 flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center shrink-0">
+                <Phone size={16} className="text-indigo-400" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-white">{c.name}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{c.available}</p>
+                <p className="text-sm font-mono text-indigo-300 mt-1">{c.phone}</p>
+              </div>
+              {c.free && <span className="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-1 rounded-full shrink-0">Gratuit</span>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const TOOLS_TABS = ['Budget', 'Cărți', 'Carpool', 'Colegi cameră']
+
+function BudgetTab() {
+  const CATEGORIES = ['Cazare', 'Mâncare', 'Transport', 'Cursuri', 'Distracție', 'Diverse']
+  const AVERAGES = { Cazare: 800, Mâncare: 400, Transport: 100, Cursuri: 150, Distracție: 200, Diverse: 100 }
+  const [budget, setBudget] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('sc_budget') || '{}') } catch { return {} }
+  })
+
+  function updateBudget(cat, val) {
+    const next = { ...budget, [cat]: Number(val) || 0 }
+    setBudget(next)
+    localStorage.setItem('sc_budget', JSON.stringify(next))
+  }
+
+  const total = CATEGORIES.reduce((s, c) => s + (budget[c] || 0), 0)
+  const avgTotal = Object.values(AVERAGES).reduce((s, v) => s + v, 0)
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between p-4 glass-card">
+        <div>
+          <p className="text-xs text-slate-500">Total lunar</p>
+          <p className="text-2xl font-black text-white">{total} RON</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-slate-500">Medie studenți Iași</p>
+          <p className="text-lg font-bold text-slate-400">{avgTotal} RON</p>
+        </div>
+      </div>
+      <div className="space-y-3">
+        {CATEGORIES.map(cat => (
+          <div key={cat} className="glass-card p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold text-white">{cat}</span>
+              <span className="text-xs text-slate-500">Medie: {AVERAGES[cat]} RON</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="number"
+                value={budget[cat] || ''}
+                onChange={e => updateBudget(cat, e.target.value)}
+                placeholder={String(AVERAGES[cat])}
+                className="w-28 h-9 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 text-sm text-slate-300 outline-none focus:border-indigo-500/50"
+              />
+              <span className="text-xs text-slate-600">RON/lună</span>
+              <div className="flex-1 h-2 bg-white/[0.05] rounded-full overflow-hidden">
+                <div
+                  className={clsx('h-full rounded-full transition-all', (budget[cat] || 0) > AVERAGES[cat] ? 'bg-red-500' : 'bg-indigo-500')}
+                  style={{ width: `${Math.min(100, ((budget[cat] || 0) / AVERAGES[cat]) * 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function BooksTab() {
+  const [query, setQuery] = useState('')
+  const [type, setType] = useState('Toate')
+  const books = booksData.filter(b =>
+    (type === 'Toate' || b.type === type) &&
+    (!query || b.title.toLowerCase().includes(query.toLowerCase()) || b.subject.toLowerCase().includes(query.toLowerCase()))
+  )
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <SearchField value={query} onChange={setQuery} placeholder="Caută titlu, materie..." />
+        <FilterPills items={['Toate', 'donez', 'vând']} value={type} onChange={setType} />
+      </div>
+      <div className="space-y-3">
+        {books.map(b => (
+          <div key={b.id} className="glass-card p-4 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shrink-0">
+              <BookOpen size={16} className="text-amber-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-white truncate">{b.title}</p>
+              <p className="text-xs text-slate-500">{b.subject} · An {b.yearNeeded} · {b.condition}</p>
+              <p className="text-xs text-slate-600 mt-0.5">Oferit de {b.contact}</p>
+            </div>
+            <div className="text-right shrink-0">
+              <p className={clsx('text-sm font-bold', b.price === 0 ? 'text-emerald-400' : 'text-white')}>
+                {b.price === 0 ? 'Gratuit' : `${b.price} RON`}
+              </p>
+              <span className={clsx('text-[10px] font-bold px-2 py-0.5 rounded-full', b.type === 'donez' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400')}>
+                {b.type === 'donez' ? 'Donez' : 'Vând'}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function CarpoolTab() {
+  const [query, setQuery] = useState('')
+  const rides = carpoolData.filter(r =>
+    !query || r.from.toLowerCase().includes(query.toLowerCase()) || r.to.toLowerCase().includes(query.toLowerCase())
+  )
+  return (
+    <div className="space-y-4">
+      <SearchField value={query} onChange={setQuery} placeholder="Caută destinație..." />
+      <div className="space-y-3">
+        {rides.map(r => (
+          <div key={r.id} className="glass-card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-white">{r.from}</span>
+                <ChevronRight size={14} className="text-slate-600" />
+                <span className="text-sm font-bold text-white">{r.to}</span>
+              </div>
+              {r.verified && <span className="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-0.5 rounded-full">Verificat</span>}
+            </div>
+            <div className="flex items-center gap-4 text-xs text-slate-500">
+              <span>{r.date} · {r.time}</span>
+              <span>{r.seats} {r.seats === 1 ? 'loc' : 'locuri'} libere</span>
+              <span>Șofer: {r.driver}</span>
+            </div>
+            <div className="flex items-center justify-between mt-3">
+              <span className="text-lg font-black text-white">{r.pricePerPerson} RON <span className="text-xs font-normal text-slate-500">/ persoană</span></span>
+              <button className="h-8 px-4 rounded-xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-bold hover:bg-indigo-600/30 transition-all">
+                Contactează {r.contact}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function RoommateTab() {
+  const [query, setQuery] = useState('')
+  const people = roommateData.filter(r =>
+    !query || r.zone.toLowerCase().includes(query.toLowerCase()) || r.faculty.toLowerCase().includes(query.toLowerCase())
+  )
+  return (
+    <div className="space-y-4">
+      <SearchField value={query} onChange={setQuery} placeholder="Caută zonă, facultate..." />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {people.map(r => (
+          <div key={r.id} className="glass-card p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                {r.name.split(' ').map(w => w[0]).join('')}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-white">{r.name}</p>
+                <p className="text-xs text-slate-500">{r.faculty} · An {r.year}</p>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400 mt-3 leading-relaxed">{r.bio}</p>
+            <div className="flex flex-wrap gap-1.5 mt-3">
+              <span className="tag">{r.zone}</span>
+              <span className="tag">{r.budget}</span>
+              <span className="tag">{r.schedule}</span>
+              {!r.smoking && <span className="tag">Non-fumător</span>}
+              {r.pets && <span className="tag">Animale ok</span>}
+            </div>
+            <button className="mt-3 w-full h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-bold hover:bg-indigo-600/30 transition-all">
+              Contactează {r.contact}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ToolsSection() {
+  const [toolTab, setToolTab] = useState('Budget')
+  return (
+    <section className="space-y-4">
+      <div className="flex gap-2 border-b border-white/[0.05] pb-4">
+        {TOOLS_TABS.map(t => (
+          <button key={t} onClick={() => setToolTab(t)}
+            className={clsx('px-4 py-2 rounded-xl text-sm font-semibold transition-all',
+              toolTab === t ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]')}
+          >{t}</button>
+        ))}
+      </div>
+      {toolTab === 'Budget' && <BudgetTab />}
+      {toolTab === 'Cărți' && <BooksTab />}
+      {toolTab === 'Carpool' && <CarpoolTab />}
+      {toolTab === 'Colegi cameră' && <RoommateTab />}
+    </section>
+  )
+}
+
 export default function StudentLifeHub({ activeSection = 'discounts', profile, session }) {
   const [saved, savedOps] = useStoredSet('sc_saved_v2')
   const [applied, appliedOps] = useStoredSet('sc_applied_v2')
   const [joined, joinedOps] = useStoredSet('sc_joined_v2')
+  const [going, goingOps] = useStoredSet('sc_going_v1')
   const lifeProfile = useMemo(() => buildLifeProfile(profile, session), [profile, session])
   const theme = getUniversityTheme(session?.university)
   const jobCount = (studentLifeData.career[lifeProfile.careerKey] || studentLifeData.career.CS).length
@@ -471,12 +892,12 @@ export default function StudentLifeHub({ activeSection = 'discounts', profile, s
               <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 mt-1">Oferte</p>
             </div>
             <div className="stat-card">
-              <p className="font-mono text-xl font-bold text-white leading-none">{jobCount}</p>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 mt-1">Roluri</p>
+              <p className="font-mono text-xl font-bold text-white leading-none">{eventsData.length}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 mt-1">Evenimente</p>
             </div>
             <div className="stat-card">
-              <p className="font-mono text-xl font-bold text-white leading-none">{studentLifeData.community.groups.length}</p>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 mt-1">Grupuri</p>
+              <p className="font-mono text-xl font-bold text-white leading-none">{booksData.length}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 mt-1">Cărți</p>
             </div>
           </div>
         </div>
@@ -485,6 +906,9 @@ export default function StudentLifeHub({ activeSection = 'discounts', profile, s
       {activeSection === 'discounts' && <DiscountsSection lifeProfile={lifeProfile} saved={saved} savedOps={savedOps} />}
       {activeSection === 'career' && <CareerSection lifeProfile={lifeProfile} applied={applied} appliedOps={appliedOps} />}
       {activeSection === 'community' && <CommunitySection lifeProfile={lifeProfile} joined={joined} joinedOps={joinedOps} />}
+      {activeSection === 'events' && <EventsSection going={going} goingOps={goingOps} />}
+      {activeSection === 'wellness' && <WellnessSection />}
+      {activeSection === 'tools' && <ToolsSection />}
     </div>
   )
 }
