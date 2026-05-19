@@ -489,6 +489,66 @@ Genereaza exact 4 recomandari smart si practice. Raspunde doar cu JSON valid in 
   }
 }
 
+async function handleSupportAssistant(req, res) {
+  const body = await readJson(req)
+  const context = body.context || {}
+  const fallbackSuggestions = context.role === 'professor'
+    ? ['What can I manage here?', 'How do thesis requests work?', 'How do messages work?']
+    : ['What can I do here?', 'Open Campus Navigator', 'How do thesis requests work?']
+
+  const raw = await grokChat({
+    model: TEXT_MODEL,
+    messages: [
+      {
+        role: 'system',
+        content: `You are the virtual support assistant inside StudentCompass.
+Answer in the same language as the user when possible. Be concise, practical, and product-aware.
+
+You can help with:
+- account access, institutional email, onboarding, profile basics
+- student modules: Dashboard, Campus Navigator, Schedule Hub, Thesis Finder, Peer Tutoring, Messages, Student Life, City Adaptation
+- professor modules: dashboard, academic profile, thesis requests, recovery requests, messages
+- basic student-life questions
+
+Rules:
+- Do not claim you changed account data unless the user explicitly used an app control.
+- Do not invent policies, grades, legal/medical/financial advice, or private data.
+- If the user asks for something outside StudentCompass, answer briefly if it is basic; otherwise redirect to what the app can help with.
+- Return JSON only with this shape: {"answer":"...", "suggestions":["...", "...", "..."]}.`,
+      },
+      {
+        role: 'user',
+        content: `Current app context:
+${JSON.stringify({
+  role: context.role,
+  university: context.university,
+  faculty: context.faculty || context.detectedFaculty,
+  year: context.year,
+  platformMode: context.platformMode,
+  currentView: context.currentView,
+  currentLabel: context.currentLabel,
+})}
+
+Recent conversation:
+${JSON.stringify(Array.isArray(body.history) ? body.history.slice(-8) : [])}
+
+User question:
+${String(body.message || '')}`,
+      },
+    ],
+    max_tokens: 520,
+    response_format: { type: 'json_object' },
+  })
+
+  const parsed = safeJson(raw, { answer: raw, suggestions: fallbackSuggestions })
+  sendJson(res, 200, {
+    answer: String(parsed.answer || raw || 'I can help with StudentCompass account, modules, messages, schedules, thesis requests, and basic student-life questions.'),
+    suggestions: Array.isArray(parsed.suggestions)
+      ? parsed.suggestions.slice(0, 3).map(String)
+      : fallbackSuggestions,
+  })
+}
+
 export function createNavigationRequestHandler() {
   return async (req, res) => {
     try {
@@ -498,6 +558,7 @@ export function createNavigationRequestHandler() {
       if (req.url === '/api/navigation/photo') { await handlePhoto(req, res); return }
       if (req.url === '/api/navigation/copilot') { await handleCopilot(req, res); return }
       if (req.url === '/api/navigation/recommendations') { await handleRecommendations(req, res); return }
+      if (req.url === '/api/navigation/support-assistant') { await handleSupportAssistant(req, res); return }
       sendJson(res, 404, { error: 'Not found' })
     } catch (error) {
       sendJson(res, error.statusCode || 500, { error: error.message || 'Navigation API error' })
@@ -530,6 +591,10 @@ export function createNavigationApiServer(port = 3000) {
       }
       if (req.url === '/api/navigation/recommendations') {
         await handleRecommendations(req, res)
+        return
+      }
+      if (req.url === '/api/navigation/support-assistant') {
+        await handleSupportAssistant(req, res)
         return
       }
       sendJson(res, 404, { error: 'Not found' })
