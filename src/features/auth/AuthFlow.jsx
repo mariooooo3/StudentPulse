@@ -7,8 +7,8 @@ import { DEMO_PROFESSOR } from '../../shared/services/professorPortal.service'
 import clsx from 'clsx'
 
 const STEP = { SELECT_UNI: 0, ENTER_EMAIL: 1, VERIFYING: 2, CONFIRMED: 3 }
-const UAIC = UNIVERSITIES.find(u => u.id === 'uaic')
-const FMIM = UAIC?.faculties.find(f => f.code === 'FMIM')
+const TUIASI = UNIVERSITIES.find(u => u.id === 'tuiasi')
+const AC_FACULTY = TUIASI?.faculties.find(f => f.code === 'AC')
 
 function UniversityGrid({ onSelect }) {
   const [search, setSearch] = useState('')
@@ -146,7 +146,7 @@ function ProfessorLogin({ email, setEmail, accessCode, setAccessCode, error, onS
     <div className="space-y-4">
       <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
         <p className="text-[13px] font-semibold text-amber-200">{DEMO_PROFESSOR.name}</p>
-        <p className="text-[11px] text-amber-200/70 mt-0.5">{DEMO_PROFESSOR.facultyName} - UAIC</p>
+        <p className="text-[11px] text-amber-200/70 mt-0.5">{DEMO_PROFESSOR.facultyName} – TUIASI</p>
       </div>
 
       <div>
@@ -304,7 +304,7 @@ export default function AuthFlow() {
 
   async function handleProfessorSubmit() {
     if (professorEmail.trim().toLowerCase() !== DEMO_PROFESSOR.email || accessCode !== DEMO_PROFESSOR.password) {
-      setAccessCodeError('Cont profesor invalid. Pentru demo foloseste andrei.munteanu@uaic.ro si codul 0000.')
+      setAccessCodeError('Cont profesor invalid. Pentru demo folosește mihai.ciobanu@academic.tuiasi.ro și codul 0000.')
       return
     }
     setAccessCodeError('')
@@ -315,14 +315,14 @@ export default function AuthFlow() {
       role: 'professor',
       userId: DEMO_PROFESSOR.id,
       email: DEMO_PROFESSOR.email,
-      university: UAIC,
-      detectedFaculty: FMIM,
+      university: TUIASI,
+      detectedFaculty: AC_FACULTY,
       profile: {
         ...DEMO_PROFESSOR,
-        university: UAIC,
-        detectedFaculty: FMIM,
-        facultyCode: 'FMIM',
-        facultyType: 'MATH_CS',
+        university: TUIASI,
+        detectedFaculty: AC_FACULTY,
+        facultyCode: 'AC',
+        facultyType: 'ENGINEERING_CS',
       },
       isNewUser: false,
     })

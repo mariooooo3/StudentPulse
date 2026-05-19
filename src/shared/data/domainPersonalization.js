@@ -209,6 +209,26 @@ const EXTRA_QUESTIONS = {
       options: ['Python','C++','Java','C','MATLAB','R','Haskell','JavaScript','SQL','Niciunul încă'],
     },
   },
+
+  ENGINEERING_CS: {
+    interestsLabel: 'Ce domenii din ingineria calculatoarelor te pasionează?',
+    interests: ['Programare & software','Algoritmi & structuri de date','Rețele de calculatoare','Sisteme de operare','Baze de date','Inteligență artificială','Securitate cibernetică','Embedded systems','Control automat','Robotică','VLSI & circuite digitale','Web & aplicații mobile'],
+    specific: {
+      question: 'Ce tip de proiecte preferi?',
+      type: 'cards',
+      options: [
+        { label: 'Software & aplicații', desc: 'Web, mobile, backend, inginerie software' },
+        { label: 'Hardware & embedded', desc: 'Microcontrolere, FPGA, sisteme încorporate' },
+        { label: 'AI & Data Science', desc: 'Machine learning, modele inteligente, date' },
+        { label: 'Sisteme automate', desc: 'Control procese, robotică, automatizare industrială' },
+      ],
+    },
+    experience: {
+      question: 'Ce limbaje / tehnologii cunoști deja?',
+      type: 'tags',
+      options: ['C','C++','Python','Java','JavaScript','MATLAB/Simulink','Assembly','SQL','Git','Niciunul încă'],
+    },
+  },
 }
 
 // ── New faculty type schedules ─────────────────────────────────────────────────
@@ -513,6 +533,80 @@ const EXTRA_SCHEDULES = {
       { id:3, name:'Radu Croitoru',   avatar:'RC', offersSubject:'Probabilități & Statistică', offersSlot:{ day:2, start:14, end:16, group:'B1' }, wantsSlot:{ day:4, start:8, end:10, group:'A1' }, message:'Marțea am tutoriat la facultate', isMatch:true },
     ],
   },
+
+  ENGINEERING_CS_CTI: {
+    schedule: [
+      { id:1,  name:'Programare Orientată pe Obiecte', short:'POO',  day:1, start:8,  end:10, room:'Amf. AC0-1',  type:'Curs',     professor:'Conf. dr. ing. Andrei Stan',         color:'bg-indigo-500/80 border-indigo-400', group:'CTI-A1' },
+      { id:2,  name:'Programare Orientată pe Obiecte', short:'POO',  day:1, start:12, end:14, room:'Lab. C1-1',   type:'Laborator',professor:'Ș.l. dr. ing. Cristian Aflori',       color:'bg-indigo-500/80 border-indigo-400', group:'CTI-A1' },
+      { id:3,  name:'Electronică Digitală',            short:'ED',   day:2, start:8,  end:10, room:'Amf. AC0-2',  type:'Curs',     professor:'Prof. dr. ing. Mircea Hulea',         color:'bg-violet-500/80 border-violet-400', group:'CTI-A1' },
+      { id:4,  name:'Teoria Sistemelor',               short:'TS',   day:2, start:10, end:12, room:'Amf. AC0-1',  type:'Curs',     professor:'Conf. dr. ing. Anca Maxim',           color:'bg-amber-500/80 border-amber-400',   group:'CTI-A1' },
+      { id:5,  name:'Statistică și Prelucrarea Datelor',short:'SPD', day:3, start:8,  end:10, room:'Amf. AC0-2',  type:'Curs',     professor:'Conf. dr. ing. Lavinia Ferariu',      color:'bg-emerald-500/80 border-emerald-400',group:'CTI-A1' },
+      { id:6,  name:'Programare în Limbaj de Asamblare',short:'ASM', day:3, start:12, end:14, room:'Lab. C1-3',   type:'Laborator',professor:'Ș.l. dr. ing. Mihai Timiș',          color:'bg-rose-500/80 border-rose-400',     group:'CTI-A1' },
+      { id:7,  name:'Dispozitive și Electronică Analogică',short:'DEA',day:4,start:8, end:10, room:'Amf. AC0-1',  type:'Curs',     professor:'Prof. dr. ing. Robert Gabriel Lupu',  color:'bg-cyan-500/80 border-cyan-400',     group:'CTI-A1' },
+      { id:8,  name:'Electronică Digitală',            short:'ED',   day:4, start:12, end:14, room:'Lab. C2-1',   type:'Laborator',professor:'Ș.l. dr. ing. Alexandru Archip',     color:'bg-violet-500/80 border-violet-400', group:'CTI-A1' },
+      { id:9,  name:'Teoria Sistemelor',               short:'TS',   day:5, start:10, end:12, room:'S. A1-5',     type:'Seminar',  professor:'Asist. drd. ing. Sofia Huștiu',      color:'bg-amber-500/80 border-amber-400',   group:'CTI-A1' },
+      { id:10, name:'Statistică și Prelucrarea Datelor',short:'SPD', day:5, start:14, end:16, room:'S. A1-7',     type:'Seminar',  professor:'Asist. drd. ing. Ioana Huștiu',      color:'bg-emerald-500/80 border-emerald-400',group:'CTI-A1' },
+    ],
+    recoverySlots: {
+      'Programare Orientată pe Obiecte': [
+        { day:1, start:8,  end:10, room:'Amf. AC0-1', group:'CTI-A1', professor:'Conf. dr. ing. Andrei Stan',   total:30, enrolled:28, isMine:true  },
+        { day:2, start:14, end:16, room:'Lab. C1-2',  group:'CTI-A2', professor:'Ș.l. dr. ing. Cristian Aflori', total:16, enrolled:14, isMine:false },
+        { day:4, start:16, end:18, room:'Lab. C1-1',  group:'CTI-B1', professor:'Ș.l. dr. ing. Cristian Aflori', total:16, enrolled:11, isMine:false },
+      ],
+      'Electronică Digitală': [
+        { day:2, start:8,  end:10, room:'Amf. AC0-2', group:'CTI-A1', professor:'Prof. dr. ing. Mircea Hulea',   total:30, enrolled:27, isMine:true  },
+        { day:3, start:10, end:12, room:'Lab. C2-1',  group:'CTI-A2', professor:'Ș.l. dr. ing. Alexandru Archip',total:16, enrolled:15, isMine:false },
+        { day:5, start:14, end:16, room:'Lab. C2-2',  group:'CTI-B1', professor:'Ș.l. dr. ing. Alexandru Archip',total:16, enrolled:9,  isMine:false },
+      ],
+      'Teoria Sistemelor': [
+        { day:2, start:10, end:12, room:'Amf. AC0-1', group:'CTI-A1', professor:'Conf. dr. ing. Anca Maxim',     total:30, enrolled:24, isMine:true  },
+        { day:5, start:10, end:12, room:'S. A1-5',    group:'CTI-A2', professor:'Asist. drd. ing. Sofia Huștiu', total:18, enrolled:16, isMine:false },
+        { day:4, start:14, end:16, room:'S. A1-6',    group:'CTI-B1', professor:'Asist. drd. ing. Sofia Huștiu', total:18, enrolled:12, isMine:false },
+      ],
+    },
+    swapRequests: [
+      { id:1, name:'Radu Botnari',    avatar:'RB', offersSubject:'Programare Orientată pe Obiecte', offersSlot:{ day:2, start:14, end:16, group:'CTI-A2' }, wantsSlot:{ day:1, start:8, end:10, group:'CTI-A1' }, message:'Suprapunere cu laborator de Electronică', isMatch:true },
+      { id:2, name:'Elena Ciobanu',   avatar:'EC', offersSubject:'Electronică Digitală',           offersSlot:{ day:3, start:10, end:12, group:'CTI-A2' }, wantsSlot:{ day:2, start:8, end:10, group:'CTI-A1' }, message:'Prefer joia dimineața', isMatch:false },
+      { id:3, name:'Andrei Toma',     avatar:'AT', offersSubject:'Teoria Sistemelor',              offersSlot:{ day:5, start:10, end:12, group:'CTI-A2' }, wantsSlot:{ day:2, start:10, end:12, group:'CTI-A1' }, message:'Se suprapune cu seminarul de SPD', isMatch:true },
+    ],
+  },
+
+  ENGINEERING_CS_IS: {
+    schedule: [
+      { id:1,  name:'Metode Numerice',                    short:'MN',   day:1, start:8,  end:10, room:'Amf. AC0-1',  type:'Curs',     professor:'Conf. dr. ing. Carlos-Mihai Pascal',  color:'bg-indigo-500/80 border-indigo-400', group:'IS-A1' },
+      { id:2,  name:'Structuri de Date și Algoritmi',     short:'SDA',  day:1, start:12, end:14, room:'Lab. C1-2',   type:'Laborator',professor:'Ș.l. dr. ing. Florin Brăescu',        color:'bg-violet-500/80 border-violet-400', group:'IS-A1' },
+      { id:3,  name:'Electronică Digitală',               short:'ED',   day:2, start:8,  end:10, room:'Amf. AC0-2',  type:'Curs',     professor:'Prof. dr. ing. Mircea Hulea',          color:'bg-amber-500/80 border-amber-400',   group:'IS-A1' },
+      { id:4,  name:'Matematici Speciale',                short:'MS',   day:2, start:10, end:12, room:'Amf. AC0-1',  type:'Curs',     professor:'Conf. dr. ing. Lavinia Ferariu',       color:'bg-emerald-500/80 border-emerald-400',group:'IS-A1' },
+      { id:5,  name:'Analiza și Sinteza Dispozitivelor Numerice',short:'ASDN',day:3,start:10,end:12,room:'Lab. C2-3',type:'Laborator',professor:'Ș.l. dr. ing. Silviu Ostafi',          color:'bg-rose-500/80 border-rose-400',     group:'IS-A1' },
+      { id:6,  name:'Modelarea Sistemelor Fizice',        short:'MSF',  day:3, start:12, end:14, room:'Amf. AC0-2',  type:'Curs',     professor:'Prof. dr. ing. Marius Kloetzer',       color:'bg-cyan-500/80 border-cyan-400',     group:'IS-A1' },
+      { id:7,  name:'Structuri de Date și Algoritmi',     short:'SDA',  day:4, start:8,  end:10, room:'Amf. AC0-1',  type:'Curs',     professor:'Conf. dr. ing. Cristina Budaciu',      color:'bg-violet-500/80 border-violet-400', group:'IS-A1' },
+      { id:8,  name:'Electronică Digitală',               short:'ED',   day:4, start:12, end:14, room:'S. A1-4',     type:'Seminar',  professor:'Asist. drd. ing. Rareș Crăciun',      color:'bg-amber-500/80 border-amber-400',   group:'IS-A1' },
+      { id:9,  name:'Metode Numerice',                    short:'MN',   day:5, start:10, end:12, room:'S. A1-6',     type:'Seminar',  professor:'Asist. drd. ing. Angela Nagîț',        color:'bg-indigo-500/80 border-indigo-400', group:'IS-A1' },
+      { id:10, name:'Modelarea Sistemelor Fizice',        short:'MSF',  day:5, start:14, end:16, room:'Lab. A1-1',   type:'Laborator',professor:'Asist. drd. ing. Teodor Sauciuc',      color:'bg-cyan-500/80 border-cyan-400',     group:'IS-A1' },
+    ],
+    recoverySlots: {
+      'Structuri de Date și Algoritmi': [
+        { day:4, start:8,  end:10, room:'Amf. AC0-1', group:'IS-A1', professor:'Conf. dr. ing. Cristina Budaciu', total:28, enrolled:26, isMine:true  },
+        { day:2, start:14, end:16, room:'Lab. C1-2',  group:'IS-A2', professor:'Ș.l. dr. ing. Florin Brăescu',   total:16, enrolled:14, isMine:false },
+        { day:5, start:14, end:16, room:'Lab. C1-3',  group:'IS-B1', professor:'Ș.l. dr. ing. Florin Brăescu',   total:16, enrolled:10, isMine:false },
+      ],
+      'Metode Numerice': [
+        { day:1, start:8,  end:10, room:'Amf. AC0-1', group:'IS-A1', professor:'Conf. dr. ing. Carlos-Mihai Pascal', total:28, enrolled:25, isMine:true  },
+        { day:5, start:10, end:12, room:'S. A1-6',    group:'IS-A2', professor:'Asist. drd. ing. Angela Nagîț',      total:18, enrolled:15, isMine:false },
+        { day:3, start:14, end:16, room:'S. A1-5',    group:'IS-B1', professor:'Asist. drd. ing. Angela Nagîț',      total:18, enrolled:11, isMine:false },
+      ],
+      'Modelarea Sistemelor Fizice': [
+        { day:3, start:12, end:14, room:'Amf. AC0-2', group:'IS-A1', professor:'Prof. dr. ing. Marius Kloetzer',     total:28, enrolled:23, isMine:true  },
+        { day:5, start:14, end:16, room:'Lab. A1-1',  group:'IS-A2', professor:'Asist. drd. ing. Teodor Sauciuc',    total:16, enrolled:13, isMine:false },
+        { day:4, start:14, end:16, room:'Lab. A1-2',  group:'IS-B1', professor:'Asist. drd. ing. Teodor Sauciuc',    total:16, enrolled:9,  isMine:false },
+      ],
+    },
+    swapRequests: [
+      { id:1, name:'Iulia Botezatu',  avatar:'IB', offersSubject:'Structuri de Date și Algoritmi', offersSlot:{ day:2, start:14, end:16, group:'IS-A2' }, wantsSlot:{ day:4, start:8, end:10, group:'IS-A1' }, message:'Suprapunere cu laborator de Electronică Digitală', isMatch:true },
+      { id:2, name:'Mihai Stănescu',  avatar:'MS', offersSubject:'Metode Numerice',               offersSlot:{ day:5, start:10, end:12, group:'IS-A2' }, wantsSlot:{ day:1, start:8, end:10, group:'IS-A1' }, message:'Prefer lunea dimineața', isMatch:false },
+      { id:3, name:'Diana Moraru',    avatar:'DM', offersSubject:'Modelarea Sistemelor Fizice',   offersSlot:{ day:5, start:14, end:16, group:'IS-A2' }, wantsSlot:{ day:3, start:12, end:14, group:'IS-A1' }, message:'Joia am antrenament', isMatch:true },
+    ],
+  },
 }
 
 // ── Professors by faculty type ─────────────────────────────────────────────────
@@ -569,6 +663,18 @@ const EXTRA_PROFESSORS = {
     { id:903, name:'Conf. Dr. Luminița Dumitriu',  title:'Conferențiar universitar', domain:'Algebră & Statistică Matematică', tags:['Algebră abstractă','Probabilități','Statistică matematică','R'],        available:true,  slotsLeft:3, totalSlots:6, minGrade:7.5, language:'Română / Engleză', acceptsOther:true,  previousTheses:[{title:'Metode statistice pentru analiza datelor genomice',year:2024},{title:'Algebre Lie și aplicații în mecanică',year:2023}],              contact:'Email',  avatar:'LD', color:'from-emerald-600 to-teal-600', requirementsNote:'Acceptă teme interdisciplinare (statistică + bioinformatică, eco-statistică). CV și extras notă de studii.' },
     { id:904, name:'Conf. Dr. Mihai Gavriluț',     title:'Conferențiar universitar', domain:'Baze de Date & Inginerie Software',tags:['Baze de date relaționale','SQL','NoSQL','Arhitecturi software'],        available:true,  slotsLeft:2, totalSlots:4, minGrade:8.0, language:'Română / Engleză', acceptsOther:true,  previousTheses:[{title:'Optimizarea interogărilor în sisteme distribuite',year:2024},{title:'Modele de date pentru sisteme IoT scalabile',year:2023}],      contact:'Email',  avatar:'MG', color:'from-amber-600 to-orange-600', requirementsNote:'Preferă studenți cu proiect de baze de date demonstrabil. CV și link la repository la prima întâlnire.' },
   ],
+  ENGINEERING_CS_CTI: [
+    { id:1001, name:'Prof. dr. ing. Florin Leon',      title:'Profesor universitar',    domain:'Inteligență Artificială & Web Semantic', tags:['Agenți inteligenți','Raționament automat','Semantic Web'],         available:true,  slotsLeft:3, totalSlots:5, minGrade:8.5, language:'Română / Engleză', acceptsOther:true,  previousTheses:[{title:'Sisteme multi-agent pentru planificare adaptivă',year:2024},{title:'Ontologii OWL pentru interoperabilitate în e-Health',year:2023}], contact:'Email', avatar:'FL', color:'from-indigo-600 to-blue-600', requirementsNote:'Solicită un plan de cercetare de 1 pagină cu problema propusă, metode și bibliografie. Recomandare: cunoașterea Python sau Prolog.' },
+    { id:1002, name:'Prof. dr. ing. Petru Cașcaval',   title:'Profesor universitar',    domain:'Calcul Paralel & Distribuit',            tags:['MPI','OpenMP','Sisteme distribuite','HPC'],                        available:true,  slotsLeft:2, totalSlots:4, minGrade:8.0, language:'Română / Engleză', acceptsOther:false, previousTheses:[{title:'Optimizarea comunicației în clustere MPI',year:2024},{title:'Scheduling în grid computing',year:2023}], contact:'Teams', avatar:'PC', color:'from-violet-600 to-purple-600', requirementsNote:'Necesită cunoașterea programării paralele (C/C++ cu MPI sau OpenMP). Proiect demonstrabil de performanță la prima întâlnire.' },
+    { id:1003, name:'Conf. dr. ing. Andrei Stan',       title:'Conferențiar universitar', domain:'Rețele de Calculatoare & Securitate',    tags:['TCP/IP','Securitate rețele','Firewall','VPN'],                     available:true,  slotsLeft:3, totalSlots:6, minGrade:7.5, language:'Română / Engleză', acceptsOther:true,  previousTheses:[{title:'Detectarea intruziunilor cu ML în rețele SDN',year:2024},{title:'VPN site-to-site cu IPSec — performanță și securitate',year:2023}], contact:'Email', avatar:'AS', color:'from-emerald-600 to-teal-600', requirementsNote:'Acceptă teme cu implementare practică pe echipamente Cisco sau simulatoare (GNS3, Packet Tracer). CV și laborator de rețele propus.' },
+    { id:1004, name:'Conf. dr. ing. Dan Mardare',       title:'Conferențiar universitar', domain:'Inginerie Software & Arhitecturi',       tags:['UML','Design patterns','Microservicii','DevOps'],                  available:true,  slotsLeft:2, totalSlots:5, minGrade:8.0, language:'Română',          acceptsOther:true,  previousTheses:[{title:'Migrarea monolitului la microservicii — studiu de caz',year:2024},{title:'CI/CD pipelines pentru aplicații Java enterprise',year:2023}], contact:'Email', avatar:'DM', color:'from-amber-600 to-orange-600', requirementsNote:'Preferă teme cu aplicație software demonstrabilă. Repository GitHub cu cod demonstrabil la prima întâlnire.' },
+  ],
+  ENGINEERING_CS_IS: [
+    { id:1101, name:'Prof. dr. ing. Marius Kloetzer',  title:'Profesor universitar',    domain:'Sisteme Hibride & Verificare Formală',   tags:['Automate hibride','Temporal logic','Model checking'],              available:true,  slotsLeft:2, totalSlots:4, minGrade:9.0, language:'Română / Engleză', acceptsOther:true,  previousTheses:[{title:'Verificarea formală a sistemelor embedded critice',year:2024},{title:'Sinteză automată de controlere din specificații LTL',year:2023}], contact:'Email', avatar:'MK', color:'from-indigo-600 to-blue-600', requirementsNote:'Solicită cunoașterea automatelor finite și a logicii temporale. Plan de cercetare cu 2 pagini și bibliografie de specialitate obligatorie.' },
+    { id:1102, name:'Conf. dr. ing. Anca Maxim',        title:'Conferențiar universitar', domain:'Control Predictiv & Sisteme Avansate',   tags:['MPC','Sisteme neliniare','Optimizare în timp real'],               available:true,  slotsLeft:3, totalSlots:5, minGrade:8.0, language:'Română / Engleză', acceptsOther:false, previousTheses:[{title:'Control predictiv robust pentru procese chimice',year:2024},{title:'Reglare în timp real cu MPC explicit',year:2023}], contact:'Teams', avatar:'AM', color:'from-violet-600 to-purple-600', requirementsNote:'Necesită cunoașterea MATLAB/Simulink și noțiuni de optimizare convexă. Proiect de simulare propus la prima întâlnire.' },
+    { id:1103, name:'Conf. dr. ing. Lavinia Ferariu',   title:'Conferențiar universitar', domain:'Procesarea Semnalelor & Machine Learning',tags:['DSP','Rețele neuronale','MATLAB','Clasificare'],                    available:true,  slotsLeft:3, totalSlots:6, minGrade:7.5, language:'Română / Engleză', acceptsOther:true,  previousTheses:[{title:'Clasificarea aritmiilor cu CNN pe date ECG',year:2024},{title:'Filtrare adaptivă pentru semnale biomediale',year:2024}], contact:'Email', avatar:'LF', color:'from-emerald-600 to-teal-600', requirementsNote:'Acceptă teme cu seturi de date reale (biomedicale, industriale). Cunoașterea Python/MATLAB și repository demonstrabil sunt avantaje.' },
+    { id:1104, name:'Prof. dr. ing. Carlos-Mihai Pascal',title:'Profesor universitar',   domain:'Robotică & Viziune Artificială',         tags:['ROS','Computer Vision','Embedded control','Kinematică'],           available:true,  slotsLeft:2, totalSlots:4, minGrade:8.5, language:'Română / Engleză', acceptsOther:true,  previousTheses:[{title:'Localizare și cartare simultană (SLAM) cu LiDAR',year:2024},{title:'Detectare obiecte cu YOLO pe sisteme embedded',year:2023}], contact:'Email', avatar:'CP', color:'from-amber-600 to-orange-600', requirementsNote:'Solicită cunoașterea ROS sau OpenCV și un proiect de robotică sau viziune artificială demonstrabil. CV și link la proiect obligatorii.' },
+  ],
   // Existing types kept with real data
   ENGINEERING: [],
   ARTS: [],
@@ -620,6 +726,18 @@ const EXTRA_TUTORS = {
     { id:901, name:'Alexandru Buza',  year:3, subjects:['Algoritmi & Structuri de Date','Programare C++','Python'], grade:9.5, sessions:38, rating:4.9, reviews:30, price:50, availability:['Luni 17-20','Miercuri 17-20','Sâmbătă 10-13'], style:'Probleme rezolvate pas cu pas, vizualizare algoritmi', avatar:'AB', color:'from-indigo-500 to-blue-500',   online:true  },
     { id:902, name:'Ioana Munteanu',  year:2, subjects:['Analiză Matematică','Algebră Liniară','Geometrie'],       grade:9.7, sessions:24, rating:4.9, reviews:19, price:45, availability:['Marți 17-20','Joi 17-20'],                   style:'Demonstrații riguroase, exerciții tip examen', avatar:'IM', color:'from-violet-500 to-purple-500', online:true  },
     { id:903, name:'Radu Croitoru',   year:3, subjects:['Baze de Date','SQL','Java POO'],                         grade:9.2, sessions:31, rating:4.8, reviews:24, price:55, availability:['Vineri 16-20','Sâmbătă 10-14'],               style:'Proiecte reale, debugging în timp real', avatar:'RC', color:'from-emerald-500 to-teal-500', online:false },
+  ],
+  ENGINEERING_CS_CTI: [
+    { id:1001, name:'Andrei Popescu',   year:3, subjects:['Programare Orientată Obiect','Java','Design Patterns'], grade:9.4, sessions:35, rating:4.9, reviews:28, price:50, availability:['Luni 17-20','Miercuri 17-20'],              style:'Live coding, refactoring ghidat, code review',  avatar:'AP', color:'from-indigo-500 to-blue-500',   online:true  },
+    { id:1002, name:'Mihaela Ionescu',  year:4, subjects:['Structuri de Date & Algoritmi','C++','Complexitate'],   grade:9.6, sessions:42, rating:5.0, reviews:34, price:55, availability:['Marți 17-20','Joi 17-20','Sâmbătă 10-13'], style:'Vizualizare algoritmi, probleme pas cu pas',    avatar:'MI', color:'from-violet-500 to-purple-500', online:true  },
+    { id:1003, name:'Bogdan Arhire',    year:3, subjects:['Rețele de Calculatoare','Packet Tracer','TCP/IP'],       grade:9.1, sessions:22, rating:4.7, reviews:17, price:45, availability:['Vineri 16-20','Sâmbătă 10-14'],              style:'Simulare Packet Tracer, scheme comentate',      avatar:'BA', color:'from-emerald-500 to-teal-500',  online:false },
+    { id:1004, name:'Teodora Ciocan',   year:4, subjects:['Baze de Date','SQL','PostgreSQL','Modelare ER'],         grade:9.3, sessions:29, rating:4.8, reviews:23, price:50, availability:['Luni 17-20','Joi 17-20'],                   style:'Proiecte reale, normalizare și optimizare SQL',  avatar:'TC', color:'from-amber-500 to-orange-500', online:true  },
+  ],
+  ENGINEERING_CS_IS: [
+    { id:1101, name:'Cristian Rusu',    year:4, subjects:['Teoria Sistemelor','MATLAB/Simulink','Reglaj automat'], grade:9.5, sessions:31, rating:4.9, reviews:25, price:50, availability:['Luni 17-20','Miercuri 17-20'],              style:'Simulare Simulink, proiecte de reglaj',         avatar:'CR', color:'from-indigo-500 to-blue-500',   online:true  },
+    { id:1102, name:'Elena Moisiu',     year:3, subjects:['Matematici Superioare','Analiză Matematică','Calcul'],  grade:9.7, sessions:38, rating:5.0, reviews:30, price:45, availability:['Marți 17-20','Joi 17-20'],                   style:'Demonstrații riguroase, exerciții graduale',    avatar:'EM', color:'from-violet-500 to-purple-500', online:true  },
+    { id:1103, name:'Radu Chiriac',     year:4, subjects:['Sisteme Digitale','VHDL','Microprocesoare'],             grade:9.2, sessions:26, rating:4.8, reviews:21, price:50, availability:['Joi 17-20','Sâmbătă 10-14'],                style:'Lab FPGA, cod VHDL comentat',                   avatar:'RC', color:'from-emerald-500 to-teal-500',  online:false },
+    { id:1104, name:'Ioana Sandu',      year:3, subjects:['Procesarea Semnalelor','MATLAB','Python DSP'],           grade:9.0, sessions:18, rating:4.6, reviews:14, price:45, availability:['Vineri 16-20','Sâmbătă 10-14'],              style:'Exerciții pe seturi de date reale',              avatar:'IS', color:'from-rose-500 to-pink-500',    online:true  },
   ],
 }
 
@@ -674,6 +792,17 @@ const EXTRA_SKILL_SWAP = {
     { id:3, name:'Radu Croitoru',   avatar:'RC', teaches:'SQL & Baze de Date',         learns:'Geometrie diferențială',          teachLevel:'Intermediar',learnLevel:'Beginner',   match:false, online:false },
     { id:4, name:'Maria Nechita',   avatar:'MN', teaches:'Probabilități & Statistică', learns:'Framework-uri web (Django/Flask)',teachLevel:'Avansat',    learnLevel:'Beginner',   match:true,  online:true  },
   ],
+  ENGINEERING_CS_CTI: [
+    { id:1, name:'Andrei Popescu',  avatar:'AP', teaches:'Java & Design Patterns',    learns:'DevOps & Docker',             teachLevel:'Avansat',    learnLevel:'Beginner',   match:true,  online:true  },
+    { id:2, name:'Mihaela Ionescu', avatar:'MI', teaches:'Algoritmi & C++',            learns:'Machine Learning (PyTorch)',   teachLevel:'Avansat',    learnLevel:'Intermediar',match:true,  online:true  },
+    { id:3, name:'Bogdan Arhire',   avatar:'BA', teaches:'Rețele & Cisco (GNS3)',      learns:'Programare web (React)',       teachLevel:'Intermediar',learnLevel:'Beginner',   match:false, online:false },
+    { id:4, name:'Teodora Ciocan',  avatar:'TC', teaches:'SQL & Modelare BD',          learns:'Algoritmi avansați (C++)',     teachLevel:'Avansat',    learnLevel:'Beginner',   match:true,  online:true  },
+  ],
+  ENGINEERING_CS_IS: [
+    { id:1, name:'Cristian Rusu',   avatar:'CR', teaches:'MATLAB/Simulink & Control',   learns:'Embedded Linux & ROS',         teachLevel:'Avansat',    learnLevel:'Beginner',   match:true,  online:true  },
+    { id:2, name:'Elena Moisiu',    avatar:'EM', teaches:'Matematici Superioare',        learns:'Programare Python & SciPy',    teachLevel:'Avansat',    learnLevel:'Intermediar',match:true,  online:true  },
+    { id:3, name:'Radu Chiriac',    avatar:'RC', teaches:'VHDL & Sisteme Digitale',      learns:'Computer Vision (OpenCV)',     teachLevel:'Intermediar',learnLevel:'Beginner',   match:false, online:false },
+  ],
 }
 
 const EXTRA_GROUP_SESSIONS = {
@@ -719,6 +848,16 @@ const EXTRA_GROUP_SESSIONS = {
     { id:2, host:'Ioana Munteanu', topic:'Analiză Matematică — exerciții tip sesiune',      date:'Joi, 22 Mai',     time:'17:00', spots:2, totalSpots:4, type:'study', tags:['Analiză','Serii','Examen'] },
     { id:3, host:'Radu Croitoru',  topic:'Atelier SQL — interogări avansate & optimizare', date:'Duminică, 19 Mai',time:'15:00', spots:3, totalSpots:4, type:'teach', tags:['SQL','Baze de Date','Practică'] },
   ],
+  ENGINEERING_CS_CTI: [
+    { id:1, host:'Andrei Popescu',   topic:'Atelier Java — Design Patterns în practică',        date:'Sâmbătă, 18 Mai',  time:'10:00', spots:3, totalSpots:4, type:'teach', tags:['Java','OOP','Design Patterns'] },
+    { id:2, host:'Mihaela Ionescu',  topic:'Pregătire examen Algoritmi & Structuri de Date',    date:'Joi, 22 Mai',      time:'17:00', spots:2, totalSpots:4, type:'study', tags:['Algoritmi','C++','Examen'] },
+    { id:3, host:'Bogdan Arhire',    topic:'Atelier rețele — subnetting și ACL Cisco',          date:'Duminică, 19 Mai', time:'14:00', spots:3, totalSpots:4, type:'teach', tags:['Rețele','Cisco','Subnetting'] },
+  ],
+  ENGINEERING_CS_IS: [
+    { id:1, host:'Cristian Rusu',    topic:'Simulink — modelarea unui sistem de reglaj automat',date:'Sâmbătă, 18 Mai',  time:'10:00', spots:2, totalSpots:4, type:'teach', tags:['MATLAB','Simulink','Control'] },
+    { id:2, host:'Elena Moisiu',     topic:'Sesiune exerciții Matematici Superioare — sesiune', date:'Joi, 22 Mai',      time:'17:00', spots:3, totalSpots:4, type:'study', tags:['Matematică','Examen','Exerciții'] },
+    { id:3, host:'Radu Chiriac',     topic:'Atelier VHDL — implementare pe placă FPGA',         date:'Duminică, 19 Mai', time:'14:00', spots:2, totalSpots:4, type:'teach', tags:['VHDL','FPGA','Digital'] },
+  ],
 }
 
 // ── Thesis domain filters by faculty type ──────────────────────────────────────
@@ -740,6 +879,8 @@ const EXTRA_THESIS_DOMAINS = {
   ENGINEERING:  ['Toate', 'Electronică & Automatizare', 'Inginerie mecanică', 'Energetică & Mediu', 'Telecomunicații & IT'],
   ARTS:         ['Toate', 'Pictură & Desen', 'Sculptură & Ceramică', 'Design grafic & Digital', 'Arhitectură de interior'],
   MATH_CS:      ['Toate', 'Algoritmi & Complexitate', 'Machine Learning & AI', 'Analiză Matematică & Ecuații', 'Baze de Date & Sisteme Distribuite', 'Probabilități & Statistică', 'Algebră & Geometrie'],
+  ENGINEERING_CS_CTI: ['Toate', 'Arhitecturi Software & Microservicii', 'Inteligență Artificială & Agenți', 'Rețele & Securitate Cibernetică', 'Calcul Paralel & Distribuit', 'Baze de Date & Big Data', 'Web & Cloud Computing'],
+  ENGINEERING_CS_IS:  ['Toate', 'Control Predictiv & Sisteme Avansate', 'Sisteme Hibride & Verificare Formală', 'Robotică & Viziune Artificială', 'Procesarea Semnalelor & ML', 'Automatizare Industrială', 'Sisteme Digitale & FPGA'],
 }
 
 // ── Subject filters for tutoring by faculty type ───────────────────────────────
@@ -761,6 +902,8 @@ const EXTRA_SUBJECT_FILTERS = {
   ENGINEERING:  ['Toate', 'Matematici Superioare', 'Fizică', 'Electronică', 'Mecanică'],
   ARTS:         ['Toate', 'Desen', 'Pictură', 'Sculptură', 'Design Grafic'],
   MATH_CS:      ['Toate', 'Analiză Matematică', 'Algebră Liniară', 'Algoritmi & Structuri de Date', 'Baze de Date', 'Probabilități & Statistică', 'POO / Java / Python'],
+  ENGINEERING_CS_CTI: ['Toate', 'Algoritmi & Structuri Date', 'POO / Java', 'Rețele Calculatoare', 'Baze de Date / SQL', 'Sisteme de Operare', 'Arhitectura Calculatoarelor'],
+  ENGINEERING_CS_IS:  ['Toate', 'Teoria Sistemelor', 'Matematici Superioare', 'Sisteme Digitale', 'Procesarea Semnalelor', 'Automatizare', 'Electronică Analogică'],
 }
 
 // ── Professors for existing faculty types ─────────────────────────────────────

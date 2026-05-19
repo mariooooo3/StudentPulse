@@ -1,24 +1,34 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import clsx from 'clsx'
 import {
   Award,
+  Apple,
   Bookmark,
   BookOpen,
+  Brain,
   Briefcase,
   Calendar,
   Car,
   Check,
   ChevronRight,
   Clock,
+  ExternalLink,
   Heart,
+  HandHeart,
+  Moon,
   Pause,
   Phone,
   Play,
   RotateCcw,
   Search,
+  Smartphone,
+  Sprout,
   Sparkles,
   Tag,
   Timer,
+  TreePine,
+  Trash2,
+  Dumbbell,
   Users,
   Users2,
   Wallet,
@@ -258,25 +268,35 @@ function DiscountsSection({ lifeProfile, saved, savedOps }) {
                 </div>
               </div>
               <p className="mt-4 min-h-12 text-sm leading-relaxed text-slate-400">{offer.description}</p>
-              <div className="mt-4 flex items-end justify-between gap-3">
+              <div className="mt-4 flex items-end justify-between gap-2">
                 <div>
                   <span className="text-2xl font-black text-white">-{offer.discount}%</span>
                   <p className="mt-1 flex items-center gap-1 text-[11px] text-slate-500">
                     <Clock size={12} /> Expiră în {offer.expiryDays} {offer.expiryDays === 1 ? 'zi' : 'zile'}
                   </p>
                 </div>
-                <button
-                  onClick={() => savedOps.toggle(offer.id)}
-                  className={clsx(
-                    'inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-xs font-bold transition-all active:scale-[0.98]',
-                    saved.has(offer.id)
-                      ? 'border-emerald-400/30 bg-emerald-400/15 text-emerald-300'
-                      : 'border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-500',
+                <div className="flex items-center gap-2">
+                  {offer.url && (
+                    <button
+                      onClick={() => window.open(offer.url, '_blank', 'noopener,noreferrer')}
+                      className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-indigo-500/40 bg-indigo-600/20 px-3 text-xs font-bold text-indigo-300 transition-all hover:bg-indigo-600/30 active:scale-[0.98]"
+                    >
+                      Accesează →
+                    </button>
                   )}
-                >
-                  <Bookmark size={13} />
-                  {saved.has(offer.id) ? 'Salvat' : 'Salvează'}
-                </button>
+                  <button
+                    onClick={() => savedOps.toggle(offer.id)}
+                    className={clsx(
+                      'inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-xs font-bold transition-all active:scale-[0.98]',
+                      saved.has(offer.id)
+                        ? 'border-emerald-400/30 bg-emerald-400/15 text-emerald-300'
+                        : 'border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-500',
+                    )}
+                  >
+                    <Bookmark size={13} />
+                    {saved.has(offer.id) ? 'Salvat' : 'Salvează'}
+                  </button>
+                </div>
               </div>
             </article>
           ))}
@@ -360,7 +380,10 @@ function CareerSection({ lifeProfile, applied, appliedOps }) {
                   {job.match}% potrivire
                 </span>
                 <button
-                  onClick={() => appliedOps.add(job.id)}
+                  onClick={() => {
+                    if (job.url) window.open(job.url, '_blank', 'noopener,noreferrer')
+                    appliedOps.add(job.id)
+                  }}
                   disabled={applied.has(job.id)}
                   className={clsx(
                     'inline-flex h-10 min-w-28 items-center justify-center gap-2 rounded-xl px-4 text-[13px] font-bold transition-all active:scale-[0.98] disabled:cursor-default',
@@ -368,7 +391,7 @@ function CareerSection({ lifeProfile, applied, appliedOps }) {
                   )}
                 >
                   {applied.has(job.id) && <Check size={14} />}
-                  {applied.has(job.id) ? 'Aplicat' : 'Aplică'}
+                  {applied.has(job.id) ? 'Aplicat' : job.url ? 'Aplică →' : 'Aplică'}
                 </button>
               </div>
             </article>
@@ -440,10 +463,19 @@ function CommunitySection({ lifeProfile, joined, joinedOps }) {
               <p className="mt-3 flex items-center gap-1 text-xs font-semibold text-slate-500">
                 <Clock size={12} /> {group.event.label}
               </p>
-              <div className="mt-4 flex items-center justify-between gap-3">
+              <div className="mt-4 flex items-center justify-between gap-2">
                 <span className={clsx('text-xs font-semibold', group.open ? 'text-slate-500' : 'text-amber-300')}>
                   {group.open ? 'Grup deschis' : 'Grup plin'}
                 </span>
+                <div className="flex items-center gap-2">
+                {group.url && (
+                  <button
+                    onClick={() => window.open(group.url, '_blank', 'noopener,noreferrer')}
+                    className="h-9 rounded-xl border border-slate-600 bg-slate-800 px-3 text-[11px] font-bold text-slate-300 transition-all hover:border-slate-500 active:scale-[0.98]"
+                  >
+                    Site →
+                  </button>
+                )}
                 <button
                   onClick={() => group.open && joinedOps.add(group.id)}
                   disabled={!group.open || joined.has(group.id)}
@@ -458,6 +490,7 @@ function CommunitySection({ lifeProfile, joined, joinedOps }) {
                 >
                   {joined.has(group.id) ? 'Alăturat' : group.open ? 'Cere acces' : 'Indisponibil'}
                 </button>
+                </div>
               </div>
             </article>
           ))}
@@ -467,7 +500,7 @@ function CommunitySection({ lifeProfile, joined, joinedOps }) {
   )
 }
 
-const EVENT_CATEGORIES = ['Toate', 'Tech', 'Muzică', 'Carieră', 'Știință', 'Cultură', 'Social', 'Antreprenoriat']
+const EVENT_CATEGORIES = ['Toate', 'Tech', 'Cariera', 'Stiinta', 'Social', 'Antreprenoriat']
 
 function EventsSection({ going, goingOps }) {
   const [category, setCategory] = useState('Toate')
@@ -508,18 +541,28 @@ function EventsSection({ going, goingOps }) {
                   </div>
                 </div>
                 <p className="text-xs text-slate-400 mt-2 leading-relaxed line-clamp-2">{ev.description}</p>
-                <div className="mt-3 flex items-center justify-between">
+                <div className="mt-3 flex items-center justify-between gap-2">
                   <span className="text-xs text-slate-600">{ev.going + (isGoing ? 1 : 0)} merg</span>
-                  <button
-                    onClick={() => goingOps.toggle(ev.id)}
-                    className={clsx('h-8 rounded-xl border px-3 text-[11px] font-bold transition-all active:scale-[0.98]',
-                      isGoing
-                        ? 'border-emerald-400/30 bg-emerald-400/15 text-emerald-300'
-                        : 'border-indigo-500/40 bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30'
+                  <div className="flex items-center gap-2">
+                    {ev.url && (
+                      <button
+                        onClick={() => window.open(ev.url, '_blank', 'noopener,noreferrer')}
+                        className="h-8 rounded-xl border border-slate-600 bg-slate-800 px-3 text-[11px] font-bold text-slate-300 transition-all hover:border-slate-500 active:scale-[0.98]"
+                      >
+                        Detalii →
+                      </button>
                     )}
-                  >
-                    {isGoing ? '✓ Merg' : 'Merg'}
-                  </button>
+                    <button
+                      onClick={() => goingOps.toggle(ev.id)}
+                      className={clsx('h-8 rounded-xl border px-3 text-[11px] font-bold transition-all active:scale-[0.98]',
+                        isGoing
+                          ? 'border-emerald-400/30 bg-emerald-400/15 text-emerald-300'
+                          : 'border-indigo-500/40 bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30'
+                      )}
+                    >
+                      {isGoing ? '✓ Merg' : 'Merg'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </article>
@@ -619,23 +662,180 @@ function PomodoroTimer() {
   )
 }
 
+function FocusForest() {
+  const [minutes, setMinutes] = useState(25)
+  const [elapsed, setElapsed] = useState(0)
+  const [running, setRunning] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const [completed, setCompleted] = useState(() => {
+    try { return Number(localStorage.getItem('sc_focus_trees') || 0) } catch { return 0 }
+  })
+  const intervalRef = useRef(null)
+  const targetSeconds = minutes * 60
+  const progress = Math.min(1, elapsed / targetSeconds)
+
+  useEffect(() => {
+    if (!running) return undefined
+    intervalRef.current = setInterval(() => {
+      setElapsed(value => {
+        const next = value + 1
+        if (next >= targetSeconds) {
+          clearInterval(intervalRef.current)
+          setRunning(false)
+          setCompleted(total => {
+            const saved = total + 1
+            localStorage.setItem('sc_focus_trees', String(saved))
+            return saved
+          })
+        }
+        return Math.min(next, targetSeconds)
+      })
+    }, 1000)
+    return () => clearInterval(intervalRef.current)
+  }, [running, targetSeconds])
+
+  useEffect(() => {
+    function failSession() {
+      if (!running) return
+      clearInterval(intervalRef.current)
+      setRunning(false)
+      setFailed(true)
+      setElapsed(0)
+    }
+    function handleVisibility() {
+      if (document.hidden) failSession()
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    window.addEventListener('blur', failSession)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+      window.removeEventListener('blur', failSession)
+    }
+  }, [running])
+
+  function start() {
+    setElapsed(0)
+    setFailed(false)
+    setRunning(true)
+  }
+
+  function reset() {
+    clearInterval(intervalRef.current)
+    setRunning(false)
+    setFailed(false)
+    setElapsed(0)
+  }
+
+  const remaining = Math.max(0, targetSeconds - elapsed)
+  const mins = String(Math.floor(remaining / 60)).padStart(2, '0')
+  const secs = String(remaining % 60).padStart(2, '0')
+  const trunkHeight = 26 + progress * 42
+  const crownSize = 34 + progress * 70
+
+  return (
+    <div className="glass-card overflow-hidden p-6">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
+        <div className="relative min-h-60 flex-1 rounded-2xl border border-emerald-500/20 bg-gradient-to-b from-emerald-500/[0.12] to-slate-950/40 p-5">
+          <div className="absolute inset-x-6 bottom-5 h-8 rounded-[100%] bg-emerald-950/70" />
+          <div className="absolute bottom-10 left-1/2 flex -translate-x-1/2 flex-col items-center">
+            <div
+              className="rounded-full border border-emerald-300/40 bg-emerald-500/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] transition-all duration-700"
+              style={{ width: crownSize, height: crownSize, opacity: progress > 0.05 ? 1 : 0.25 }}
+            />
+            <div
+              className="w-5 rounded-t-lg bg-amber-800 transition-all duration-700"
+              style={{ height: trunkHeight }}
+            />
+          </div>
+          <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[11px] font-bold text-emerald-200">
+            <TreePine size={13} />
+            {Math.round(progress * 100)}% crestere
+          </div>
+          <div className="absolute bottom-4 right-4 text-right">
+            <p className="font-mono text-2xl font-black text-white">{mins}:{secs}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">ramase</p>
+          </div>
+        </div>
+
+        <div className="w-full lg:w-80">
+          <p className="section-label">Focus Forest</p>
+          <h3 className="mt-2 text-lg font-bold text-white">Creste un copac ramanand pe tab.</h3>
+          <p className="mt-2 text-sm leading-relaxed text-slate-400">
+            Porneste sesiunea si ramai aici pana se termina. Daca schimbi tabul sau pierzi focusul ferestrei, copacul se reseteaza.
+          </p>
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            {[15, 25, 45].map(value => (
+              <button
+                key={value}
+                onClick={() => !running && setMinutes(value)}
+                disabled={running}
+                className={clsx(
+                  'h-9 rounded-xl border text-xs font-bold transition-all active:scale-[0.98] disabled:cursor-default',
+                  minutes === value ? 'border-emerald-400/30 bg-emerald-400/15 text-emerald-200' : 'border-white/[0.06] bg-white/[0.03] text-slate-500 hover:text-slate-300',
+                )}
+              >
+                {value} min
+              </button>
+            ))}
+          </div>
+          <div className="mt-4 flex items-center gap-2">
+            <button
+              onClick={running ? reset : start}
+              className={clsx(
+                'inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold transition-all active:scale-[0.98]',
+                running ? 'border border-red-500/30 bg-red-500/10 text-red-300' : 'border border-emerald-400/30 bg-emerald-500/20 text-emerald-100',
+              )}
+            >
+              {running ? <X size={15} /> : <Sprout size={15} />}
+              {running ? 'Opreste' : 'Porneste focus'}
+            </button>
+            <button onClick={reset} className="h-10 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 text-slate-500 transition-all hover:text-slate-300 active:scale-[0.98]">
+              <RotateCcw size={15} />
+            </button>
+          </div>
+          {failed && (
+            <p className="mt-3 rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-semibold text-amber-200">
+              Sesiunea a fost intrerupta fiindca ai parasit tabul.
+            </p>
+          )}
+          <p className="mt-3 text-xs text-slate-600">{completed} copaci finalizati in istoricul local</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const WELLNESS_ICONS = {
+  brain: Brain,
+  sleep: Moon,
+  movement: Dumbbell,
+  food: Apple,
+  phone: Smartphone,
+  support: HandHeart,
+}
+
 function WellnessSection() {
   return (
     <section className="space-y-6">
+      <FocusForest />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <PomodoroTimer />
         <div className="lg:col-span-2 space-y-3">
           <h3 className="text-sm font-bold text-white">Sfaturi de Wellbeing</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {wellnessData.tips.map(tip => (
+            {wellnessData.tips.map(tip => {
+              const Icon = WELLNESS_ICONS[tip.icon] || Heart
+              return (
               <div key={tip.id} className="glass-card p-4 flex gap-3">
-                <span className="text-2xl leading-none">{tip.icon}</span>
+                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-400/10">
+                  <Icon size={16} className="text-emerald-300" />
+                </div>
                 <div>
                   <p className="text-sm font-bold text-white">{tip.title}</p>
                   <p className="text-xs text-slate-400 mt-1 leading-relaxed">{tip.body}</p>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
       </div>
@@ -650,9 +850,17 @@ function WellnessSection() {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold text-white">{c.name}</p>
                 <p className="text-xs text-slate-500 mt-0.5">{c.available}</p>
-                <p className="text-sm font-mono text-indigo-300 mt-1">{c.phone}</p>
+                <a href={`tel:${c.phone.replace(/-/g, '')}`} className="text-sm font-mono text-indigo-300 mt-1 hover:text-indigo-200 transition-colors block">{c.phone}</a>
               </div>
-              {c.free && <span className="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-1 rounded-full shrink-0">Gratuit</span>}
+              <div className="flex flex-col gap-1.5 shrink-0">
+                {c.free && <span className="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-1 rounded-full text-center">Gratuit</span>}
+                {c.url && (
+                  <button onClick={() => window.open(c.url, '_blank', 'noopener,noreferrer')}
+                    className="text-[10px] font-bold text-slate-400 bg-white/[0.04] border border-white/[0.08] px-2 py-1 rounded-full hover:border-indigo-500/40 hover:text-indigo-300 transition-all flex items-center gap-1">
+                    <ExternalLink size={9} /> Site
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -671,13 +879,20 @@ function BudgetTab() {
   })
 
   function updateBudget(cat, val) {
-    const next = { ...budget, [cat]: Number(val) || 0 }
+    const num = val === '' ? null : Math.max(0, Number(val))
+    const next = { ...budget, [cat]: num }
     setBudget(next)
     localStorage.setItem('sc_budget', JSON.stringify(next))
   }
 
-  const total = CATEGORIES.reduce((s, c) => s + (budget[c] || 0), 0)
+  function resetBudget() {
+    setBudget({})
+    localStorage.removeItem('sc_budget')
+  }
+
+  const total = CATEGORIES.reduce((s, c) => s + (budget[c] ?? 0), 0)
   const avgTotal = Object.values(AVERAGES).reduce((s, v) => s + v, 0)
+  const diff = total - avgTotal
 
   return (
     <div className="space-y-4">
@@ -685,37 +900,55 @@ function BudgetTab() {
         <div>
           <p className="text-xs text-slate-500">Total lunar</p>
           <p className="text-2xl font-black text-white">{total} RON</p>
+          {total > 0 && (
+            <p className={clsx('text-xs font-semibold mt-1', diff > 0 ? 'text-red-400' : 'text-emerald-400')}>
+              {diff > 0 ? `+${diff} față de medie` : `${diff} față de medie`}
+            </p>
+          )}
         </div>
         <div className="text-right">
           <p className="text-xs text-slate-500">Medie studenți Iași</p>
           <p className="text-lg font-bold text-slate-400">{avgTotal} RON</p>
+          <button onClick={resetBudget} className="mt-2 flex items-center gap-1 text-[11px] text-slate-600 hover:text-red-400 transition-colors ml-auto">
+            <Trash2 size={11} /> Resetează
+          </button>
         </div>
       </div>
       <div className="space-y-3">
-        {CATEGORIES.map(cat => (
-          <div key={cat} className="glass-card p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-white">{cat}</span>
-              <span className="text-xs text-slate-500">Medie: {AVERAGES[cat]} RON</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <input
-                type="number"
-                value={budget[cat] || ''}
-                onChange={e => updateBudget(cat, e.target.value)}
-                placeholder={String(AVERAGES[cat])}
-                className="w-28 h-9 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 text-sm text-slate-300 outline-none focus:border-indigo-500/50"
-              />
-              <span className="text-xs text-slate-600">RON/lună</span>
-              <div className="flex-1 h-2 bg-white/[0.05] rounded-full overflow-hidden">
-                <div
-                  className={clsx('h-full rounded-full transition-all', (budget[cat] || 0) > AVERAGES[cat] ? 'bg-red-500' : 'bg-indigo-500')}
-                  style={{ width: `${Math.min(100, ((budget[cat] || 0) / AVERAGES[cat]) * 100)}%` }}
+        {CATEGORIES.map(cat => {
+          const val = budget[cat] ?? null
+          const pct = val !== null ? Math.min(100, (val / AVERAGES[cat]) * 100) : 0
+          return (
+            <div key={cat} className="glass-card p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-white">{cat}</span>
+                <span className="text-xs text-slate-500">Medie: {AVERAGES[cat]} RON</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  min="0"
+                  value={val ?? ''}
+                  onChange={e => updateBudget(cat, e.target.value)}
+                  placeholder={String(AVERAGES[cat])}
+                  className="w-28 h-9 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 text-sm text-slate-300 outline-none focus:border-indigo-500/50"
                 />
+                <span className="text-xs text-slate-600">RON/lună</span>
+                <div className="flex-1 h-2 bg-white/[0.05] rounded-full overflow-hidden">
+                  <div
+                    className={clsx('h-full rounded-full transition-all', val > AVERAGES[cat] ? 'bg-red-500' : 'bg-indigo-500')}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                {val !== null && val !== AVERAGES[cat] && (
+                  <span className={clsx('text-[11px] font-semibold shrink-0', val > AVERAGES[cat] ? 'text-red-400' : 'text-emerald-400')}>
+                    {val > AVERAGES[cat] ? `+${val - AVERAGES[cat]}` : `-${AVERAGES[cat] - val}`}
+                  </span>
+                )}
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
@@ -786,7 +1019,10 @@ function CarpoolTab() {
             </div>
             <div className="flex items-center justify-between mt-3">
               <span className="text-lg font-black text-white">{r.pricePerPerson} RON <span className="text-xs font-normal text-slate-500">/ persoană</span></span>
-              <button className="h-8 px-4 rounded-xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-bold hover:bg-indigo-600/30 transition-all">
+              <button
+                onClick={() => window.open(`https://t.me/${r.contact.replace('@', '')}`, '_blank', 'noopener,noreferrer')}
+                className="h-8 px-4 rounded-xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-bold hover:bg-indigo-600/30 transition-all"
+              >
                 Contactează {r.contact}
               </button>
             </div>
@@ -825,7 +1061,10 @@ function RoommateTab() {
               {!r.smoking && <span className="tag">Non-fumător</span>}
               {r.pets && <span className="tag">Animale ok</span>}
             </div>
-            <button className="mt-3 w-full h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-bold hover:bg-indigo-600/30 transition-all">
+            <button
+              onClick={() => window.open(`https://t.me/${r.contact.replace('@', '')}`, '_blank', 'noopener,noreferrer')}
+              className="mt-3 w-full h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-bold hover:bg-indigo-600/30 transition-all"
+            >
               Contactează {r.contact}
             </button>
           </div>

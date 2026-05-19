@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 
 const WS_URL = import.meta.env.VITE_CROWD_WS_URL || 'ws://localhost:8000/ws/crowd'
-const CAMPUS = [47.1764, 27.5733]
+const CAMPUS = [47.154082, 27.5940514]
 const RADIUS = 0.008
 const GRID = 0.001
 const HOTSPOTS = [
-  [47.1771, 27.5742],
-  [47.1758, 27.5728],
-  [47.1753, 27.5747],
-  [47.1783, 27.5718],
+  [47.154082, 27.5940514],
+  [47.1549,   27.5948],
+  [47.1570,   27.5903],
+  [47.1547,   27.5932],
 ]
 
 class SimulatedUser {

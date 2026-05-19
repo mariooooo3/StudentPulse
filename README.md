@@ -10,6 +10,19 @@ The project was built during **FiiPractic Hackathon 2026** as a fast, modular pr
 
 ---
 
+## Latest Updates
+
+- TUIASI / Gheorghe Asachi is now a first-class campus target, with AC-centered navigation, all main faculties, Rectorat, Biblioteca Gh. Asachi, Cantina TUIASI, and Tudor Vladimirescu dorm groups.
+- Campus map popups now include direct Google Maps and Waze actions for buildings and points of interest.
+- Navigation AI prompts and local fallbacks now identify AC TUIASI correctly from photos and explicitly avoid the old FII / UAIC Informatics label.
+- The shared support assistant now answers in Romanian by default across student and professor chat contexts, while guided route presentation keeps English voice actions.
+- Student-professor portal messages now support live `typing` and `seen` behavior, matching the student-student direct-message experience.
+- Student Life was cleaned for AC TUIASI relevance: stale demo resources were removed or replaced with official AC/TUIASI, LSAC, CCOC, campus, practice, and student developer resources.
+- Wellness now includes Focus Forest, a Forest-like study mode that grows a tree while the student keeps the tab focused.
+- README now documents the newer professor portal, portal notifications, TUIASI map data, Student Life modules, and realtime messaging behavior.
+
+---
+
 ## Features
 
 ### Multi-role platform
@@ -46,6 +59,8 @@ The project was built during **FiiPractic Hackathon 2026** as a fast, modular pr
 - New requests generate live professor notifications through WebSocket channels
 - Professor decisions generate persistent notifications for the student
 - Professor replies generate student notifications and update the student message thread
+- Student-professor conversations now support live typing indicators in both directions
+- Student-professor conversations now support live read receipts with single/double-check status
 - Professor-side notifications can deep-link into the relevant area:
   - thesis requests
   - recovery requests
@@ -69,8 +84,12 @@ The project was built during **FiiPractic Hackathon 2026** as a fast, modular pr
 ### Campus Navigator
 - Interactive campus map with real pedestrian routing through OSRM
 - Live crowd heatmap for busier campus areas
-- Points of interest such as cafes, pharmacy, supermarket, ATM, and copy shop
+- Updated TUIASI / Gheorghe Asachi map centered on AC Mangeron
+- Includes all main TUIASI faculties, Rectorat, Biblioteca Gh. Asachi, Cantina TUIASI, Campus Tudor Vladimirescu dorm groups, pharmacy, ATM, mall, minimarkets, and copy shop
+- Building and POI cards include external navigation buttons for Google Maps and Waze
+- POI markers use stable text labels instead of emoji markers
 - AI photo recognition for location-aware guidance
+- Photo prompts are tuned for AC TUIASI / Corp C / Corp A and reject the outdated Informatics/FII label
 - Guided route presentation with step-by-step voice narration
 
 ### Indoor navigation
@@ -99,6 +118,7 @@ The project was built during **FiiPractic Hackathon 2026** as a fast, modular pr
 - Separate professor conversation list powered by portal threads
 - Typing indicator with debounce — shows when the other person is writing
 - Read receipts — confirms when a message has been seen
+- Student-professor portal threads reuse the same live typing and seen behavior through `typing:portal-thread:<threadId>` and `read:portal-thread:<threadId>` channels
 - Push notifications for new messages when the tab is not focused
 - Group channels scoped to the current faculty: #general, #cursuri, #proiecte, #off-topic
 - Mobile-responsive layout with back navigation between contact list and conversation
@@ -134,18 +154,22 @@ The project was built during **FiiPractic Hackathon 2026** as a fast, modular pr
 | Local Tips | Practical advice from senior students |
 
 ### Student Life Hub
-- Curated student-life information for UAIC-focused usage
-- Covers food, libraries, clubs, events, transport, housing, and services
+- Curated student-life information for AC TUIASI-focused usage
+- Broken or stale demo links were removed from discounts, careers, events, and communities
+- Current sources prioritize AC TUIASI, LSAC Iasi, CCOC TUIASI, official campus pages, practice information, and stable student developer resources
+- Covers food, libraries, clubs, events, transport, housing, services, focus tools, and career resources
 - Designed to work well with the recommendations assistant
 
 | Section | Description |
 |---------|-------------|
-| Discounts | Local student discounts from shops, cafes, and services |
-| Career | Job listings and internship opportunities |
-| Community | Student clubs and organizations |
-| Events | Campus events with RSVP (going / not going), saved to `localStorage` |
-| Wellness | Pomodoro timer with SVG circular progress and work/break modes, plus mental health support contacts |
+| Discounts | Verified student benefits such as CTP Iasi, TUIASI cantina/campus pages, GitHub Student Pack, JetBrains Student, Microsoft 365 Education, Spotify Student, cultural discounts, and CCOC support |
+| Career | AC-focused opportunities, practice resources, LSAC volunteering, Amazon Romania, Continental, Endava, Cegeka, and official AC offers |
+| Community | Relevant communities such as LSAC Iasi, CCOC TUIASI, AC study groups, sport groups, and hackathon/project groups |
+| Events | AC/TUIASI-focused events and reminders with RSVP (going / not going), saved to `localStorage` |
+| Wellness | Focus Forest, Pomodoro timer with SVG circular progress and work/break modes, plus mental health support contacts |
 | Tools | Four utility sub-tabs: Budget Tracker, Book Exchange, Carpool, and Roommate Finder |
+
+**Focus Forest** - a Forest-like study mode. Students choose 15, 25, or 45 minutes, start a focus session, and grow a tree while they keep the tab active. Switching tabs or losing window focus interrupts the session and resets the tree. Completed trees are stored locally in `localStorage`.
 
 **Budget Tracker** — tracks monthly expenses per category and compares them against the average student spending. Persisted in `localStorage`.
 
@@ -433,7 +457,7 @@ Student demo:
 - Access code: `0000`
 
 Professor demo:
-- Email: `andrei.munteanu@uaic.ro`
+- Email: `mihai.ciobanu@academic.tuiasi.ro`
 - Access code: `0000`
 
 ---
