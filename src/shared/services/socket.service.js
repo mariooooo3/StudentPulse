@@ -25,7 +25,9 @@ class SocketService extends EventTarget {
   #url = WS_URL
 
   #open() {
-    if (this.#ws) return
+    const s = this.#ws?.readyState
+    if (s === WebSocket.OPEN || s === WebSocket.CONNECTING) return
+    this.#ws = null
     try {
       this.#ws = new WebSocket(this.#url)
     } catch {

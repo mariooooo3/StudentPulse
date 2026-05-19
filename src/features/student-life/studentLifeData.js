@@ -521,3 +521,60 @@ export const facultyCareerKeys = {
   ARCHITECTURE: 'ARCHITECTURE',
   ARCH: 'ARCHITECTURE',
 }
+
+export const eventsData = [
+  { id: 'ev1', title: 'Hackathon FiiPractic 2026', date: '2026-05-20', time: '09:00', location: 'UAIC Corp A, Iași', category: 'Tech', going: 234, color: '#6366f1', description: '48 de ore de cod, idei și pizza. Cel mai mare hackathon studențesc din Moldova.' },
+  { id: 'ev2', title: 'Concert Studenți', date: '2026-05-25', time: '20:00', location: 'Palatul Culturii, Iași', category: 'Muzică', going: 512, color: '#ec4899', description: 'Seară de muzică live cu trupe studențești. Intrare gratuită cu carnet.' },
+  { id: 'ev3', title: 'Bursa Locurilor de Muncă UAIC', date: '2026-05-28', time: '10:00', location: 'Sala Polivalentă, Iași', category: 'Carieră', going: 389, color: '#10b981', description: '30+ companii tech prezente. Aduce CV-ul și fii pregătit pentru interviu pe loc.' },
+  { id: 'ev4', title: 'Noaptea Cercetătorilor', date: '2026-06-02', time: '18:00', location: 'UAIC, toate corpurile', category: 'Știință', going: 178, color: '#f59e0b', description: 'Experimente, demonstrații și prezentări de la cercetătorii UAIC. Intrare liberă.' },
+  { id: 'ev5', title: 'Student Startup Pitch', date: '2026-06-05', time: '14:00', location: 'Hub Iași', category: 'Antreprenoriat', going: 145, color: '#8b5cf6', description: 'Prezintă-ți ideea de business în față investitorilor. Premii în valoare de 10.000€.' },
+  { id: 'ev6', title: 'Film Club — Indie Night', date: '2026-06-08', time: '19:00', location: 'Cinema arta, Iași', category: 'Cultură', going: 89, color: '#06b6d4', description: 'Proiecție de scurtmetraje studențești urmată de dezbatere cu regizorii.' },
+  { id: 'ev7', title: 'Olimpiada Informaticii', date: '2026-06-10', time: '09:00', location: 'FII UAIC', category: 'Tech', going: 203, color: '#6366f1', description: 'Concurs de algoritmică open pentru studenți. Primele 3 locuri primesc internship la Endava.' },
+  { id: 'ev8', title: 'Gala Absolvenților FII', date: '2026-06-15', time: '18:00', location: 'Hotel Moldova, Iași', category: 'Social', going: 456, color: '#f97316', description: 'Ceremonia de premiere a absolvenților promoției 2026. Dresscode: smart casual.' },
+]
+
+export const booksData = [
+  { id: 'bk1', title: 'Algoritmi și Structuri de Date', author: 'Knuth', subject: 'Informatică', yearNeeded: 2, condition: 'Bună', price: 0, type: 'donez', contact: 'Rareș B.', faculty: 'FII' },
+  { id: 'bk2', title: 'Calcul Diferențial și Integral', author: 'Boboc', subject: 'Matematică', yearNeeded: 1, condition: 'Foarte bună', price: 30, type: 'vând', contact: 'Maria C.', faculty: 'FII' },
+  { id: 'bk3', title: 'Baze de Date — Teorie și Practică', author: 'Fotache', subject: 'Baze de Date', yearNeeded: 2, condition: 'Uzată', price: 15, type: 'vând', contact: 'Andrei P.', faculty: 'FII' },
+  { id: 'bk4', title: 'Fizică pentru Ingineri Vol. 1', author: 'Halliday', subject: 'Fizică', yearNeeded: 1, condition: 'Bună', price: 40, type: 'vând', contact: 'Elena M.', faculty: 'FII' },
+  { id: 'bk5', title: 'Programare Orientată Obiect în Java', author: 'Horstmann', subject: 'POO', yearNeeded: 2, condition: 'Bună', price: 0, type: 'donez', contact: 'Claudiu T.', faculty: 'FII' },
+  { id: 'bk6', title: 'Rețele de Calculatoare', author: 'Tanenbaum', subject: 'Rețele', yearNeeded: 3, condition: 'Foarte bună', price: 60, type: 'vând', contact: 'Denis I.', faculty: 'FII' },
+  { id: 'bk7', title: 'Sisteme de Operare', author: 'Silberschatz', subject: 'SO', yearNeeded: 3, condition: 'Bună', price: 35, type: 'vând', contact: 'Ioana R.', faculty: 'FII' },
+  { id: 'bk8', title: 'Inteligență Artificială — O abordare modernă', author: 'Russell & Norvig', subject: 'AI', yearNeeded: 4, condition: 'Nouă', price: 80, type: 'vând', contact: 'Mihai S.', faculty: 'FII' },
+]
+
+export const carpoolData = [
+  { id: 'cp1', from: 'Iași', to: 'București', date: '2026-05-23', time: '07:30', seats: 2, driver: 'Alex M.', pricePerPerson: 60, contact: '@alexm', verified: true },
+  { id: 'cp2', from: 'Iași', to: 'Cluj-Napoca', date: '2026-05-24', time: '08:00', seats: 3, driver: 'Ioana R.', pricePerPerson: 80, contact: '@ioanar', verified: true },
+  { id: 'cp3', from: 'București', to: 'Iași', date: '2026-05-25', time: '16:00', seats: 1, driver: 'Dan V.', pricePerPerson: 60, contact: '@danv', verified: false },
+  { id: 'cp4', from: 'Iași', to: 'Suceava', date: '2026-05-23', time: '14:00', seats: 2, driver: 'Maria T.', pricePerPerson: 30, contact: '@mariat', verified: true },
+  { id: 'cp5', from: 'Iași', to: 'Bacău', date: '2026-05-24', time: '15:00', seats: 3, driver: 'Cristi P.', pricePerPerson: 25, contact: '@cristip', verified: false },
+  { id: 'cp6', from: 'Iași', to: 'Timișoara', date: '2026-05-31', time: '06:00', seats: 2, driver: 'Radu M.', pricePerPerson: 120, contact: '@radum', verified: true },
+]
+
+export const roommateData = [
+  { id: 'rm1', name: 'Maria C.', faculty: 'FII', year: 2, budget: '800-1000 RON/lună', zone: 'Copou', smoking: false, pets: false, schedule: 'Matinal', bio: 'Caut colegă serioasă pentru apartament 2 camere în Copou. Sunt ordonată și liniștită.', contact: '@mariac' },
+  { id: 'rm2', name: 'Andrei P.', faculty: 'FII', year: 3, budget: '600-800 RON/lună', zone: 'Podu Roș', smoking: false, pets: true, schedule: 'Flexibil', bio: 'Caut 1-2 colegi pentru apartament 3 camere. Am pisică prietenoasă. Gătim împreună?', contact: '@andreip' },
+  { id: 'rm3', name: 'Elena M.', faculty: 'Medicină', year: 1, budget: '700-900 RON/lună', zone: 'Tătărași', smoking: false, pets: false, schedule: 'Variabil', bio: 'Studentă la Medicină, program intens. Caut coleg/colegă tolerant/ă cu orele ciudate.', contact: '@elenam' },
+  { id: 'rm4', name: 'Bogdan T.', faculty: 'FII', year: 4, budget: '500-700 RON/lună', zone: 'Manta Roșie', smoking: false, pets: false, schedule: 'Nocturn', bio: 'Developer, lucrez mult de acasă. Caut apartament liniștit, preferabil cu internet bun.', contact: '@bogdant' },
+  { id: 'rm5', name: 'Ioana R.', faculty: 'Drept', year: 2, budget: '900-1200 RON/lună', zone: 'Copou', smoking: false, pets: false, schedule: 'Matinal', bio: 'Caut colegă în Copou, aproape de facultate. Sunt ordonată, gătesc bine.', contact: '@ioanar' },
+]
+
+export const wellnessData = {
+  contacts: [
+    { id: 'wc1', name: 'Consiliere Psihologică UAIC', phone: '0232-201-000', email: 'consiliere@uaic.ro', available: 'L-V, 9:00-17:00', type: 'Psiholog', free: true },
+    { id: 'wc2', name: 'Linia de criză TESA', phone: '0800-070-800', available: '24/7', type: 'Urgențe', free: true },
+    { id: 'wc3', name: 'Ambulatoriu Studențesc', phone: '0232-214-100', available: 'L-V, 8:00-20:00', type: 'Medicină', free: true },
+    { id: 'wc4', name: 'Sala de Sport UAIC', phone: '0232-201-234', available: 'L-D, 7:00-22:00', type: 'Sport', free: false },
+  ],
+  tips: [
+    { id: 'wt1', icon: '🧠', title: 'Tehnica Pomodoro', body: '25 minute focus, 5 minute pauză. Crește productivitatea cu până la 40%.' },
+    { id: 'wt2', icon: '😴', title: 'Somnul contează', body: '7-8 ore pe noapte îmbunătățesc memoria și concentrarea. Nu sacrifica somnul pentru studiu.' },
+    { id: 'wt3', icon: '🏃', title: 'Mișcare zilnică', body: '30 minute de mers pe jos reduc anxietatea cu 50%. Ieși din cameră.' },
+    { id: 'wt4', icon: '🍎', title: 'Mânâncă regulat', body: 'Sare peste mese = concentrare slabă. Cantina studențească e ieftină și accesibilă.' },
+    { id: 'wt5', icon: '📵', title: 'Detox digital', body: 'O oră fără telefon înainte de culcare îmbunătățește calitatea somnului semnificativ.' },
+    { id: 'wt6', icon: '🤝', title: 'Vorbește cu cineva', body: 'Nu ești singur. Consilierea psihologică UAIC e gratuită și confidențială.' },
+  ],
+  pomodoroConfig: { work: 25, shortBreak: 5, longBreak: 15, sessionsUntilLong: 4 },
+}
