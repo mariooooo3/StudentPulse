@@ -68,7 +68,7 @@ function ProfessorCard({ p, onBook }) {
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <div className="glass-card flex flex-col hover:border-slate-600 transition-all duration-200">
+    <div className="glass-card flex flex-col hover:border-white/[0.12] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_4px_20px_rgba(0,0,0,0.3)] transition-all duration-300">
       {/* Top gradient bar */}
       <div className={`h-1.5 rounded-t-2xl bg-gradient-to-r ${p.color}`} />
 

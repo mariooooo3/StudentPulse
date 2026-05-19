@@ -114,7 +114,7 @@ export default function Header({ platformMode = 'academic', onModeChange, curren
   }
 
   return (
-    <header className="h-[3.75rem] bg-[#070b14]/90 backdrop-blur-xl border-b border-white/[0.05] flex items-center px-5 gap-4 shrink-0 relative z-30">
+    <header className="h-[3.75rem] bg-[#060a15]/92 backdrop-blur-xl border-b border-white/[0.05] flex items-center px-5 gap-4 shrink-0 relative z-30 shadow-[0_1px_0_rgba(0,0,0,0.4)]">
 
       {/* Hamburger — mobile only */}
       <button

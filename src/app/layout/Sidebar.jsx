@@ -15,6 +15,7 @@ import {
   Edit3,
   Save,
   GraduationCap,
+  ChevronRight,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useState } from 'react'
@@ -55,10 +56,7 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
     updateProfile({
       name: name.trim() || displayName,
       year,
-      interests: interests
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean),
+      interests: interests.split(',').map(item => item.trim()).filter(Boolean),
     })
     setSaved(true)
     setTimeout(() => { setSaved(false); onClose() }, 800)
@@ -68,13 +66,13 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-sm animate-slide-up">
-        <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.1] to-white/[0.03]">
-          <div className="rounded-[calc(1rem-1px)] bg-[#0c1120] border border-white/[0.05] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.9)] overflow-hidden">
+        <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.12] to-white/[0.03]">
+          <div className="rounded-[calc(1rem-1px)] bg-[#0b1020] border border-white/[0.06] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.95)] overflow-hidden">
 
             {/* Header */}
             <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
               <p className="text-[14px] font-semibold text-white">Profilul meu</p>
-              <button onClick={onClose} className="text-slate-600 hover:text-slate-300 transition-colors">
+              <button onClick={onClose} className="text-slate-600 hover:text-slate-300 transition-colors p-1 rounded-lg hover:bg-white/[0.05]">
                 <X size={15} strokeWidth={1.75} />
               </button>
             </div>
@@ -84,7 +82,7 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
               <div className="flex items-center gap-4">
                 <div
                   className="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-lg font-bold shrink-0 shadow-lg"
-                  style={{ background: `linear-gradient(140deg, ${theme.accent}cc, ${theme.accentStrong || theme.accent}88)` }}
+                  style={{ background: `linear-gradient(140deg, ${theme.accent}dd, ${theme.accentStrong || theme.accent}88)`, boxShadow: `0 4px 20px ${theme.accent}30` }}
                 >
                   {initials}
                 </div>
@@ -95,7 +93,7 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
                   </p>
                   {session?.university && (
                     <span
-                      className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
+                      className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
                       style={{ color: theme.accent, background: theme.accentSoft, borderColor: theme.accentBorder }}
                     >
                       <span>{session.university.avatar}</span>
@@ -111,7 +109,7 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
                 <input
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2.5 text-[13px] text-slate-200 placeholder-slate-600 outline-none focus:border-white/[0.14] transition-colors"
+                  className="input-base"
                   placeholder="Numele tău..."
                 />
               </div>
@@ -119,14 +117,14 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
               {/* Year */}
               <div>
                 <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">An de studiu</label>
-                <div className="flex gap-2">
-                  {['1', '2', '3', '4', 'Master 1', 'Master 2'].map(y => (
+                <div className="flex gap-1.5">
+                  {['1', '2', '3', '4', 'M1', 'M2'].map(y => (
                     <button
                       key={y}
-                      onClick={() => setYear(y)}
+                      onClick={() => setYear(y === 'M1' ? 'Master 1' : y === 'M2' ? 'Master 2' : y)}
                       className={clsx(
                         'flex-1 py-2 rounded-lg text-[11px] font-semibold transition-all border',
-                        year === y
+                        (year === y || year === (y === 'M1' ? 'Master 1' : y === 'M2' ? 'Master 2' : y))
                           ? 'border-indigo-500/40 bg-indigo-600/20 text-indigo-300'
                           : 'border-white/[0.06] bg-white/[0.02] text-slate-600 hover:text-slate-300 hover:border-white/[0.1]',
                       )}
@@ -139,11 +137,11 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
 
               {/* Interests */}
               <div>
-                <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">Interese (separate prin virgulă)</label>
+                <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">Interese (virgulă)</label>
                 <input
                   value={interests}
                   onChange={e => setInterests(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2.5 text-[13px] text-slate-200 placeholder-slate-600 outline-none focus:border-white/[0.14] transition-colors"
+                  className="input-base"
                   placeholder="ex: AI, web dev, mobile..."
                 />
               </div>
@@ -180,15 +178,18 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
   const initials = displayName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
   const sidebarContent = (
-    <aside className="w-60 flex flex-col h-full shrink-0 bg-[#070b14] border-r border-white/[0.05]">
+    <aside className="w-60 flex flex-col h-full shrink-0 bg-[#060a15] border-r border-white/[0.05]">
 
       {/* Brand */}
-      <div className="px-5 pt-6 pb-5">
+      <div className="px-5 pt-6 pb-4">
         <div className="flex items-center gap-3">
-          <div className="p-[1.5px] rounded-[0.85rem] bg-gradient-to-b from-white/10 to-white/[0.03]">
+          <div className="p-[1.5px] rounded-[0.85rem] bg-gradient-to-b from-white/15 to-white/[0.03]">
             <div
-              className="w-9 h-9 rounded-[0.75rem] flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
-              style={{ background: `linear-gradient(140deg, ${theme.accent}dd, ${theme.accentStrong || theme.accent}99)` }}
+              className="w-9 h-9 rounded-[0.75rem] flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]"
+              style={{
+                background: `linear-gradient(140deg, ${theme.accent}ee, ${theme.accentStrong || theme.accent}aa)`,
+                boxShadow: `inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 8px ${theme.accent}30`,
+              }}
             >
               <ModeIcon size={16} className="text-white" strokeWidth={2} />
             </div>
@@ -213,8 +214,8 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold"
             style={{
-              background: university.color + '0d',
-              borderColor: university.color + '25',
+              background: university.color + '0c',
+              borderColor: university.color + '22',
               color: university.color,
             }}
           >
@@ -224,8 +225,10 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
         </div>
       )}
 
-      {/* Divider */}
-      <div className="mx-5 h-px bg-white/[0.04] mb-4" />
+      {/* Gradient separator */}
+      <div className="mx-4 mb-4">
+        <div className="gradient-separator" />
+      </div>
 
       {/* Nav */}
       <nav key={platformMode} className="flex-1 px-3 space-y-0.5 overflow-y-auto">
@@ -245,18 +248,29 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
               )}
             >
               {active && (
-                <span
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full"
-                  style={{ background: theme.accent }}
-                />
+                <>
+                  {/* Left accent bar */}
+                  <span
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full"
+                    style={{ background: theme.accent }}
+                  />
+                  {/* Glow behind icon */}
+                  <span
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg blur-md opacity-20"
+                    style={{ background: theme.accent }}
+                  />
+                </>
               )}
               <Icon
                 size={16}
                 strokeWidth={active ? 2 : 1.75}
-                className={active ? 'text-white' : 'text-slate-600 group-hover:text-slate-400'}
+                className={clsx(
+                  'relative transition-colors',
+                  active ? 'text-white' : 'text-slate-600 group-hover:text-slate-400',
+                )}
                 style={active ? { color: theme.accent } : undefined}
               />
-              <span className="flex-1 text-left text-[13px]">{label}</span>
+              <span className="flex-1 text-left text-[13px] relative">{label}</span>
               {badge && (
                 <span
                   className="min-w-[18px] h-[18px] px-1 rounded-full text-white text-[10px] font-bold flex items-center justify-center"
@@ -265,41 +279,50 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
                   {badge}
                 </span>
               )}
+              {!active && !badge && (
+                <ChevronRight size={12} className="text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity" strokeWidth={2} />
+              )}
             </button>
           )
         })}
       </nav>
 
+      {/* Gradient separator */}
+      <div className="mx-4 mt-2">
+        <div className="gradient-separator" />
+      </div>
+
       {/* User card */}
-      <div className="p-3 mt-2">
-        <div className="p-[1px] rounded-[0.9rem] bg-gradient-to-b from-white/[0.06] to-transparent">
-          <div className="rounded-[calc(0.9rem-1px)] bg-white/[0.03] backdrop-blur-sm border border-white/[0.04] p-3">
-            <div className="flex items-center gap-2.5">
-              <button
-                onClick={() => setShowProfile(true)}
-                className="w-8 h-8 rounded-[0.6rem] flex items-center justify-center text-white text-[11px] font-bold shrink-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] hover:opacity-80 transition-opacity relative group"
-                style={{ background: `linear-gradient(140deg, ${theme.accent}cc, ${theme.accentStrong || theme.accent}88)` }}
-                title="Editează profilul"
-              >
-                {initials}
-                <span className="absolute inset-0 rounded-[0.6rem] flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Edit3 size={10} className="text-white" />
-                </span>
-              </button>
+      <div className="p-3 pt-2">
+        <div className="rounded-xl bg-white/[0.025] border border-white/[0.05] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setShowProfile(true)}
+              className="relative w-8 h-8 rounded-[0.6rem] flex items-center justify-center text-white text-[11px] font-bold shrink-0 hover:opacity-80 transition-opacity group"
+              style={{
+                background: `linear-gradient(140deg, ${theme.accent}dd, ${theme.accentStrong || theme.accent}88)`,
+                boxShadow: `0 2px 8px ${theme.accent}30, inset 0 1px 0 rgba(255,255,255,0.15)`,
+              }}
+              title="Editează profilul"
+            >
+              {initials}
+              <span className="absolute inset-0 rounded-[0.6rem] flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Edit3 size={10} className="text-white" />
+              </span>
+            </button>
 
-              <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-semibold text-slate-200 truncate leading-tight">{displayName}</p>
-                <p className="text-[11px] text-slate-600 truncate mt-0.5">{facultyLabel}</p>
-              </div>
-
-              <button
-                onClick={logout}
-                title="Deconectare"
-                className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-slate-700 hover:text-slate-400 hover:bg-white/[0.05] transition-all duration-200"
-              >
-                <LogOut size={13} strokeWidth={1.75} />
-              </button>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-semibold text-slate-200 truncate leading-tight">{displayName}</p>
+              <p className="text-[11px] text-slate-600 truncate mt-0.5">{facultyLabel}</p>
             </div>
+
+            <button
+              onClick={logout}
+              title="Deconectare"
+              className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-slate-700 hover:text-red-400 hover:bg-red-400/[0.08] transition-all duration-200"
+            >
+              <LogOut size={13} strokeWidth={1.75} />
+            </button>
           </div>
         </div>
       </div>
@@ -323,7 +346,6 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
         </div>
       )}
 
-      {/* Profile modal */}
       {showProfile && (
         <ProfileModal
           profile={profile}
