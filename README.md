@@ -97,6 +97,11 @@ The project was built during **FiiPractic Hackathon 2026** as a fast, modular pr
 - Presence tracking for online users
 - Persistent direct-message history through the backend repository
 - Separate professor conversation list powered by portal threads
+- Typing indicator with debounce — shows when the other person is writing
+- Read receipts — confirms when a message has been seen
+- Push notifications for new messages when the tab is not focused
+- Group channels scoped to the current faculty: #general, #cursuri, #proiecte, #off-topic
+- Mobile-responsive layout with back navigation between contact list and conversation
 
 ### Schedule Hub
 - Weekly schedule experience
@@ -132,6 +137,27 @@ The project was built during **FiiPractic Hackathon 2026** as a fast, modular pr
 - Curated student-life information for UAIC-focused usage
 - Covers food, libraries, clubs, events, transport, housing, and services
 - Designed to work well with the recommendations assistant
+
+| Section | Description |
+|---------|-------------|
+| Discounts | Local student discounts from shops, cafes, and services |
+| Career | Job listings and internship opportunities |
+| Community | Student clubs and organizations |
+| Events | Campus events with RSVP (going / not going), saved to `localStorage` |
+| Wellness | Pomodoro timer with SVG circular progress and work/break modes, plus mental health support contacts |
+| Tools | Four utility sub-tabs: Budget Tracker, Book Exchange, Carpool, and Roommate Finder |
+
+**Budget Tracker** — tracks monthly expenses per category and compares them against the average student spending. Persisted in `localStorage`.
+
+**Book Exchange** — browse textbooks available from other students and send a request.
+
+**Carpool** — find and join rides posted by other students for routes around the city.
+
+**Roommate Finder** — browse student profiles by lifestyle preferences to find compatible roommates.
+
+### UI & performance
+- Shimmer skeleton loaders shown during lazy-loaded page transitions
+- Mobile-first responsive layout throughout the student shell
 
 ### Auth and onboarding
 - Institutional email validation per university
