@@ -9,6 +9,7 @@ import { ToastProvider } from '../shared/components/Toast'
 import GlobalSearch from '../shared/components/GlobalSearch'
 import VirtualAssistant from '../shared/components/VirtualAssistant'
 import { OnlineCountProvider, useOnlineCount } from '../shared/hooks/useOnlineCount'
+import { socketService } from '../shared/services/socket.service'
 import LandingPage from '../features/landing/LandingPage'
 
 const AuthFlow       = lazy(() => import('../features/auth/AuthFlow'))
@@ -59,6 +60,21 @@ function AppShell() {
   const theme = getUniversityTheme(session?.university)
   const currentView = currentViewByMode[platformMode]
 
+  useEffect(() => {
+    if (!session?.userId || authState !== AUTH_STATE.AUTHENTICATED) return
+    const faculty = profile || session?.detectedFaculty || {}
+    const university = session?.university || profile?.university || {}
+    const socketProfile = {
+      universityId: university.id || profile?.universityId || '',
+      universityName: university.name || profile?.universityName || '',
+      facultyCode: profile?.facultyCode || session?.detectedFaculty?.code || faculty.code || '',
+      facultyName: profile?.faculty || profile?.facultyName || session?.detectedFaculty?.name || faculty.name || '',
+      scope: `${university.id || profile?.universityId || 'unknown-university'}:${profile?.facultyCode || session?.detectedFaculty?.code || faculty.code || 'unknown-faculty'}`,
+    }
+    const name = profile?.name || session.email?.split('@')[0]?.split('.').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ') || session.email
+    socketService.auth(session.userId, name, socketProfile)
+  }, [authState, session?.userId, session?.email, session?.university, session?.detectedFaculty, profile])
+
   const handleModeChange = (mode) => {
     setPlatformMode(mode)
     setCurrentViewByMode((views) => ({
@@ -71,6 +87,10 @@ function AppShell() {
     setCurrentViewByMode((views) => ({ ...views, [platformMode]: view }))
   }
 
+  const handleNotificationNavigate = (view, mode = 'academic') => {
+    handleModeChange(mode)
+    setCurrentViewByMode((views) => ({ ...views, [mode]: view }))
+  }
 
   if (authState === AUTH_STATE.LOADING) {
     return (
@@ -98,18 +118,9 @@ function AppShell() {
 
   if (session?.role === 'professor') {
     return (
-      <>
-        <Suspense fallback={<PageLoader />}>
-          <ProfessorApp />
-        </Suspense>
-        <VirtualAssistant
-          session={session}
-          profile={profile}
-          platformMode="professor"
-          currentView="professor"
-          currentLabel="Professor Portal"
-        />
-      </>
+      <Suspense fallback={<PageLoader />}>
+        <ProfessorApp />
+      </Suspense>
     )
   }
 
@@ -145,6 +156,7 @@ function AppShell() {
           session={session}
           onMenuClick={() => setSidebarOpen(true)}
           onSearchOpen={() => setSearchOpen(true)}
+          onNavigate={handleNotificationNavigate}
         />
         <main className="flex-1 overflow-auto flex flex-col">
           <Suspense fallback={<PageLoader />}>

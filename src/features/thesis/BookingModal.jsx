@@ -23,18 +23,12 @@ export default function BookingModal({ professor, onClose, session }) {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     setLoading(true)
-    setTimeout(() => {
-      pushNotification({
-        title: 'Cerere licenta trimisa',
-        body: `${professor.name} va raspunde in 2-5 zile lucratoare.`,
-        type: 'info',
-        action: 'thesis.booking.requested',
-        meta: { professorId: professor.id, professorName: professor.name, domain: professor.domain },
-      })
-      createThesisRequest({
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500))
+      await createThesisRequest({
         professor,
         student: {
           userId: session?.userId,
@@ -45,10 +39,20 @@ export default function BookingModal({ professor, onClose, session }) {
         form,
         attachedFile,
       })
+      await pushNotification({
+        title: 'Cerere licenta trimisa',
+        body: `${professor.name} va raspunde in 2-5 zile lucratoare.`,
+        type: 'info',
+        action: 'thesis.booking.requested',
+        meta: { professorId: professor.id, professorName: professor.name, domain: professor.domain },
+      })
       toast({ type: 'success', title: 'Cerere trimisă!', message: `${professor.name} va răspunde în 2–5 zile.` })
-      setLoading(false)
       setStep(2)
-    }, 1400)
+    } catch {
+      toast({ type: 'error', title: 'Cererea nu a fost trimisa', message: 'Verifica serverul si incearca din nou.' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

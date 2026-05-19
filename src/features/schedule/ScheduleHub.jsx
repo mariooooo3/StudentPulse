@@ -76,7 +76,7 @@ function studentNameFromSession(session) {
 function RecoveryGrid({ recoverySlots, onNotify, session }) {
   const [pendingModal, setPendingModal] = useState(null)
   const [confirmed, setConfirmed] = useState({})
-  const [studentRequests, setStudentRequests] = useState(() => getRecoveryRequestsForUser(session?.userId))
+  const [studentRequests, setStudentRequests] = useState([])
 
   const subjects = Object.keys(recoverySlots)
 
@@ -102,8 +102,8 @@ function RecoveryGrid({ recoverySlots, onNotify, session }) {
     return recoverySlots[subject]?.find(s => s.day === day && s.start === start) || null
   }
 
-  function refreshRequests() {
-    setStudentRequests(getRecoveryRequestsForUser(session?.userId))
+  async function refreshRequests() {
+    setStudentRequests(await getRecoveryRequestsForUser(session?.userId))
   }
 
   useEffect(() => {
@@ -229,9 +229,9 @@ function RecoveryGrid({ recoverySlots, onNotify, session }) {
           slot={pendingModal.slot}
           subject={pendingModal.subject}
           onClose={() => setPendingModal(null)}
-          onConfirm={(reason) => {
+          onConfirm={async (reason) => {
             setConfirmed(p => ({ ...p, [pendingModal.key]: true }))
-            createRecoveryRequest({
+            await createRecoveryRequest({
               slot: pendingModal.slot,
               subject: pendingModal.subject,
               reason,
@@ -242,7 +242,7 @@ function RecoveryGrid({ recoverySlots, onNotify, session }) {
                 facultyName: session?.detectedFaculty?.name || 'Facultatea de Matematica-Informatica',
               },
             })
-            refreshRequests()
+            await refreshRequests()
             onNotify?.({
               title: 'Cerere recuperare trimisa',
               body: `${pendingModal.subject} - grupa ${pendingModal.slot.group}, ${DAYS[pendingModal.slot.day - 1]} ${pendingModal.slot.start}:00.`,

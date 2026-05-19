@@ -6,6 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/navigation': 'http://localhost:3001',
+      '/api/portal': 'http://localhost:3001',
     },
   },
 })

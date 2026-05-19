@@ -194,7 +194,7 @@ export default function ThesisFinder({ profile, session }) {
   const [onlyAvailable, setOnlyAvailable] = useState(false)
   const [booking, setBooking] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [myRequests, setMyRequests] = useState(() => getThesisRequestsForUser(session?.userId))
+  const [myRequests, setMyRequests] = useState([])
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 400)
@@ -202,8 +202,8 @@ export default function ThesisFinder({ profile, session }) {
   }, [])
 
   useEffect(() => {
-    function refresh() {
-      setMyRequests(getThesisRequestsForUser(session?.userId))
+    async function refresh() {
+      setMyRequests(await getThesisRequestsForUser(session?.userId))
     }
     refresh()
     window.addEventListener('sc:thesis-requests', refresh)

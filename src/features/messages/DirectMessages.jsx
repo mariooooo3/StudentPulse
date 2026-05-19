@@ -5,6 +5,7 @@ import { socketService } from '../../shared/services/socket.service'
 import { useOnlineCount } from '../../shared/hooks/useOnlineCount'
 import { createUserId } from '../../shared/services/auth.service'
 import { listPortalThreadsForUser, sendPortalMessage } from '../../shared/services/professorPortal.service'
+import { useNotifications } from '../../shared/hooks/useNotifications'
 import clsx from 'clsx'
 
 function nameFromEmail(email) {
@@ -191,9 +192,9 @@ function PortalThread({ thread, currentUserId, currentName }) {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [localThread?.messages])
 
-  function send() {
+  async function send() {
     if (!input.trim()) return
-    const updated = sendPortalMessage(localThread.id, {
+    const updated = await sendPortalMessage(localThread.id, {
       senderId: currentUserId,
       senderName: currentName,
       senderRole: 'student',
@@ -285,9 +286,10 @@ export default function DirectMessages({ session, profile }) {
   const [onlineUsers, setOnlineUsers] = useState([])
   const [active, setActive] = useState(null)
   const [activePortal, setActivePortal] = useState(null)
-  const [portalThreads, setPortalThreads] = useState(() => listPortalThreadsForUser(currentUserId))
+  const [portalThreads, setPortalThreads] = useState([])
   const [search, setSearch] = useState('')
   const { report: reportOnlineCount } = useOnlineCount()
+  const { notifications } = useNotifications(currentUserId)
 
   const eligibleUsers = useCallback((users) => {
     return (users || []).filter(u => u.userId !== currentUserId && u.scope === scope)
@@ -319,8 +321,8 @@ export default function DirectMessages({ session, profile }) {
   }, [eligibleUsers])
 
   useEffect(() => {
-    function refresh() {
-      const threads = listPortalThreadsForUser(currentUserId)
+    async function refresh() {
+      const threads = await listPortalThreadsForUser(currentUserId)
       setPortalThreads(threads)
       setActivePortal(prev => prev ? threads.find(thread => thread.id === prev.id) || null : null)
     }
@@ -328,6 +330,27 @@ export default function DirectMessages({ session, profile }) {
     window.addEventListener('sc:portal-messages', refresh)
     return () => window.removeEventListener('sc:portal-messages', refresh)
   }, [currentUserId])
+
+  useEffect(() => {
+    const unsub = socketService.subscribe(`portal:${currentUserId}`, async () => {
+      const threads = await listPortalThreadsForUser(currentUserId)
+      setPortalThreads(threads)
+      setActivePortal(prev => prev ? threads.find(thread => thread.id === prev.id) || null : prev)
+    })
+    return unsub
+  }, [currentUserId])
+
+  useEffect(() => {
+    if (!notifications.length) return
+    async function refreshFromNotification() {
+      const hasPortalUpdate = notifications.some(item => item.action?.startsWith('portal.') || item.meta?.threadId)
+      if (!hasPortalUpdate) return
+      const threads = await listPortalThreadsForUser(currentUserId)
+      setPortalThreads(threads)
+      setActivePortal(prev => prev ? threads.find(thread => thread.id === prev.id) || null : prev)
+    }
+    refreshFromNotification()
+  }, [notifications, currentUserId])
 
   const contacts = onlineUsers.filter(u =>
     u.name.toLowerCase().includes(search.toLowerCase())
