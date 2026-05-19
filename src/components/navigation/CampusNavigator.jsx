@@ -28,7 +28,7 @@ const TUIASI_BUILDINGS = [
   { id: 3,  name: 'Biblioteca Gh. Asachi',                         distance: '650m',  time: '9 min',  type: 'Studiu',   coords: [47.157030, 27.590140] },
   { id: 4,  name: 'Cantina TUIASI – Tudor Vladimirescu',           distance: '1.3km', time: '17 min', type: 'Servicii', coords: [47.149650, 27.607200] },
   { id: 5,  name: 'Secretariat AC',                                distance: '30m',   time: '1 min',  type: 'Admin',    coords: [47.154082, 27.594051] },
-  { id: 6,  name: 'Facultatea ETTI – Bd. Carol I nr. 11A',         distance: '2.8km', time: '35 min', type: 'Cursuri',  coords: [47.177180, 27.572960] },
+  { id: 6,  name: 'Facultatea ETTI – Bd. Carol I nr. 11A',         distance: '2.8km', time: '35 min', type: 'Cursuri',  coords: [47.175840, 27.574020] },
   { id: 7,  name: 'Rectorat TUIASI',                               distance: '480m',  time: '7 min',  type: 'Admin',    coords: [47.157440, 27.591880] },
   { id: 8,  name: 'Facultatea IEEIA',                              distance: '370m',  time: '5 min',  type: 'Cursuri',  coords: [47.156200, 27.591320] },
   { id: 9,  name: 'Facultatea de Mecanică',                        distance: '200m',  time: '3 min',  type: 'Cursuri',  coords: [47.153870, 27.595440] },
@@ -106,7 +106,7 @@ const UAIC_CENTER = [47.17560, 27.57420]
 
 const UAIC_BUILDINGS = [
   { id: 1,  name: 'Corp A – Rectorat UAIC (Bd. Carol I 11)',        distance: '0m',    time: '-',      type: 'Admin',    coords: [47.17580, 27.57405] },
-  { id: 2,  name: 'Facultatea de Informatică – FII (Corp B)',        distance: '55m',   time: '1 min',  type: 'Cursuri',  coords: [47.17568, 27.57458] },
+  { id: 2,  name: 'Facultatea de Informatică – FII (Corp B)',        distance: '55m',   time: '1 min',  type: 'Cursuri',  coords: [47.17545, 27.57432] },
   { id: 3,  name: 'Facultatea de Matematică (Corp A)',               distance: '40m',   time: '1 min',  type: 'Cursuri',  coords: [47.17550, 27.57388] },
   { id: 4,  name: 'Facultatea de Fizică',                            distance: '90m',   time: '2 min',  type: 'Cursuri',  coords: [47.17530, 27.57415] },
   { id: 5,  name: 'Facultatea de Chimie',                            distance: '130m',  time: '2 min',  type: 'Cursuri',  coords: [47.17512, 27.57442] },
@@ -115,7 +115,7 @@ const UAIC_BUILDINGS = [
   { id: 8,  name: 'Facultatea de Litere (Bd. Carol I 11)',           distance: '110m',  time: '2 min',  type: 'Cursuri',  coords: [47.17622, 27.57388] },
   { id: 9,  name: 'Facultatea de Filosofie și Soc-Pol',              distance: '95m',   time: '1 min',  type: 'Cursuri',  coords: [47.17608, 27.57436] },
   { id: 10, name: 'Facultatea de Psihologie și Ed.',                 distance: '85m',   time: '1 min',  type: 'Cursuri',  coords: [47.17592, 27.57465] },
-  { id: 11, name: 'Facultatea de Economie – FEAA (Bd. Carol I 22)', distance: '280m',  time: '4 min',  type: 'Cursuri',  coords: [47.17415, 27.57494] },
+  { id: 11, name: 'Facultatea de Economie – FEAA (Bd. Carol I 22)', distance: '230m',  time: '3 min',  type: 'Cursuri',  coords: [47.17698, 27.57468] },
   { id: 12, name: 'Facultatea de Geografie și Geologie',             distance: '170m',  time: '2 min',  type: 'Cursuri',  coords: [47.17472, 27.57396] },
   { id: 13, name: 'Biblioteca Centrală „Mihai Eminescu" (BCU)',      distance: '480m',  time: '7 min',  type: 'Studiu',   coords: [47.17363, 27.57328] },
   { id: 14, name: 'Secretariat FII',                                 distance: '55m',   time: '1 min',  type: 'Admin',    coords: [47.17562, 27.57466] },
