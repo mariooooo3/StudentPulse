@@ -37,16 +37,17 @@ class SocketService extends EventTarget {
       this.#connected = true
       this.#reconnectDelay = 1000
       clearTimeout(this.#reconnectTimer)
-      this.dispatchEvent(new Event('connect'))
 
       // Re-auth after reconnect
       if (this.#userId) {
         this.#ws.send(JSON.stringify({ type: 'AUTH', userId: this.#userId, name: this.#userName, profile: this.#profile }))
+        this.dispatchEvent(new Event('auth'))
       }
       // Re-subscribe all active channels
       for (const channel of this.#subscribers.keys()) {
         this.#ws.send(JSON.stringify({ type: 'SUBSCRIBE', channel }))
       }
+      this.dispatchEvent(new Event('connect'))
     }
 
     this.#ws.onclose = () => {
@@ -192,6 +193,9 @@ class SocketService extends EventTarget {
     this.#profile = profile
     if (this.#ws?.readyState === WebSocket.OPEN) {
       this.#ws.send(JSON.stringify({ type: 'AUTH', userId, name, profile }))
+      for (const channel of this.#subscribers.keys()) {
+        this.#ws.send(JSON.stringify({ type: 'SUBSCRIBE', channel }))
+      }
       this.dispatchEvent(new Event('auth'))
     }
   }

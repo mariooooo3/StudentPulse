@@ -1,7 +1,9 @@
-import { Bell, Compass, Menu, Search, Settings, Sparkles, X } from 'lucide-react'
+import { ArrowRight, Bell, BellRing, CalendarCheck, CheckCheck, Compass, GraduationCap, Menu, MessageSquare, Search, Settings, Sparkles, Wifi, WifiOff, X } from 'lucide-react'
 import clsx from 'clsx'
-import { useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNotifications } from '../../shared/hooks/useNotifications'
+import { useSocket } from '../../shared/hooks/useSocket'
+import { useToast } from '../../shared/components/Toast'
 import { getUniversityTheme } from '../../shared/utils/theme'
 
 const VIEW_TITLES = {
@@ -22,9 +24,43 @@ const MODES = [
   { id: 'life',     label: 'Viață',    icon: Sparkles },
 ]
 
-export default function Header({ platformMode = 'academic', onModeChange, currentView, profile, session, onMenuClick, onSearchOpen }) {
+const NOTIFICATION_FILTERS = [
+  { id: 'all', label: 'Toate' },
+  { id: 'unread', label: 'Necitite' },
+]
+
+function getNotificationRoute(notification) {
+  const action = notification?.action || ''
+  if (action.startsWith('thesis.')) return { mode: 'academic', view: 'thesis' }
+  if (action.startsWith('schedule.') || action.startsWith('recovery.')) return { mode: 'academic', view: 'schedule' }
+  if (action.includes('message')) return { mode: 'academic', view: 'messages' }
+  return { mode: 'academic', view: 'dashboard' }
+}
+
+function getNotificationIcon(notification) {
+  const action = notification?.action || ''
+  if (action.startsWith('thesis.')) return GraduationCap
+  if (action.startsWith('schedule.') || action.startsWith('recovery.')) return CalendarCheck
+  if (action.includes('message')) return MessageSquare
+  return BellRing
+}
+
+function timeAgo(value) {
+  const date = value ? new Date(value) : null
+  if (!date || Number.isNaN(date.getTime())) return 'acum'
+  const diff = Math.max(0, Date.now() - date.getTime())
+  const minutes = Math.floor(diff / 60000)
+  if (minutes < 1) return 'acum'
+  if (minutes < 60) return `${minutes} min`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours} h`
+  return `${Math.floor(hours / 24)} zile`
+}
+
+export default function Header({ platformMode = 'academic', onModeChange, currentView, profile, session, onMenuClick, onSearchOpen, onNavigate }) {
   const { title, sub } = VIEW_TITLES[currentView] || VIEW_TITLES.dashboard
   const [notifOpen, setNotifOpen] = useState(false)
+  const [notifFilter, setNotifFilter] = useState('all')
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [settings, setSettings] = useState(() => {
     try {
@@ -34,14 +70,47 @@ export default function Header({ platformMode = 'academic', onModeChange, curren
     }
   })
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications(session?.userId)
-  const visible = notifications.slice(0, 5)
+  const { connected } = useSocket()
+  const toast = useToast()
+  const seenNotificationIds = useRef(new Set())
+  const initializedNotifications = useRef(false)
+  const filteredNotifications = useMemo(() => (
+    notifFilter === 'unread' ? notifications.filter(n => !n.read) : notifications
+  ), [notifFilter, notifications])
+  const visible = filteredNotifications.slice(0, 8)
   const university = session?.university
   const theme = getUniversityTheme(university)
+
+  useEffect(() => {
+    if (!notifications.length) return
+    const known = seenNotificationIds.current
+    const newest = notifications.filter(n => !known.has(n.id))
+    notifications.forEach(n => known.add(n.id))
+    if (!initializedNotifications.current) {
+      initializedNotifications.current = true
+      return
+    }
+    const live = newest.find(n => !n.read)
+    if (!live) return
+    toast({
+      type: live.type === 'warning' ? 'error' : live.type || 'info',
+      title: live.title || 'Notificare noua',
+      message: live.body || live.text || 'Ai un update nou in StudentCompass.',
+      duration: 4500,
+    })
+  }, [notifications, toast])
 
   function updateSetting(key, value) {
     const next = { ...settings, [key]: value }
     setSettings(next)
     localStorage.setItem('sc_settings', JSON.stringify(next))
+  }
+
+  function openNotification(notification) {
+    markRead(notification.id)
+    const route = getNotificationRoute(notification)
+    onNavigate?.(route.view, route.mode)
+    setNotifOpen(false)
   }
 
   return (
@@ -128,45 +197,93 @@ export default function Header({ platformMode = 'academic', onModeChange, curren
             <div className="absolute right-0 top-10 w-80 max-w-[calc(100vw-2rem)] z-50 animate-slide-up">
               <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.1] to-white/[0.03]">
                 <div className="rounded-[calc(1rem-1px)] bg-[#0c1120] border border-white/[0.05] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.8)] overflow-hidden">
-                  <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
-                    <p className="text-[13px] font-semibold text-white">Notificari</p>
-                    <div className="flex items-center gap-2">
-                      {unreadCount > 0 && (
-                        <button onClick={markAllRead} className="text-[11px] font-semibold" style={{ color: theme.accent }}>
-                          Marcheaza toate
+                  <div className="px-4 py-3 border-b border-white/[0.06]">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[13px] font-semibold text-white">Notificari</p>
+                        <div className="mt-1 flex items-center gap-1.5 text-[10px] font-semibold text-slate-600">
+                          {connected ? <Wifi size={11} className="text-emerald-400" /> : <WifiOff size={11} className="text-amber-400" />}
+                          {connected ? 'Live conectat' : 'Offline, sincronizare locala'}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {unreadCount > 0 && (
+                          <button onClick={markAllRead} className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: theme.accent }}>
+                            <CheckCheck size={13} />
+                            Marcheaza
+                          </button>
+                        )}
+                        <button onClick={() => setNotifOpen(false)} className="text-slate-600 hover:text-slate-300 transition-colors">
+                          <X size={14} strokeWidth={1.75} />
                         </button>
-                      )}
-                      <button onClick={() => setNotifOpen(false)} className="text-slate-600 hover:text-slate-300 transition-colors">
-                        <X size={14} strokeWidth={1.75} />
-                      </button>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex rounded-xl border border-white/[0.06] bg-white/[0.03] p-1">
+                      {NOTIFICATION_FILTERS.map(filter => (
+                        <button
+                          key={filter.id}
+                          onClick={() => setNotifFilter(filter.id)}
+                          className={clsx(
+                            'flex-1 rounded-lg px-3 py-1.5 text-[11px] font-bold transition-colors',
+                            notifFilter === filter.id ? 'bg-white/[0.08] text-white' : 'text-slate-600 hover:text-slate-300',
+                          )}
+                        >
+                          {filter.label}{filter.id === 'unread' && unreadCount > 0 ? ` (${unreadCount})` : ''}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                  <div className="max-h-72 overflow-y-auto">
+                  <div className="max-h-96 overflow-y-auto">
                     {visible.length === 0 ? (
                       <div className="px-4 py-10 text-center">
                         <Bell size={20} className="text-slate-800 mx-auto mb-2" strokeWidth={1.5} />
-                        <p className="text-[13px] text-slate-600">Nu ai notificari noi.</p>
+                        <p className="text-[13px] text-slate-600">{notifFilter === 'unread' ? 'Nu ai notificari necitite.' : 'Nu ai notificari noi.'}</p>
                       </div>
                     ) : (
-                      visible.map(n => (
-                        <button
-                          key={n.id}
-                          onClick={() => markRead(n.id)}
-                          className="w-full text-left px-4 py-3 border-b border-white/[0.04] last:border-b-0 hover:bg-white/[0.03] transition-colors group"
-                        >
-                          <div className="flex items-start gap-3">
-                            {!n.read && (
-                              <span className="mt-[5px] w-1.5 h-1.5 rounded-full shrink-0 flex-none" style={{ background: theme.accent }} />
+                      visible.map(n => {
+                        const Icon = getNotificationIcon(n)
+                        const route = getNotificationRoute(n)
+                        return (
+                          <button
+                            key={n.id}
+                            onClick={() => openNotification(n)}
+                            className={clsx(
+                              'w-full text-left px-4 py-3 border-b border-white/[0.04] last:border-b-0 transition-colors group',
+                              n.read ? 'hover:bg-white/[0.03]' : 'bg-white/[0.025] hover:bg-white/[0.055]',
                             )}
-                            <div className="min-w-0" style={n.read ? { paddingLeft: '0.875rem' } : {}}>
-                              <p className="text-[13px] font-semibold text-slate-200 truncate">{n.title || 'Notificare'}</p>
-                              <p className="text-[11px] text-slate-600 leading-relaxed mt-0.5">{n.body || n.text}</p>
+                          >
+                            <div className="flex items-start gap-3">
+                              <div
+                                className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border"
+                                style={{ background: n.read ? 'rgba(255,255,255,0.03)' : theme.accentSoft, borderColor: n.read ? 'rgba(255,255,255,0.06)' : theme.accentBorder }}
+                              >
+                                <Icon size={14} style={{ color: n.read ? '#64748b' : theme.accent }} />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-[13px] font-semibold text-slate-200 truncate">{n.title || 'Notificare'}</p>
+                                  {!n.read && <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: theme.accent }} />}
+                                </div>
+                                <p className="text-[11px] text-slate-600 leading-relaxed mt-0.5 line-clamp-2">{n.body || n.text}</p>
+                                <div className="mt-2 flex items-center justify-between gap-2">
+                                  <span className="text-[10px] font-mono text-slate-700">{timeAgo(n.timestamp || n.createdAt)}</span>
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: theme.accent }}>
+                                    {route.view}
+                                    <ArrowRight size={11} />
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </button>
-                      ))
+                          </button>
+                        )
+                      })
                     )}
                   </div>
+                  {filteredNotifications.length > visible.length && (
+                    <div className="border-t border-white/[0.05] px-4 py-2 text-center text-[11px] text-slate-700">
+                      Se afiseaza ultimele {visible.length} din {filteredNotifications.length}.
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

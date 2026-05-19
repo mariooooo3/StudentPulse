@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import clsx from 'clsx'
 import {
   Bell,
   BookOpen,
   CalendarClock,
   Check,
+  CheckCheck,
   Clock,
   Edit3,
   FileText,
@@ -14,10 +15,16 @@ import {
   Plus,
   Save,
   UserCheck,
+  Wifi,
+  WifiOff,
   X,
 } from 'lucide-react'
 import { useAuth } from '../../app/providers/AuthContext'
 import { useToast } from '../../shared/components/Toast'
+import { useNotifications } from '../../shared/hooks/useNotifications'
+import { useSocket } from '../../shared/hooks/useSocket'
+import { socketService } from '../../shared/services/socket.service'
+import VirtualAssistant from '../../shared/components/VirtualAssistant'
 import {
   DEMO_PROFESSOR,
   getProfessorProfile,
@@ -101,7 +108,12 @@ function ProfessorSidebar({ current, onNavigate, onLogout, profile }) {
 function Header({ current, pendingCount, profile, requests, recoveryRequests, threads, onNavigate }) {
   const title = NAV.find(item => item.id === current)?.label || 'Dashboard'
   const [open, setOpen] = useState(false)
-  const latest = [
+  const { notifications, unreadCount, markRead, markAllRead } = useNotifications(profile.id)
+  const { connected } = useSocket()
+  const toast = useToast()
+  const seenNotificationIds = useRef(new Set())
+  const initializedNotifications = useRef(false)
+  const fallbackLatest = [
     ...requests.filter(item => item.status === 'pending').map(item => ({
       id: item.id,
       title: 'Cerere licenta noua',
@@ -125,8 +137,39 @@ function Header({ current, pendingCount, profile, requests, recoveryRequests, th
       threadId: thread.id,
     })),
   ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 6)
+  const latest = notifications.length
+    ? notifications.slice(0, 8).map(item => ({
+        id: item.id,
+        title: item.title || 'Notificare profesor',
+        body: item.body || item.text,
+        time: item.timestamp || item.createdAt,
+        target: item.action?.includes('recovery') ? 'recovery' : item.action?.includes('message') ? 'messages' : 'thesis',
+        threadId: item.meta?.threadId,
+        read: item.read,
+      }))
+    : fallbackLatest
+
+  useEffect(() => {
+    if (!notifications.length) return
+    const known = seenNotificationIds.current
+    const newest = notifications.filter(item => !known.has(item.id))
+    notifications.forEach(item => known.add(item.id))
+    if (!initializedNotifications.current) {
+      initializedNotifications.current = true
+      return
+    }
+    const live = newest.find(item => !item.read)
+    if (!live) return
+    toast({
+      type: live.type === 'warning' ? 'error' : live.type || 'info',
+      title: live.title || 'Update profesor',
+      message: live.body || live.text || 'Ai un update nou in portal.',
+      duration: 4500,
+    })
+  }, [notifications, toast])
 
   function openNotification(item) {
+    if (item.id?.startsWith('notif-')) markRead(item.id)
     onNavigate(item.target, item.threadId ? { threadId: item.threadId } : undefined)
     setOpen(false)
   }
@@ -140,15 +183,29 @@ function Header({ current, pendingCount, profile, requests, recoveryRequests, th
       <div className="relative">
         <button onClick={() => setOpen(v => !v)} className="relative w-9 h-9 rounded-xl border border-white/[0.07] bg-white/[0.03] flex items-center justify-center hover:bg-white/[0.06] transition-colors">
           <Bell size={15} className="text-slate-500" />
-          {pendingCount > 0 && <span className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full bg-amber-500 text-[9px] font-bold text-white flex items-center justify-center">{pendingCount}</span>}
+          {(unreadCount || pendingCount) > 0 && <span className="absolute -top-1 -right-1 min-w-4 h-4 rounded-full bg-amber-500 text-[9px] font-bold text-white flex items-center justify-center">{(unreadCount || pendingCount) > 9 ? '9+' : (unreadCount || pendingCount)}</span>}
         </button>
         {open && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
             <div className="absolute right-0 top-11 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/[0.07] bg-[#0c1120] shadow-2xl overflow-hidden">
               <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
-                <p className="text-[13px] font-semibold text-white">Notificari profesor</p>
-                <button onClick={() => setOpen(false)} className="text-slate-600 hover:text-slate-300"><X size={14} /></button>
+                <div>
+                  <p className="text-[13px] font-semibold text-white">Notificari profesor</p>
+                  <p className="mt-1 flex items-center gap-1.5 text-[10px] font-semibold text-slate-600">
+                    {connected ? <Wifi size={11} className="text-emerald-400" /> : <WifiOff size={11} className="text-amber-400" />}
+                    {connected ? 'Live conectat' : 'Offline, sincronizare la refresh'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {unreadCount > 0 && (
+                    <button onClick={markAllRead} className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-300">
+                      <CheckCheck size={13} />
+                      Marcheaza
+                    </button>
+                  )}
+                  <button onClick={() => setOpen(false)} className="text-slate-600 hover:text-slate-300"><X size={14} /></button>
+                </div>
               </div>
               {latest.length === 0 ? (
                 <div className="px-4 py-8 text-center text-sm text-slate-600">Nu ai notificari noi.</div>
@@ -160,6 +217,7 @@ function Header({ current, pendingCount, profile, requests, recoveryRequests, th
                 >
                   <p className="text-[13px] font-semibold text-slate-200 truncate">{item.title}</p>
                   <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-2">{item.body}</p>
+                  <p className="text-[10px] text-slate-700 mt-1">{new Date(item.time || Date.now()).toLocaleTimeString('ro', { hour: '2-digit', minute: '2-digit' })}</p>
                 </button>
               ))}
             </div>
@@ -551,41 +609,83 @@ function MessagesView({ threads, onSend, selectedThreadId, onThreadSelect }) {
 export default function ProfessorApp() {
   const { logout, profile } = useAuth()
   const toast = useToast()
-  const [professor, setProfessor] = useState(() => ({ ...(profile || DEMO_PROFESSOR), ...getProfessorProfile() }))
+  const [professor, setProfessor] = useState(() => ({ ...(profile || DEMO_PROFESSOR) }))
   const [current, setCurrent] = useState('dashboard')
   const [selectedThreadId, setSelectedThreadId] = useState(null)
-  const [requests, setRequests] = useState(() => listThesisRequests())
-  const [recoveryRequests, setRecoveryRequests] = useState(() => listRecoveryRequests())
-  const [threads, setThreads] = useState(() => listPortalThreads())
+  const [requests, setRequests] = useState([])
+  const [recoveryRequests, setRecoveryRequests] = useState([])
+  const [threads, setThreads] = useState([])
+
+  const refreshRequests = async () => {
+    setRequests(await listThesisRequests())
+  }
+
+  const refreshRecoveryRequests = async () => {
+    setRecoveryRequests(await listRecoveryRequests())
+  }
+
+  const refreshThreads = async () => {
+    setThreads(await listPortalThreads())
+  }
+
+  const refreshPortalData = async () => {
+    const [nextRequests, nextRecoveryRequests, nextThreads] = await Promise.all([
+      listThesisRequests().catch(() => []),
+      listRecoveryRequests().catch(() => []),
+      listPortalThreads().catch(() => []),
+    ])
+    setRequests(nextRequests)
+    setRecoveryRequests(nextRecoveryRequests)
+    setThreads(nextThreads)
+  }
 
   useEffect(() => {
-    function refresh() {
-      setRequests(listThesisRequests())
+    let cancelled = false
+    async function load() {
+      const [nextProfessor, nextRequests, nextRecoveryRequests, nextThreads] = await Promise.all([
+        getProfessorProfile().catch(() => profile || DEMO_PROFESSOR),
+        listThesisRequests().catch(() => []),
+        listRecoveryRequests().catch(() => []),
+        listPortalThreads().catch(() => []),
+      ])
+      if (cancelled) return
+      setProfessor({ ...(profile || DEMO_PROFESSOR), ...nextProfessor })
+      setRequests(nextRequests)
+      setRecoveryRequests(nextRecoveryRequests)
+      setThreads(nextThreads)
     }
-    window.addEventListener('sc:thesis-requests', refresh)
-    return () => window.removeEventListener('sc:thesis-requests', refresh)
+    load()
+    return () => { cancelled = true }
+  }, [profile])
+
+  useEffect(() => {
+    if (!professor?.id) return undefined
+    const unsub = socketService.subscribe(`portal:${professor.id}`, () => {
+      refreshPortalData()
+    })
+    return unsub
+  }, [professor?.id])
+
+  useEffect(() => {
+    window.addEventListener('sc:thesis-requests', refreshRequests)
+    return () => window.removeEventListener('sc:thesis-requests', refreshRequests)
   }, [])
 
   useEffect(() => {
-    function refreshProfessor(event) {
-      setProfessor({ ...(profile || DEMO_PROFESSOR), ...(event?.detail || getProfessorProfile()) })
+    async function refreshProfessor(event) {
+      const nextProfessor = event?.detail || await getProfessorProfile().catch(() => profile || DEMO_PROFESSOR)
+      setProfessor({ ...(profile || DEMO_PROFESSOR), ...nextProfessor })
     }
     window.addEventListener('sc:professor-profile', refreshProfessor)
     return () => window.removeEventListener('sc:professor-profile', refreshProfessor)
   }, [profile])
 
   useEffect(() => {
-    function refreshRecovery() {
-      setRecoveryRequests(listRecoveryRequests())
-    }
-    window.addEventListener('sc:recovery-requests', refreshRecovery)
-    return () => window.removeEventListener('sc:recovery-requests', refreshRecovery)
+    window.addEventListener('sc:recovery-requests', refreshRecoveryRequests)
+    return () => window.removeEventListener('sc:recovery-requests', refreshRecoveryRequests)
   }, [])
 
   useEffect(() => {
-    function refreshThreads() {
-      setThreads(listPortalThreads())
-    }
     window.addEventListener('sc:portal-messages', refreshThreads)
     return () => window.removeEventListener('sc:portal-messages', refreshThreads)
   }, [])
@@ -603,18 +703,19 @@ export default function ProfessorApp() {
     setCurrent(target)
   }
 
-  function handleDecision(requestId, status, note) {
-    const updated = updateThesisRequestStatus(requestId, status, note)
+  async function handleDecision(requestId, status, note) {
+    const updated = await updateThesisRequestStatus(requestId, status, note)
     if (updated?.studentId) {
-      const thread = upsertPortalThread({
+      const thread = await upsertPortalThread({
         student: {
           userId: updated.studentId,
           name: updated.studentName,
           email: updated.studentEmail,
         },
+        professor,
         subject: `Licenta: ${updated.idea}`,
       })
-      sendPortalMessage(thread.id, {
+      await sendPortalMessage(thread.id, {
         senderId: professor.id,
         senderName: professor.name,
         senderRole: 'professor',
@@ -622,9 +723,9 @@ export default function ProfessorApp() {
           ? `Am acceptat cererea ta pentru licenta. ${note || 'Stabilim detaliile la o discutie initiala.'}`
           : `Am respins cererea ta pentru licenta. ${note || 'Tema nu se potriveste directiei curente.'}`,
       })
-      setThreads(listPortalThreads())
+      await refreshThreads()
     }
-    setRequests(listThesisRequests())
+    await refreshRequests()
     toast({
       type: status === 'accepted' ? 'success' : 'info',
       title: status === 'accepted' ? 'Cerere acceptata' : 'Cerere respinsa',
@@ -632,18 +733,19 @@ export default function ProfessorApp() {
     })
   }
 
-  function handleRecoveryDecision(requestId, status, note) {
-    const updated = updateRecoveryRequestStatus(requestId, status, note)
+  async function handleRecoveryDecision(requestId, status, note) {
+    const updated = await updateRecoveryRequestStatus(requestId, status, note)
     if (updated?.studentId) {
-      const thread = upsertPortalThread({
+      const thread = await upsertPortalThread({
         student: {
           userId: updated.studentId,
           name: updated.studentName,
           email: updated.studentEmail,
         },
+        professor,
         subject: `Recuperare: ${updated.subject}`,
       })
-      sendPortalMessage(thread.id, {
+      await sendPortalMessage(thread.id, {
         senderId: professor.id,
         senderName: professor.name,
         senderRole: 'professor',
@@ -652,23 +754,23 @@ export default function ProfessorApp() {
           : `Recuperarea la ${updated.subject} a fost respinsa. ${note}`,
       })
     }
-    setRecoveryRequests(listRecoveryRequests())
-    setThreads(listPortalThreads())
+    await refreshRecoveryRequests()
+    await refreshThreads()
     toast({ type: status === 'accepted' ? 'success' : 'info', title: 'Recuperare actualizata', message: `${updated?.studentName || 'Studentul'} primeste notificare.` })
   }
 
-  function handleSendMessage(threadId, text) {
-    sendPortalMessage(threadId, {
+  async function handleSendMessage(threadId, text) {
+    await sendPortalMessage(threadId, {
       senderId: professor.id,
       senderName: professor.name,
       senderRole: 'professor',
       text,
     })
-    setThreads(listPortalThreads())
+    await refreshThreads()
   }
 
-  function handleProfessorSave(patch) {
-    const updated = saveProfessorProfile(patch)
+  async function handleProfessorSave(patch) {
+    const updated = await saveProfessorProfile(patch)
     setProfessor({ ...(profile || DEMO_PROFESSOR), ...updated })
     toast({ type: 'success', title: 'Profil actualizat', message: 'Datele publice ale contului de profesor au fost salvate.' })
   }
@@ -687,6 +789,14 @@ export default function ProfessorApp() {
           {current === 'messages' && <MessagesView threads={threads} onSend={handleSendMessage} selectedThreadId={selectedThreadId} onThreadSelect={setSelectedThreadId} />}
         </main>
       </div>
+      <VirtualAssistant
+        session={{ role: 'professor', userId: professor.id, email: professor.email }}
+        profile={professor}
+        platformMode="professor"
+        currentView={current}
+        currentLabel={NAV.find(item => item.id === current)?.label || 'Professor Portal'}
+        onNavigate={(view) => handleNavigate(view)}
+      />
     </div>
   )
 }

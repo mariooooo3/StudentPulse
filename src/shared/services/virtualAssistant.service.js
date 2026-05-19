@@ -75,8 +75,12 @@ export function localVirtualAssistantAnswer(message, context = {}) {
 
   if (q.includes('licenta') || q.includes('thesis') || q.includes('profesor')) {
     return {
-      answer: 'Thesis Finder lets students filter professors by domain and availability, review each professor requirements, and send a request with an optional file. Professors can accept or reject requests and send a note back.',
-      suggestions: ['Open Thesis Finder', 'How do professor notifications work?'],
+      answer: context?.role === 'professor'
+        ? 'In the professor portal, the thesis area lets you review incoming student requests, read each thesis idea and motivation, accept or reject the request, add an optional note, notify the student, and continue the discussion in Messages.'
+        : 'Thesis Finder lets students filter professors by domain and availability, review each professor requirements, and send a request with an optional file. Professors can accept or reject requests and send a note back.',
+      suggestions: context?.role === 'professor'
+        ? ['Open thesis requests', 'How do messages work?', 'How do notifications work?']
+        : ['Open Thesis Finder', 'How do professor notifications work?'],
     }
   }
 

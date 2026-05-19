@@ -8,11 +8,13 @@ import { eventBus } from './core/events/EventBus.js'
 import { createTCPServer } from './core/realtime/TCPServer.js'
 import { WSBridge } from './core/realtime/WSBridge.js'
 import { createDispatcher } from './handlers/CommandDispatch.js'
-import { createMessagesHandler } from './handlers/messages.js'
-import { createScheduleHandler } from './handlers/schedule.js'
+import { createPersistentMessagesHandler } from './handlers/messages.js'
+import { createPersistentScheduleHandler } from './handlers/schedule.js'
 import { createNotificationsHandler } from './handlers/notifications.js'
 import { createSessionHandler } from './handlers/session.js'
 import { createNavigationRequestHandler } from './handlers/navigation.js'
+import { createPortalRequestHandler } from './handlers/portal.js'
+import { createPortalRepository } from './db/portalRepository.js'
 
 const PORT = Number(process.env.PORT || 3001)
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -64,20 +66,25 @@ function serveStatic(req, res) {
 
 const store = new Store()
 const pubsub = new PubSub()
-const notifications = createNotificationsHandler(store, pubsub)
+const repository = createPortalRepository()
+const notifications = createNotificationsHandler(store, pubsub, repository)
 
 const handlers = {
-  messages: createMessagesHandler(store, pubsub),
-  schedule: createScheduleHandler(store, pubsub, notifications),
+  messages: createPersistentMessagesHandler(repository, pubsub),
+  schedule: createPersistentScheduleHandler(repository, pubsub, notifications),
   notifications,
   session: createSessionHandler(store),
 }
 
 const handleNavigation = createNavigationRequestHandler()
+const handlePortal = createPortalRequestHandler(repository, notifications, pubsub)
 
 const httpServer = createServer(async (req, res) => {
   if (req.url?.startsWith('/api/navigation')) {
     return handleNavigation(req, res)
+  }
+  if (req.url?.startsWith('/api/portal')) {
+    return handlePortal(req, res)
   }
   if (existsSync(DIST)) {
     serveStatic(req, res)

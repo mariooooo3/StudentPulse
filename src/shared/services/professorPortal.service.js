@@ -25,266 +25,186 @@ export const DEMO_PROFESSOR = {
   avatar: 'AM',
 }
 
-const PROFESSOR_PROFILE_KEY = 'sc_professor_profile'
-const THESIS_KEY = 'sc_thesis_requests'
-const RECOVERY_KEY = 'sc_recovery_requests'
-const MESSAGE_KEY = 'sc_portal_messages'
-const NOTIF_KEY = 'sc_local_notifications'
-
-function readJson(key, fallback) {
-  try {
-    return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback))
-  } catch {
-    return fallback
-  }
-}
-
-function writeJson(key, value) {
-  localStorage.setItem(key, JSON.stringify(value))
-}
+const API_BASE = '/api/portal'
+const LOCAL_NOTIFICATIONS_KEY = 'sc_local_notifications'
 
 function emit(name, detail) {
-  window.dispatchEvent(new CustomEvent(name, { detail }))
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(name, { detail }))
 }
 
-export function listThesisRequests() {
-  return readJson(THESIS_KEY, [])
-}
-
-export function getProfessorProfile() {
-  return { ...DEMO_PROFESSOR, ...readJson(PROFESSOR_PROFILE_KEY, {}) }
-}
-
-export function saveProfessorProfile(patch) {
-  const current = getProfessorProfile()
-  const updated = { ...current, ...patch }
-  writeJson(PROFESSOR_PROFILE_KEY, updated)
-  emit('sc:professor-profile', updated)
-  return updated
-}
-
-export function getThesisRequestsForUser(userId) {
-  return listThesisRequests().filter(request => request.studentId === userId)
-}
-
-export function createThesisRequest({ professor, student, form, attachedFile }) {
-  const requests = listThesisRequests()
-  const request = {
-    id: `thesis-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    status: 'pending',
-    professorId: professor.id || professor.name,
-    professorName: professor.name,
-    professorDomain: professor.domain,
-    studentId: student.userId,
-    studentName: student.name,
-    studentEmail: student.email,
-    facultyName: student.facultyName,
-    idea: form.idea,
-    motivation: form.motivation,
-    file: attachedFile ? {
-      name: attachedFile.name,
-      size: attachedFile.size,
-      type: attachedFile.type,
-    } : null,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+function readLocalNotifications() {
+  if (typeof window === 'undefined') return {}
+  try {
+    return JSON.parse(window.localStorage.getItem(LOCAL_NOTIFICATIONS_KEY) || '{}')
+  } catch {
+    return {}
   }
-  writeJson(THESIS_KEY, [request, ...requests])
-  const thread = upsertPortalThread({
-    student,
-    professor: { id: DEMO_PROFESSOR.id, name: professor.name || DEMO_PROFESSOR.name },
-    subject: `Licenta: ${form.idea}`,
-  })
-  sendPortalMessage(thread.id, {
-    senderId: student.userId,
-    senderName: student.name,
-    senderRole: 'student',
-    text: `Am trimis o cerere de licenta: ${form.idea}`,
-  })
-  emit('sc:thesis-requests', request)
-  return request
 }
 
-export function updateThesisRequestStatus(requestId, status, note = '') {
-  const requests = listThesisRequests()
-  const updated = requests.map(request => request.id === requestId
-    ? { ...request, status, professorNote: note, updatedAt: new Date().toISOString() }
-    : request
-  )
-  writeJson(THESIS_KEY, updated)
-  const request = updated.find(item => item.id === requestId)
-  if (request?.studentId) {
-    addLocalNotification(request.studentId, {
-      title: status === 'accepted' ? 'Cerere licenta acceptata' : 'Cerere licenta respinsa',
-      body: status === 'accepted'
-        ? `${request.professorName} a acceptat cererea ta.`
-        : `${request.professorName} a respins cererea ta.${note ? ` Motiv: ${note}` : ''}`,
-      type: status === 'accepted' ? 'success' : 'warning',
-      action: `thesis.request.${status}`,
-      meta: { requestId, professorName: request.professorName },
-    })
-  }
-  emit('sc:thesis-requests', request)
-  return request
+function writeLocalNotifications(data) {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(LOCAL_NOTIFICATIONS_KEY, JSON.stringify(data))
 }
 
-export function listRecoveryRequests() {
-  return readJson(RECOVERY_KEY, [])
-}
-
-export function getRecoveryRequestsForUser(userId) {
-  return listRecoveryRequests().filter(request => request.studentId === userId)
-}
-
-export function createRecoveryRequest({ slot, subject, reason, student }) {
-  const requests = listRecoveryRequests()
-  const request = {
-    id: `recovery-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    status: 'pending',
-    subject,
-    reason,
-    studentId: student.userId,
-    studentName: student.name,
-    studentEmail: student.email,
-    facultyName: student.facultyName,
-    group: slot.group,
-    room: slot.room,
-    professor: slot.professor,
-    day: slot.day,
-    start: slot.start,
-    end: slot.end,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }
-  writeJson(RECOVERY_KEY, [request, ...requests])
-  const thread = upsertPortalThread({
-    student,
-    subject: `Recuperare: ${subject}`,
-  })
-  sendPortalMessage(thread.id, {
-    senderId: student.userId,
-    senderName: student.name,
-    senderRole: 'student',
-    text: `Am trimis o cerere de recuperare pentru ${subject}. Motiv: ${reason}`,
-  })
-  emit('sc:recovery-requests', request)
-  return request
-}
-
-export function updateRecoveryRequestStatus(requestId, status, note = '') {
-  const requests = listRecoveryRequests()
-  const updated = requests.map(request => request.id === requestId
-    ? { ...request, status, professorNote: note, updatedAt: new Date().toISOString() }
-    : request
-  )
-  writeJson(RECOVERY_KEY, updated)
-  const request = updated.find(item => item.id === requestId)
-  if (request?.studentId) {
-    addLocalNotification(request.studentId, {
-      title: status === 'accepted' ? 'Recuperare aprobata' : 'Recuperare respinsa',
-      body: status === 'accepted'
-        ? `Cererea pentru ${request.subject} a fost aprobata.`
-        : `Cererea pentru ${request.subject} a fost respinsa.${note ? ` Motiv: ${note}` : ''}`,
-      type: status === 'accepted' ? 'success' : 'warning',
-      action: `recovery.request.${status}`,
-      meta: { requestId, subject: request.subject },
-    })
-  }
-  emit('sc:recovery-requests', request)
-  return request
-}
-
-export function listPortalThreadsForUser(userId) {
-  if (!userId) return []
-  return readJson(MESSAGE_KEY, []).filter(thread => thread.studentId === userId || thread.professorId === userId)
-}
-
-export function listPortalThreads() {
-  return readJson(MESSAGE_KEY, [])
-}
-
-export function upsertPortalThread({ student, professor = DEMO_PROFESSOR, subject = 'Discutie academica' }) {
-  const threads = readJson(MESSAGE_KEY, [])
-  const existing = threads.find(thread => thread.studentId === student.userId && thread.professorId === professor.id)
-  if (existing) return existing
-  const thread = {
-    id: `thread-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    studentId: student.userId,
-    studentName: student.name,
-    studentEmail: student.email,
-    professorId: professor.id,
-    professorName: professor.name,
-    subject,
-    updatedAt: new Date().toISOString(),
-    messages: [],
-  }
-  writeJson(MESSAGE_KEY, [thread, ...threads])
-  emit('sc:portal-messages', thread)
-  return thread
-}
-
-export function sendPortalMessage(threadId, message) {
-  const threads = readJson(MESSAGE_KEY, [])
-  const updated = threads.map(thread => {
-    if (thread.id !== threadId) return thread
-    return {
-      ...thread,
-      updatedAt: new Date().toISOString(),
-      messages: [
-        ...thread.messages,
-        {
-          id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-          timestamp: new Date().toISOString(),
-          ...message,
-        },
-      ],
-    }
-  }).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-  writeJson(MESSAGE_KEY, updated)
-  const thread = updated.find(item => item.id === threadId)
-  if (thread && message.senderRole === 'professor') {
-    addLocalNotification(thread.studentId, {
-      title: `Mesaj de la ${thread.professorName}`,
-      body: message.text,
-      type: 'info',
-      action: 'portal.message.received',
-      meta: { threadId },
-    })
-  }
-  emit('sc:portal-messages', thread)
-  return thread
-}
-
-export function addLocalNotification(userId, notification) {
-  if (!userId) return null
-  const all = readJson(NOTIF_KEY, {})
-  const saved = {
-    id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    read: false,
-    timestamp: new Date().toISOString(),
-    ...notification,
-  }
-  all[userId] = [saved, ...(all[userId] || [])]
-  writeJson(NOTIF_KEY, all)
-  emit('sc:notifications', { userId, notification: saved })
-  return saved
+function localNotificationId() {
+  return `local-notif-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 }
 
 export function getLocalNotifications(userId) {
   if (!userId) return []
-  return readJson(NOTIF_KEY, {})[userId] || []
+  const data = readLocalNotifications()
+  return Array.isArray(data[userId]) ? data[userId] : []
 }
 
-export function markLocalNotificationRead(userId, notifId) {
-  const all = readJson(NOTIF_KEY, {})
-  all[userId] = (all[userId] || []).map(notification =>
-    notification.id === notifId ? { ...notification, read: true } : notification
+export function addLocalNotification(userId, notification) {
+  if (!userId || !notification) return null
+  const data = readLocalNotifications()
+  const entry = {
+    id: notification.id || localNotificationId(),
+    title: notification.title,
+    body: notification.body || notification.text || '',
+    type: notification.type || 'info',
+    action: notification.action,
+    meta: notification.meta || null,
+    read: notification.read === true,
+    timestamp: notification.timestamp || new Date().toISOString(),
+  }
+  data[userId] = [entry, ...getLocalNotifications(userId)].slice(0, 100)
+  writeLocalNotifications(data)
+  emit('sc:notifications', { userId })
+  return entry
+}
+
+export function markLocalNotificationRead(userId, notificationId) {
+  if (!userId || !notificationId) return false
+  const data = readLocalNotifications()
+  data[userId] = getLocalNotifications(userId).map(notification =>
+    notification.id === notificationId ? { ...notification, read: true } : notification
   )
-  writeJson(NOTIF_KEY, all)
+  writeLocalNotifications(data)
+  emit('sc:notifications', { userId })
+  return true
 }
 
 export function markAllLocalNotificationsRead(userId) {
-  const all = readJson(NOTIF_KEY, {})
-  all[userId] = (all[userId] || []).map(notification => ({ ...notification, read: true }))
-  writeJson(NOTIF_KEY, all)
+  if (!userId) return
+  const data = readLocalNotifications()
+  data[userId] = getLocalNotifications(userId).map(notification => ({ ...notification, read: true }))
+  writeLocalNotifications(data)
+  emit('sc:notifications', { userId })
+}
+
+async function api(path, options = {}) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    ...options,
+  })
+  if (!res.ok) throw new Error(`Portal API error: ${res.status}`)
+  return res.json()
+}
+
+export async function getProfessorProfile() {
+  const { profile } = await api('/professor-profile')
+  return profile || DEMO_PROFESSOR
+}
+
+export async function saveProfessorProfile(patch) {
+  const { profile } = await api('/professor-profile', {
+    method: 'POST',
+    body: JSON.stringify({ patch }),
+  })
+  emit('sc:professor-profile', profile)
+  return profile
+}
+
+export async function listThesisRequests() {
+  const { requests } = await api('/thesis-requests')
+  return requests || []
+}
+
+export async function getThesisRequestsForUser(userId) {
+  if (!userId) return []
+  const { requests } = await api(`/thesis-requests?userId=${encodeURIComponent(userId)}`)
+  return requests || []
+}
+
+export async function createThesisRequest(payload) {
+  const { request } = await api('/thesis-requests', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+  emit('sc:thesis-requests', request)
+  emit('sc:portal-messages', request)
+  return request
+}
+
+export async function updateThesisRequestStatus(requestId, status, note = '') {
+  const { request } = await api(`/thesis-requests/${encodeURIComponent(requestId)}/status`, {
+    method: 'POST',
+    body: JSON.stringify({ status, note }),
+  })
+  emit('sc:thesis-requests', request)
+  emit('sc:notifications', { userId: request?.studentId })
+  return request
+}
+
+export async function listRecoveryRequests() {
+  const { requests } = await api('/recovery-requests')
+  return requests || []
+}
+
+export async function getRecoveryRequestsForUser(userId) {
+  if (!userId) return []
+  const { requests } = await api(`/recovery-requests?userId=${encodeURIComponent(userId)}`)
+  return requests || []
+}
+
+export async function createRecoveryRequest(payload) {
+  const { request } = await api('/recovery-requests', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+  emit('sc:recovery-requests', request)
+  emit('sc:portal-messages', request)
+  return request
+}
+
+export async function updateRecoveryRequestStatus(requestId, status, note = '') {
+  const { request } = await api(`/recovery-requests/${encodeURIComponent(requestId)}/status`, {
+    method: 'POST',
+    body: JSON.stringify({ status, note }),
+  })
+  emit('sc:recovery-requests', request)
+  emit('sc:notifications', { userId: request?.studentId })
+  return request
+}
+
+export async function listPortalThreadsForUser(userId) {
+  if (!userId) return []
+  const { threads } = await api(`/threads?userId=${encodeURIComponent(userId)}`)
+  return threads || []
+}
+
+export async function listPortalThreads() {
+  const { threads } = await api('/threads')
+  return threads || []
+}
+
+export async function upsertPortalThread(payload) {
+  const { thread } = await api('/threads/upsert', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+  emit('sc:portal-messages', thread)
+  return thread
+}
+
+export async function sendPortalMessage(threadId, message) {
+  const { thread } = await api(`/threads/${encodeURIComponent(threadId)}/messages`, {
+    method: 'POST',
+    body: JSON.stringify({ message }),
+  })
+  emit('sc:portal-messages', thread)
+  if (message.senderRole === 'professor') emit('sc:notifications', { userId: thread?.studentId })
+  return thread
 }

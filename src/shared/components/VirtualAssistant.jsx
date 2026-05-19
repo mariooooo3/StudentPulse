@@ -41,12 +41,45 @@ const NAVIGATION_ACTIONS = [
   { match: ['student life', 'discount'], view: 'discounts', mode: 'life' },
 ]
 
-function findNavigationAction(label) {
-  const normalized = String(label || '').toLowerCase()
-  return NAVIGATION_ACTIONS.find(action => action.match.some(token => normalized.includes(token)))
+const PROFESSOR_NAVIGATION_ACTIONS = [
+  { match: ['licenta', 'licente', 'thesis', 'cereri licenta', 'cerere licenta', 'studenti acceptati'], view: 'thesis', mode: 'professor' },
+  { match: ['recuperari', 'recuperare', 'recovery'], view: 'recovery', mode: 'professor' },
+  { match: ['mesaje', 'messages', 'chat', 'conversatii', 'student'], view: 'messages', mode: 'professor' },
+  { match: ['profil', 'profile', 'academic profile', 'date publice'], view: 'profile', mode: 'professor' },
+  { match: ['dashboard', 'acasa', 'home', 'overview'], view: 'dashboard', mode: 'professor' },
+]
+
+function initialAssistantMessage(role) {
+  if (role === 'professor') {
+    return 'Salut, sunt asistentul pentru portalul profesorului. Te pot ajuta cu cereri de licenta, recuperari, mesaje, notificari live si profilul academic.'
+  }
+  return 'Salut, sunt asistentul StudentCompass. Te pot ajuta cu modulele studentului, mesaje, orar, cereri de licenta, navigare in campus si intrebari de cont.'
 }
 
-function AssistantBubble({ onClick, unread }) {
+function findNavigationAction(label, role) {
+  const normalized = String(label || '').toLowerCase()
+  const actions = role === 'professor' ? PROFESSOR_NAVIGATION_ACTIONS : NAVIGATION_ACTIONS
+  return actions.find(action => action.match.some(token => normalized.includes(token)))
+}
+
+function assistantBrand(role) {
+  if (role === 'professor') {
+    return {
+      title: 'ProfessorCompass Assistant',
+      subtitle: 'Cereri, mesaje, profil',
+      badge: 'Professor help',
+      footer: 'Professor-aware help',
+    }
+  }
+  return {
+    title: 'StudentCompass Assistant',
+    subtitle: 'Account, modules, quick help',
+    badge: 'Live help',
+    footer: 'Context-aware help',
+  }
+}
+
+function AssistantBubble({ onClick, unread, brand }) {
   return (
     <motion.button
       type="button"
@@ -63,8 +96,8 @@ function AssistantBubble({ onClick, unread }) {
         <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-[#0b1020] bg-emerald-400" />
       </span>
       <span className="hidden sm:block min-w-0">
-        <span className="block text-[12px] font-bold text-white">StudentCompass Assistant</span>
-        <span className="block text-[11px] text-slate-500">Account, modules, quick help</span>
+        <span className="block text-[12px] font-bold text-white">{brand.title}</span>
+        <span className="block text-[11px] text-slate-500">{brand.subtitle}</span>
       </span>
       {unread > 0 && (
         <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-cyan-400 px-1.5 text-[10px] font-bold text-slate-950">
@@ -127,7 +160,7 @@ export default function VirtualAssistant({
   const [messages, setMessages] = useState(() => [
     {
       role: 'assistant',
-      text: 'Hi, I am your StudentCompass assistant. I can help with account questions, modules, messages, schedules, thesis requests, campus navigation, and basic student-life topics.',
+      text: initialAssistantMessage(session?.role),
     },
   ])
   const bottomRef = useRef(null)
@@ -144,6 +177,15 @@ export default function VirtualAssistant({
     currentView,
     currentLabel: currentLabel || VIEW_LABELS[currentView] || currentView,
   }
+  const brand = assistantBrand(context.role)
+
+  useEffect(() => {
+    setSuggestions(defaultSuggestions(context))
+    setMessages(prev => {
+      if (prev.length > 1) return prev
+      return [{ role: 'assistant', text: initialAssistantMessage(context.role) }]
+    })
+  }, [context.role])
 
   useEffect(() => {
     if (open) {
@@ -160,7 +202,7 @@ export default function VirtualAssistant({
     const text = String(raw ?? input).trim()
     if (!text || loading) return
 
-    const navAction = findNavigationAction(text)
+    const navAction = findNavigationAction(text, context.role)
     if (navAction && onNavigate) {
       onNavigate(navAction.view, navAction.mode)
     }
@@ -191,7 +233,7 @@ export default function VirtualAssistant({
   }
 
   if (!open) {
-    return <AssistantBubble onClick={() => setOpen(true)} unread={unread} />
+    return <AssistantBubble onClick={() => setOpen(true)} unread={unread} brand={brand} />
   }
 
   return (
@@ -211,10 +253,10 @@ export default function VirtualAssistant({
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <p className="truncate text-[13px] font-bold text-white">StudentCompass Assistant</p>
+                <p className="truncate text-[13px] font-bold text-white">{brand.title}</p>
                 <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
                   <Sparkles size={10} strokeWidth={1.75} />
-                  Live help
+                  {brand.badge}
                 </span>
               </div>
               <p className="truncate text-[11px] text-slate-600">
@@ -280,7 +322,7 @@ export default function VirtualAssistant({
                   }
                 }}
                 rows={1}
-                placeholder="Ask about account, app modules, or student basics..."
+                placeholder={context.role === 'professor' ? 'Intreaba despre cereri, mesaje sau profil...' : 'Intreaba despre cont, module sau viata de student...'}
                 className="max-h-24 min-h-7 flex-1 resize-none bg-transparent text-[13px] leading-6 text-slate-200 outline-none placeholder:text-slate-700"
               />
               <CornerDownLeft size={13} strokeWidth={1.75} className="hidden shrink-0 text-slate-700 sm:block" />
@@ -297,7 +339,7 @@ export default function VirtualAssistant({
           <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-slate-700">
             <span className="inline-flex items-center gap-1.5">
               <MessageSquare size={11} strokeWidth={1.75} />
-              Context-aware help
+              {brand.footer}
             </span>
             <span className="inline-flex items-center gap-1.5">
               {context.role === 'professor' ? <Maximize2 size={11} strokeWidth={1.75} /> : <Compass size={11} strokeWidth={1.75} />}

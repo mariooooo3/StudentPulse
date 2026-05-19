@@ -89,3 +89,63 @@ export function createScheduleHandler(store, pubsub, notifications) {
 
   return { submitSwap, cancelSwap, getPending }
 }
+
+export function createPersistentScheduleHandler(repository, pubsub, notifications) {
+  function submitSwap(request) {
+    const pending = repository.listPendingSwaps()
+    const match = pending.find(r =>
+      r.course === request.course &&
+      r.offerSlot === request.needSlot &&
+      r.needSlot === request.offerSlot &&
+      r.userId !== request.userId
+    )
+
+    if (match) {
+      repository.deletePendingSwap(match.id)
+      const matchData = {
+        id: `match-${Date.now()}`,
+        course: request.course,
+        userA: match.userId,
+        userB: request.userId,
+        slotA: match.offerSlot,
+        slotB: request.offerSlot,
+        timestamp: new Date().toISOString(),
+      }
+      pubsub.publish(`user:${match.userId}:swaps`, matchData)
+      pubsub.publish(`user:${request.userId}:swaps`, matchData)
+      notifications?.push(match.userId, {
+        title: 'Swap gasit',
+        body: `Ai un match pentru ${request.course}.`,
+        type: 'success',
+        action: 'schedule.swap.match',
+        meta: matchData,
+      })
+      notifications?.push(request.userId, {
+        title: 'Swap gasit',
+        body: `Ai un match pentru ${request.course}.`,
+        type: 'success',
+        action: 'schedule.swap.match',
+        meta: matchData,
+      })
+      eventBus.emitSwap(matchData)
+      return { matched: true, match: matchData }
+    }
+
+    const entry = repository.addPendingSwap(request)
+    notifications?.push(request.userId, {
+      title: 'Cerere swap publicata',
+      body: `Cautam automat un coleg compatibil pentru ${request.course}.`,
+      type: 'info',
+      action: 'schedule.swap.pending',
+      meta: { swapId: entry.id },
+    })
+    return { matched: false, swapId: entry.id }
+  }
+
+  function cancelSwap(swapId) {
+    repository.deletePendingSwap(swapId)
+    return true
+  }
+
+  return { submitSwap, cancelSwap, getPending: () => repository.listPendingSwaps() }
+}

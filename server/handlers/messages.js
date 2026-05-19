@@ -41,3 +41,29 @@ export function createMessagesHandler(store, pubsub) {
 
   return { getHistory, addMessage, sendMessage }
 }
+
+export function createPersistentMessagesHandler(repository, pubsub) {
+  function getHistory(channel) {
+    return repository.getDirectMessages(channel)
+  }
+
+  function addMessage(channel, message) {
+    return repository.addDirectMessage(channel, { ...message, channel })
+  }
+
+  function sendMessage(channel, senderId, content, senderName) {
+    const message = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      senderId,
+      senderName,
+      content,
+      timestamp: new Date().toISOString(),
+      channel,
+    }
+    addMessage(channel, message)
+    pubsub.publish(channel, message)
+    return message
+  }
+
+  return { getHistory, addMessage, sendMessage }
+}
