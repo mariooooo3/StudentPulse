@@ -3,11 +3,11 @@ import { ChevronLeft, Tag, MapPin, CheckCircle, Flame } from 'lucide-react'
 import { studentDiscounts } from '../../shared/data/cityData'
 import clsx from 'clsx'
 
-const CATS = ['Toate', 'food', 'cultura', 'transport', 'sport', 'sanatate', 'tech']
+const CATS = ['Toate', 'Mâncare', 'Cultură', 'Transport', 'Sport', 'Rechizite', 'Shopping']
 
 const CAT_COLORS = {
-  food: '#f97316', cultura: '#8b5cf6', transport: '#3b82f6',
-  sport: '#10b981', sanatate: '#ef4444', tech: '#6366f1',
+  'Mâncare': '#f97316', 'Cultură': '#8b5cf6', 'Transport': '#3b82f6',
+  'Sport': '#10b981', 'Rechizite': '#ef4444', 'Shopping': '#6366f1',
 }
 
 export default function StudentDiscounts({ onBack }) {
@@ -47,10 +47,10 @@ export default function StudentDiscounts({ onBack }) {
 
       {/* Discount cards */}
       <div className="space-y-2">
-        {filtered.map((d, i) => {
+        {filtered.map((d) => {
           const catColor = CAT_COLORS[d.cat] || '#6366f1'
           return (
-            <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-white/[0.09] transition-all">
+            <div key={d.id} className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-white/[0.09] transition-all">
               {/* Discount badge */}
               <div className="w-14 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 font-bold"
                 style={{ background: catColor + '20', border: `1.5px solid ${catColor}40` }}>

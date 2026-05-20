@@ -36,11 +36,11 @@ export default function SafeZones({ onBack }) {
 
       {/* Zones */}
       <div className="space-y-2">
-        {safetyZones.map((zone, i) => {
+        {safetyZones.map((zone) => {
           const meta = LEVEL_META[zone.level]
           const Icon = meta.icon
           return (
-            <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/[0.05]">
+            <div key={zone.id} className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/[0.05]">
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                 style={{ background: zone.color + '20', border: `1.5px solid ${zone.color}40` }}
@@ -66,9 +66,9 @@ export default function SafeZones({ onBack }) {
       <div>
         <h3 className="text-sm font-bold text-slate-300 mb-3 uppercase tracking-wider">Contacte urgență</h3>
         <div className="grid grid-cols-2 gap-2">
-          {emergencyContacts.map((c, i) => (
+          {emergencyContacts.map((c) => (
             <a
-              key={i}
+              key={`${c.name}-${c.number}`}
               href={`tel:${c.number}`}
               className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-white/[0.09] transition-colors group"
             >

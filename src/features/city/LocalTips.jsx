@@ -3,7 +3,7 @@ import { ChevronLeft, ThumbsUp, CheckCircle, Lightbulb } from 'lucide-react'
 import { localTips } from '../../shared/data/cityData'
 import clsx from 'clsx'
 
-const CATS = ['Toate', 'transport', 'mancare', 'studiu', 'social', 'financiar', 'locuinta']
+const CATS = ['Toate', 'Transport', 'Mâncare', 'Academic', 'Social', 'Birocrație', 'Safety']
 
 export default function LocalTips({ onBack }) {
   const [filter, setFilter] = useState('Toate')

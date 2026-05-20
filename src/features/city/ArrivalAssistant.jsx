@@ -10,7 +10,7 @@ const URGENCY_META = {
   low:      { label: 'Opțional', color: '#6b7280', bg: '#6b728020' },
 }
 
-const CATS = ['Toate', 'admin', 'financiar', 'academic', 'locuinta', 'social', 'sanatate']
+const CATS = ['Toate', 'Documente', 'Finanțe', 'Transport', 'Sănătate', 'Social']
 
 export default function ArrivalAssistant({ onBack }) {
   const [items, setItems] = useState(arrivalChecklist)
@@ -23,7 +23,7 @@ export default function ArrivalAssistant({ onBack }) {
 
   const filtered = filter === 'Toate' ? items : items.filter(i => i.cat === filter)
   const done = items.filter(i => i.done).length
-  const pct = Math.round((done / items.length) * 100)
+  const pct = items.length === 0 ? 0 : Math.round((done / items.length) * 100)
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-5">

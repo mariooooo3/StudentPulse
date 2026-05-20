@@ -3,7 +3,7 @@ import { ChevronLeft, Home, MapPin, Wifi, Users, AlertTriangle, ChevronDown, Che
 import { housingListings, SCAM_WARNINGS } from '../../shared/data/cityData'
 import clsx from 'clsx'
 
-const TYPE_TABS = ['Toate', 'camin', 'apartament', 'camera']
+const TYPE_TABS = ['Toate', 'Cămin', 'Chirie', 'Coabitare']
 
 export default function StudentHousing({ onBack }) {
   const [tab, setTab] = useState('Toate')
@@ -34,8 +34,8 @@ export default function StudentHousing({ onBack }) {
       </button>
       {showScams && (
         <div className="space-y-2 -mt-3">
-          {SCAM_WARNINGS.map((w, i) => (
-            <div key={i} className="flex items-start gap-2 px-4 py-2.5 rounded-xl bg-red-500/8 border border-red-500/20">
+          {SCAM_WARNINGS.map((w) => (
+            <div key={w} className="flex items-start gap-2 px-4 py-2.5 rounded-xl bg-red-500/8 border border-red-500/20">
               <span className="text-red-400 text-xs mt-0.5">⚠</span>
               <p className="text-xs text-red-300/80 leading-relaxed">{w}</p>
             </div>
@@ -54,23 +54,23 @@ export default function StudentHousing({ onBack }) {
               tab === t ? 'bg-indigo-600 text-white' : 'bg-white/[0.03] text-slate-400 hover:text-slate-200 border border-white/[0.07]'
             )}
           >
-            {t.charAt(0).toUpperCase() + t.slice(1)}
+            {t}
           </button>
         ))}
       </div>
 
       {/* Listings */}
       <div className="space-y-3">
-        {filtered.map((h, i) => (
-          <div key={i} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-white/[0.09] transition-all space-y-3">
+        {filtered.map((h) => (
+          <div key={h.id} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-white/[0.09] transition-all space-y-3">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-slate-200">{h.name}</span>
                   <span className={clsx(
                     'text-[9px] font-bold px-2 py-0.5 rounded-full',
-                    h.type === 'camin' ? 'bg-blue-500/20 text-blue-400' :
-                    h.type === 'apartament' ? 'bg-violet-500/20 text-violet-400' :
+                    h.type === 'Cămin' ? 'bg-blue-500/20 text-blue-400' :
+                    h.type === 'Chirie' ? 'bg-violet-500/20 text-violet-400' :
                     'bg-emerald-500/20 text-emerald-400'
                   )}>
                     {h.type}
