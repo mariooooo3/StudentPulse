@@ -222,7 +222,7 @@ function ChatThread({ contact, currentUserId, currentName, scope, onBack }) {
           <p className="font-semibold text-white text-sm truncate">{contact.name}</p>
           <p className="text-xs truncate">
             {Object.keys(typingUsers).length > 0
-              ? <span className="text-indigo-400 italic">scrie...</span>
+              ? <span className="text-indigo-400 italic">{Object.keys(typingUsers).length === 1 ? 'scrie...' : 'scriu...'}</span>
               : <span className="text-emerald-400">● Online</span>
             }
           </p>
@@ -614,7 +614,7 @@ export default function DirectMessages({ session, profile }) {
   }, [notifications, currentUserId])
 
   const contacts = onlineUsers.filter(u =>
-    u.name.toLowerCase().includes(search.toLowerCase())
+    (u.name || '').toLowerCase().includes(search.toLowerCase())
   )
 
   function openChat(contact) {
@@ -727,7 +727,7 @@ export default function DirectMessages({ session, profile }) {
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">AM</div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-slate-200 truncate">{thread.professorName}</p>
-                      <p className="text-xs text-slate-600 truncate">{thread.messages.at(-1)?.text || thread.subject}</p>
+                      <p className="text-xs text-slate-600 truncate">{thread.messages?.at(-1)?.text || thread.subject}</p>
                     </div>
                   </button>
                 ))}
