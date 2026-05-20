@@ -747,8 +747,6 @@ export default function CampusNavigator() {
   ], [buildings, POIS])
   const { zones, totalUsers, connected, mode } = useCrowdSocket(showCrowd, campusCenter, heatmapHotspots)
 
-  const { zones, totalUsers, connected, mode } = useCrowdSocket(showCrowd, campusCenter)
-
   useEffect(() => {
     setFromRoom('')
     setToRoom('')
