@@ -239,7 +239,7 @@ export default function OnboardingFlow({ onComplete, session }) {
           </div>
           <h2 className="text-3xl font-bold text-white mb-3">Profilul tău este gata!</h2>
           <p className="text-slate-400 mb-8 leading-relaxed">
-            StudentAcademic a personalizat toate modulele în funcție de facultatea, anul și interesele tale.
+            StudentCompass a personalizat toate modulele în funcție de facultatea, anul și interesele tale.
             De acum, nu te mai pierzi.
           </p>
           <div className="grid grid-cols-3 gap-3 mb-8">
@@ -263,7 +263,7 @@ export default function OnboardingFlow({ onComplete, session }) {
             })}
             className="btn-primary w-full text-base py-3"
           >
-            Intră în StudentAcademic →
+            Intră în StudentCompass →
           </button>
         </div>
       </div>

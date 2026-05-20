@@ -1,13 +1,18 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import clsx from 'clsx'
 import {
   Award,
+  AlertCircle,
   Apple,
   Bookmark,
   BookOpen,
+  Bot,
   Brain,
   Briefcase,
   Calendar,
+  FileText,
+  Loader2,
+  Upload,
   Car,
   Check,
   ChevronRight,
@@ -305,11 +310,173 @@ function DiscountsSection({ lifeProfile, saved, savedOps }) {
   )
 }
 
+const CV_API_URL = '/api/career/cv-analyze'
+
+function CVAnalysisPanel({ allJobs, onAnalysis, cvAnalysis }) {
+  const [cvText, setCvText] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [open, setOpen] = useState(false)
+  const fileRef = useRef(null)
+
+  function onFile(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 2 * 1024 * 1024) { setError('Fișierul e prea mare. Maxim 2MB.'); return }
+    const reader = new FileReader()
+    reader.onload = ev => {
+      const text = ev.target.result
+      if (text && text.trim().length > 30) {
+        setCvText(text.trim())
+        setError('')
+      } else {
+        setError('Nu am putut citi textul din fișier. Copiați conținutul manual în câmpul de mai jos.')
+      }
+    }
+    reader.onerror = () => setError('Eroare la citirea fișierului.')
+    reader.readAsText(file)
+    e.target.value = ''
+  }
+
+  const analyze = useCallback(async () => {
+    if (cvText.trim().length < 30) { setError('CV-ul e prea scurt. Adaugă mai mult conținut.'); return }
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch(CV_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cvText: cvText.trim(),
+          jobs: allJobs.map(j => ({ id: j.id, role: j.role, company: j.company, tags: j.tags, type: j.type })),
+        }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || `Eroare server ${res.status}`)
+      }
+      const data = await res.json()
+      onAnalysis(data)
+      setOpen(false)
+    } catch (err) {
+      setError(err.message || 'Eroare la analiză. Încearcă din nou.')
+    } finally {
+      setLoading(false)
+    }
+  }, [cvText, allJobs, onAnalysis])
+
+  if (cvAnalysis) {
+    return (
+      <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Bot size={15} className="text-indigo-400" strokeWidth={1.75} />
+            <span className="text-sm font-bold text-indigo-300">Analiză CV</span>
+            <span className="rounded-full bg-indigo-500/20 border border-indigo-500/30 px-2 py-0.5 text-[10px] font-bold text-indigo-300 uppercase tracking-wide">{cvAnalysis.experienceLevel}</span>
+          </div>
+          <button onClick={() => { onAnalysis(null); setOpen(false) }} className="text-slate-600 hover:text-slate-400 transition-colors">
+            <X size={14} />
+          </button>
+        </div>
+        {cvAnalysis.summary && (
+          <p className="text-sm text-slate-400 leading-relaxed">{cvAnalysis.summary}</p>
+        )}
+        {cvAnalysis.skills?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {cvAnalysis.skills.map(skill => (
+              <span key={skill} className="rounded-lg bg-indigo-500/10 border border-indigo-500/20 px-2 py-1 text-[11px] font-semibold text-indigo-300">{skill}</span>
+            ))}
+          </div>
+        )}
+        <button onClick={() => setOpen(true)} className="text-[11px] text-slate-600 hover:text-indigo-400 transition-colors underline underline-offset-2">
+          Actualizează CV-ul
+        </button>
+        {open && (
+          <div className="pt-2 space-y-2 border-t border-white/[0.06]">
+            <textarea
+              value={cvText}
+              onChange={e => setCvText(e.target.value)}
+              rows={5}
+              placeholder="Lipește conținutul CV-ului..."
+              className="w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none focus:border-indigo-500/50 resize-none"
+            />
+            {error && <p className="text-xs text-red-400 flex items-center gap-1"><AlertCircle size={12} />{error}</p>}
+            <button onClick={analyze} disabled={loading || cvText.trim().length < 30}
+              className="btn-primary text-sm h-9 px-4 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              {loading ? <><Loader2 size={14} className="animate-spin" /> Analizez...</> : 'Actualizează'}
+            </button>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="w-full flex items-center gap-3 rounded-xl border border-dashed border-indigo-500/30 bg-indigo-500/5 px-4 py-3 text-left hover:border-indigo-500/50 hover:bg-indigo-500/10 transition-all"
+      >
+        <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
+          <Bot size={16} className="text-indigo-400" strokeWidth={1.75} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-white">Analizează CV-ul cu AI</p>
+          <p className="text-xs text-slate-500">Potrivire personalizată bazată pe experiența ta reală</p>
+        </div>
+        <Sparkles size={14} className="text-indigo-400 ml-auto shrink-0" strokeWidth={1.75} />
+      </button>
+    )
+  }
+
+  return (
+    <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Bot size={15} className="text-indigo-400" strokeWidth={1.75} />
+          <span className="text-sm font-bold text-indigo-300">Analizează CV-ul cu AI</span>
+        </div>
+        <button onClick={() => setOpen(false)} className="text-slate-600 hover:text-slate-400 transition-colors">
+          <X size={14} />
+        </button>
+      </div>
+      <p className="text-xs text-slate-500">Lipește textul CV-ului sau încarcă un fișier <span className="text-slate-400">.txt</span>. Pentru PDF, copiați conținutul din document.</p>
+      <textarea
+        value={cvText}
+        onChange={e => { setCvText(e.target.value); setError('') }}
+        rows={6}
+        placeholder="Lipește conținutul CV-ului tău aici: educație, experiență, skill-uri, proiecte..."
+        className="w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2.5 text-sm text-slate-300 placeholder-slate-600 outline-none focus:border-indigo-500/50 resize-none"
+      />
+      {error && <p className="text-xs text-red-400 flex items-center gap-1"><AlertCircle size={12} />{error}</p>}
+      <div className="flex items-center gap-2">
+        <input ref={fileRef} type="file" accept=".txt,.pdf,.doc,.docx" className="hidden" onChange={onFile} />
+        <button onClick={() => fileRef.current?.click()}
+          className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-slate-400 hover:text-slate-200 hover:border-white/[0.15] transition-all">
+          <Upload size={12} /> Încarcă fișier
+        </button>
+        <button onClick={analyze} disabled={loading || cvText.trim().length < 30}
+          className="btn-primary text-sm h-9 px-4 flex items-center gap-2 ml-auto disabled:opacity-50 disabled:cursor-not-allowed">
+          {loading
+            ? <><Loader2 size={14} className="animate-spin" /> Analizez...</>
+            : <><FileText size={14} /> Analizează</>}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function CareerSection({ lifeProfile, applied, appliedOps }) {
   const [type, setType] = useState('Toate')
   const [query, setQuery] = useState('')
+  const [cvAnalysis, setCvAnalysis] = useState(null)
   const now = useNow()
   const allJobs = studentLifeData.career[lifeProfile.careerKey] || studentLifeData.career.CS
+
+  const cvAdjMap = useMemo(() => {
+    if (!cvAnalysis?.jobAdjustments?.length) return {}
+    return Object.fromEntries(cvAnalysis.jobAdjustments.map(a => [a.jobId, a]))
+  }, [cvAnalysis])
 
   const jobs = useMemo(() => {
     const q = query.toLowerCase()
@@ -322,17 +489,22 @@ function CareerSection({ lifeProfile, applied, appliedOps }) {
         if (lifeProfile.year < job.minYear) warnings.push(`Anul ${job.minYear}+`)
         if (!job.remote && !cities.includes('all') && !cities.includes(lifeProfile.city)) warnings.push(job.cities[0])
         const deadlineDays = rollingDays(job.id, 3, 21, now)
-        return { ...job, deadlineDays, match: jobMatch(job, lifeProfile), warnings }
+        const baseScore = jobMatch(job, lifeProfile)
+        const adj = cvAdjMap[job.id]
+        const match = adj ? Math.min(99, Math.max(8, baseScore + adj.adjustment)) : baseScore
+        return { ...job, deadlineDays, match, cvReason: adj?.reason || null, warnings }
       })
       .filter((job) => job.match >= 20)
       .sort((a, b) => b.match - a.match)
-  }, [allJobs, lifeProfile, now, query, type])
+  }, [allJobs, lifeProfile, now, query, type, cvAdjMap])
 
   return (
     <section className="space-y-4">
+      <CVAnalysisPanel allJobs={allJobs} onAnalysis={setCvAnalysis} cvAnalysis={cvAnalysis} />
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-[13px] text-slate-500">
         <Award size={14} className="text-slate-400" strokeWidth={1.75} />
         <span><b className="text-slate-300 font-semibold">{lifeProfile.facultyName}</b> · Anul {lifeProfile.year} · {lifeProfile.city}</span>
+        {cvAnalysis && <span className="ml-auto flex items-center gap-1 text-indigo-400 text-[11px] font-semibold"><Bot size={11} /> Potrivire bazată pe CV</span>}
       </div>
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
         <SearchField value={query} onChange={setQuery} placeholder="Caută poziții, companii, skill-uri..." />
@@ -361,6 +533,11 @@ function CareerSection({ lifeProfile, applied, appliedOps }) {
                     {job.warnings.map((warning) => (
                       <span key={warning} className="tag border-amber-500/30 bg-amber-500/10 text-amber-300">{warning}</span>
                     ))}
+                    {job.cvReason && (
+                      <span className="tag border-indigo-500/30 bg-indigo-500/10 text-indigo-300 flex items-center gap-1">
+                        <Bot size={10} strokeWidth={1.75} />{job.cvReason}
+                      </span>
+                    )}
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {job.tags.map((tag) => (

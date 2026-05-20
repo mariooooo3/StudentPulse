@@ -7,6 +7,7 @@ export default defineConfig({
     proxy: {
       '/api/navigation': 'http://localhost:3001',
       '/api/portal': 'http://localhost:3001',
+      '/api/career': 'http://localhost:3001',
     },
   },
 })

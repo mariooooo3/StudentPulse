@@ -694,6 +694,63 @@ ${String(body.message || '')}`,
   })
 }
 
+async function handleCVAnalysis(req, res) {
+  const body = await readJson(req)
+  const { cvText, jobs = [] } = body
+
+  if (!cvText || cvText.trim().length < 30) {
+    sendJson(res, 400, { error: 'CV text prea scurt. Adaugă mai mult conținut.' })
+    return
+  }
+
+  const jobsContext = jobs
+    .map(j => `ID:${j.id} | ${j.role} la ${j.company} | Skills: ${(j.tags || []).join(', ')} | Tip: ${j.type}`)
+    .join('\n')
+
+  const raw = await grokChat({
+    model: TEXT_MODEL,
+    messages: [
+      {
+        role: 'system',
+        content: `Ești un consultant de carieră specializat pentru studenți din România. Analizezi CV-uri și identifici potrivirea cu oportunități de stagii și internship-uri.
+Răspunzi ÎNTOTDEAUNA în română, concis și specific. Răspunsul tău este STRICT un obiect JSON valid, fără text suplimentar.`,
+      },
+      {
+        role: 'user',
+        content: `Analizează CV-ul următor și returnează un JSON cu exact aceste câmpuri:
+{
+  "skills": ["skill1", "skill2", ...],           // max 10 skill-uri tehnice/soft extrase din CV
+  "experienceLevel": "fara experienta" | "incepator" | "intermediar" | "avansat",
+  "summary": "rezumat profesional 1-2 propoziții în română",
+  "jobAdjustments": [                             // DOAR pentru joburi cu adjustment diferit de 0
+    { "jobId": <number>, "adjustment": <-20 to +35>, "reason": "motiv scurt în română" }
+  ]
+}
+
+Joburi disponibile:
+${jobsContext || 'Niciun job disponibil'}
+
+CV:
+${cvText.slice(0, 4000)}`,
+      },
+    ],
+    max_tokens: 900,
+    response_format: { type: 'json_object' },
+  })
+
+  let parsed = {}
+  try { parsed = JSON.parse(raw) } catch { parsed = {} }
+
+  sendJson(res, 200, {
+    skills: Array.isArray(parsed.skills) ? parsed.skills.slice(0, 10).map(String) : [],
+    experienceLevel: parsed.experienceLevel || 'incepator',
+    summary: String(parsed.summary || ''),
+    jobAdjustments: Array.isArray(parsed.jobAdjustments)
+      ? parsed.jobAdjustments.filter(j => j.jobId && typeof j.adjustment === 'number')
+      : [],
+  })
+}
+
 export function createNavigationRequestHandler() {
   return async (req, res) => {
     try {
@@ -704,6 +761,7 @@ export function createNavigationRequestHandler() {
       if (req.url === '/api/navigation/copilot') { await handleCopilot(req, res); return }
       if (req.url === '/api/navigation/recommendations') { await handleRecommendations(req, res); return }
       if (req.url === '/api/navigation/support-assistant') { await handleSupportAssistant(req, res); return }
+      if (req.url === '/api/career/cv-analyze') { await handleCVAnalysis(req, res); return }
       sendJson(res, 404, { error: 'Not found' })
     } catch (error) {
       sendJson(res, error.statusCode || 500, { error: error.message || 'Navigation API error' })
@@ -740,6 +798,10 @@ export function createNavigationApiServer(port = 3000) {
       }
       if (req.url === '/api/navigation/support-assistant') {
         await handleSupportAssistant(req, res)
+        return
+      }
+      if (req.url === '/api/career/cv-analyze') {
+        await handleCVAnalysis(req, res)
         return
       }
       sendJson(res, 404, { error: 'Not found' })

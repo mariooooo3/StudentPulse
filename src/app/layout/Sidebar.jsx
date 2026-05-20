@@ -126,10 +126,10 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
                   {['1', '2', '3', '4', 'M1', 'M2'].map(y => (
                     <button
                       key={y}
-                      onClick={() => setYear(y === 'M1' ? 'Master 1' : y === 'M2' ? 'Master 2' : y)}
+                      onClick={() => setYear(y)}
                       className={clsx(
                         'flex-1 py-2 rounded-lg text-[11px] font-semibold transition-all border',
-                        (year === y || year === (y === 'M1' ? 'Master 1' : y === 'M2' ? 'Master 2' : y))
+                        year === y
                           ? 'border-indigo-500/40 bg-indigo-600/20 text-indigo-300'
                           : 'border-white/[0.06] bg-white/[0.02] text-slate-600 hover:text-slate-300 hover:border-white/[0.1]',
                       )}

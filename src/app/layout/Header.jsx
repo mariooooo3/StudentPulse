@@ -357,7 +357,7 @@ export default function Header({ platformMode = 'academic', onModeChange, curren
       )}
 
       {/* Mobile mode switcher — bottom bar */}
-      <div className="fixed inset-x-3 bottom-3 z-40 flex gap-1 rounded-2xl border border-white/[0.08] bg-[#070b14]/95 p-1 shadow-2xl backdrop-blur-xl sm:hidden">
+      <div className="fixed inset-x-3 bottom-3 z-[60] flex gap-1 rounded-2xl border border-white/[0.08] bg-[#070b14]/95 p-1 shadow-2xl backdrop-blur-xl sm:hidden">
         {MODES.map(({ id, label, icon: Icon }) => {
           const active = platformMode === id
           return (

@@ -80,7 +80,7 @@ const handleNavigation = createNavigationRequestHandler()
 const handlePortal = createPortalRequestHandler(repository, notifications, pubsub)
 
 const httpServer = createServer(async (req, res) => {
-  if (req.url?.startsWith('/api/navigation')) {
+  if (req.url?.startsWith('/api/navigation') || req.url?.startsWith('/api/career')) {
     return handleNavigation(req, res)
   }
   if (req.url?.startsWith('/api/portal')) {
