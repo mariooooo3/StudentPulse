@@ -90,7 +90,15 @@ const TUIASI_IND_GRAPH = {
   stairs_4:         ['sala-conf', 'stairs_3'],
 }
 
-const TUIASI_ROUTE_IDS = { 'corp-c': '1', 'corp-a': '2', library: '3', canteen: '4', secretariat: '5' }
+const TUIASI_ROUTE_IDS = {
+  'corp-c': '1', 'ac': '1', 'automatica': '1',
+  'corp-a': '2', 'daia': '2',
+  'library': '3', 'biblioteca': '3',
+  'canteen': '4', 'cantina': '4',
+  'secretariat': '5', 'secretariat-ac': '5',
+  'etti': '6',
+  'rectorat': '7',
+}
 
 const TUIASI_AI_DESTINATIONS = [
   { label: 'C210', query: 'Vreau să ajung la sala C210', type: 'Sală' },
@@ -120,6 +128,7 @@ const UAIC_BUILDINGS = [
   { id: 13, name: 'Biblioteca Centrală „Mihai Eminescu" (BCU)',      distance: '480m',  time: '7 min',  type: 'Studiu',   coords: [47.17363, 27.57328] },
   { id: 14, name: 'Secretariat FII',                                 distance: '55m',   time: '1 min',  type: 'Admin',    coords: [47.17562, 27.57466] },
   { id: 15, name: 'Cămine Codrescu (Aleea M. Sadoveanu)',            distance: '700m',  time: '10 min', type: 'Cămin',    coords: [47.17168, 27.57283] },
+  { id: 16, name: 'Cantina Universității UAIC',                      distance: '200m',  time: '3 min',  type: 'Servicii', coords: [47.17475, 27.57462] },
 ]
 
 const UAIC_POIS = [
@@ -168,7 +177,16 @@ const UAIC_IND_GRAPH = {
   stairs_4:          ['sala-conf-fii', 'stairs_3'],
 }
 
-const UAIC_ROUTE_IDS = { 'rectorat': '1', 'fii': '2', 'matematica': '3', 'bcu': '13', 'camine': '15', 'secretariat': '14' }
+const UAIC_ROUTE_IDS = {
+  'rectorat': '1', 'rectorat-uaic': '1',
+  'fii': '2', 'informatica': '2',
+  'matematica': '3',
+  'bcu': '13', 'biblioteca': '13',
+  'secretariat': '14', 'secretariat-fii': '14',
+  'camine': '15', 'camine-codrescu': '15',
+  'feaa': '11', 'economie': '11',
+  'canteen-uaic': '16', 'cantina': '16',
+}
 
 const UAIC_AI_DESTINATIONS = [
   { label: 'Secretariat FII', query: 'Unde se află Secretariatul FII?',           type: 'Admin'   },
@@ -489,7 +507,6 @@ export default function CampusNavigator() {
   const [indoorPath, setIndoorPath] = useState(null)
 
   const [showCrowd, setShowCrowd] = useState(false)
-  const { zones, totalUsers, connected, mode } = useCrowdSocket(showCrowd)
 
   const { profile, session } = useAuth()
   const firstName = profile?.name?.split(' ')[0] ?? 'Student'
@@ -497,6 +514,14 @@ export default function CampusNavigator() {
   const campus = CAMPUS_CONFIG[universityId] || CAMPUS_CONFIG.tuiasi
   const { center: campusCenter, buildings, pois: POIS, indRooms: IND_ROOMS, indGraph: IND_GRAPH,
           outdoorRouteIds: OUTDOOR_ROUTE_IDS, aiDestinations: AI_COMPASS_DESTINATIONS } = campus
+
+  const { zones, totalUsers, connected, mode } = useCrowdSocket(showCrowd, campusCenter)
+
+  useEffect(() => {
+    setFromRoom('')
+    setToRoom('')
+    setIndoorPath(null)
+  }, [universityId])
 
   useEffect(() => {
     if (activeTab !== 'reco' || pulseLoaded) return
@@ -579,19 +604,22 @@ export default function CampusNavigator() {
   const [routePath, setRoutePath] = useState(null)
   const [routeLoading, setRouteLoading] = useState(false)
   const [routeInfo, setRouteInfo] = useState(null)
+  const [routeMode, setRouteMode] = useState('foot')
 
   const [cinematicMode, setCinematicMode] = useState(false)
   const [cinematicStep, setCinematicStep] = useState(0)
   const [cinematicSteps, setCinematicSteps] = useState([])
   const [voiceEnabled, setVoiceEnabled] = useState(true)
 
-  async function calculateOutdoorRoute(fromValue, toValue) {
+  async function calculateOutdoorRoute(fromValue, toValue, mode) {
     const from = buildings.find(b => String(b.id) === String(fromValue))
     const to = buildings.find(b => String(b.id) === String(toValue))
     if (!from || !to) return
     setRouteLoading(true)
     setRoutePath(null)
     setRouteInfo(null)
+    // kmh per mode; OSRM demo only has foot data for this region so always fetch foot geometry
+    const speedKmh = mode === 'car' ? 40 : mode === 'bike' ? 15 : 5
     try {
       const [lat1, lon1] = from.coords
       const [lat2, lon2] = to.coords
@@ -602,19 +630,19 @@ export default function CampusNavigator() {
       if (data.routes?.[0]) {
         const coords = data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng])
         setRoutePath(coords)
-        const dist = data.routes[0].distance
-        const dur = Math.ceil(data.routes[0].duration / 60)
-        setRouteInfo({ distance: dist < 1000 ? `${Math.round(dist)}m` : `${(dist/1000).toFixed(1)}km`, duration: `${dur} min` })
+        const distM = data.routes[0].distance
+        const dur = Math.max(1, Math.ceil((distM / 1000) / speedKmh * 60))
+        setRouteInfo({ distance: distM < 1000 ? `${Math.round(distM)}m` : `${(distM/1000).toFixed(1)}km`, duration: `${dur} min`, mode: mode || 'foot' })
       }
     } catch {
       setRoutePath([from.coords, to.coords])
-      setRouteInfo({ distance: from.distance, duration: from.time })
+      setRouteInfo({ distance: from.distance, duration: from.time, mode: mode || 'foot' })
     }
     setRouteLoading(false)
   }
 
   async function fetchRoute() {
-    await calculateOutdoorRoute(routeFrom, routeTo)
+    await calculateOutdoorRoute(routeFrom, routeTo, routeMode)
   }
 
   function applyCopilotRoute(routeSuggestion) {
@@ -622,11 +650,11 @@ export default function CampusNavigator() {
 
     if (routeSuggestion.type === 'indoor') {
       const start = routeSuggestion.from || campus.indoorDefault
-      const path = bfsIndoor(start, routeSuggestion.to, IND_GRAPH)
-      if (!path) return
-      setFromRoom(start)
-      setToRoom(routeSuggestion.to)
-      setIndoorPath(path)
+      const end = routeSuggestion.to
+      const path = bfsIndoor(start, end, IND_GRAPH)
+      setFromRoom(start && IND_ROOMS.find(r => r.id === start) ? start : '')
+      setToRoom(end && IND_ROOMS.find(r => r.id === end) ? end : '')
+      setIndoorPath(path || null)
       setActiveTab('indoor')
       return
     }
@@ -636,8 +664,9 @@ export default function CampusNavigator() {
       const to = OUTDOOR_ROUTE_IDS[routeSuggestion.to] || routeSuggestion.to
       setRouteFrom(from)
       setRouteTo(to)
+      setRoutePath(null)
+      setRouteInfo(null)
       setActiveTab('map')
-      calculateOutdoorRoute(from, to)
     }
   }
 
@@ -701,13 +730,11 @@ export default function CampusNavigator() {
       const start = routeSuggestion.from || campus.indoorDefault
       const end = routeSuggestion.to
       const path = bfsIndoor(start, end, IND_GRAPH)
-      if (path) {
-        setFromRoom(start)
-        setToRoom(end)
-        setIndoorPath(path)
-        setActiveTab('indoor')
-        steps = buildIndoorCinematicSteps(path, IND_ROOMS)
-      }
+      setFromRoom(start && IND_ROOMS.find(r => r.id === start) ? start : '')
+      setToRoom(end && IND_ROOMS.find(r => r.id === end) ? end : '')
+      setIndoorPath(path || null)
+      setActiveTab('indoor')
+      if (path) steps = buildIndoorCinematicSteps(path, IND_ROOMS)
     }
 
     if (steps.length === 0) return
@@ -904,6 +931,18 @@ export default function CampusNavigator() {
               <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
                 <Route size={15} className="text-indigo-400" /> Calculează traseu
               </h2>
+              <div className="flex gap-1.5 mb-1">
+                {[{ id: 'foot', label: '🚶 Pe jos' }, { id: 'bike', label: '🚲 Bicicletă' }, { id: 'car', label: '🚗 Mașină' }].map(m => (
+                  <button key={m.id} onClick={() => {
+                    setRouteMode(m.id)
+                    if (routeFrom && routeTo) { calculateOutdoorRoute(routeFrom, routeTo, m.id) }
+                    else { setRoutePath(null); setRouteInfo(null) }
+                  }}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${routeMode === m.id ? 'bg-indigo-600 text-white' : 'bg-white/[0.04] text-slate-400 hover:text-slate-200 border border-white/[0.07]'}`}>
+                    {m.label}
+                  </button>
+                ))}
+              </div>
               <div className="flex flex-wrap gap-3 items-end">
                 <div className="flex-1 min-w-36">
                   <label className="text-xs text-slate-400 mb-1 block">De la</label>
@@ -940,7 +979,7 @@ export default function CampusNavigator() {
                     <NavIcon size={14} /> {routeInfo.distance}
                   </span>
                   <span className="text-slate-500">•</span>
-                  <span className="text-slate-400">~{routeInfo.duration} pe jos</span>
+                  <span className="text-slate-400">~{routeInfo.duration} {routeInfo.mode === 'car' ? 'cu mașina' : routeInfo.mode === 'bike' ? 'cu bicicleta' : 'pe jos'}</span>
                   <span className="ml-auto text-xs text-green-400 bg-green-900/20 px-2 py-0.5 rounded-lg">
                     Traseu calculat
                   </span>
@@ -1625,7 +1664,7 @@ export default function CampusNavigator() {
                   return (
                     <g key={room.id} style={{ cursor: 'pointer' }}
                       onClick={() => {
-                        if (!fromRoom) { setFromRoom(room.id); setIndoorPath(null) }
+                        if (!fromRoom || (fromRoom && toRoom)) { setFromRoom(room.id); setToRoom(''); setIndoorPath(null) }
                         else if (!toRoom && room.id !== fromRoom) { setToRoom(room.id); setIndoorPath(null) }
                       }}>
                       <rect x={room.cx - 9} y={FLOOR_Y[room.floor] - 11} width={18} height={22}

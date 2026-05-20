@@ -367,58 +367,54 @@ async function handleAssistant(req, res) {
   sendJson(res, 200, { answer })
 }
 
-const UNIVERSAL_PHOTO_PROMPT = `Ești AI Compass pentru StudentCompass, un asistent de recunoaștere vizuală a locațiilor universitare din Iași, România.
+const PHOTO_PROMPT_UAIC = `Ești AI Compass pentru StudentCompass.
+Studentul este înscris la UAIC (Universitatea Alexandru Ioan Cuza din Iași, Bd. Carol I 11).
+Poza este din campusul UAIC. Identifică clădirea sau zona exactă.
 
-Analizează imaginea și încearcă să identifici locația din oricare dintre universitățile de mai jos:
+Clădirile UAIC pe care le poți recunoaște:
+• Facultatea de Informatică FII – Corp B, intrare separată, clădire modernă
+• Rectorat UAIC – Corp A, clădire istorică, Bd. Carol I 11
+• Facultatea de Matematică, Fizică, Chimie, Biologie, Drept, Litere, Filosofie, Psihologie – Bd. Carol I 11
+• Facultatea de Economie FEAA – Bd. Carol I 22
+• BCU Biblioteca Centrală „Mihai Eminescu" – Bd. Carol I
+• Cantina UAIC – Bd. Carol I
+• Cămine Codrescu – Aleea M. Sadoveanu
+• Parcul Copou
 
-━━━ TUIASI – Universitatea Tehnică "Gheorghe Asachi" (Bd. Prof. Dimitrie Mangeron) ━━━
-• Facultatea de Automatică și Calculatoare (AC) – Corp C (CTI) sau Corp A (DAIA)
+Răspunde în română, în 2-3 fraze:
+1. Universitatea: UAIC și locația probabilă (clădire sau reper)
+2. Indiciile vizuale principale (arhitectură, plăcuțe, sigle, vegetație etc.)
+3. Gradul de certitudine (sigur / probabil / nesigur)
+
+Nu genera traseu și nu întreba destinația.`
+
+const PHOTO_PROMPT_TUIASI = `Ești AI Compass pentru StudentCompass.
+Studentul este înscris la TUIASI (Universitatea Tehnică "Gheorghe Asachi" din Iași, Bd. Mangeron).
+Poza este din campusul TUIASI. Identifică clădirea sau zona exactă.
+
+Clădirile TUIASI pe care le poți recunoaște:
+• Facultatea de Automatică și Calculatoare (AC) – Corp C (CTI) sau Corp A (DAIA), Bd. Mangeron 27
 • Facultatea ETTI – Bd. Carol I 11A
-• Facultatea IEEIA (Electrotehnica) – Bd. Mangeron
+• Facultatea IEEIA – Bd. Mangeron
 • Facultatea de Mecanică – Bd. Mangeron
-• Facultatea de Construcții și Instalații (CI) – Bd. Mangeron
-• Facultatea ICPM „C. Simionescu" – Bd. Mangeron
-• Facultatea de Arhitectură „G.M. Cantacuzino" – Bd. Mangeron
-• Facultatea CMMI – Bd. Mangeron
-• Facultatea HGIM – Bd. Mangeron
-• Facultatea SIM – Bd. Mangeron
-• Facultatea DIMA – Bd. Mangeron
+• Facultatea CI, ICPM, Arhitectură, CMMI, HGIM, SIM, DIMA – Bd. Mangeron
 • Biblioteca Gh. Asachi – Bd. Carol I
 • Rectorat TUIASI – Bd. Carol I
 • Cantina TUIASI – Campus Tudor Vladimirescu
 • Cămine Tudor Vladimirescu (T1–T19)
-• Iulius Mall Iași
 
-━━━ UAIC – Universitatea Alexandru Ioan Cuza (Bd. Carol I 11) ━━━
-• Facultatea de Informatică FII – Corp B, Bd. Carol I 11
-• Rectorat UAIC – Corp A, Bd. Carol I 11
-• Facultatea de Matematică – Bd. Carol I 11
-• Facultatea de Fizică – Bd. Carol I 11
-• Facultatea de Chimie – Bd. Carol I 11
-• Facultatea de Biologie – Bd. Carol I 11
-• Facultatea de Drept – Bd. Carol I 11
-• Facultatea de Litere – Bd. Carol I 11
-• Facultatea de Filosofie și Științe Social-Politice – Bd. Carol I 11
-• Facultatea de Psihologie și Educație – Bd. Carol I 11
-• Facultatea de Economie FEAA – Bd. Carol I 22
-• Facultatea de Geografie și Geologie – Bd. Carol I 11
-• BCU Biblioteca Centrală „Mihai Eminescu" – Bd. Carol I
-• Cantina UAIC – Bd. Carol I
-• Cămine Codrescu – Aleea M. Sadoveanu
-• Parcul Copou – teiul lui Eminescu
-
-━━━ INSTRUCȚIUNI ━━━
-Răspunde în română, în 1-3 fraze:
-1. Universitatea (TUIASI sau UAIC) și locația probabilă (facultate, clădire sau reper)
-2. Indiciile vizuale principale care te-au ajutat (arhitectură, plăcuțe, culori, sigle, vegetație etc.)
+Răspunde în română, în 2-3 fraze:
+1. Universitatea: TUIASI și locația probabilă (clădire sau reper)
+2. Indiciile vizuale principale (arhitectură, plăcuțe, sigle, vegetație etc.)
 3. Gradul de certitudine (sigur / probabil / nesigur)
 
-Dacă nu recunoști nimic specific, spune sincer că nu poți identifica locația cu certitudine.
-Nu genera traseu și nu întreba destinația — aplicația va întreba automat după răspunsul tău.`
+Nu genera traseu și nu întreba destinația.`
 
 async function handlePhoto(req, res) {
   const body = await readJson(req)
   const mimeType = body.mimeType || 'image/jpeg'
+  const university = body.university || 'tuiasi'
+  const prompt = university === 'uaic' ? PHOTO_PROMPT_UAIC : PHOTO_PROMPT_TUIASI
 
   const rawAnswer = await grokChat({
     model: VISION_MODEL,
@@ -427,7 +423,7 @@ async function handlePhoto(req, res) {
         role: 'user',
         content: [
           { type: 'image_url', image_url: { url: `data:${mimeType};base64,${body.base64 || ''}` } },
-          { type: 'text', text: UNIVERSAL_PHOTO_PROMPT },
+          { type: 'text', text: prompt },
         ],
       },
     ],
@@ -447,6 +443,7 @@ async function handleCopilot(req, res) {
   const indoorRooms = knownRooms(university)
   const outdoorBuildings = knownBuildings(university)
   const defaultStart = university === 'uaic' ? 'secretariat-fii' : 'secretariat-ac'
+  const outdoorDefaultStart = university === 'uaic' ? 'fii' : 'corp-c'
   const sysPrompt = getSystemPrompt(university)
 
   if (image?.base64 && !visualAnswer) {
@@ -459,7 +456,7 @@ async function handleCopilot(req, res) {
             { type: 'image_url', image_url: { url: `data:${image.mimeType || 'image/jpeg'};base64,${image.base64}` } },
             {
               type: 'text',
-              text: `${UNIVERSAL_PHOTO_PROMPT}
+              text: `${university === 'uaic' ? PHOTO_PROMPT_UAIC : PHOTO_PROMPT_TUIASI}
 
 Dacă poți identifica o locație interioară (coridor, sală, panou), menționează și asta.
 Dacă există un mesaj de la student care indică o destinație, ține cont de el în răspuns.`,
@@ -525,15 +522,15 @@ IMPORTANT: Campul "actions" trebuie scris INTOTDEAUNA in engleza (ghidare vocala
       buildingId: inferredBuilding,
     }
   }
-  if (!inferredRoom && inferredBuilding && (!normalized.routeSuggestion.to || normalized.routeSuggestion.type === 'none')) {
-    normalized.routeSuggestion = { type: 'outdoor', from: defaultStart, to: inferredBuilding }
+  if (!inferredRoom && inferredBuilding) {
+    normalized.routeSuggestion = { type: 'outdoor', from: outdoorDefaultStart, to: inferredBuilding }
   }
 
   if (normalized.routeSuggestion.type === 'indoor' && normalized.routeSuggestion.to && !normalized.routeSuggestion.from) {
     normalized.routeSuggestion.from = normalized.detectedLocation.room || defaultStart
   }
   if (normalized.routeSuggestion.type === 'outdoor' && normalized.routeSuggestion.to && !normalized.routeSuggestion.from) {
-    normalized.routeSuggestion.from = defaultStart
+    normalized.routeSuggestion.from = outdoorDefaultStart
   }
   sendJson(res, 200, withImageOnlyPrompt(normalized, visualAnswer, message, university))
 }

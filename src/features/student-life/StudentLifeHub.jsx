@@ -949,32 +949,6 @@ function WellnessSection() {
           </div>
         </div>
       </div>
-      <div>
-        <h3 className="text-sm font-bold text-white mb-3">Contacte Utile</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {wellnessData.contacts.map(c => (
-            <div key={c.id} className="glass-card p-4 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center shrink-0">
-                <Phone size={16} className="text-indigo-400" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-white">{c.name}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{c.available}</p>
-                <a href={`tel:${c.phone.replace(/-/g, '')}`} className="text-sm font-mono text-indigo-300 mt-1 hover:text-indigo-200 transition-colors block">{c.phone}</a>
-              </div>
-              <div className="flex flex-col gap-1.5 shrink-0">
-                {c.free && <span className="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-1 rounded-full text-center">Gratuit</span>}
-                {c.url && (
-                  <button onClick={() => window.open(c.url, '_blank', 'noopener,noreferrer')}
-                    className="text-[10px] font-bold text-slate-400 bg-white/[0.04] border border-white/[0.08] px-2 py-1 rounded-full hover:border-indigo-500/40 hover:text-indigo-300 transition-all flex items-center gap-1">
-                    <ExternalLink size={9} /> Site
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </section>
   )
 }
