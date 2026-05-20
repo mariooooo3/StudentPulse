@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
-import { X, Send, CheckCircle, Loader2, Paperclip, FileText, Info } from 'lucide-react'
+import { X, Send, CheckCircle, Loader2, Paperclip, FileText, Info, Upload, GraduationCap } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useNotifications } from '../../shared/hooks/useNotifications'
 import { useToast } from '../../shared/components/Toast'
 import { createThesisRequest } from '../../shared/services/professorPortal.service'
@@ -9,9 +10,13 @@ export default function BookingModal({ professor, onClose, session }) {
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ idea: '', motivation: '' })
   const [attachedFile, setAttachedFile] = useState(null)
+  const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef(null)
   const { pushNotification } = useNotifications(session?.userId)
   const toast = useToast()
+
+  const initials = professor.avatar ||
+    professor.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
 
   function handleFileChange(e) {
     const file = e.target.files[0]
@@ -21,6 +26,13 @@ export default function BookingModal({ professor, onClose, session }) {
   function handleRemoveFile() {
     setAttachedFile(null)
     if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  function handleDrop(e) {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer.files[0]
+    if (file) setAttachedFile(file)
   }
 
   async function handleSubmit(e) {
@@ -56,137 +68,229 @@ export default function BookingModal({ professor, onClose, session }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.1] to-white/[0.03] w-full max-w-lg" onClick={e => e.stopPropagation()}>
-        <div className="bg-[#0c1120] border border-white/[0.05] rounded-[calc(1rem-1px)] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.8)] overflow-hidden">
-          <div className="flex items-start justify-between p-5 border-b border-white/[0.06]">
-            <div>
-              <p className="section-label mb-1">Rezervare loc licență</p>
-              <h3 className="font-bold text-white text-[15px]">{professor.name}</h3>
-              <p className="text-[12px] text-slate-500 mt-0.5">{professor.domain}</p>
+    <AnimatePresence>
+      <motion.div
+        key="backdrop"
+        className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        onClick={onClose}
+      >
+        <motion.div
+          key="modal"
+          className="bezel-card w-full max-w-md"
+          initial={{ opacity: 0, y: 24, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 16, scale: 0.97 }}
+          transition={{ type: 'spring', stiffness: 80, damping: 18 }}
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="bezel-inner overflow-hidden">
+
+            {/* ── Header ── */}
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06]">
+              {/* Professor avatar */}
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${professor.color ?? 'from-indigo-600 to-violet-600'} flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-lg`}>
+                {initials}
+              </div>
+
+              {/* Name + label */}
+              <div className="flex-1 min-w-0">
+                <p className="section-label mb-0.5">Rezervare loc licență</p>
+                <h3 className="font-bold text-white text-[14px] truncate leading-snug">{professor.name}</h3>
+                <p className="text-[11px] text-slate-500 truncate">{professor.domain}</p>
+              </div>
+
+              {/* Close */}
+              <button
+                onClick={onClose}
+                className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.08] hover:border-white/[0.12] transition-all shrink-0"
+              >
+                <X size={13} className="text-slate-400" strokeWidth={2} />
+              </button>
             </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.08] transition-colors">
-              <X size={14} className="text-slate-500" strokeWidth={1.75} />
-            </button>
-          </div>
 
-          {step === 1 ? (
-            <form onSubmit={handleSubmit} className="p-5 space-y-4">
-              {professor.requirementsNote && (
-                <div className="flex gap-2.5 bg-indigo-500/[0.08] border border-indigo-500/20 rounded-xl px-4 py-3">
-                  <Info size={14} className="text-indigo-400 shrink-0 mt-0.5" strokeWidth={1.75} />
-                  <p className="text-[12px] text-indigo-200/80 leading-relaxed">{professor.requirementsNote}</p>
-                </div>
-              )}
+            {/* ── Body ── */}
+            <AnimatePresence mode="wait">
+              {step === 1 ? (
+                <motion.form
+                  key="form"
+                  onSubmit={handleSubmit}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 8 }}
+                  transition={{ duration: 0.18 }}
+                  className="p-5 space-y-4"
+                >
+                  {/* Info note */}
+                  {professor.requirementsNote && (
+                    <div className="flex gap-2.5 bg-indigo-500/[0.08] border border-indigo-500/20 rounded-xl px-4 py-3">
+                      <Info size={13} className="text-indigo-400 shrink-0 mt-0.5" strokeWidth={1.75} />
+                      <p className="text-[11px] text-indigo-200/80 leading-relaxed">{professor.requirementsNote}</p>
+                    </div>
+                  )}
 
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Idee preliminară de temă *</label>
-                  <span className="text-[10px] text-slate-700 font-mono">{form.idea.length}/300</span>
-                </div>
-                <textarea
-                  required
-                  maxLength={300}
-                  rows={3}
-                  value={form.idea}
-                  onChange={e => setForm(p => ({ ...p, idea: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/[0.07] focus:border-indigo-500/40 rounded-xl px-4 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none resize-none transition-colors"
-                  placeholder="Descrie pe scurt ideea ta de temă pentru licență..."
-                />
-              </div>
+                  {/* Idea field */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="section-label">Idee preliminară de temă <span className="text-indigo-400">*</span></label>
+                      <span className="text-[10px] text-slate-700 font-mono">{form.idea.length}/300</span>
+                    </div>
+                    <textarea
+                      required
+                      maxLength={300}
+                      rows={3}
+                      value={form.idea}
+                      onChange={e => setForm(p => ({ ...p, idea: e.target.value }))}
+                      className="input-base resize-none leading-relaxed"
+                      placeholder="Descrie pe scurt ideea ta de temă pentru licență..."
+                    />
+                  </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Motivație *</label>
-                  <span className="text-[10px] text-slate-700 font-mono">{form.motivation.length}/300</span>
-                </div>
-                <textarea
-                  required
-                  maxLength={300}
-                  rows={3}
-                  value={form.motivation}
-                  onChange={e => setForm(p => ({ ...p, motivation: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/[0.07] focus:border-indigo-500/40 rounded-xl px-4 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none resize-none transition-colors"
-                  placeholder="De ce vrei să lucrezi cu acest profesor și pe această temă?"
-                />
-              </div>
+                  {/* Motivation field */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="section-label">Motivație <span className="text-indigo-400">*</span></label>
+                      <span className="text-[10px] text-slate-700 font-mono">{form.motivation.length}/300</span>
+                    </div>
+                    <textarea
+                      required
+                      maxLength={300}
+                      rows={3}
+                      value={form.motivation}
+                      onChange={e => setForm(p => ({ ...p, motivation: e.target.value }))}
+                      className="input-base resize-none leading-relaxed"
+                      placeholder="De ce vrei să lucrezi cu acest profesor și pe această temă?"
+                    />
+                  </div>
 
-              <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">
-                  Document atașat <span className="normal-case font-normal text-slate-700">(CV, portofoliu, plan — opțional)</span>
-                </label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-                {attachedFile ? (
-                  <div className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.07] rounded-xl px-4 py-3">
-                    <FileText size={15} className="text-indigo-400 shrink-0" strokeWidth={1.5} />
-                    <span className="text-[13px] text-slate-300 truncate flex-1">{attachedFile.name}</span>
-                    <span className="text-[11px] text-slate-700 shrink-0">
-                      {(attachedFile.size / 1024).toFixed(0)} KB
-                    </span>
+                  {/* File upload */}
+                  <div>
+                    <label className="section-label block mb-1.5">
+                      Document atașat{' '}
+                      <span className="normal-case font-normal text-slate-700 tracking-normal">(CV, portofoliu, plan — opțional)</span>
+                    </label>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+
+                    {attachedFile ? (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.97 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3"
+                      >
+                        <FileText size={15} className="text-indigo-400 shrink-0" strokeWidth={1.5} />
+                        <span className="text-[13px] text-slate-300 truncate flex-1">{attachedFile.name}</span>
+                        <span className="text-[10px] text-slate-600 shrink-0 font-mono">
+                          {(attachedFile.size / 1024).toFixed(0)} KB
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleRemoveFile}
+                          className="text-slate-600 hover:text-slate-300 transition-colors shrink-0 ml-1"
+                        >
+                          <X size={13} />
+                        </button>
+                      </motion.div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+                        onDragLeave={() => setDragOver(false)}
+                        onDrop={handleDrop}
+                        className={`w-full flex flex-col items-center gap-2 border border-dashed rounded-xl px-4 py-5 transition-all group ${
+                          dragOver
+                            ? 'border-indigo-500/50 bg-indigo-500/[0.06]'
+                            : 'border-white/[0.12] bg-white/[0.02] hover:border-indigo-500/30 hover:bg-white/[0.04]'
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center group-hover:border-indigo-500/30 transition-colors">
+                          <Upload size={14} className="text-slate-600 group-hover:text-indigo-400 transition-colors" strokeWidth={1.75} />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[12px] text-slate-500 group-hover:text-slate-300 transition-colors font-medium">
+                            Click sau drag &amp; drop
+                          </p>
+                          <p className="text-[10px] text-slate-700 mt-0.5">.pdf, .doc, .docx</p>
+                        </div>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-3 pt-1">
+                    <button type="button" onClick={onClose} disabled={loading} className="btn-secondary flex-1 text-[13px]">
+                      Anulează
+                    </button>
                     <button
-                      type="button"
-                      onClick={handleRemoveFile}
-                      className="text-slate-600 hover:text-slate-300 transition-colors shrink-0"
+                      type="submit"
+                      disabled={loading}
+                      className="btn-primary flex-1 text-[13px] flex items-center justify-center gap-2"
                     >
-                      <X size={14} />
+                      {loading
+                        ? <><Loader2 size={14} className="animate-spin" /> Se trimite...</>
+                        : <><Send size={13} /> Trimite cererea</>
+                      }
                     </button>
                   </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full flex items-center gap-3 bg-white/[0.03] border border-dashed border-white/[0.1] hover:border-white/[0.22] hover:bg-white/[0.05] rounded-xl px-4 py-3 transition-all group"
-                  >
-                    <Paperclip size={15} className="text-slate-600 group-hover:text-slate-400 transition-colors shrink-0" strokeWidth={1.75} />
-                    <span className="text-[13px] text-slate-600 group-hover:text-slate-400 transition-colors text-left">
-                      Adaugă fișier <span className="text-slate-700">(.pdf, .doc, .docx)</span>
-                    </span>
-                  </button>
-                )}
-              </div>
-
-              <div className="pt-1 flex gap-3">
-                <button type="button" onClick={onClose} disabled={loading} className="btn-secondary flex-1">Anulează</button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="btn-primary flex-1 flex items-center justify-center gap-2"
+                </motion.form>
+              ) : (
+                /* ── Success state ── */
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 90, damping: 18 }}
+                  className="p-8 text-center"
                 >
-                  {loading ? <><Loader2 size={14} className="animate-spin" /> Se trimite...</> : <><Send size={14} /> Trimite cererea</>}
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="p-8 text-center">
-              <div className="w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center mx-auto mb-4">
-                <CheckCircle size={24} className="text-emerald-400" strokeWidth={1.75} />
-              </div>
-              <h4 className="font-bold text-white text-[15px] mb-2">Cerere trimisă cu succes!</h4>
-              <p className="text-[13px] text-slate-400 mb-2 leading-relaxed">
-                {professor.name} va reveni cu un răspuns în 2–5 zile lucrătoare.
-              </p>
-              {attachedFile && (
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <FileText size={13} className="text-slate-600" strokeWidth={1.5} />
-                  <p className="text-[11px] text-slate-600">
-                    Document atașat: <span className="text-slate-500">{attachedFile.name}</span>
+                  {/* Animated check */}
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 120, damping: 16, delay: 0.1 }}
+                    className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-5"
+                    style={{ boxShadow: '0 0 20px rgba(52,211,153,0.15)' }}
+                  >
+                    <CheckCircle size={28} className="text-emerald-400" strokeWidth={1.75} />
+                  </motion.div>
+
+                  <h4 className="font-bold text-white text-[16px] mb-2">Cerere trimisă cu succes!</h4>
+                  <p className="text-[13px] text-slate-400 mb-3 leading-relaxed">
+                    <span className="text-slate-300 font-semibold">{professor.name}</span> va reveni cu un răspuns în 2–5 zile lucrătoare.
                   </p>
-                </div>
+
+                  {attachedFile && (
+                    <div className="flex items-center justify-center gap-2 mb-3 bg-white/[0.03] border border-white/[0.06] rounded-xl py-2.5 px-4">
+                      <FileText size={12} className="text-slate-600" strokeWidth={1.5} />
+                      <p className="text-[11px] text-slate-500 truncate">
+                        Document atașat: <span className="text-slate-400">{attachedFile.name}</span>
+                      </p>
+                    </div>
+                  )}
+
+                  <p className="text-[11px] text-slate-600 mb-6 leading-relaxed">
+                    Vei primi o notificare prin email și în aplicație la acceptare sau refuz.
+                  </p>
+
+                  <button onClick={onClose} className="btn-primary w-full text-[13px]">
+                    Închide
+                  </button>
+                </motion.div>
               )}
-              <p className="text-[11px] text-slate-600 mb-6">
-                Vei primi o notificare prin email și în aplicație la acceptare sau refuz.
-              </p>
-              <button onClick={onClose} className="btn-primary w-full">Închide</button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+            </AnimatePresence>
+
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   )
 }

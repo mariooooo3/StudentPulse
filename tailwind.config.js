@@ -39,8 +39,13 @@ export default {
         'shimmer': 'shimmer 2.4s linear infinite',
         'float': 'float 6s ease-in-out infinite',
         'glow-pulse': 'glowPulse 3s ease-in-out infinite',
+        'glow-pulse-fast': 'glowPulseFast 2s ease-in-out infinite',
         'spin-slow': 'spin 10s linear infinite',
+        'spin-slower': 'spin 20s linear infinite',
         'fade-in-up': 'fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1)',
+        'pulse-dot': 'pulse-dot 2s ease-in-out infinite',
+        'orbit': 'orbit 8s linear infinite',
+        'rotate-gradient': 'rotate-gradient 4s linear infinite',
       },
       keyframes: {
         fadeIn: { from: { opacity: '0' }, to: { opacity: '1' } },

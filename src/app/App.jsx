@@ -188,7 +188,7 @@ function AppShell() {
               {platformMode === 'academic' && currentView === 'tutoring'  && <PeerTutoring profile={profile} />}
               {platformMode === 'academic' && currentView === 'messages'  && <DirectMessages session={session} profile={profile} />}
 
-              {platformMode === 'life' && ['discounts', 'career', 'community', 'events', 'wellness', 'tools'].includes(currentView) && (
+              {platformMode === 'life' && ['pulse', 'discounts', 'career', 'community', 'events', 'wellness', 'tools'].includes(currentView) && (
                 <StudentLifeHub activeSection={currentView} profile={profile} session={session} />
               )}
               {platformMode === 'life' && currentView === 'citylife' && <CityAdaptation profile={profile} session={session} />}

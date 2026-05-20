@@ -187,6 +187,18 @@ class SocketService extends EventTarget {
     return this.#send({ type: 'SWAP_REQUEST', data })
   }
 
+  getPulseList() {
+    return this.#send({ type: 'PULSE_LIST' })
+  }
+
+  createPulse(data) {
+    return this.#send({ type: 'PULSE_CREATE', data })
+  }
+
+  reactPulse(id, reaction = 'confirm') {
+    return this.#send({ type: 'PULSE_REACT', data: { id, reaction } })
+  }
+
   get connected() { return this.#connected }
 
   auth(userId, name, profile = null) {

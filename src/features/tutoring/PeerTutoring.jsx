@@ -1,35 +1,56 @@
 import { useState, useEffect } from 'react'
-import { Search, Star, Calendar, Clock, Check, MessageSquare, ArrowLeftRight, Users } from 'lucide-react'
+import { Search, Star, Calendar, Clock, Check, MessageSquare, ArrowLeftRight, Users, GraduationCap, SlidersHorizontal } from 'lucide-react'
 import { getSubjectFilters, getTutors } from '../../shared/data/facultyCatalog'
 import SkillSwap from './SkillSwap'
 import clsx from 'clsx'
 import { useToast } from '../../shared/components/Toast'
+import { motion, AnimatePresence } from 'framer-motion'
 
-const TABS = ['Tutori disponibili', 'Skill Swap & Grupuri']
+const TABS = [
+  { label: 'Tutori', icon: <GraduationCap size={13} /> },
+  { label: 'Grup & Swap', icon: <ArrowLeftRight size={11} /> },
+]
+
+const containerVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.065 } },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 16, filter: 'blur(4px)' },
+  show: {
+    opacity: 1, y: 0, filter: 'blur(0px)',
+    transition: { type: 'spring', stiffness: 90, damping: 20 },
+  },
+}
 
 function TutorSkeleton() {
   return (
-    <div className="glass-card animate-pulse">
-      <div className="h-1 rounded-t-2xl bg-white/[0.05]" />
+    <div className="premium-card animate-pulse">
+      <div className="h-0.5 rounded-t-2xl bg-white/[0.05]" />
       <div className="p-5 space-y-4">
         <div className="flex items-start gap-3">
-          <div className="w-12 h-12 rounded-full bg-white/[0.06] shrink-0" />
+          <div className="w-11 h-11 rounded-full bg-white/[0.06] shrink-0" />
           <div className="flex-1 space-y-2 pt-1">
             <div className="h-3.5 bg-white/[0.06] rounded w-3/4" />
             <div className="h-2.5 bg-white/[0.03] rounded w-1/2" />
             <div className="flex gap-0.5">
-              {[0,1,2,3,4].map(i => <div key={i} className="w-2.5 h-2.5 rounded bg-white/[0.04]" />)}
+              {[0, 1, 2, 3, 4].map(i => (
+                <div key={i} className="w-2.5 h-2.5 rounded bg-white/[0.04]" />
+              ))}
             </div>
           </div>
           <div className="text-right shrink-0 space-y-1">
-            <div className="h-5 w-10 bg-white/[0.06] rounded" />
+            <div className="h-5 w-12 bg-white/[0.06] rounded" />
             <div className="h-2.5 w-14 bg-white/[0.03] rounded" />
           </div>
         </div>
         <div className="space-y-1.5">
           <div className="h-2 bg-white/[0.03] rounded w-1/3" />
           <div className="flex gap-1.5">
-            {[56, 72, 50].map(w => <div key={w} className="h-5 bg-white/[0.04] rounded-full" style={{ width: w }} />)}
+            {[56, 72, 50].map(w => (
+              <div key={w} className="h-5 bg-white/[0.04] rounded-full" style={{ width: w }} />
+            ))}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -59,96 +80,137 @@ function TutorCard({ t }) {
   }
 
   return (
-    <div className="glass-card flex flex-col hover:border-slate-600 transition-all duration-200">
-      <div className={`h-1 rounded-t-2xl bg-gradient-to-r ${t.color}`} />
+    <motion.div
+      variants={itemVariants}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.98 }}
+      className="premium-card flex flex-col group cursor-default"
+    >
+      {/* Gradient accent bar */}
+      <div className={`h-0.5 rounded-t-2xl bg-gradient-to-r ${t.color} opacity-80`} />
+
       <div className="p-5 flex-1 flex flex-col">
         {/* Header */}
         <div className="flex items-start gap-3 mb-4">
-          <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-lg relative`}>
-            {t.avatar}
-            {t.online && <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-900" />}
+          {/* Avatar */}
+          <div className="relative shrink-0">
+            <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-white font-bold text-sm shadow-lg ring-2 ring-white/[0.07]`}>
+              {t.avatar}
+            </div>
+            {t.online && (
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#080e1c] shadow-sm shadow-emerald-500/40" />
+            )}
           </div>
+
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-white text-sm">{t.name}</p>
-            <p className="text-xs text-slate-500">Anul {t.year} · {t.sessions} sesiuni efectuate</p>
-            <div className="flex items-center gap-1 mt-1">
+            <p className="font-bold text-white text-sm leading-tight">{t.name}</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Anul {t.year} · {t.sessions} sesiuni</p>
+            <div className="flex items-center gap-0.5 mt-1.5">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} size={10} className={i < Math.floor(t.rating) ? 'text-amber-400 fill-amber-400' : 'text-slate-600'} />
+                <Star
+                  key={i}
+                  size={10}
+                  className={i < Math.floor(t.rating) ? 'text-amber-400 fill-amber-400' : 'text-slate-700 fill-slate-700'}
+                />
               ))}
-              <span className="text-[10px] text-slate-500 ml-1">{t.rating} ({t.reviews} recenzii)</span>
+              <span className="text-[10px] text-slate-500 ml-1.5">{t.rating} <span className="text-slate-700">({t.reviews})</span></span>
             </div>
           </div>
-          <div className="text-right shrink-0">
-            <p className="text-lg font-bold text-white">{t.price}</p>
-            <p className="text-[10px] text-slate-500">lei/sesiune</p>
+
+          {/* Price */}
+          <div className="shrink-0">
+            <span className="badge-amber text-[11px] font-bold px-2.5 py-1">{t.price} lei</span>
+            <p className="text-[9px] text-slate-600 text-right mt-1">/ sesiune</p>
           </div>
         </div>
 
-        {/* Subjects */}
+        {/* Subject tags */}
         <div className="mb-4">
-          <p className="text-[10px] text-slate-600 uppercase font-semibold mb-2">Materii disponibile</p>
+          <p className="section-label mb-2">Materii</p>
           <div className="flex flex-wrap gap-1.5">
-            {t.subjects.map(s => <span key={s} className="tag text-[10px] py-0.5">{s}</span>)}
+            {t.subjects.map(s => (
+              <span key={s} className="tag text-[10px] py-0.5 px-2">{s}</span>
+            ))}
           </div>
         </div>
 
+        {/* Stats grid */}
         <div className="grid grid-cols-2 gap-2 mb-4">
-          <div className="bg-white/[0.03] border border-white/[0.04] rounded-lg p-2.5">
-            <p className="text-[9px] text-slate-600 uppercase font-semibold tracking-wide">Nota obținută</p>
-            <p className="text-[13px] font-bold text-emerald-400 font-mono">{t.grade}/10</p>
+          <div className="bg-white/[0.03] border border-white/[0.05] rounded-xl p-2.5 group-hover:border-white/[0.08] transition-colors">
+            <p className="text-[9px] text-slate-600 uppercase font-semibold tracking-wide mb-0.5">Notă obținută</p>
+            <p className="text-sm font-bold text-emerald-400 font-mono">{t.grade}<span className="text-slate-600 font-normal">/10</span></p>
           </div>
-          <div className="bg-white/[0.03] border border-white/[0.04] rounded-lg p-2.5">
-            <p className="text-[9px] text-slate-600 uppercase font-semibold tracking-wide">Stil</p>
+          <div className="bg-white/[0.03] border border-white/[0.05] rounded-xl p-2.5 group-hover:border-white/[0.08] transition-colors">
+            <p className="text-[9px] text-slate-600 uppercase font-semibold tracking-wide mb-0.5">Stil predare</p>
             <p className="text-[10px] text-slate-400 leading-tight">{t.style}</p>
           </div>
         </div>
 
-        {/* Availability */}
+        {/* Availability toggle */}
         <button
           onClick={() => setShowSlots(v => !v)}
-          className="flex items-center gap-2 text-xs text-slate-400 hover:text-slate-200 transition-colors mb-3"
+          className="flex items-center gap-2 text-[11px] text-slate-500 hover:text-slate-300 transition-colors mb-2 w-fit"
         >
-          <Calendar size={12} /> Disponibilitate ({t.availability.length} sloturi)
+          <Calendar size={11} className="text-slate-600" />
+          Disponibilitate
+          <span className="badge-blue text-[9px] py-0 px-1.5">{t.availability.length} sloturi</span>
         </button>
-        {showSlots && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {t.availability.map(slot => (
-              <span key={slot} className="px-2.5 py-1 rounded-lg text-[10px] bg-white/[0.03] border border-white/[0.07] text-slate-400 flex items-center gap-1">
-                <Clock size={9} /> {slot}
-              </span>
-            ))}
-          </div>
-        )}
 
-        {/* Action */}
-        <div className="mt-auto flex gap-2">
+        <AnimatePresence>
+          {showSlots && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="overflow-hidden"
+            >
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {t.availability.map(slot => (
+                  <span
+                    key={slot}
+                    className="px-2.5 py-1 rounded-lg text-[10px] bg-white/[0.03] border border-white/[0.07] text-slate-400 flex items-center gap-1"
+                  >
+                    <Clock size={9} className="text-slate-600" /> {slot}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Actions */}
+        <div className="mt-auto pt-1 flex gap-2">
           <button
             onClick={handleContact}
             className={clsx(
-              'w-9 h-9 rounded-xl border flex items-center justify-center transition-colors shrink-0',
+              'w-9 h-9 rounded-xl border flex items-center justify-center transition-all shrink-0',
               contacted
                 ? 'bg-emerald-600/20 border-emerald-500/30'
-                : 'bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.07]',
+                : 'bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.06] hover:border-white/[0.12]',
             )}
             title={contacted ? 'Contact cerut' : 'Cere contact'}
           >
-            {contacted ? <Check size={14} className="text-emerald-400" /> : <MessageSquare size={14} className="text-slate-500" strokeWidth={1.75} />}
+            {contacted
+              ? <Check size={13} className="text-emerald-400" />
+              : <MessageSquare size={13} className="text-slate-500" strokeWidth={1.75} />}
           </button>
+
           {booked ? (
-            <div className="flex-1 flex items-center justify-center gap-2 bg-emerald-600/20 border border-emerald-500/30 rounded-xl text-emerald-400 text-sm font-semibold">
-              <Check size={15} /> Rezervat!
+            <div className="flex-1 flex items-center justify-center gap-2 bg-emerald-600/15 border border-emerald-500/25 rounded-xl text-emerald-400 text-xs font-semibold">
+              <Check size={13} /> Rezervat!
             </div>
           ) : (
             <button
               onClick={handleBook}
-              className="flex-1 btn-primary text-sm flex items-center justify-center gap-2"
+              className="flex-1 btn-primary text-xs flex items-center justify-center gap-2 py-2.5"
             >
-              <Calendar size={14} /> Rezervă sesiune
+              <Calendar size={13} /> Rezervă sesiune
             </button>
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -167,7 +229,8 @@ export default function PeerTutoring({ profile }) {
   }, [])
 
   const filtered = tutors.filter(t => {
-    const matchSearch = t.name.toLowerCase().includes(search.toLowerCase()) ||
+    const matchSearch =
+      t.name.toLowerCase().includes(search.toLowerCase()) ||
       t.subjects.some(s => s.toLowerCase().includes(search.toLowerCase()))
     const subjectKey = subject.toLowerCase().replace(' / ', '/').split('/')[0].trim()
     const matchSubject = subject === 'Toate' || (t.subjects || []).some(s => s?.toLowerCase().includes(subjectKey))
@@ -176,43 +239,68 @@ export default function PeerTutoring({ profile }) {
 
   return (
     <div className="flex flex-col h-full animate-fade-in">
-      {/* Filter bar */}
+
+      {/* ── Top bar ── */}
       <div className="px-5 py-3.5 border-b border-white/[0.05] bg-[#070b14]/90 backdrop-blur-xl shrink-0 space-y-3">
-        <div className="flex gap-2">
-          <div className="flex p-[1px] rounded-full bg-white/[0.05] border border-white/[0.07]">
-            {TABS.map((t, i) => (
+
+        {/* Tab switcher + search */}
+        <div className="flex gap-2 items-center">
+          {/* Pill switcher */}
+          <div className="flex p-[2px] rounded-full bg-white/[0.04] border border-white/[0.07] gap-0.5">
+            {TABS.map(({ label, icon }, i) => (
               <button
-                key={t}
+                key={label}
                 onClick={() => setTab(i)}
-                className={clsx('px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all flex items-center gap-1.5',
-                  tab === i ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/30' : 'text-slate-500 hover:text-slate-300')}
+                className={clsx(
+                  'relative px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-all flex items-center gap-1.5',
+                  tab === i
+                    ? 'bg-indigo-600/30 text-indigo-300 shadow-sm shadow-indigo-900/40'
+                    : 'text-slate-500 hover:text-slate-300',
+                )}
               >
-                {i === 1 && <ArrowLeftRight size={10} />}
-                {t}
+                {tab === i && (
+                  <motion.span
+                    layoutId="tabActive"
+                    className="absolute inset-0 rounded-full bg-indigo-600/25 border border-indigo-500/30"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-1.5">
+                  {icon} {label}
+                </span>
               </button>
             ))}
           </div>
+
           {tab === 0 && (
-            <div className="flex-1 flex items-center gap-2 bg-white/[0.03] border border-white/[0.07] hover:bg-white/[0.05] rounded-xl px-3 py-2 transition-colors">
+            <div className="flex-1 flex items-center gap-2 bg-white/[0.03] border border-white/[0.07] hover:border-white/[0.12] rounded-xl px-3 py-2 transition-colors">
               <Search size={13} className="text-slate-600 shrink-0" strokeWidth={1.75} />
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Caută tutor sau materie..."
-                className="bg-transparent text-[13px] text-slate-300 placeholder-slate-700 outline-none flex-1 font-medium"
+                className="bg-transparent text-[13px] text-slate-300 placeholder-slate-700 outline-none flex-1"
               />
             </div>
           )}
         </div>
 
+        {/* Subject filter chips */}
         {tab === 0 && (
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+            <span className="shrink-0 flex items-center text-slate-600 pr-1">
+              <SlidersHorizontal size={11} />
+            </span>
             {SUBJECTS.map(s => (
               <button
                 key={s}
                 onClick={() => setSubject(s)}
-                className={clsx('shrink-0 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all border',
-                  subject === s ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-300' : 'bg-white/[0.02] border-white/[0.06] text-slate-500 hover:border-white/[0.1] hover:text-slate-300')}
+                className={clsx(
+                  'chip shrink-0 transition-all',
+                  subject === s
+                    ? 'bg-indigo-600/25 border-indigo-500/50 text-indigo-300'
+                    : 'text-slate-500 hover:text-slate-300 hover:border-white/[0.12]',
+                )}
               >
                 {s}
               </button>
@@ -221,28 +309,66 @@ export default function PeerTutoring({ profile }) {
         )}
       </div>
 
-      {/* Content */}
+      {/* ── Content ── */}
       <div className="flex-1 overflow-auto p-5">
         {tab === 0 && (
           <>
-            <p className="text-[12px] text-slate-500 font-medium mb-4">{loading ? '...' : `${filtered.length} tutori disponibili`}</p>
-            {!loading && filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <Users size={36} className="text-slate-800 mb-4" strokeWidth={1.5} />
-                <p className="text-slate-500 text-sm font-semibold">Niciun tutor găsit</p>
-                <p className="text-slate-700 text-xs mt-1">Încearcă alt filtru sau terge căutarea</p>
+            {/* Section header */}
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-indigo-600/20 border border-indigo-500/25 flex items-center justify-center">
+                  <GraduationCap size={14} className="text-indigo-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white leading-tight">Tutori disponibili</p>
+                  <p className="text-[11px] text-slate-600">Studenti verificati din facultatea ta</p>
+                </div>
               </div>
+              {!loading && (
+                <span className="badge-blue text-[11px] font-semibold px-2.5 py-1">
+                  {filtered.length} tutori
+                </span>
+              )}
+            </div>
+
+            {!loading && filtered.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: 'spring', stiffness: 80, damping: 18 }}
+                className="flex flex-col items-center justify-center py-24 text-center"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-4">
+                  <Users size={28} className="text-slate-700" strokeWidth={1.25} />
+                </div>
+                <p className="text-slate-400 text-sm font-semibold mb-1">Niciun tutor găsit</p>
+                <p className="text-slate-700 text-xs">Încearcă alt filtru sau șterge căutarea</p>
+              </motion.div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+              >
                 {loading
                   ? Array.from({ length: 6 }).map((_, i) => <TutorSkeleton key={i} />)
                   : filtered.map(t => <TutorCard key={t.id} t={t} />)
                 }
-              </div>
+              </motion.div>
             )}
           </>
         )}
-        {tab === 1 && <SkillSwap profile={profile} />}
+
+        {tab === 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 80, damping: 18 }}
+          >
+            <SkillSwap profile={profile} />
+          </motion.div>
+        )}
       </div>
     </div>
   )

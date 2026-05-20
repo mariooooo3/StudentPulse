@@ -1,61 +1,109 @@
 import { useState, useMemo } from 'react'
-import { ChevronRight, ChevronLeft, Check, Compass, Search } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Check, Compass, Search, Sparkles } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ALL_FACULTY_QUESTIONS as FACULTY_QUESTIONS } from '../../shared/data/domainPersonalization'
 import clsx from 'clsx'
 
+// ─── Progress bar ─────────────────────────────────────────────────────────────
 function ProgressBar({ step, total }) {
+  const pct = Math.round(((step) / total) * 100)
   return (
-    <div className="flex items-center gap-1.5 mb-8">
-      {Array.from({ length: total }).map((_, i) => (
-        <div key={i} className={clsx('h-1.5 flex-1 rounded-full transition-all duration-500',
-          i < step ? 'bg-indigo-500' : i === step ? 'bg-indigo-400/50' : 'bg-white/[0.07]')} />
-      ))}
+    <div className="mb-8 space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-semibold text-slate-600 uppercase tracking-widest">Progres</span>
+        <span className="text-[11px] font-bold text-indigo-400">{pct}%</span>
+      </div>
+      <div className="h-1 w-full rounded-full bg-white/[0.06] overflow-hidden">
+        <motion.div
+          className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"
+          initial={false}
+          animate={{ width: `${pct}%` }}
+          transition={{ type: 'spring', stiffness: 80, damping: 18 }}
+        />
+      </div>
+      <div className="flex gap-1.5">
+        {Array.from({ length: total }).map((_, i) => (
+          <div
+            key={i}
+            className={clsx(
+              'h-0.5 flex-1 rounded-full transition-all duration-500',
+              i < step ? 'bg-indigo-500' : i === step ? 'bg-indigo-400/40' : 'bg-white/[0.05]',
+            )}
+          />
+        ))}
+      </div>
     </div>
   )
 }
 
+// ─── Select option ─────────────────────────────────────────────────────────────
 function SelectOption({ label, selected, onClick }) {
   return (
-    <button onClick={onClick} className={clsx(
-      'w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all duration-150 flex items-center gap-2',
-      selected ? 'bg-indigo-600/20 border-indigo-500/60 text-indigo-300'
-               : 'bg-white/[0.03] border-white/[0.05] text-slate-300 hover:border-white/[0.1] hover:text-white',
-    )}>
-      {selected && <Check size={13} className="text-indigo-400 shrink-0" />}{label}
+    <button
+      onClick={onClick}
+      className={clsx(
+        'w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all duration-200 flex items-center gap-2',
+        selected
+          ? 'bg-indigo-600/20 border-indigo-500/60 text-indigo-300 shadow-[0_0_16px_rgba(99,102,241,0.12)]'
+          : 'bg-white/[0.03] border-white/[0.06] text-slate-300 hover:border-white/[0.12] hover:text-white hover:bg-white/[0.05] hover:-translate-y-px',
+      )}
+    >
+      <span className={clsx(
+        'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors',
+        selected ? 'border-indigo-500 bg-indigo-500' : 'border-white/[0.2]',
+      )}>
+        {selected && <Check size={9} className="text-white" />}
+      </span>
+      {label}
     </button>
   )
 }
 
+// ─── Card option ───────────────────────────────────────────────────────────────
 function CardOption({ opt, selected, onClick }) {
   return (
-    <button onClick={onClick} className={clsx(
-      'w-full text-left px-4 py-3.5 rounded-xl border flex items-center gap-3 transition-all duration-150',
-      selected ? 'bg-indigo-600/20 border-indigo-500/60' : 'bg-white/[0.03] border-white/[0.05] hover:border-white/[0.1]',
-    )}>
-      <div className={clsx('w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0',
-        selected ? 'border-indigo-500 bg-indigo-500' : 'border-white/[0.2]')}>
+    <button
+      onClick={onClick}
+      className={clsx(
+        'w-full text-left px-4 py-3.5 rounded-xl border flex items-center gap-3 transition-all duration-200',
+        selected
+          ? 'bg-indigo-600/20 border-indigo-500/60 shadow-[0_0_20px_rgba(99,102,241,0.13)] -translate-y-px'
+          : 'bg-white/[0.03] border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.05] hover:-translate-y-px',
+      )}
+    >
+      <div className={clsx(
+        'w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors',
+        selected ? 'border-indigo-500 bg-indigo-500' : 'border-white/[0.2]',
+      )}>
         {selected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
       </div>
       <div>
         <p className={clsx('font-semibold text-sm', selected ? 'text-indigo-300' : 'text-slate-200')}>{opt.label}</p>
-        {opt.desc && <p className="text-xs text-slate-500">{opt.desc}</p>}
+        {opt.desc && <p className="text-xs text-slate-500 mt-0.5">{opt.desc}</p>}
       </div>
     </button>
   )
 }
 
+// ─── Tag / chip options ────────────────────────────────────────────────────────
 function TagOptions({ options, selected = [], onToggle }) {
   return (
     <div className="flex flex-wrap gap-2">
       {options.map(tag => {
         const sel = selected.includes(tag)
         return (
-          <button key={tag} onClick={() => onToggle(tag)} className={clsx(
-            'px-4 py-2 rounded-full border text-sm font-medium transition-all duration-150 flex items-center gap-1.5',
-            sel ? 'bg-indigo-600/30 border-indigo-500/60 text-indigo-300'
-                : 'bg-white/[0.03] border-white/[0.05] text-slate-400 hover:border-white/[0.1] hover:text-white',
-          )}>
-            {sel && <Check size={11} className="text-indigo-400" />}{tag}
+          <button
+            key={tag}
+            onClick={() => onToggle(tag)}
+            className={clsx(
+              'chip transition-all duration-200',
+              sel
+                ? 'bg-indigo-600/30 border-indigo-500/60 text-indigo-300 shadow-[0_0_12px_rgba(99,102,241,0.18)]'
+                : 'hover:border-white/[0.14] hover:text-white',
+            )}
+          >
+            {sel && <Check size={10} className="text-indigo-400" />}
+            {tag}
           </button>
         )
       })}
@@ -63,17 +111,18 @@ function TagOptions({ options, selected = [], onToggle }) {
   )
 }
 
-// Faculty search step ──────────────────────────────────────────────────────────
+// ─── Faculty search step ───────────────────────────────────────────────────────
 function FacultyStep({ value, onChange, universityFaculties }) {
   const [search, setSearch] = useState('')
-  const filtered = useMemo(() =>
-    universityFaculties.filter(f => f.name.toLowerCase().includes(search.toLowerCase())),
-    [search, universityFaculties])
+  const filtered = useMemo(
+    () => universityFaculties.filter(f => f.name.toLowerCase().includes(search.toLowerCase())),
+    [search, universityFaculties],
+  )
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2.5">
-        <Search size={15} className="text-slate-500" />
+      <div className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 focus-within:border-indigo-500/40 transition-colors">
+        <Search size={14} className="text-slate-500 shrink-0" />
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -82,19 +131,26 @@ function FacultyStep({ value, onChange, universityFaculties }) {
           placeholder="Caută facultatea ta..."
         />
       </div>
-      <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1">
+      <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1 scrollbar-thin">
         {filtered.map(f => (
-          <SelectOption key={f.code} label={f.name} selected={value?.code === f.code} onClick={() => onChange(f)} />
+          <SelectOption
+            key={f.code}
+            label={f.name}
+            selected={value?.code === f.code}
+            onClick={() => onChange(f)}
+          />
         ))}
         {filtered.length === 0 && (
-          <p className="text-sm text-slate-500 text-center py-4">Nicio facultate găsită. Caută cu alți termeni.</p>
+          <p className="text-sm text-slate-600 text-center py-6">
+            Nicio facultate găsită. Încearcă alți termeni.
+          </p>
         )}
       </div>
     </div>
   )
 }
 
-// Step definitions (base + dynamic) ──────────────────────────────────────────
+// ─── Step definitions (base + dynamic) ────────────────────────────────────────
 const BASE_AFTER = [
   {
     id: 'learning_style',
@@ -129,7 +185,7 @@ const BASE_AFTER = [
     options: [
       { label: 'Cămin studențesc', desc: 'Pe campusul universitar' },
       { label: 'Chirie', desc: 'Apartament în afara campusului' },
-      { label: 'Acasă (navetist)', desc: 'Vin zilnic din alt oraș' },
+      { label: 'Acasă', desc: 'Locuiesc cu familia' },
     ],
   },
   {
@@ -146,18 +202,19 @@ const BASE_AFTER = [
   },
 ]
 
+// ─── Main component ────────────────────────────────────────────────────────────
 export default function OnboardingFlow({ onComplete, session }) {
   const [step, setStep] = useState(0)
+  const [direction, setDirection] = useState(1) // 1 = forward, -1 = back
   const [answers, setAnswers] = useState({})
   const [done, setDone] = useState(false)
 
   const universityFaculties = session?.university?.faculties || []
   const university = session?.university
 
-  const faculty = answers.faculty  // { code, name, type, years, emailPrefix }
+  const faculty = answers.faculty
   const facultyQ = faculty ? FACULTY_QUESTIONS[faculty.type] || null : null
 
-  // Build steps dynamically
   const STEPS = useMemo(() => {
     const defaultYears = [
       { label: 'Anul 1', desc: 'Primul an de licență' },
@@ -166,12 +223,20 @@ export default function OnboardingFlow({ onComplete, session }) {
       { label: 'Master', desc: 'Studii postuniversitare' },
     ]
     const steps = [
-      { id: 'faculty', emoji: '🎓', question: 'La ce facultate ești înscris?', subtitle: university ? `Facultățile disponibile la ${university.shortName}` : 'Selectează sau caută facultatea ta', type: 'faculty' },
+      {
+        id: 'faculty',
+        emoji: '🎓',
+        question: 'La ce facultate ești înscris?',
+        subtitle: university ? `Facultățile disponibile la ${university.shortName}` : 'Selectează sau caută facultatea ta',
+        type: 'faculty',
+      },
     ]
 
     if (faculty?.code === 'AC') {
       steps.push({
-        id: 'specialization', emoji: '🖥️', question: 'Ce specializare urmezi?',
+        id: 'specialization',
+        emoji: '🖥️',
+        question: 'Ce specializare urmezi?',
         subtitle: 'Fiecare specializare are materii, profesori și structură diferite',
         type: 'cards',
         options: [
@@ -182,7 +247,9 @@ export default function OnboardingFlow({ onComplete, session }) {
     }
 
     steps.push({
-      id: 'year', emoji: '📅', question: 'În ce an de studiu ești?',
+      id: 'year',
+      emoji: '📅',
+      question: 'În ce an de studiu ești?',
       subtitle: 'Vom prioritiza informațiile relevante pentru anul tău',
       type: 'cards',
       options: faculty?.years || defaultYears,
@@ -190,7 +257,8 @@ export default function OnboardingFlow({ onComplete, session }) {
 
     if (facultyQ) {
       steps.push({
-        id: 'interests', emoji: '💡',
+        id: 'interests',
+        emoji: '💡',
         question: facultyQ.interestsLabel,
         subtitle: 'Selectează unul sau mai multe — personalizăm tutorii și tema de licență',
         type: 'tags',
@@ -223,33 +291,58 @@ export default function OnboardingFlow({ onComplete, session }) {
 
   function next() {
     if (!canProceed()) return
-    if (step < total - 1) setStep(s => s + 1)
+    if (step < total - 1) { setDirection(1); setStep(s => s + 1) }
     else setDone(true)
   }
-  function prev() { if (step > 0) setStep(s => s - 1) }
+  function prev() {
+    if (step > 0) { setDirection(-1); setStep(s => s - 1) }
+  }
 
+  // ─── Done screen ─────────────────────────────────────────────────────────────
   if (done) {
     return (
-      <div className="min-h-screen bg-[#050810] flex items-center justify-center p-8">
-        <div className="text-center max-w-md animate-slide-up">
-          <div className="p-[1.5px] rounded-full bg-gradient-to-b from-emerald-400/30 to-emerald-500/10 mx-auto w-fit mb-6">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-2xl shadow-emerald-500/30">
-              <Check size={36} className="text-white" />
+      <div className="min-h-screen bg-[#050810] dot-grid flex items-center justify-center p-8 overflow-hidden">
+        {/* Top glow */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-emerald-500/10 via-transparent to-transparent" />
+
+        <motion.div
+          className="text-center max-w-md relative"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 80, damping: 18 }}
+        >
+          {/* Check icon */}
+          <div className="mx-auto w-fit mb-8 relative">
+            <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-2xl scale-150" />
+            <div className="p-[1.5px] rounded-full bg-gradient-to-b from-emerald-400/40 to-emerald-500/10 relative">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-2xl shadow-emerald-500/30">
+                <Check size={36} className="text-white" />
+              </div>
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-white mb-3">Profilul tău este gata!</h2>
-          <p className="text-slate-400 mb-8 leading-relaxed">
+
+          <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">Profilul tău este gata!</h2>
+          <p className="text-slate-400 mb-10 leading-relaxed text-sm">
             StudentCompass a personalizat toate modulele în funcție de facultatea, anul și interesele tale.
             De acum, nu te mai pierzi.
           </p>
-          <div className="grid grid-cols-3 gap-3 mb-8">
-            {[['🗺️','Navigator'],['📅','Orar'],['🎓','Licență'],['👥','Tutoring'],['🔄','Skill Swap'],['💬','Mesaje']].map(([e,l]) => (
-              <div key={l} className="glass-card p-3 text-center">
+
+          {/* Module grid */}
+          <div className="grid grid-cols-3 gap-2.5 mb-8">
+            {[['🗺️','Navigator'],['📅','Orar'],['🎓','Licență'],['👥','Tutoring'],['🔄','Skill Swap'],['💬','Mesaje']].map(([e, l], i) => (
+              <motion.div
+                key={l}
+                className="glass-card p-3 text-center"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08 * i, type: 'spring', stiffness: 80, damping: 18 }}
+              >
                 <div className="text-2xl mb-1">{e}</div>
-                <div className="text-xs text-slate-400 font-medium">{l}</div>
-              </div>
+                <div className="text-[11px] text-slate-400 font-semibold">{l}</div>
+              </motion.div>
             ))}
           </div>
+
           <button
             onClick={() => onComplete({
               faculty: answers.faculty?.name || university?.shortName || 'FII',
@@ -261,70 +354,138 @@ export default function OnboardingFlow({ onComplete, session }) {
               learningStyle: answers.learning_style?.label,
               housing: answers.housing?.label,
             })}
-            className="btn-primary w-full text-base py-3"
+            className="btn-primary w-full text-base py-3 gap-2"
           >
-            Intră în StudentCompass →
+            <Sparkles size={16} />
+            Intră în StudentCompass
           </button>
-        </div>
+        </motion.div>
       </div>
     )
   }
 
+  // ─── Step card variants ───────────────────────────────────────────────────────
+  const variants = {
+    enter: (dir) => ({ opacity: 0, x: dir > 0 ? 32 : -32 }),
+    center: { opacity: 1, x: 0 },
+    exit: (dir) => ({ opacity: 0, x: dir > 0 ? -32 : 32 }),
+  }
+
+  // ─── Main flow ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#050810] flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-[#050810] dot-grid flex flex-col items-center justify-center p-6 overflow-hidden">
+      {/* Top glow orb */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-indigo-500/10 via-indigo-500/[0.03] to-transparent" />
+      <div className="pointer-events-none absolute top-[-8rem] left-1/2 -translate-x-1/2 w-[40rem] h-[20rem] rounded-full bg-indigo-500/[0.07] blur-3xl" />
+
       {/* Logo */}
-      <div className="flex items-center gap-3 mb-10">
-        <div className="p-[1.5px] rounded-[0.85rem] bg-gradient-to-b from-white/10 to-white/[0.03]">
+      <motion.div
+        className="flex items-center gap-3 mb-10 relative"
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 80, damping: 18 }}
+      >
+        <div className="p-[1.5px] rounded-[0.85rem] bg-gradient-to-b from-white/[0.12] to-white/[0.03]">
           <div className="w-10 h-10 rounded-[0.75rem] bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
             <Compass size={20} className="text-white" />
           </div>
         </div>
         <div>
           <p className="font-bold text-white text-[14px] tracking-tight">StudentCompass</p>
-          <p className="text-xs text-slate-600">Setup profil — {step + 1} din {total}</p>
+          <p className="text-xs text-slate-600">Setup profil · pas {step + 1} din {total}</p>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="w-full max-w-xl">
+      <div className="w-full max-w-md relative">
         <ProgressBar step={step} total={total} />
 
-        <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.08] to-white/[0.02]" key={q.id}>
-        <div className="rounded-[calc(1rem-1px)] bg-[#0c1120] border border-white/[0.04] p-8 animate-fade-in">
-          <div className="text-4xl mb-4">{q.emoji}</div>
-          <h2 className="text-2xl font-bold text-white mb-2">{q.question}</h2>
-          <p className="text-slate-400 mb-6 text-sm leading-relaxed">{q.subtitle}</p>
+        {/* Step card with slide transition */}
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={q.id}
+            custom={direction}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+          >
+            {/* bezel-card */}
+            <div className="bezel-card">
+              <div className="bezel-inner p-8">
+                {/* Emoji */}
+                <div className="text-4xl mb-5 select-none">{q.emoji}</div>
 
-          {q.type === 'faculty' && (
-            <FacultyStep value={answers.faculty} onChange={val => setAnswers(p => ({ ...p, faculty: val }))} universityFaculties={universityFaculties} />
-          )}
-          {q.type === 'select' && (
-            <div className="space-y-2">
-              {q.options.map(opt => (
-                <SelectOption key={opt} label={opt} selected={answer === opt} onClick={() => set(opt)} />
-              ))}
+                {/* Title + subtitle */}
+                <h2 className="text-[1.35rem] font-bold text-white mb-1.5 tracking-tight leading-snug">
+                  {q.question}
+                </h2>
+                <p className="text-slate-500 mb-7 text-sm leading-relaxed">{q.subtitle}</p>
+
+                {/* Step body */}
+                {q.type === 'faculty' && (
+                  <FacultyStep
+                    value={answers.faculty}
+                    onChange={val => setAnswers(p => ({ ...p, faculty: val }))}
+                    universityFaculties={universityFaculties}
+                  />
+                )}
+                {q.type === 'select' && (
+                  <div className="space-y-2">
+                    {q.options.map(opt => (
+                      <SelectOption key={opt} label={opt} selected={answer === opt} onClick={() => set(opt)} />
+                    ))}
+                  </div>
+                )}
+                {q.type === 'cards' && (
+                  <div className="space-y-2">
+                    {q.options.map(opt => (
+                      <CardOption
+                        key={opt.label}
+                        opt={opt}
+                        selected={answer?.label === opt.label}
+                        onClick={() => set(opt)}
+                      />
+                    ))}
+                  </div>
+                )}
+                {q.type === 'tags' && (
+                  <TagOptions
+                    options={q.options}
+                    selected={answers[q.id] || []}
+                    onToggle={toggleTag}
+                  />
+                )}
+              </div>
             </div>
-          )}
-          {q.type === 'cards' && (
-            <div className="space-y-2">
-              {q.options.map(opt => (
-                <CardOption key={opt.label} opt={opt} selected={answer?.label === opt.label} onClick={() => set(opt)} />
-              ))}
-            </div>
-          )}
-          {q.type === 'tags' && (
-            <TagOptions options={q.options} selected={answers[q.id] || []} onToggle={toggleTag} />
-          )}
-        </div>
-        </div>
+          </motion.div>
+        </AnimatePresence>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between mt-6">
-          <button onClick={prev} disabled={step === 0} className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
-            <ChevronLeft size={18} /> Înapoi
+        <div className="flex items-center justify-between mt-5">
+          <button
+            onClick={prev}
+            disabled={step === 0}
+            className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft size={17} />
+            Înapoi
           </button>
-          <span className="text-xs text-slate-600">{step + 1} / {total}</span>
-          <button onClick={next} disabled={!canProceed()} className={clsx('flex items-center gap-2 btn-primary text-sm', !canProceed() && 'opacity-40 cursor-not-allowed')}>
-            {step === total - 1 ? 'Finalizează' : 'Continuă'} <ChevronRight size={18} />
+
+          <span className="text-[11px] font-mono text-slate-700">
+            {step + 1} / {total}
+          </span>
+
+          <button
+            onClick={next}
+            disabled={!canProceed()}
+            className={clsx(
+              'flex items-center gap-2 btn-primary text-sm transition-opacity',
+              !canProceed() && 'opacity-35 cursor-not-allowed',
+            )}
+          >
+            {step === total - 1 ? 'Finalizează' : 'Continuă'}
+            <ChevronRight size={17} />
           </button>
         </div>
       </div>

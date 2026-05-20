@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MapPin, Camera, Sparkles, Send, X, Loader2, Navigation as NavIcon, Lightbulb, Route, ArrowRight, Users, Wifi, WifiOff, FlipHorizontal, ImagePlus, Play, CheckCircle, ChevronRight, ChevronLeft, Volume2, VolumeX } from 'lucide-react'
+import { MapPin, Camera, Sparkles, Send, X, Loader2, Navigation as NavIcon, Lightbulb, Route, ArrowRight, Users, Wifi, WifiOff, FlipHorizontal, ImagePlus, Play, CheckCircle, ChevronRight, ChevronLeft, Volume2, VolumeX, LocateFixed, Building2, Activity } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import HeatmapLayer from './HeatmapLayer'
@@ -29,21 +29,21 @@ const ROUTE_PROFILES = {
   },
   bike: {
     label: 'Cu bicicleta',
-    osrmProfile: 'foot',
+    osrmProfile: 'bike',
     durationLabel: 'cu bicicleta',
     fallbackSpeedKmh: 15,
     speedKmh: 15,
   },
   car: {
     label: 'Cu masina',
-    osrmProfile: 'foot',
+    osrmProfile: 'driving',
     durationLabel: 'cu masina',
     fallbackSpeedKmh: 40,
     speedKmh: 40,
   },
   driving: {
     label: 'Cu masina',
-    osrmProfile: 'foot',
+    osrmProfile: 'driving',
     durationLabel: 'cu masina',
     fallbackSpeedKmh: 40,
     speedKmh: 40,
@@ -69,11 +69,19 @@ function haversineMeters(a, b) {
 function fallbackRouteInfo(from, to, profile) {
   const distance = haversineMeters(from.coords, to.coords)
   const duration = Math.max(1, Math.ceil((distance / 1000) / profile.fallbackSpeedKmh * 60))
-  return { distance: formatDistance(distance), duration: `${duration} min`, mode: profile.label }
+  return { distance: formatDistance(distance), duration: `${duration} min`, mode: profile.label, source: 'direct-estimate' }
 }
 
 function routeDistance(path) {
   return path.slice(1).reduce((total, point, index) => total + haversineMeters(path[index], point), 0)
+}
+
+function compactRoutePath(path) {
+  return path.reduce((clean, point) => {
+    const previous = clean[clean.length - 1]
+    if (!previous || haversineMeters(previous, point) > 2) clean.push(point)
+    return clean
+  }, [])
 }
 
 function nearestWalkNode(nodes, coords) {
@@ -127,16 +135,43 @@ function buildCampusWalkRoute(campus, from, to) {
   if (!nodePath) return null
 
   const nodeById = Object.fromEntries(campus.walkNodes.map(node => [node.id, node]))
-  const path = [
+  const path = compactRoutePath([
     from.coords,
     ...nodePath.map(id => nodeById[id].coords),
     to.coords,
-  ]
+  ])
   const distance = routeDistance(path)
+  const directDistance = haversineMeters(from.coords, to.coords)
+  if (directDistance > 0 && distance > directDistance * 1.85) return null
+
   const duration = Math.max(1, Math.ceil((distance / 1000) / ROUTE_PROFILES.foot.fallbackSpeedKmh * 60))
   return {
     path,
     info: { distance: formatDistance(distance), duration: `${duration} min`, mode: ROUTE_PROFILES.foot.label, source: 'campus-walk' },
+  }
+}
+
+async function fetchOsrmRoute(from, to, profile) {
+  const [lat1, lon1] = from.coords
+  const [lat2, lon2] = to.coords
+  const controller = new AbortController()
+  const timeout = window.setTimeout(() => controller.abort(), 8000)
+
+  try {
+    const res = await fetch(
+      `https://router.project-osrm.org/route/v1/${profile.osrmProfile}/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`,
+      { signal: controller.signal },
+    )
+    if (!res.ok) throw new Error(`OSRM ${res.status}`)
+    const data = await res.json()
+    const route = data.routes?.[0]
+    if (!route?.geometry?.coordinates?.length) throw new Error('No OSRM route found')
+    return {
+      path: compactRoutePath(route.geometry.coordinates.map(([lng, lat]) => [lat, lng])),
+      distance: route.distance,
+    }
+  } finally {
+    window.clearTimeout(timeout)
   }
 }
 
@@ -261,14 +296,19 @@ const TUIASI_WALK_EDGES = [
   ['library', 'corp-a'],
   ['corp-a', 'ac'],
   ['ieeia', 'ac'],
+  ['ac', 'dima'],
   ['ac', 'cmmi'],
+  ['dima', 'cmmi'],
   ['cmmi', 'sim'],
   ['sim', 'mec'],
   ['mec', 'icpm'],
-  ['icpm', 'dima'],
+  ['mec', 'rectorat'],
+  ['sim', 'rectorat'],
   ['dima', 'rectorat'],
   ['rectorat', 'hgim'],
   ['rectorat', 'tudor-entry'],
+  ['hgim', 'tudor-entry'],
+  ['icpm', 'tudor-entry'],
   ['tudor-entry', 'mall'],
   ['mall', 'dorms-north'],
   ['mall', 'dorms-center'],
@@ -536,7 +576,9 @@ function indoorPathPoints(nodePath, indRooms) {
 
 function FlyTo({ coords }) {
   const map = useMap()
-  if (coords) map.flyTo(coords, 17, { duration: 1.2 })
+  useEffect(() => {
+    if (coords) map.flyTo(coords, 17, { duration: 1.2 })
+  }, [coords, map])
   return null
 }
 
@@ -585,7 +627,7 @@ function coordsParam(item) {
 }
 
 function googleDirectionsUrl(from, to, mode = 'foot') {
-  const travelmode = mode === 'driving' ? 'driving' : 'walking'
+  const travelmode = mode === 'car' || mode === 'driving' ? 'driving' : mode === 'bike' ? 'bicycling' : 'walking'
   return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(coordsParam(from))}&destination=${encodeURIComponent(coordsParam(to))}&travelmode=${travelmode}`
 }
 
@@ -604,7 +646,7 @@ function speak(text, enabled) {
   if (!enabled || typeof window === 'undefined' || !window.speechSynthesis) return
   window.speechSynthesis.cancel()
   const utt = new SpeechSynthesisUtterance(text)
-  utt.lang = 'en-US'
+  utt.lang = 'ro-RO'
   utt.rate = 0.92
   window.speechSynthesis.speak(utt)
 }
@@ -776,6 +818,13 @@ export default function CampusNavigator() {
   const [indoorPath, setIndoorPath] = useState(null)
 
   const [showCrowd, setShowCrowd] = useState(false)
+  const [showPOI, setShowPOI] = useState(false)
+  const [routeFrom, setRouteFrom] = useState('')
+  const [routeTo, setRouteTo] = useState('')
+  const [routeMode, setRouteMode] = useState('foot')
+  const [routePath, setRoutePath] = useState(null)
+  const [routeLoading, setRouteLoading] = useState(false)
+  const [routeInfo, setRouteInfo] = useState(null)
 
   const { profile, session } = useAuth()
   const firstName = profile?.name?.split(' ')[0] ?? 'Student'
@@ -788,6 +837,19 @@ export default function CampusNavigator() {
     ...POIS.map(poi => [poi.lat, poi.lng]),
   ], [buildings, POIS])
   const { zones, totalUsers, connected, mode } = useCrowdSocket(showCrowd, campusCenter, heatmapHotspots)
+  const activeRouteProfile = ROUTE_PROFILES[routeMode] || ROUTE_PROFILES.foot
+  const visibleDestinations = buildings
+  const campusStats = [
+    { label: 'Cladiri', value: buildings.length, icon: Building2, color: '#6366f1' },
+    { label: 'Puncte utile', value: POIS.length, icon: MapPin, color: '#10b981' },
+    { label: 'Studenti live', value: totalUsers || '-', icon: Users, color: '#f59e0b' },
+  ]
+  const navigatorTabs = [
+    { id: 'map', label: 'Harta', desc: 'trasee live', icon: MapPin },
+    { id: 'chat', label: 'AI Compass', desc: 'ghid conversational', icon: Sparkles },
+    { id: 'reco', label: 'Recomandari', desc: 'context campus', icon: Lightbulb },
+    { id: 'indoor', label: 'Plan interior', desc: 'sali si etaje', icon: Route },
+  ]
 
   useEffect(() => {
     setFromRoom('')
@@ -811,6 +873,13 @@ export default function CampusNavigator() {
       videoRef.current.srcObject = cameraStream
     }
   }, [cameraOpen, cameraStream])
+
+  useEffect(() => {
+    return () => {
+      cameraStream?.getTracks().forEach(track => track.stop())
+      window.speechSynthesis?.cancel()
+    }
+  }, [cameraStream])
 
   async function loadPulse() {
     setPulseLoading(true)
@@ -864,7 +933,6 @@ export default function CampusNavigator() {
     setRecoLoading(false)
   }
 
-  const [showPOI, setShowPOI] = useState(false)
   const poiIcons = useRef({})
   function getPoiIcon(poi) {
     if (!poiIcons.current[poi.id]) {
@@ -873,12 +941,12 @@ export default function CampusNavigator() {
     return poiIcons.current[poi.id]
   }
 
-  const [routeFrom, setRouteFrom] = useState('')
-  const [routeTo, setRouteTo] = useState('')
-  const [routeMode, setRouteMode] = useState('foot')
-  const [routePath, setRoutePath] = useState(null)
-  const [routeLoading, setRouteLoading] = useState(false)
-  const [routeInfo, setRouteInfo] = useState(null)
+  function resolveOutdoorRouteId(value, fallback = '') {
+    const raw = String(value || '').trim()
+    if (!raw) return fallback
+    const mapped = OUTDOOR_ROUTE_IDS[raw.toLowerCase()] || raw
+    return buildings.some(building => String(building.id) === String(mapped)) ? String(mapped) : fallback
+  }
 
   const [cinematicMode, setCinematicMode] = useState(false)
   const [cinematicStep, setCinematicStep] = useState(0)
@@ -889,11 +957,17 @@ export default function CampusNavigator() {
     const from = buildings.find(b => String(b.id) === String(fromValue))
     const to = buildings.find(b => String(b.id) === String(toValue))
     if (!from || !to) return
+    if (String(from.id) === String(to.id)) {
+      setRouteLoading(false)
+      setRoutePath(null)
+      setRouteInfo({ distance: '0m', duration: '0 min', mode: ROUTE_PROFILES[mode]?.label || ROUTE_PROFILES.foot.label })
+      return
+    }
     const profile = ROUTE_PROFILES[mode] || ROUTE_PROFILES.foot
     setRouteLoading(true)
     setRoutePath(null)
     setRouteInfo(null)
-    const speedKmh = profile.speedKmh
+
     try {
       if (mode === 'foot') {
         const campusWalkRoute = buildCampusWalkRoute(campus, from, to)
@@ -904,23 +978,18 @@ export default function CampusNavigator() {
           return
         }
       }
-      const [lat1, lon1] = from.coords
-      const [lat2, lon2] = to.coords
-      const res = await fetch(
-        `https://router.project-osrm.org/route/v1/${profile.osrmProfile}/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`
-      )
-      const data = await res.json()
-      if (data.routes?.[0]) {
-        const coords = data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng])
-        setRoutePath(coords)
-        const dist = data.routes[0].distance
-        const dur = Math.max(1, Math.ceil((dist / 1000) / speedKmh * 60))
-        setRouteInfo({ distance: formatDistance(dist), duration: `${dur} min`, mode: profile.label })
-      } else {
-        throw new Error('No OSRM route found')
-      }
+
+      const osrmRoute = await fetchOsrmRoute(from, to, profile)
+      const duration = Math.max(1, Math.ceil((osrmRoute.distance / 1000) / profile.speedKmh * 60))
+      setRoutePath(osrmRoute.path)
+      setRouteInfo({
+        distance: formatDistance(osrmRoute.distance),
+        duration: `${duration} min`,
+        mode: profile.label,
+        source: 'osrm',
+      })
     } catch {
-      setRoutePath([from.coords, to.coords])
+      setRoutePath(compactRoutePath([from.coords, to.coords]))
       setRouteInfo(fallbackRouteInfo(from, to, profile))
     }
     setRouteLoading(false)
@@ -929,6 +998,31 @@ export default function CampusNavigator() {
   async function fetchRoute() {
     await calculateOutdoorRoute(routeFrom, routeTo, routeMode)
   }
+
+  useEffect(() => {
+    let pending = null
+    try {
+      const raw = sessionStorage.getItem('sc_pending_route')
+      if (!raw) return
+      pending = JSON.parse(raw)
+    } catch {
+      return
+    }
+
+    const from = String(pending?.from || '')
+    const to = String(pending?.to || '')
+    if (!from || !to || !buildings.some(b => String(b.id) === from) || !buildings.some(b => String(b.id) === to)) return
+    sessionStorage.removeItem('sc_pending_route')
+
+    const mode = pending.mode || 'foot'
+    setActiveTab('map')
+    setRouteMode(mode)
+    setRouteFrom(from)
+    setRouteTo(to)
+    setRoutePath(null)
+    setRouteInfo(null)
+    calculateOutdoorRoute(from, to, mode)
+  }, [buildings, universityId])
 
   function applyCopilotRoute(routeSuggestion) {
     if (!routeSuggestion?.type || routeSuggestion.type === 'none') return
@@ -945,8 +1039,12 @@ export default function CampusNavigator() {
     }
 
     if (routeSuggestion.type === 'outdoor') {
-      const from = OUTDOOR_ROUTE_IDS[routeSuggestion.from] || routeSuggestion.from || '1'
-      const to = OUTDOOR_ROUTE_IDS[routeSuggestion.to] || routeSuggestion.to
+      const from = resolveOutdoorRouteId(routeSuggestion.from, '1')
+      const to = resolveOutdoorRouteId(routeSuggestion.to)
+      if (!to) {
+        setChatMessages(prev => [...prev, { role: 'model', text: 'Nu am gasit destinatia pe harta campusului. Alege una dintre destinatiile rapide si calculez ruta.' }])
+        return
+      }
       setRouteFrom(from)
       setRouteTo(to)
       setRoutePath(null)
@@ -985,8 +1083,8 @@ export default function CampusNavigator() {
 
     if (routeSuggestion?.type === 'outdoor') {
       const profile = ROUTE_PROFILES[routeMode] || ROUTE_PROFILES.foot
-      const fromId = OUTDOOR_ROUTE_IDS[routeSuggestion.from] || routeSuggestion.from || '1'
-      const toId = OUTDOOR_ROUTE_IDS[routeSuggestion.to] || routeSuggestion.to
+      const fromId = resolveOutdoorRouteId(routeSuggestion.from, '1')
+      const toId = resolveOutdoorRouteId(routeSuggestion.to)
       const fromB = buildings.find(b => String(b.id) === fromId)
       const toB = buildings.find(b => String(b.id) === toId)
       if (!fromB || !toB) return
@@ -1003,27 +1101,25 @@ export default function CampusNavigator() {
             setRouteInfo(campusWalkRoute.info)
           }
         }
-        if (pathData) {
-          steps = buildOutdoorCinematicSteps(pathData, actions, fromB, toB)
-        } else {
-        const [lat1, lon1] = fromB.coords
-        const [lat2, lon2] = toB.coords
-        const res = await fetch(
-          `https://router.project-osrm.org/route/v1/${profile.osrmProfile}/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`
-        )
-        const data = await res.json()
-        if (data.routes?.[0]) {
-          pathData = data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng])
-          const dist = data.routes[0].distance
-          const dur = Math.max(1, Math.ceil((dist / 1000) / profile.speedKmh * 60))
+
+        if (!pathData) {
+          const osrmRoute = await fetchOsrmRoute(fromB, toB, profile)
+          pathData = osrmRoute.path
+          const duration = Math.max(1, Math.ceil((osrmRoute.distance / 1000) / profile.speedKmh * 60))
           setRoutePath(pathData)
-          setRouteInfo({ distance: formatDistance(dist), duration: `${dur} min`, mode: profile.label })
-        }
+          setRouteInfo({
+            distance: formatDistance(osrmRoute.distance),
+            duration: `${duration} min`,
+            mode: profile.label,
+            source: 'osrm',
+          })
         }
       } catch {
-        pathData = [fromB.coords, toB.coords]
-        setRoutePath(pathData)
-        setRouteInfo(fallbackRouteInfo(fromB, toB, profile))
+        if (!pathData) {
+          pathData = compactRoutePath([fromB.coords, toB.coords])
+          setRoutePath(pathData)
+          setRouteInfo(fallbackRouteInfo(fromB, toB, profile))
+        }
       }
       if (pathData) steps = buildOutdoorCinematicSteps(pathData, actions, fromB, toB)
     } else if (routeSuggestion?.type === 'indoor') {
@@ -1196,14 +1292,71 @@ export default function CampusNavigator() {
     submitAiCompass(chatInput, attachmentFromDataUrl(dataUrl, 'image/jpeg'))
   }
 
+  function startLostMode() {
+    setActiveTab('chat')
+    setChatInput('')
+    setChatAttachment(null)
+    setChatMessages(prev => [
+      ...prev,
+      {
+        role: 'model',
+        text: 'Ok, intrăm în modul de orientare rapidă. Trimite o poză din jur sau alege direct un reper important și îți propun ruta.',
+        destinationOptions: AI_COMPASS_DESTINATIONS,
+      },
+    ])
+    setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 80)
+  }
+
   return (
-    <div className="space-y-6 p-4 sm:p-6">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+    <div className="space-y-5 overflow-auto p-4 sm:p-6">
+      <motion.div className="hidden" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl font-bold text-white">Navigator Campus</h1>
         <p className="text-slate-400 mt-1">Hartă, AI chat și recunoaștere vizuală.</p>
       </motion.div>
 
-      <div className="flex gap-2 flex-wrap">
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 90, damping: 20 }}
+        className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#080e1c] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_18px_48px_-28px_rgba(0,0,0,0.95)] sm:p-6"
+      >
+        <div className="pointer-events-none absolute inset-0 dot-grid opacity-35" />
+        <div className="pointer-events-none absolute -right-24 -top-28 h-80 w-80 rounded-full bg-indigo-500/14 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-emerald-500/8 blur-3xl" />
+        <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/45 to-transparent" />
+
+        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-500/[0.08] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-300">
+              <Activity size={11} strokeWidth={2.2} />
+              {campus.name}
+            </div>
+            <h1 className="text-[2rem] font-bold leading-none tracking-tight text-white sm:text-[2.35rem]">
+              Navigator Campus
+            </h1>
+            <p className="mt-3 max-w-[56ch] text-[13px] font-medium leading-relaxed text-slate-500">
+              Harta campusului, trasee pietonale, AI Compass si plan interior pentru sali. Salut, {firstName}.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 sm:min-w-[420px]">
+            {campusStats.map(({ label, value, icon: Icon, color }) => (
+              <div
+                key={label}
+                className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+              >
+                <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-xl border" style={{ color, background: `${color}18`, borderColor: `${color}28` }}>
+                  <Icon size={15} strokeWidth={1.8} />
+                </div>
+                <p className="font-mono text-lg font-bold leading-none text-white">{value}</p>
+                <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-slate-600">{label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      <div className="hidden">
         {[
           { id: 'map', label: 'Hartă', icon: MapPin },
           { id: 'chat', label: 'AI Compass', icon: Sparkles },
@@ -1222,23 +1375,71 @@ export default function CampusNavigator() {
         ))}
       </div>
 
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+          {navigatorTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`group relative min-h-14 rounded-2xl border px-3.5 text-left transition-all duration-200 active:scale-[0.98] sm:min-w-[156px] ${
+                activeTab === tab.id
+                  ? 'border-indigo-400/35 bg-indigo-500/[0.13] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
+                  : 'border-white/[0.06] bg-white/[0.025] text-slate-400 hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-slate-200'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <span className={`flex h-8 w-8 items-center justify-center rounded-xl border transition-colors ${
+                  activeTab === tab.id ? 'border-indigo-400/25 bg-indigo-500/18 text-indigo-200' : 'border-white/[0.06] bg-white/[0.03] text-slate-500 group-hover:text-slate-300'
+                }`}>
+                  <tab.icon size={15} strokeWidth={1.85} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[12px] font-bold leading-tight">{tab.label}</span>
+                  <span className="block text-[10px] font-semibold leading-tight text-slate-600">{tab.desc}</span>
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+
+      <button
+        type="button"
+        onClick={startLostMode}
+        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-rose-400/25 bg-rose-500/[0.09] px-4 text-sm font-bold text-rose-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-all hover:bg-rose-500/[0.14] active:scale-[0.98] sm:w-auto"
+      >
+        <LocateFixed size={16} strokeWidth={2} />
+        M-am rătăcit
+      </button>
+      </div>
+
       <AnimatePresence mode="wait">
         {activeTab === 'map' && (
           <motion.div key="map" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             className="space-y-4">
 
-            <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] p-4">
-              <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+            <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#080e1c] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+              <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/35 to-transparent" />
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="section-label mb-1">Traseu outdoor</p>
+                  <h2 className="flex items-center gap-2 text-sm font-bold text-white">
+                    <Route size={15} className="text-indigo-400" /> Calculeaza ruta
+                  </h2>
+                </div>
+                <Badge variant="primary">{activeRouteProfile.label}</Badge>
+              </div>
+              <h2 className="hidden text-sm font-semibold text-white mb-3 items-center gap-2">
                 <Route size={15} className="text-indigo-400" /> Calculează traseu
               </h2>
-              <div className="flex gap-1.5 mb-1">
+              <div className="mb-3 grid grid-cols-3 gap-2 sm:inline-grid sm:min-w-[360px]">
                 {[{ id: 'foot', label: '🚶 Pe jos' }, { id: 'bike', label: '🚲 Bicicletă' }, { id: 'car', label: '🚗 Mașină' }].map(m => (
                   <button key={m.id} onClick={() => {
                     setRouteMode(m.id)
                     if (routeFrom && routeTo) { calculateOutdoorRoute(routeFrom, routeTo, m.id) }
                     else { setRoutePath(null); setRouteInfo(null) }
                   }}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${routeMode === m.id ? 'bg-indigo-600 text-white' : 'bg-white/[0.04] text-slate-400 hover:text-slate-200 border border-white/[0.07]'}`}>
+                    className={`min-h-9 rounded-xl border px-3 text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${routeMode === m.id ? 'border-indigo-400/35 bg-indigo-600/85 text-white' : 'border-white/[0.07] bg-white/[0.035] text-slate-400 hover:text-slate-200 hover:bg-white/[0.06]'}`}>
                     {m.label}
                   </button>
                 ))}
@@ -1247,16 +1448,16 @@ export default function CampusNavigator() {
                 <div className="flex-1 min-w-36">
                   <label className="text-xs text-slate-400 mb-1 block">De la</label>
                   <select value={routeFrom} onChange={e => { setRouteFrom(e.target.value); setRoutePath(null) }}
-                    className="w-full px-3 py-2 rounded-xl bg-white/[0.03] text-slate-200 text-sm border border-white/[0.07] focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                    className="input-base">
                     <option value="">Alege punct de start...</option>
                     {buildings.map(b => <option key={b.id} value={b.id} className="bg-slate-900">{b.name}</option>)}
                   </select>
                 </div>
-                <ArrowRight size={16} className="text-slate-400 mb-2 shrink-0" />
+                <ArrowRight size={16} className="hidden sm:block text-slate-400 mb-2 shrink-0" />
                 <div className="flex-1 min-w-36">
                   <label className="text-xs text-slate-400 mb-1 block">La</label>
                   <select value={routeTo} onChange={e => { setRouteTo(e.target.value); setRoutePath(null) }}
-                    className="w-full px-3 py-2 rounded-xl bg-white/[0.03] text-slate-200 text-sm border border-white/[0.07] focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                    className="input-base">
                     <option value="">Alege destinație...</option>
                     {buildings.map(b => <option key={b.id} value={b.id} className="bg-slate-900">{b.name}</option>)}
                   </select>
@@ -1281,8 +1482,12 @@ export default function CampusNavigator() {
                   </span>
                   <span className="text-slate-500">•</span>
                   <span className="text-slate-400">~{routeInfo.duration} {ROUTE_PROFILES[routeMode]?.durationLabel}</span>
-                  <span className="text-xs text-green-400 bg-green-900/20 px-2 py-0.5 rounded-lg">
-                    Traseu calculat
+                  <span className={`text-xs px-2 py-0.5 rounded-lg ${
+                    routeInfo.source === 'direct-estimate'
+                      ? 'text-amber-300 bg-amber-500/10'
+                      : 'text-green-400 bg-green-900/20'
+                  }`}>
+                    {routeInfo.source === 'direct-estimate' ? 'Estimare directa' : 'Traseu calculat'}
                   </span>
                   </div>
                   {routeFrom && routeTo && (() => {
@@ -1307,7 +1512,7 @@ export default function CampusNavigator() {
               )}
             </div>
 
-            <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] px-4 py-3 flex flex-wrap items-center gap-4">
+            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] flex flex-wrap items-center gap-4">
               <button
                 onClick={() => setShowCrowd(v => !v)}
                 className="flex items-center gap-3 select-none cursor-pointer"
@@ -1367,7 +1572,7 @@ export default function CampusNavigator() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2">
-                <div className="rounded-2xl overflow-hidden border border-white/[0.06] relative" style={{ height: 460 }}>
+                <div className="h-[58dvh] min-h-[360px] sm:h-[460px] rounded-2xl overflow-hidden border border-white/[0.06] relative">
                   <MapContainer center={campusCenter} zoom={16} style={{ height: '100%', width: '100%' }} zoomControl={true}>
                     <TileLayer
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -1446,26 +1651,44 @@ export default function CampusNavigator() {
                       const displayPath = cinematicMode && cinematicSteps[cinematicStep]?.pathSlice
                         ? cinematicSteps[cinematicStep].pathSlice
                         : routePath
-                      return <>
-                        <Polyline positions={displayPath} color="#f97316" weight={6} opacity={0.25} />
-                        <Polyline positions={displayPath} color="#ffffff" weight={4} opacity={0.8} />
-                        <Polyline positions={displayPath} color="#f97316" weight={3} opacity={1} dashArray="10 6" />
-                      </>
+                      return (
+                        <Polyline
+                          positions={displayPath}
+                          color={routeInfo?.source === 'direct-estimate' ? '#f59e0b' : '#f97316'}
+                          weight={4}
+                          opacity={0.95}
+                          dashArray={routeInfo?.source === 'direct-estimate' ? '8 8' : undefined}
+                        />
+                      )
                     })()}
 
                     <FlyTo coords={!routePath ? selectedBuilding?.coords : null} />
                     <FitRoute path={routePath} />
                   </MapContainer>
 
+                  <button
+                    type="button"
+                    onClick={startLostMode}
+                    className="absolute right-3 top-3 z-[1000] inline-flex min-h-12 max-w-[calc(100%-5.5rem)] items-center gap-3 rounded-2xl border border-rose-300/35 bg-[#0c1120]/95 px-3.5 pr-4 text-left shadow-[0_16px_36px_-16px_rgba(0,0,0,0.95),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl transition-all hover:border-rose-300/55 hover:bg-[#14192a]/95 active:scale-[0.98] sm:right-4 sm:top-4 sm:max-w-none"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-rose-300/30 bg-rose-500/18 text-rose-100">
+                      <LocateFixed size={16} strokeWidth={2.2} />
+                    </span>
+                    <span className="leading-tight">
+                      <span className="block text-[12px] font-bold text-white">M-am rătăcit</span>
+                      <span className="block text-[10px] font-semibold text-rose-200/75">AI Compass rapid</span>
+                    </span>
+                  </button>
+
                   {selectedBuilding && !routePath && (
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                       className="absolute bottom-4 left-4 right-4 bg-[#0c1120] rounded-xl shadow-lg p-4 border border-white/[0.07] z-[1000]">
-                      <div className="flex items-center justify-between">
-                        <div>
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
                           <p className="font-medium text-white">{selectedBuilding.name}</p>
                           <p className="text-xs text-slate-400">{selectedBuilding.distance} • {selectedBuilding.time}</p>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           <Button size="sm" variant="secondary" onClick={() => openExternalMap(selectedBuilding, 'google')}>
                             Google
                           </Button>
@@ -1488,9 +1711,9 @@ export default function CampusNavigator() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="rounded-2xl border border-white/[0.07] bg-[#080e1c]/70 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] space-y-2">
                 <h2 className="text-sm font-semibold text-white">Destinații</h2>
-                {buildings.map((building) => (
+                {visibleDestinations.map((building) => (
                   <motion.div key={building.id} whileHover={{ x: 4 }}
                     onClick={() => setSelectedBuilding(building)}
                     className={`p-3 rounded-xl border cursor-pointer transition-all duration-200 ${
@@ -1529,15 +1752,25 @@ export default function CampusNavigator() {
 
         {activeTab === 'chat' && (
           <motion.div key="chat" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-            className="bg-white/[0.02] rounded-2xl border border-white/[0.06] overflow-hidden h-[520px] flex flex-col">
-            <div className="p-4 border-b border-white/[0.05] flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center">
-                <Sparkles size={18} className="text-white" />
+            className="bg-white/[0.02] rounded-2xl border border-white/[0.06] overflow-hidden h-[70dvh] min-h-[520px] flex flex-col">
+            <div className="p-4 border-b border-white/[0.05] flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center">
+                  <Sparkles size={18} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">AI Compass</p>
+                  <p className="text-xs text-slate-500">Chat, poza si ghidare campus</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-semibold text-white">AI Compass</p>
-                <p className="text-xs text-slate-500">Chat, poza si ghidare campus</p>
-              </div>
+              <button
+                type="button"
+                onClick={startLostMode}
+                className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-rose-400/20 bg-rose-500/[0.08] px-3 text-xs font-bold text-rose-100 transition-colors hover:bg-rose-500/[0.13] active:scale-[0.98]"
+              >
+                <LocateFixed size={14} />
+                M-am rătăcit
+              </button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -1595,7 +1828,7 @@ export default function CampusNavigator() {
               <div ref={chatBottomRef} />
             </div>
 
-            <form onSubmit={sendChat} className="p-4 border-t border-white/[0.05]">
+            <form onSubmit={sendChat} className="p-3 sm:p-4 border-t border-white/[0.05]">
               {chatAttachment && (
                 <div className="mb-3 flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.03] p-2">
                   <img
@@ -1616,7 +1849,7 @@ export default function CampusNavigator() {
                   </button>
                 </div>
               )}
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3">
                 <input ref={chatFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleChatPhoto} />
                 <button
                   type="button"
@@ -1639,7 +1872,7 @@ export default function CampusNavigator() {
                   placeholder="Unde e sala C310? Cum ajung la cantină?..."
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.03] text-slate-200 border border-white/[0.07] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm placeholder:text-slate-600"
+                  className="min-w-0 flex-1 px-3 sm:px-4 py-2.5 rounded-xl bg-white/[0.03] text-slate-200 border border-white/[0.07] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm placeholder:text-slate-600"
                 />
                 <button type="submit" disabled={(!chatInput.trim() && !chatAttachment) || chatLoading}
                   className="p-2.5 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-50 cursor-pointer">

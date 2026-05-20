@@ -1,6 +1,23 @@
-import { ArrowRight, Bell, BellRing, CalendarCheck, CheckCheck, Compass, GraduationCap, Menu, MessageSquare, Search, Settings, Sparkles, Wifi, WifiOff, X } from 'lucide-react'
+import {
+  ArrowRight,
+  Bell,
+  BellRing,
+  CalendarCheck,
+  CheckCheck,
+  Compass,
+  GraduationCap,
+  Menu,
+  MessageSquare,
+  Search,
+  Settings,
+  Sparkles,
+  Wifi,
+  WifiOff,
+  X,
+} from 'lucide-react'
 import clsx from 'clsx'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useNotifications } from '../../shared/hooks/useNotifications'
 import { useSocket } from '../../shared/hooks/useSocket'
 import { useToast } from '../../shared/components/Toast'
@@ -13,6 +30,7 @@ const VIEW_TITLES = {
   thesis:     { title: 'Thesis Finder',               sub: 'Găsește îndrumătorul potrivit' },
   tutoring:   { title: 'Peer Tutoring',               sub: 'Învață de la colegi, ajută colegii' },
   messages:   { title: 'Mesaje',                      sub: 'Comunicare academică directă' },
+  pulse:      { title: 'Campus Pulse',                sub: 'Semnale live din viata de campus' },
   discounts:  { title: 'Reduceri & Beneficii',        sub: 'Oferte studențești și beneficii locale' },
   career:     { title: 'Carieră & Internship-uri',    sub: 'Oportunități personalizate pe facultate' },
   community:  { title: 'Comunitate',                  sub: 'Grupuri, mentori și evenimente studențești' },
@@ -25,7 +43,7 @@ const MODES = [
 ]
 
 const NOTIFICATION_FILTERS = [
-  { id: 'all', label: 'Toate' },
+  { id: 'all',    label: 'Toate' },
   { id: 'unread', label: 'Necitite' },
 ]
 
@@ -57,26 +75,35 @@ function timeAgo(value) {
   return `${Math.floor(hours / 24)} zile`
 }
 
-export default function Header({ platformMode = 'academic', onModeChange, currentView, profile, session, onMenuClick, onSearchOpen, onNavigate }) {
+export default function Header({
+  platformMode = 'academic',
+  onModeChange,
+  currentView,
+  profile,
+  session,
+  onMenuClick,
+  onSearchOpen,
+  onNavigate,
+}) {
   const { title, sub } = VIEW_TITLES[currentView] || VIEW_TITLES.dashboard
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifFilter, setNotifFilter] = useState('all')
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [settingsHovered, setSettingsHovered] = useState(false)
   const [settings, setSettings] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('sc_settings') || '{}')
-    } catch {
-      return {}
-    }
+    try { return JSON.parse(localStorage.getItem('sc_settings') || '{}') }
+    catch { return {} }
   })
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications(session?.userId)
   const { connected } = useSocket()
   const toast = useToast()
   const seenNotificationIds = useRef(new Set())
   const initializedNotifications = useRef(false)
-  const filteredNotifications = useMemo(() => (
-    notifFilter === 'unread' ? notifications.filter(n => !n.read) : notifications
-  ), [notifFilter, notifications])
+
+  const filteredNotifications = useMemo(
+    () => notifFilter === 'unread' ? notifications.filter(n => !n.read) : notifications,
+    [notifFilter, notifications],
+  )
   const visible = filteredNotifications.slice(0, 8)
   const university = session?.university
   const theme = getUniversityTheme(university)
@@ -113,8 +140,16 @@ export default function Header({ platformMode = 'academic', onModeChange, curren
     setNotifOpen(false)
   }
 
+  // Dropdown animation config
+  const dropdownAnim = {
+    initial: { opacity: 0, y: -8, scale: 0.97 },
+    animate: { opacity: 1, y: 0, scale: 1 },
+    exit: { opacity: 0, y: -8, scale: 0.97 },
+    transition: { type: 'spring', stiffness: 300, damping: 28 },
+  }
+
   return (
-    <header className="h-[3.75rem] bg-[#060a15]/92 backdrop-blur-xl border-b border-white/[0.05] flex items-center px-5 gap-4 shrink-0 relative z-30 shadow-[0_1px_0_rgba(0,0,0,0.4)]">
+    <header className="h-[3.75rem] bg-[#060a15]/95 backdrop-blur-xl border-b border-white/[0.05] flex items-center px-5 gap-4 shrink-0 relative z-30 shadow-[0_1px_0_rgba(0,0,0,0.4)]">
 
       {/* Hamburger — mobile only */}
       <button
@@ -124,7 +159,7 @@ export default function Header({ platformMode = 'academic', onModeChange, curren
         <Menu size={14} className="text-slate-400" strokeWidth={1.75} />
       </button>
 
-      {/* Title */}
+      {/* Title area */}
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2.5">
           <h1 className="font-bold text-white text-[15px] leading-none tracking-tight truncate">{title}</h1>
@@ -141,8 +176,16 @@ export default function Header({ platformMode = 'academic', onModeChange, curren
         <p className="text-[11px] text-slate-600 mt-0.5 truncate font-medium">{sub}</p>
       </div>
 
-      {/* Mode switcher — floating glass pill */}
-      <div className="hidden sm:flex p-[1px] rounded-full bg-white/[0.05] border border-white/[0.07] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+      {/* Connection status dot */}
+      <div className="hidden lg:flex items-center gap-1.5 shrink-0">
+        <div className={clsx('w-1.5 h-1.5 rounded-full shrink-0', connected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400')} />
+        <span className={clsx('text-[11px] font-semibold', connected ? 'text-emerald-500' : 'text-amber-500')}>
+          {connected ? 'Live' : 'Offline'}
+        </span>
+      </div>
+
+      {/* Mode switcher — premium pill */}
+      <div className="hidden sm:flex p-[1px] rounded-full bg-gradient-to-b from-white/[0.08] to-white/[0.03] border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
         {MODES.map(({ id, label, icon: Icon }) => {
           const active = platformMode === id
           return (
@@ -151,210 +194,296 @@ export default function Header({ platformMode = 'academic', onModeChange, curren
               onClick={() => onModeChange(id)}
               className={clsx(
                 'relative inline-flex h-8 items-center gap-1.5 rounded-full px-4 text-[12px] font-semibold transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.97]',
-                active
-                  ? 'text-white shadow-[0_1px_0_rgba(255,255,255,0.08)_inset]'
-                  : 'text-slate-600 hover:text-slate-300',
+                active ? 'text-white shadow-[0_1px_0_rgba(255,255,255,0.08)_inset]' : 'text-slate-600 hover:text-slate-300',
               )}
               style={active ? { background: theme.accentSoft, color: theme.accent } : undefined}
             >
-              <Icon size={13} strokeWidth={active ? 2.25 : 1.75} />
-              {label}
+              {active && (
+                <motion.div
+                  layoutId="mode-pill"
+                  className="absolute inset-0 rounded-full"
+                  style={{ background: theme.accentSoft }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                />
+              )}
+              <Icon size={13} strokeWidth={active ? 2.25 : 1.75} className="relative z-10" />
+              <span className="relative z-10">{label}</span>
             </button>
           )
         })}
       </div>
 
-      {/* Search */}
+      {/* Search bar */}
       <button
         onClick={onSearchOpen}
-        className="hidden xl:flex items-center gap-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.07] rounded-xl px-3 py-2 w-56 transition-all duration-200 text-left"
+        className="hidden xl:flex items-center gap-2 bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.07] hover:border-white/[0.12] rounded-xl px-3 py-2 w-56 transition-all duration-200 text-left group"
       >
-        <Search size={13} className="text-slate-600 shrink-0" strokeWidth={1.75} />
-        <span className="text-[13px] text-slate-700 font-medium flex-1">Caută...</span>
-        <kbd className="text-[10px] text-slate-700 border border-white/[0.07] rounded px-1.5 py-0.5">⌘K</kbd>
+        <Search size={13} className="text-slate-600 shrink-0 group-hover:text-slate-400 transition-colors" strokeWidth={1.75} />
+        <span className="text-[13px] text-slate-700 group-hover:text-slate-500 font-medium flex-1 transition-colors">
+          Caută în StudentCompass...
+        </span>
+        <kbd className="text-[10px] text-slate-700 border border-white/[0.07] rounded-md px-1.5 py-0.5 font-mono shrink-0">
+          ⌘K
+        </kbd>
       </button>
 
       {/* Notifications */}
       <div className="relative">
         <button
           onClick={() => setNotifOpen(v => !v)}
-          className="relative w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.07] transition-all duration-200 active:scale-[0.95]"
+          className={clsx(
+            'relative w-8 h-8 rounded-xl border flex items-center justify-center transition-all duration-200 active:scale-[0.95]',
+            unreadCount > 0
+              ? 'border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.07]'
+              : 'border-white/[0.07] bg-white/[0.03] hover:bg-white/[0.07]',
+          )}
         >
-          <Bell size={14} className="text-slate-500" strokeWidth={1.75} />
+          <Bell
+            size={14}
+            className={unreadCount > 0 ? 'text-slate-300' : 'text-slate-500'}
+            strokeWidth={1.75}
+          />
           {unreadCount > 0 && (
-            <span
-              className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-[#070b14]"
-              style={{ background: theme.accent }}
-            >
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
+            <>
+              {/* glow-pulse ring */}
+              <span
+                className="absolute inset-[-2px] rounded-xl animate-glow-pulse"
+                style={{ boxShadow: `0 0 0 1.5px ${theme.accent}40` }}
+              />
+              <span
+                className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-[#060a15]"
+                style={{ background: theme.accent }}
+              >
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            </>
           )}
         </button>
 
-        {notifOpen && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
-            <div className="absolute right-0 top-10 w-80 max-w-[calc(100vw-2rem)] z-50 animate-slide-up">
-              <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.1] to-white/[0.03]">
-                <div className="rounded-[calc(1rem-1px)] bg-[#0c1120] border border-white/[0.05] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.8)] overflow-hidden">
-                  <div className="px-4 py-3 border-b border-white/[0.06]">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[13px] font-semibold text-white">Notificari</p>
-                        <div className="mt-1 flex items-center gap-1.5 text-[10px] font-semibold text-slate-600">
-                          {connected ? <Wifi size={11} className="text-emerald-400" /> : <WifiOff size={11} className="text-amber-400" />}
-                          {connected ? 'Live conectat' : 'Offline, sincronizare locala'}
+        <AnimatePresence>
+          {notifOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+              <motion.div
+                className="absolute right-0 top-10 w-80 max-w-[calc(100vw-2rem)] z-50"
+                {...dropdownAnim}
+              >
+                <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.1] to-white/[0.03]">
+                  <div className="rounded-[calc(1rem-1px)] bg-[#0c1120] border border-white/[0.05] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.8)] overflow-hidden">
+
+                    {/* Header */}
+                    <div className="px-4 py-3 border-b border-white/[0.06]">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[13px] font-bold text-white">Notificari</p>
+                          <div className="mt-1 flex items-center gap-1.5 text-[10px] font-semibold text-slate-600">
+                            {connected
+                              ? <Wifi size={10} className="text-emerald-400" />
+                              : <WifiOff size={10} className="text-amber-400" />}
+                            {connected ? 'Live conectat' : 'Offline, sincronizare locala'}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {unreadCount > 0 && (
+                            <button
+                              onClick={markAllRead}
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold hover:opacity-80 transition-opacity"
+                              style={{ color: theme.accent }}
+                            >
+                              <CheckCheck size={12} />
+                              Marcheaza
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setNotifOpen(false)}
+                            className="text-slate-600 hover:text-slate-300 transition-colors"
+                          >
+                            <X size={14} strokeWidth={1.75} />
+                          </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {unreadCount > 0 && (
-                          <button onClick={markAllRead} className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: theme.accent }}>
-                            <CheckCheck size={13} />
-                            Marcheaza
-                          </button>
-                        )}
-                        <button onClick={() => setNotifOpen(false)} className="text-slate-600 hover:text-slate-300 transition-colors">
-                          <X size={14} strokeWidth={1.75} />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="mt-3 flex rounded-xl border border-white/[0.06] bg-white/[0.03] p-1">
-                      {NOTIFICATION_FILTERS.map(filter => (
-                        <button
-                          key={filter.id}
-                          onClick={() => setNotifFilter(filter.id)}
-                          className={clsx(
-                            'flex-1 rounded-lg px-3 py-1.5 text-[11px] font-bold transition-colors',
-                            notifFilter === filter.id ? 'bg-white/[0.08] text-white' : 'text-slate-600 hover:text-slate-300',
-                          )}
-                        >
-                          {filter.label}{filter.id === 'unread' && unreadCount > 0 ? ` (${unreadCount})` : ''}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="max-h-96 overflow-y-auto">
-                    {visible.length === 0 ? (
-                      <div className="px-4 py-10 text-center">
-                        <Bell size={20} className="text-slate-800 mx-auto mb-2" strokeWidth={1.5} />
-                        <p className="text-[13px] text-slate-600">{notifFilter === 'unread' ? 'Nu ai notificari necitite.' : 'Nu ai notificari noi.'}</p>
-                      </div>
-                    ) : (
-                      visible.map(n => {
-                        const Icon = getNotificationIcon(n)
-                        const route = getNotificationRoute(n)
-                        return (
+
+                      {/* Filter tabs */}
+                      <div className="mt-3 flex rounded-xl border border-white/[0.06] bg-white/[0.03] p-1">
+                        {NOTIFICATION_FILTERS.map(filter => (
                           <button
-                            key={n.id}
-                            onClick={() => openNotification(n)}
+                            key={filter.id}
+                            onClick={() => setNotifFilter(filter.id)}
                             className={clsx(
-                              'w-full text-left px-4 py-3 border-b border-white/[0.04] last:border-b-0 transition-colors group',
-                              n.read ? 'hover:bg-white/[0.03]' : 'bg-white/[0.025] hover:bg-white/[0.055]',
+                              'flex-1 rounded-lg px-3 py-1.5 text-[11px] font-bold transition-all duration-150',
+                              notifFilter === filter.id
+                                ? 'bg-white/[0.08] text-white shadow-sm'
+                                : 'text-slate-600 hover:text-slate-300',
                             )}
                           >
-                            <div className="flex items-start gap-3">
-                              <div
-                                className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border"
-                                style={{ background: n.read ? 'rgba(255,255,255,0.03)' : theme.accentSoft, borderColor: n.read ? 'rgba(255,255,255,0.06)' : theme.accentBorder }}
-                              >
-                                <Icon size={14} style={{ color: n.read ? '#64748b' : theme.accent }} />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2">
-                                  <p className="text-[13px] font-semibold text-slate-200 truncate">{n.title || 'Notificare'}</p>
-                                  {!n.read && <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: theme.accent }} />}
-                                </div>
-                                <p className="text-[11px] text-slate-600 leading-relaxed mt-0.5 line-clamp-2">{n.body || n.text}</p>
-                                <div className="mt-2 flex items-center justify-between gap-2">
-                                  <span className="text-[10px] font-mono text-slate-700">{timeAgo(n.timestamp || n.createdAt)}</span>
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: theme.accent }}>
-                                    {route.view}
-                                    <ArrowRight size={11} />
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
+                            {filter.label}
+                            {filter.id === 'unread' && unreadCount > 0 ? ` (${unreadCount})` : ''}
                           </button>
-                        )
-                      })
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Notification list */}
+                    <div className="max-h-96 overflow-y-auto">
+                      {visible.length === 0 ? (
+                        <div className="px-4 py-10 text-center">
+                          <Bell size={20} className="text-slate-800 mx-auto mb-2" strokeWidth={1.5} />
+                          <p className="text-[13px] text-slate-600">
+                            {notifFilter === 'unread' ? 'Nu ai notificari necitite.' : 'Nu ai notificari noi.'}
+                          </p>
+                        </div>
+                      ) : (
+                        visible.map(n => {
+                          const Icon = getNotificationIcon(n)
+                          const route = getNotificationRoute(n)
+                          return (
+                            <button
+                              key={n.id}
+                              onClick={() => openNotification(n)}
+                              className={clsx(
+                                'w-full text-left px-4 py-3 border-b border-white/[0.04] last:border-b-0 transition-colors group',
+                                n.read ? 'hover:bg-white/[0.03]' : 'bg-white/[0.025] hover:bg-white/[0.055]',
+                              )}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div
+                                  className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-colors"
+                                  style={{
+                                    background: n.read ? 'rgba(255,255,255,0.03)' : theme.accentSoft,
+                                    borderColor: n.read ? 'rgba(255,255,255,0.06)' : theme.accentBorder,
+                                  }}
+                                >
+                                  <Icon size={14} style={{ color: n.read ? '#64748b' : theme.accent }} />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-[13px] font-semibold text-slate-200 truncate">
+                                      {n.title || 'Notificare'}
+                                    </p>
+                                    {!n.read && (
+                                      <span
+                                        className="h-1.5 w-1.5 rounded-full shrink-0"
+                                        style={{ background: theme.accent }}
+                                      />
+                                    )}
+                                  </div>
+                                  <p className="text-[11px] text-slate-600 leading-relaxed mt-0.5 line-clamp-2">
+                                    {n.body || n.text}
+                                  </p>
+                                  <div className="mt-2 flex items-center justify-between gap-2">
+                                    <span className="text-[10px] font-mono text-slate-700">
+                                      {timeAgo(n.timestamp || n.createdAt)}
+                                    </span>
+                                    <span
+                                      className="inline-flex items-center gap-1 text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                                      style={{ color: theme.accent }}
+                                    >
+                                      {route.view}
+                                      <ArrowRight size={10} />
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          )
+                        })
+                      )}
+                    </div>
+
+                    {filteredNotifications.length > visible.length && (
+                      <div className="border-t border-white/[0.05] px-4 py-2 text-center text-[11px] text-slate-700">
+                        Se afiseaza ultimele {visible.length} din {filteredNotifications.length}.
+                      </div>
                     )}
                   </div>
-                  {filteredNotifications.length > visible.length && (
-                    <div className="border-t border-white/[0.05] px-4 py-2 text-center text-[11px] text-slate-700">
-                      Se afiseaza ultimele {visible.length} din {filteredNotifications.length}.
-                    </div>
-                  )}
                 </div>
-              </div>
-            </div>
-          </>
-        )}
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Settings */}
-      <button
-        onClick={() => setSettingsOpen(v => !v)}
-        className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.07] transition-all duration-200 active:scale-[0.95]"
-      >
-        <Settings size={14} className="text-slate-500" strokeWidth={1.75} />
-      </button>
+      <div className="relative">
+        <button
+          onClick={() => setSettingsOpen(v => !v)}
+          onMouseEnter={() => setSettingsHovered(true)}
+          onMouseLeave={() => setSettingsHovered(false)}
+          className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.07] transition-all duration-200 active:scale-[0.95]"
+          style={{ transform: settingsHovered ? 'rotate(30deg)' : 'rotate(0deg)', transition: 'transform 300ms ease, background 150ms' }}
+        >
+          <Settings size={14} className="text-slate-500" strokeWidth={1.75} />
+        </button>
 
-      {settingsOpen && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setSettingsOpen(false)} />
-          <div className="absolute right-5 top-14 w-80 max-w-[calc(100vw-2rem)] z-50 animate-slide-up">
-            <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.1] to-white/[0.03]">
-              <div className="rounded-[calc(1rem-1px)] bg-[#0c1120] border border-white/[0.05] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.8)] overflow-hidden">
-                <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
-                  <p className="text-[13px] font-semibold text-white">Setari rapide</p>
-                  <button onClick={() => setSettingsOpen(false)} className="text-slate-600 hover:text-slate-300 transition-colors">
-                    <X size={14} strokeWidth={1.75} />
-                  </button>
-                </div>
-                <div className="p-4 space-y-3">
-                  {[
-                    ['compactMode', 'Mod compact', 'Afiseaza listele mai dens.'],
-                    ['voiceGuidance', 'Ghidare vocala', 'Pastreaza vocea activata pentru tururi.'],
-                    ['emailDigest', 'Digest email', 'Grupeaza notificarile academice zilnic.'],
-                  ].map(([key, label, text]) => (
-                    <button
-                      key={key}
-                      onClick={() => updateSetting(key, !settings[key])}
-                      className="w-full flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-3 text-left hover:bg-white/[0.05] transition-colors"
-                    >
-                      <span>
-                        <span className="block text-[13px] font-semibold text-slate-200">{label}</span>
-                        <span className="block text-[11px] text-slate-600 mt-0.5">{text}</span>
-                      </span>
-                      <span
-                        className="relative h-5 w-9 rounded-full border transition-colors shrink-0"
-                        style={{
-                          background: settings[key] ? theme.accentSoft : 'rgba(255,255,255,0.04)',
-                          borderColor: settings[key] ? theme.accentBorder : 'rgba(255,255,255,0.08)',
-                        }}
+        <AnimatePresence>
+          {settingsOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setSettingsOpen(false)} />
+              <motion.div
+                className="absolute right-0 top-10 w-80 max-w-[calc(100vw-2rem)] z-50"
+                {...dropdownAnim}
+              >
+                <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.1] to-white/[0.03]">
+                  <div className="rounded-[calc(1rem-1px)] bg-[#0c1120] border border-white/[0.05] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.8)] overflow-hidden">
+                    <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+                      <p className="text-[13px] font-bold text-white">Setari rapide</p>
+                      <button
+                        onClick={() => setSettingsOpen(false)}
+                        className="text-slate-600 hover:text-slate-300 transition-colors"
                       >
-                        <span
-                          className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform"
-                          style={{ transform: settings[key] ? 'translateX(17px)' : 'translateX(2px)' }}
-                        />
-                      </span>
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => {
-                      onModeChange(platformMode === 'academic' ? 'life' : 'academic')
-                      setSettingsOpen(false)
-                    }}
-                    className="btn-primary w-full text-sm"
-                  >
-                    Comuta in modul {platformMode === 'academic' ? 'Viata' : 'Academic'}
-                  </button>
+                        <X size={14} strokeWidth={1.75} />
+                      </button>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      {[
+                        ['compactMode',    'Mod compact',     'Afiseaza listele mai dens.'],
+                        ['voiceGuidance',  'Ghidare vocala',  'Pastreaza vocea activata pentru tururi.'],
+                        ['emailDigest',    'Digest email',    'Grupeaza notificarile academice zilnic.'],
+                      ].map(([key, label, text]) => (
+                        <button
+                          key={key}
+                          onClick={() => updateSetting(key, !settings[key])}
+                          className="w-full flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-3 text-left hover:bg-white/[0.05] transition-all duration-150"
+                        >
+                          <span>
+                            <span className="block text-[13px] font-semibold text-slate-200">{label}</span>
+                            <span className="block text-[11px] text-slate-600 mt-0.5">{text}</span>
+                          </span>
+                          {/* Toggle */}
+                          <span
+                            className="relative h-5 w-9 rounded-full border transition-all duration-200 shrink-0"
+                            style={{
+                              background: settings[key] ? theme.accentSoft : 'rgba(255,255,255,0.04)',
+                              borderColor: settings[key] ? theme.accentBorder : 'rgba(255,255,255,0.08)',
+                            }}
+                          >
+                            <span
+                              className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform duration-200 shadow-sm"
+                              style={{ transform: settings[key] ? 'translateX(17px)' : 'translateX(2px)' }}
+                            />
+                          </span>
+                        </button>
+                      ))}
+
+                      <div className="gradient-separator" />
+
+                      <button
+                        onClick={() => {
+                          onModeChange(platformMode === 'academic' ? 'life' : 'academic')
+                          setSettingsOpen(false)
+                        }}
+                        className="btn-primary w-full text-sm"
+                      >
+                        Comuta in modul {platformMode === 'academic' ? 'Viata' : 'Academic'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Mobile mode switcher — bottom bar */}
       <div className="fixed inset-x-3 bottom-3 z-[60] flex gap-1 rounded-2xl border border-white/[0.08] bg-[#070b14]/95 p-1 shadow-2xl backdrop-blur-xl sm:hidden">
