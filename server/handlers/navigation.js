@@ -10,7 +10,7 @@ const KEY_FILES = [
   resolve(process.cwd(), '..', '..', '..', 'navigatie', 'navigator-export', 'key.txt'),
 ]
 
-const SYSTEM_PROMPT = `Ești Campus AI, asistentul inteligent al studenților de la Universitatea Tehnică "Gheorghe Asachi" din Iași (TUIASI).
+const TUIASI_SYSTEM_PROMPT = `Ești Campus AI, asistentul inteligent al studenților de la Universitatea Tehnică "Gheorghe Asachi" din Iași (TUIASI).
 Răspunzi ÎNTOTDEAUNA în română, concis și practic. Ești prietenos dar la obiect — nu filozofa, nu da răspunsuri vagi.
 
 ═══════════════════════════════════════
@@ -33,13 +33,12 @@ ALTE CLĂDIRI TUIASI & SERVICII
 ═══════════════════════════════════════
 - Biblioteca Gh. Asachi: L-V 08:00-20:00, S 09:00-14:00; ~9 min de la AC
 - Cantina Studențească TUIASI: L-V 11:00-15:00, prânz ~15 lei; 2 min de la AC
-- Facultatea ETTI: Bd. Carol I 11, cartier Copou; ~12 min cu tramvaiul
+- Facultatea ETTI: Bd. Carol I 11A; ~12 min cu tramvaiul
 - Facultatea IEEIA: Bd. Prof. D. Mangeron, ~5 min pe jos
 - Facultatea MEC: Bd. Prof. D. Mangeron, ~3 min pe jos
-- Cămine Tudor Vladimirescu (C1-C8): ~500m de facultate, 7 min pe jos
+- Cămine Tudor Vladimirescu: ~500m de facultate, 7 min pe jos
 - Iulius Mall: 2km nord-vest; acces tramvai, L-D 10:00-22:00
 - ATM BRD Mangeron: la intrarea AC, 24/7
-- Cafenea Corner: lângă Corp A, L-V 07:30-19:00, Wi-Fi gratuit
 - Magazin Petru / Magazin Luca: L-D 07:00-22:00, 2 min de facultate
 - Copisterie Mangeron: lângă AC, L-V 08:00-17:00
 - Farmacie Dacia: Bd. Mangeron, L-V 08:00-20:00
@@ -50,10 +49,60 @@ REGULI DE RĂSPUNS
 1. Sală (ex: "unde e Lab C1-1"): spune ETAJUL și cum se ajunge.
 2. Traseu: pași clari și concreți.
 3. Orar (secretariat, cantină, bibliotecă): ore exacte.
-4. Mâncare: Cantina TUIASI (prânz ieftin), Cafenea Corner (mic dejun), Magazin Petru/Luca (snacks).
+4. Mâncare: Cantina TUIASI (prânz ieftin), Magazin Petru/Luca (snacks).
 5. Dacă NU e despre campus: "Nu am informații despre asta, dar te pot ajuta să navighezi campusul TUIASI."
 6. NU inventa. Dacă nu știi sigur: "Nu am date exacte despre asta."
 7. Maxim 4-5 propoziții. Fii specific.`
+
+const UAIC_SYSTEM_PROMPT = `Ești Campus AI, asistentul inteligent al studenților de la Universitatea Alexandru Ioan Cuza din Iași (UAIC).
+Răspunzi ÎNTOTDEAUNA în română, concis și practic. Ești prietenos dar la obiect — nu filozofa, nu da răspunsuri vagi.
+
+═══════════════════════════════════════
+CORP B – FACULTATEA DE INFORMATICĂ (FII)
+═══════════════════════════════════════
+PARTER: Secretariat FII (L-V 09:00-13:00), Amf. „E. Otelea", Lab. Info 0-1, Sala Info 0-2
+ETAJ 1: Lab. Info 1-1, Lab. Info 1-2
+ETAJ 2: Lab. Info 2-1, Birouri Profesori
+ETAJ 3: Lab. Info 3-1, Decanat FII
+ETAJ 4: Sala Conferințe
+SCARĂ: la capătul coridorului principal.
+
+═══════════════════════════════════════
+CORP A – RECTORAT UAIC & ALTE FACULTĂȚI (Bd. Carol I 11)
+═══════════════════════════════════════
+Rectorat UAIC, Facultatea de Matematică, Fizică, Chimie, Biologie — toate pe Bd. Carol I nr. 11.
+
+═══════════════════════════════════════
+ALTE CLĂDIRI UAIC & SERVICII
+═══════════════════════════════════════
+- BCU Biblioteca Centrală „Mihai Eminescu": L-V 09:00-20:00, S 09:00-14:00; ~7 min de la FII
+- Cantina UAIC: L-V 11:00-19:00; ~5 min de la FII
+- FEAA (Facultatea de Economie): Bd. Carol I 22; ~3 min pe jos, ușor spre nord
+- Facultatea de Drept: Bd. Carol I 11, în campus
+- Cămine Codrescu (Aleea M. Sadoveanu): ~700m de FII; 10 min pe jos
+- Piața Unirii: ~5 min pe jos, stații de transport, cafenele, bănci
+- Parcul Copou: ~10 min pe jos; teiul lui Eminescu, studiu outdoor
+- Minimarket Profi: Bd. Carol I; alimente și produse zilnice
+- Farmacie Salvator: Bd. Carol I; L-V 08:00-20:00
+- ATM BRD: Bd. Carol I, la intrarea principală UAIC; 24/7
+
+═══════════════════════════════════════
+REGULI DE RĂSPUNS
+═══════════════════════════════════════
+1. Sală (ex: "unde e Lab Info 1-1"): spune ETAJUL și cum se ajunge.
+2. Traseu: pași clari și concreți.
+3. Orar (secretariat, cantină, bibliotecă): ore exacte.
+4. Mâncare: Cantina UAIC, cafenele pe Bd. Carol I, Minimarket Profi.
+5. Dacă NU e despre campus: "Nu am informații despre asta, dar te pot ajuta să navighezi campusul UAIC."
+6. NU inventa. Dacă nu știi sigur: "Nu am date exacte despre asta."
+7. Maxim 4-5 propoziții. Fii specific.`
+
+function getSystemPrompt(university) {
+  return university === 'uaic' ? UAIC_SYSTEM_PROMPT : TUIASI_SYSTEM_PROMPT
+}
+
+// Keep SYSTEM_PROMPT as alias for backward compat
+const SYSTEM_PROMPT = TUIASI_SYSTEM_PROMPT
 
 const COPILOT_JSON_SCHEMA = `{
   "answer": "Raspuns scurt, conversational, in romana.",
@@ -78,8 +127,16 @@ const COPILOT_JSON_SCHEMA = `{
   }
 }`
 
-const KNOWN_INDOOR_ROOMS = ['secretariat-ac', 'amf-ac0-1', 'lab-a0-1', 'sala-ac0-2', 'lab-c1-1', 'lab-c1-2', 'lab-c2-1', 'birou-c2-5', 'lab-a3-1', 'sala-a3-2', 'sala-conf']
-const KNOWN_BUILDINGS = ['corp-c', 'corp-a', 'library', 'canteen', 'secretariat', 'etti', 'ieeia', 'mec', 'ci', 'icpm', 'arh', 'cmmi', 'hgim', 'sim', 'dima']
+const KNOWN_INDOOR_ROOMS_TUIASI = ['secretariat-ac', 'amf-ac0-1', 'lab-a0-1', 'sala-ac0-2', 'lab-c1-1', 'lab-c1-2', 'lab-c2-1', 'birou-c2-5', 'lab-a3-1', 'sala-a3-2', 'sala-conf']
+const KNOWN_INDOOR_ROOMS_UAIC   = ['secretariat-fii', 'amf-otelea', 'lab-info-0', 'sala-info-0', 'lab-info-1a', 'lab-info-1b', 'lab-info-2a', 'birou-prof', 'lab-info-3a', 'decanat-fii', 'sala-conf-fii']
+const KNOWN_INDOOR_ROOMS = [...KNOWN_INDOOR_ROOMS_TUIASI, ...KNOWN_INDOOR_ROOMS_UAIC]
+
+const KNOWN_BUILDINGS_TUIASI = ['corp-c', 'corp-a', 'library', 'canteen', 'secretariat', 'etti', 'ieeia', 'mec', 'ci', 'icpm', 'arh', 'cmmi', 'hgim', 'sim', 'dima']
+const KNOWN_BUILDINGS_UAIC   = ['rectorat-uaic', 'fii', 'matematica', 'fizica', 'chimie', 'biologie', 'drept', 'litere', 'filosofie', 'psihologie', 'feaa', 'geografie', 'bcu', 'secretariat-fii', 'camine-codrescu', 'canteen-uaic']
+const KNOWN_BUILDINGS = [...KNOWN_BUILDINGS_TUIASI, ...KNOWN_BUILDINGS_UAIC]
+
+function knownRooms(university)    { return university === 'uaic' ? KNOWN_INDOOR_ROOMS_UAIC   : KNOWN_INDOOR_ROOMS_TUIASI }
+function knownBuildings(university) { return university === 'uaic' ? KNOWN_BUILDINGS_UAIC       : KNOWN_BUILDINGS_TUIASI }
 
 function safeJson(raw, fallback) {
   try {
@@ -130,13 +187,14 @@ function normalizeCopilotPayload(payload, fallbackAnswer = '') {
   }
 }
 
-function inferVisualLocation(text) {
+function inferVisualLocation(text, university = 'tuiasi') {
   const normalized = String(text || '').toLowerCase()
+  // For UAIC users, don't override — let the AI answer stand
+  if (university === 'uaic') return null
+  // For TUIASI: if the AI mistakenly says FII/Informatică, correct it to AC TUIASI
   if (
-    normalized.includes('informatic') ||
     normalized.includes('corp c') ||
-    normalized.includes('facultatea de info') ||
-    normalized.includes('fii')
+    normalized.includes('automatica si calculatoare')
   ) {
     return {
       type: 'outdoor',
@@ -156,8 +214,8 @@ function normalizeVisibleLocationText(text, inferredLocation) {
     .replace(/\bCorp C\b/gi, inferredLocation.label)
 }
 
-function applyVisualLocation(payload, visualAnswer) {
-  const inferred = inferVisualLocation(visualAnswer)
+function applyVisualLocation(payload, visualAnswer, university = 'tuiasi') {
+  const inferred = inferVisualLocation(visualAnswer, university)
   if (!inferred) return payload
 
   payload.detectedLocation = {
@@ -168,53 +226,85 @@ function applyVisualLocation(payload, visualAnswer) {
   return payload
 }
 
-function inferIndoorRoom(...texts) {
+function inferIndoorRoom(university, ...texts) {
   const normalized = texts.map(text => String(text || '').toLowerCase()).join(' ')
-  for (const room of KNOWN_INDOOR_ROOMS) {
+  const rooms = knownRooms(university)
+  for (const room of rooms) {
     if (normalized.includes(room)) return room
   }
-  if (normalized.includes('c 210') || normalized.includes('c210') || normalized.includes('lab c2')) return 'lab-c2-1'
-  if (normalized.includes('c 308') || normalized.includes('c308') || normalized.includes('a3') || normalized.includes('daia')) return 'lab-a3-1'
-  if (normalized.includes('c 112') || normalized.includes('c112') || normalized.includes('lab c1')) return 'lab-c1-1'
+  if (university === 'uaic') {
+    if (normalized.includes('secretariat') || normalized.includes('fii')) return 'secretariat-fii'
+    if (normalized.includes('otelea') || normalized.includes('amfiteatru')) return 'amf-otelea'
+    if (normalized.includes('decanat')) return 'decanat-fii'
+    if ((normalized.includes('lab') || normalized.includes('laborator')) && normalized.includes('info')) return 'lab-info-1a'
+    if (normalized.includes('birouri') || normalized.includes('profesori')) return 'birou-prof'
+  } else {
+    if (normalized.includes('c 210') || normalized.includes('c210') || normalized.includes('lab c2')) return 'lab-c2-1'
+    if (normalized.includes('c 308') || normalized.includes('c308') || normalized.includes('a3') || normalized.includes('daia')) return 'lab-a3-1'
+    if (normalized.includes('c 112') || normalized.includes('c112') || normalized.includes('lab c1')) return 'lab-c1-1'
+    if (normalized.includes('secretariat')) return 'secretariat-ac'
+  }
   return null
 }
 
-function inferOutdoorBuilding(...texts) {
+function inferOutdoorBuilding(university, ...texts) {
   const normalized = texts.map(text => String(text || '').toLowerCase()).join(' ')
-  if (normalized.includes('biblioteca')) return 'library'
-  if (normalized.includes('cantina')) return 'canteen'
-  if (normalized.includes('corp a')) return 'corp-a'
-  if (normalized.includes('corp c') || normalized.includes('automatic') || normalized.includes('calculatoare') || normalized.includes('informatic') || normalized.includes('fii')) return 'corp-c'
-  if (normalized.includes('secretariat')) return 'secretariat'
-  if (normalized.includes('etti') || normalized.includes('electronica') || normalized.includes('telecomunicatii')) return 'etti'
-  if (normalized.includes('ieeia') || normalized.includes('electrica') || normalized.includes('energetica')) return 'ieeia'
-  if (normalized.includes('mecanica') || normalized.includes('mecanic')) return 'mec'
-  if (normalized.includes('constructii') || normalized.includes('instalatii')) return 'ci'
-  if (normalized.includes('chimie') || normalized.includes('chimica') || normalized.includes('icpm') || normalized.includes('simionescu')) return 'icpm'
-  if (normalized.includes('arhitectura') || normalized.includes('cantacuzino')) return 'arh'
-  if (normalized.includes('cmmi') || normalized.includes('masini') || normalized.includes('management industrial')) return 'cmmi'
-  if (normalized.includes('hgim') || normalized.includes('hidrotehnica') || normalized.includes('geodezie')) return 'hgim'
-  if (normalized.includes('sim') || normalized.includes('materialelor')) return 'sim'
-  if (normalized.includes('dima') || normalized.includes('design industrial')) return 'dima'
+  if (university === 'uaic') {
+    if (normalized.includes('biblioteca') || normalized.includes('bcu')) return 'bcu'
+    if (normalized.includes('cantina')) return 'canteen-uaic'
+    if (normalized.includes('feaa') || normalized.includes('economie')) return 'feaa'
+    if (normalized.includes('informatica') || normalized.includes('fii') || normalized.includes('corp b')) return 'fii'
+    if (normalized.includes('rectorat')) return 'rectorat-uaic'
+    if (normalized.includes('drept')) return 'drept'
+    if (normalized.includes('matematica')) return 'matematica'
+    if (normalized.includes('fizica')) return 'fizica'
+    if (normalized.includes('chimie')) return 'chimie'
+    if (normalized.includes('biologie')) return 'biologie'
+    if (normalized.includes('litere')) return 'litere'
+    if (normalized.includes('filosofie')) return 'filosofie'
+    if (normalized.includes('psihologie')) return 'psihologie'
+    if (normalized.includes('geografie') || normalized.includes('geologie')) return 'geografie'
+    if (normalized.includes('camine') || normalized.includes('codrescu')) return 'camine-codrescu'
+    if (normalized.includes('secretariat')) return 'secretariat-fii'
+  } else {
+    if (normalized.includes('biblioteca')) return 'library'
+    if (normalized.includes('cantina')) return 'canteen'
+    if (normalized.includes('corp a')) return 'corp-a'
+    if (normalized.includes('corp c') || normalized.includes('automatic') || normalized.includes('calculatoare') || normalized.includes('informatic')) return 'corp-c'
+    if (normalized.includes('secretariat')) return 'secretariat'
+    if (normalized.includes('etti') || normalized.includes('electronica') || normalized.includes('telecomunicatii')) return 'etti'
+    if (normalized.includes('ieeia') || normalized.includes('electrica') || normalized.includes('energetica')) return 'ieeia'
+    if (normalized.includes('mecanica') || normalized.includes('mecanic')) return 'mec'
+    if (normalized.includes('constructii') || normalized.includes('instalatii')) return 'ci'
+    if (normalized.includes('chimie') || normalized.includes('chimica') || normalized.includes('icpm') || normalized.includes('simionescu')) return 'icpm'
+    if (normalized.includes('arhitectura') || normalized.includes('cantacuzino')) return 'arh'
+    if (normalized.includes('cmmi') || normalized.includes('masini') || normalized.includes('management industrial')) return 'cmmi'
+    if (normalized.includes('hgim') || normalized.includes('hidrotehnica') || normalized.includes('geodezie')) return 'hgim'
+    if (normalized.includes('sim') || normalized.includes('materialelor')) return 'sim'
+    if (normalized.includes('dima') || normalized.includes('design industrial')) return 'dima'
+  }
   return null
 }
 
-function withImageOnlyPrompt(payload, visualAnswer, message) {
+function withImageOnlyPrompt(payload, visualAnswer, message, university = 'tuiasi') {
   const normalizedMessage = String(message || '').trim()
-  const inferred = inferVisualLocation(visualAnswer)
+  const inferred = inferVisualLocation(visualAnswer, university)
   const hasDestination = payload.destination?.room || payload.destination?.buildingId
 
-  applyVisualLocation(payload, visualAnswer)
+  applyVisualLocation(payload, visualAnswer, university)
 
   if (!hasDestination && !normalizedMessage) {
     const cleanVisionAnswer = normalizeVisibleLocationText(String(visualAnswer || '').trim(), inferred)
+    const exampleDest = university === 'uaic'
+      ? 'Lab Info 1-1, Secretariat FII, BCU sau Cantina.'
+      : 'C210, Secretariat, Biblioteca sau Cantina.'
     payload.answer = inferred
       ? `${cleanVisionAnswer || `Recunosc zona: pare sa fie ${inferred.label}.`} Unde vrei sa ajungi de aici?`
-      : 'Am analizat poza, dar am nevoie de un reper mai clar. Unde vrei sa ajungi?'
+      : `Am analizat poza. Unde vrei sa ajungi? De exemplu: ${exampleDest}`
     payload.destination = { type: 'unknown', label: null, room: null, buildingId: null }
     payload.routeSuggestion = { type: 'none', from: null, to: null }
     payload.actions = [
-      'Spune destinatia, de exemplu C210, Secretariat, Biblioteca sau Cantina.',
+      `Spune destinatia, de exemplu ${exampleDest}`,
       'Daca esti pe coridor, trimite o poza cu usa salii sau cu indicatorul de etaj.',
     ]
   }
@@ -295,9 +385,55 @@ async function handleAssistant(req, res) {
   sendJson(res, 200, { answer })
 }
 
+const PHOTO_PROMPT_UAIC = `Ești AI Compass pentru StudentCompass.
+Studentul este înscris la UAIC (Universitatea Alexandru Ioan Cuza din Iași, Bd. Carol I 11).
+Poza este din campusul UAIC. Identifică clădirea sau zona exactă.
+
+Clădirile UAIC pe care le poți recunoaște:
+• Facultatea de Informatică FII – Corp B, intrare separată, clădire modernă
+• Rectorat UAIC – Corp A, clădire istorică, Bd. Carol I 11
+• Facultatea de Matematică, Fizică, Chimie, Biologie, Drept, Litere, Filosofie, Psihologie – Bd. Carol I 11
+• Facultatea de Economie FEAA – Bd. Carol I 22
+• BCU Biblioteca Centrală „Mihai Eminescu" – Bd. Carol I
+• Cantina UAIC – Bd. Carol I
+• Cămine Codrescu – Aleea M. Sadoveanu
+• Parcul Copou
+
+Răspunde în română, în 2-3 fraze:
+1. Universitatea: UAIC și locația probabilă (clădire sau reper)
+2. Indiciile vizuale principale (arhitectură, plăcuțe, sigle, vegetație etc.)
+3. Gradul de certitudine (sigur / probabil / nesigur)
+
+Nu genera traseu și nu întreba destinația.`
+
+const PHOTO_PROMPT_TUIASI = `Ești AI Compass pentru StudentCompass.
+Studentul este înscris la TUIASI (Universitatea Tehnică "Gheorghe Asachi" din Iași, Bd. Mangeron).
+Poza este din campusul TUIASI. Identifică clădirea sau zona exactă.
+
+Clădirile TUIASI pe care le poți recunoaște:
+• Facultatea de Automatică și Calculatoare (AC) – Corp C (CTI) sau Corp A (DAIA), Bd. Mangeron 27
+• Facultatea ETTI – Bd. Carol I 11A
+• Facultatea IEEIA – Bd. Mangeron
+• Facultatea de Mecanică – Bd. Mangeron
+• Facultatea CI, ICPM, Arhitectură, CMMI, HGIM, SIM, DIMA – Bd. Mangeron
+• Biblioteca Gh. Asachi – Bd. Carol I
+• Rectorat TUIASI – Bd. Carol I
+• Cantina TUIASI – Campus Tudor Vladimirescu
+• Cămine Tudor Vladimirescu (T1–T19)
+
+Răspunde în română, în 2-3 fraze:
+1. Universitatea: TUIASI și locația probabilă (clădire sau reper)
+2. Indiciile vizuale principale (arhitectură, plăcuțe, sigle, vegetație etc.)
+3. Gradul de certitudine (sigur / probabil / nesigur)
+
+Nu genera traseu și nu întreba destinația.`
+
 async function handlePhoto(req, res) {
   const body = await readJson(req)
   const mimeType = body.mimeType || 'image/jpeg'
+  const university = body.university || 'tuiasi'
+  const prompt = university === 'uaic' ? PHOTO_PROMPT_UAIC : PHOTO_PROMPT_TUIASI
+
   const rawAnswer = await grokChat({
     model: VISION_MODEL,
     messages: [
@@ -305,22 +441,13 @@ async function handlePhoto(req, res) {
         role: 'user',
         content: [
           { type: 'image_url', image_url: { url: `data:${mimeType};base64,${body.base64 || ''}` } },
-          {
-            type: 'text',
-            text: `Esti AI Compass pentru StudentCompass.
-Analizeaza imaginea strict ca recunoastere de locatie in campus.
-Daca poza arata cladirea Facultatii de Automatica si Calculatoare TUIASI, Corp C sau Corp A, numeste-o exact "Facultatea de Automatica si Calculatoare TUIASI". Nu folosi "Facultatea de Informatica", "FII" sau "UAIC".
-Raspunde in romana, in 1-2 fraze: locatia probabila si indiciul vizual care te-a facut sa o recunosti.
-Nu genera traseu si nu intreba destinatia; aplicatia va intreba automat dupa raspunsul tau.`,
-          },
+          { type: 'text', text: prompt },
         ],
       },
     ],
-    max_tokens: 420,
+    max_tokens: 480,
   })
-  const inferred = inferVisualLocation(rawAnswer)
-  const answer = normalizeVisibleLocationText(rawAnswer, inferred)
-  sendJson(res, 200, { answer })
+  sendJson(res, 200, { answer: rawAnswer })
 }
 
 async function handleCopilot(req, res) {
@@ -328,7 +455,14 @@ async function handleCopilot(req, res) {
   const message = String(body.message || '')
   const image = body.image || null
   const context = body.context || {}
+  const university = String(context.university || body.university || 'tuiasi').toLowerCase()
   let visualAnswer = String(context.visualAnswer || '')
+
+  const indoorRooms = knownRooms(university)
+  const outdoorBuildings = knownBuildings(university)
+  const defaultStart = university === 'uaic' ? 'secretariat-fii' : 'secretariat-ac'
+  const outdoorDefaultStart = university === 'uaic' ? 'fii' : 'corp-c'
+  const sysPrompt = getSystemPrompt(university)
 
   if (image?.base64 && !visualAnswer) {
     visualAnswer = await grokChat({
@@ -340,18 +474,15 @@ async function handleCopilot(req, res) {
             { type: 'image_url', image_url: { url: `data:${image.mimeType || 'image/jpeg'};base64,${image.base64}` } },
             {
               type: 'text',
-              text: `Analizeaza imaginea ca ghid de campus TUIASI (Gheorghe Asachi).
-Identifica daca este Corp C (CTI), Corp A (DAIA), o intrare, un coridor, o sala sau un panou.
-Raspunde concis in romana cu:
-- locatia probabila
-- indicii vizuale observate
-- cat de sigur esti
-- daca nu exista destinatie in mesaj, intreaba unde vrea studentul sa ajunga.`,
+              text: `${university === 'uaic' ? PHOTO_PROMPT_UAIC : PHOTO_PROMPT_TUIASI}
+
+Dacă poți identifica o locație interioară (coridor, sală, panou), menționează și asta.
+Dacă există un mesaj de la student care indică o destinație, ține cont de el în răspuns.`,
             },
           ],
         },
       ],
-      max_tokens: 420,
+      max_tokens: 480,
     })
   }
 
@@ -359,9 +490,10 @@ Raspunde concis in romana cu:
 Analiza vizuala preliminara: ${visualAnswer || 'Nu exista poza atasata.'}
 
 Context cunoscut:
-- Campus: ${context.campus || 'TUIASI Gheorghe Asachi'}
-- Sali indoor disponibile: ${JSON.stringify(KNOWN_INDOOR_ROOMS)}
-- Cladiri outdoor disponibile: ${JSON.stringify(KNOWN_BUILDINGS)}
+- Campus: ${context.campus || (university === 'uaic' ? 'UAIC Iași' : 'TUIASI Gheorghe Asachi')}
+- Universitate: ${university.toUpperCase()}
+- Sali indoor disponibile: ${JSON.stringify(indoorRooms)}
+- Cladiri outdoor disponibile: ${JSON.stringify(outdoorBuildings)}
 - Orar apropiat: ${JSON.stringify(context.schedule || [])}
 - Ora curenta: ${context.currentTime || new Date().toISOString()}
 
@@ -370,12 +502,12 @@ Comporta-te ca AI Compass pentru StudentCompass. Foloseste analiza vizuala preli
 Raspunde strict cu JSON valid in schema:
 ${COPILOT_JSON_SCHEMA}
 
-IMPORTANT: Campul "actions" trebuie scris INTOTDEAUNA in engleza (este folosit pentru ghidare vocala). Campul "answer" ramane in romana.`
+IMPORTANT: Campul "actions" trebuie scris INTOTDEAUNA in engleza (ghidare vocala). Campul "answer" ramane in romana.`
 
   const raw = await grokChat({
     model: TEXT_MODEL,
     messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'system', content: sysPrompt },
       ...(Array.isArray(body.history) ? body.history.slice(-6) : []),
       { role: 'user', content: text },
     ],
@@ -385,10 +517,10 @@ IMPORTANT: Campul "actions" trebuie scris INTOTDEAUNA in engleza (este folosit p
 
   const parsed = safeJson(raw, { answer: raw })
   const normalized = normalizeCopilotPayload(parsed, visualAnswer || raw)
-  applyVisualLocation(normalized, visualAnswer)
+  applyVisualLocation(normalized, visualAnswer, university)
 
-  const inferredRoom = inferIndoorRoom(message, normalized.answer, normalized.destination.label)
-  const inferredBuilding = inferOutdoorBuilding(message, normalized.answer, normalized.destination.label)
+  const inferredRoom = inferIndoorRoom(university, message, normalized.answer, normalized.destination.label)
+  const inferredBuilding = inferOutdoorBuilding(university, message, normalized.answer, normalized.destination.label)
   if (inferredRoom && !normalized.destination.room) {
     normalized.destination = {
       ...normalized.destination,
@@ -398,7 +530,7 @@ IMPORTANT: Campul "actions" trebuie scris INTOTDEAUNA in engleza (este folosit p
     }
   }
   if (inferredRoom && (!normalized.routeSuggestion.to || normalized.routeSuggestion.type === 'none')) {
-    normalized.routeSuggestion = { type: 'indoor', from: normalized.detectedLocation.room || 'secretariat-ac', to: inferredRoom }
+    normalized.routeSuggestion = { type: 'indoor', from: normalized.detectedLocation.room || defaultStart, to: inferredRoom }
   }
   if (!inferredRoom && inferredBuilding && !normalized.destination.buildingId) {
     normalized.destination = {
@@ -408,17 +540,17 @@ IMPORTANT: Campul "actions" trebuie scris INTOTDEAUNA in engleza (este folosit p
       buildingId: inferredBuilding,
     }
   }
-  if (!inferredRoom && inferredBuilding && (!normalized.routeSuggestion.to || normalized.routeSuggestion.type === 'none')) {
-    normalized.routeSuggestion = { type: 'outdoor', from: 'corp-c', to: inferredBuilding }
+  if (!inferredRoom && inferredBuilding) {
+    normalized.routeSuggestion = { type: 'outdoor', from: outdoorDefaultStart, to: inferredBuilding }
   }
 
   if (normalized.routeSuggestion.type === 'indoor' && normalized.routeSuggestion.to && !normalized.routeSuggestion.from) {
-    normalized.routeSuggestion.from = normalized.detectedLocation.room || 'secretariat-ac'
+    normalized.routeSuggestion.from = normalized.detectedLocation.room || defaultStart
   }
   if (normalized.routeSuggestion.type === 'outdoor' && normalized.routeSuggestion.to && !normalized.routeSuggestion.from) {
-    normalized.routeSuggestion.from = 'corp-c'
+    normalized.routeSuggestion.from = outdoorDefaultStart
   }
-  sendJson(res, 200, withImageOnlyPrompt(normalized, visualAnswer, message))
+  sendJson(res, 200, withImageOnlyPrompt(normalized, visualAnswer, message, university))
 }
 
 async function handleRecommendations(req, res) {

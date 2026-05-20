@@ -18,8 +18,8 @@ export async function askCampusCopilot(payload) {
   return askNavigationCopilot(payload)
 }
 
-export async function analyzePhoto(base64Image, mimeType = 'image/jpeg') {
-  return analyzeNavigationPhoto({ base64: base64Image, mimeType })
+export async function analyzePhoto(base64Image, mimeType = 'image/jpeg', university = 'tuiasi') {
+  return analyzeNavigationPhoto({ base64: base64Image, mimeType, university })
 }
 
 export async function getSmartRecommendations({ schedule }) {

@@ -66,6 +66,16 @@ function toZones(users) {
   })
 }
 
+function makeHotspotsFromCenter(center) {
+  const [lat, lng] = center
+  return [
+    [lat,         lng        ],
+    [lat + 0.001, lng + 0.001],
+    [lat + 0.003, lng - 0.004],
+    [lat - 0.001, lng - 0.001],
+  ]
+}
+
 function startLocalSimulation(onUpdate, center, hotspots) {
   const users = Array.from({ length: 220 }, () => new SimulatedUser(center, hotspots))
   let timer = null
@@ -78,12 +88,14 @@ function startLocalSimulation(onUpdate, center, hotspots) {
   return () => window.clearTimeout(timer)
 }
 
-export function useCrowdSocket(enabled, center = DEFAULT_CAMPUS, hotspots = DEFAULT_HOTSPOTS) {
+export function useCrowdSocket(enabled, center = DEFAULT_CAMPUS, hotspots) {
   const [zones, setZones] = useState([])
   const [totalUsers, setTotalUsers] = useState(0)
   const [connected, setConnected] = useState(false)
   const [mode, setMode] = useState(null)
   const cleanupRef = useRef(null)
+
+  const resolvedHotspots = hotspots?.length ? hotspots : makeHotspotsFromCenter(center)
 
   useEffect(() => {
     if (!enabled) {
@@ -108,7 +120,7 @@ export function useCrowdSocket(enabled, center = DEFAULT_CAMPUS, hotspots = DEFA
         if (stopped) return
         setZones(nextZones)
         setTotalUsers(total)
-      }, center, hotspots)
+      }, center, resolvedHotspots)
     }
 
     const fallbackTimer = window.setTimeout(fallbackToLocal, 2500)
@@ -166,7 +178,7 @@ export function useCrowdSocket(enabled, center = DEFAULT_CAMPUS, hotspots = DEFA
       cleanupRef.current?.()
       cleanupRef.current = null
     }
-  }, [enabled, center, hotspots])
+  }, [enabled, center, resolvedHotspots])
 
   return { zones, totalUsers, connected, mode }
 }

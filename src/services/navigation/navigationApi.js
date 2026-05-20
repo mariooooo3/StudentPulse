@@ -24,16 +24,16 @@ export async function askNavigationCopilot({ message, image, history = [], conte
   try {
     return await post('/copilot', { message, image, history, context })
   } catch {
-    return localCopilotAnswer(message, image)
+    return localCopilotAnswer(message, image, context?.university)
   }
 }
 
-export async function analyzeNavigationPhoto({ base64, mimeType }) {
+export async function analyzeNavigationPhoto({ base64, mimeType, university = 'tuiasi' }) {
   try {
-    const data = await post('/photo', { base64, mimeType })
+    const data = await post('/photo', { base64, mimeType, university })
     return data.answer
   } catch {
-    return 'Analiza locala: imaginea a fost preluata. Cel mai probabil esti la Facultatea de Automatica si Calculatoare TUIASI, zona Corp C / Corp A de pe Mangeron. Pentru recunoastere reala porneste API-ul de navigatie cu cheia GROQ server-side.'
+    return 'Recunoaștere indisponibilă momentan (API offline). Trimite poza din nou sau descrie verbal locația — te ajut cu navigația pe hartă.'
   }
 }
 
@@ -112,9 +112,53 @@ function localAssistantAnswer(message) {
   return 'Pot ajuta cu rute intre Corp C, Corp A, biblioteca, cantina, secretariat si puncte de interes. Alege o destinatie pe harta sau intreaba despre un reper.'
 }
 
-function localCopilotAnswer(message, image) {
+function localCopilotAnswer(message, image, university = 'tuiasi') {
   const normalized = String(message || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
   const hasImage = Boolean(image?.base64)
+  const isUAIC = university === 'uaic'
+
+  if (isUAIC) {
+    const wantsSecretariat = normalized.includes('secretariat')
+    const wantsLab = normalized.includes('lab') || normalized.includes('laborator')
+    const wantsDecanat = normalized.includes('decanat')
+    const defaultRoom = wantsDecanat ? 'decanat-fii' : wantsSecretariat ? 'secretariat-fii' : wantsLab ? 'lab-info-1a' : null
+
+    if (defaultRoom) {
+      return {
+        answer: hasImage
+          ? `Am preluat poza. Te pozitionez la Facultatea de Informatica FII (UAIC) si pot trasa ruta interioara spre ${defaultRoom}.`
+          : `Pot trasa ruta interioara in FII spre ${defaultRoom}.`,
+        detectedLocation: { type: 'indoor', label: 'Facultatea de Informatica FII – UAIC', building: 'FII UAIC', room: 'secretariat-fii', confidence: hasImage ? 0.72 : 0.58 },
+        destination: { type: 'indoor', label: defaultRoom, room: defaultRoom, buildingId: null },
+        actions: ['Check the floor indicator near the stairs.', 'Follow the route marked on the indoor map.', 'Ask at the secretariat if you cannot find the room.'],
+        routeSuggestion: { type: 'indoor', from: 'secretariat-fii', to: defaultRoom },
+      }
+    }
+
+    const wantsBCU = normalized.includes('biblioteca') || normalized.includes('bcu')
+    const wantsCantina = normalized.includes('cantina')
+    const wantsFEAA = normalized.includes('feaa') || normalized.includes('economie')
+    if (wantsBCU || wantsCantina || wantsFEAA) {
+      const to = wantsBCU ? 'bcu' : wantsCantina ? 'canteen-uaic' : 'feaa'
+      return {
+        answer: `Am gasit destinatia si pot porni ghidarea pe harta campusului UAIC.`,
+        detectedLocation: { type: 'outdoor', label: hasImage ? 'Facultatea de Informatica FII – UAIC' : 'Campus UAIC', building: hasImage ? 'FII UAIC' : null, room: null, confidence: hasImage ? 0.68 : 0.5 },
+        destination: { type: 'outdoor', label: to, room: null, buildingId: to },
+        actions: ['Head towards Bd. Carol I.', 'Avoid crowded areas during class breaks.', 'Open the map for the full route.'],
+        routeSuggestion: { type: 'outdoor', from: 'fii', to },
+      }
+    }
+
+    return {
+      answer: hasImage ? 'Recunosc zona: poza pare sa fie din campusul UAIC (Bd. Carol I). Unde vrei sa ajungi de aici?' : localAssistantAnswer(message),
+      detectedLocation: { type: hasImage ? 'outdoor' : 'unknown', label: hasImage ? 'Campus UAIC – Bd. Carol I' : 'Fara poza', building: hasImage ? 'FII UAIC' : null, room: null, confidence: hasImage ? 0.68 : 0 },
+      destination: { type: 'unknown', label: null, room: null, buildingId: null },
+      actions: [hasImage ? 'Tell me your destination: Secretariat FII, Lab Info, BCU Library or Cantina.' : 'Type your destination, e.g. Secretariat FII or BCU.', 'If you are in a corridor, send a photo of the room door or floor sign.'],
+      routeSuggestion: { type: 'none', from: null, to: null },
+    }
+  }
+
+  // TUIASI fallback
   const wantsSecretariat = normalized.includes('secretariat')
   const wantsC2 = normalized.includes('c2') || normalized.includes('c 2') || normalized.includes('lab c2')
   const wantsC1 = normalized.includes('c1') || normalized.includes('c 1') || normalized.includes('lab c1')
