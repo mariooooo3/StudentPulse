@@ -720,6 +720,7 @@ export default function CampusNavigator() {
   function makeCopilotContext() {
     return {
       campus: campus.name,
+      university: universityId,
       currentTime: new Date().toISOString(),
       schedule: courses.slice(0, 4),
       buildings: buildings.map(({ id, name, type }) => ({ id, name, type })),
@@ -741,7 +742,7 @@ export default function CampusNavigator() {
     try {
       if (attachment) {
         if (!hasTypedMessage) {
-          const photoAnswer = await analyzePhoto(attachment.base64, attachment.mimeType)
+          const photoAnswer = await analyzePhoto(attachment.base64, attachment.mimeType, universityId)
           const answer = withDestinationQuestion(photoAnswer)
           setLastPhotoContext({ image: attachment, visualAnswer: photoAnswer })
           chatHistory.current = [
