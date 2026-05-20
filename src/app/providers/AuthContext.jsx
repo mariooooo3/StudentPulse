@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { restoreSession, persistSession, clearSession, getUserProfile, saveUserProfile } from '../../shared/services/auth.service'
+
 import { AUTH_STATE, PROFILE_STAGE } from '../../shared/config/constants'
 
 const AuthContext = createContext(null)
@@ -25,7 +26,15 @@ export function AuthProvider({ children }) {
             setProfile(JSON.parse(savedProfile))
             setProfileStage(PROFILE_STAGE.COMPLETE)
           } else {
-            setProfileStage(PROFILE_STAGE.ONBOARDING)
+            // Fallback: check localStorage for existing profile (e.g. new tab after onboarding)
+            const localProfile = getUserProfile(saved.email)
+            if (localProfile) {
+              sessionStorage.setItem('sc_profile', JSON.stringify(localProfile))
+              setProfile(localProfile)
+              setProfileStage(PROFILE_STAGE.COMPLETE)
+            } else {
+              setProfileStage(PROFILE_STAGE.ONBOARDING)
+            }
           }
           setAuthState(AUTH_STATE.AUTHENTICATED)
         } else {

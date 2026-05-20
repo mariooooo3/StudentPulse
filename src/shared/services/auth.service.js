@@ -68,6 +68,7 @@ export function persistSession(session) {
 export function clearSession() {
   sessionStorage.removeItem('sc_session')
   sessionStorage.removeItem('sc_profile')
+  sessionStorage.removeItem('sc_view_state')
 }
 
 export async function signOut() {

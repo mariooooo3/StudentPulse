@@ -34,11 +34,20 @@ const DEFAULT_VIEW_BY_MODE = {
   life: 'discounts',
 }
 
+function loadViewState() {
+  try {
+    const raw = sessionStorage.getItem('sc_view_state')
+    if (!raw) return null
+    return JSON.parse(raw)
+  } catch { return null }
+}
+
 function AppShell() {
   const { authState, profileStage, session, profile, completeOnboarding } = useAuth()
   const [showAuth, setShowAuth] = useState(false)
-  const [platformMode, setPlatformMode] = useState('academic')
-  const [currentViewByMode, setCurrentViewByMode] = useState(DEFAULT_VIEW_BY_MODE)
+  const savedViewState = loadViewState()
+  const [platformMode, setPlatformMode] = useState(savedViewState?.platformMode || 'academic')
+  const [currentViewByMode, setCurrentViewByMode] = useState(savedViewState?.currentViewByMode || DEFAULT_VIEW_BY_MODE)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const { count: onlineCount } = useOnlineCount()
@@ -72,21 +81,35 @@ function AppShell() {
     socketService.auth(session.userId, name, socketProfile)
   }, [authState, session?.userId, session?.email, session?.university, session?.detectedFaculty, profile])
 
-  const handleModeChange = (mode) => {
-    setPlatformMode(mode)
-    setCurrentViewByMode((views) => ({
-      ...views,
-      [mode]: views[mode] || DEFAULT_VIEW_BY_MODE[mode],
-    }))
+  const persistViewState = (mode, views) => {
+    try {
+      sessionStorage.setItem('sc_view_state', JSON.stringify({ platformMode: mode, currentViewByMode: views }))
+    } catch {}
   }
 
-  const handleNavigate = (view) => {
-    setCurrentViewByMode((views) => ({ ...views, [platformMode]: view }))
+  const handleModeChange = (mode) => {
+    setPlatformMode(mode)
+    setCurrentViewByMode((views) => {
+      const updated = { ...views, [mode]: views[mode] || DEFAULT_VIEW_BY_MODE[mode] }
+      persistViewState(mode, updated)
+      return updated
+    })
+  }
+
+  const handleNavigate = (view, mode) => {
+    const targetMode = mode || platformMode
+    if (mode && mode !== platformMode) {
+      setPlatformMode(mode)
+    }
+    setCurrentViewByMode((views) => {
+      const updated = { ...views, [targetMode]: view }
+      persistViewState(targetMode, updated)
+      return updated
+    })
   }
 
   const handleNotificationNavigate = (view, mode = 'academic') => {
-    handleModeChange(mode)
-    setCurrentViewByMode((views) => ({ ...views, [mode]: view }))
+    handleNavigate(view, mode)
   }
 
   if (authState === AUTH_STATE.LOADING) {
@@ -178,8 +201,7 @@ function AppShell() {
         <GlobalSearch
           profile={profile}
           onNavigate={(view, mode) => {
-            if (mode) handleModeChange(mode)
-            handleNavigate(view)
+            handleNavigate(view, mode)
             setSearchOpen(false)
           }}
           onClose={() => setSearchOpen(false)}
@@ -191,10 +213,7 @@ function AppShell() {
         profile={profile}
         platformMode={platformMode}
         currentView={currentView}
-        onNavigate={(view, mode) => {
-          if (mode) handleModeChange(mode)
-          handleNavigate(view)
-        }}
+        onNavigate={(view, mode) => handleNavigate(view, mode)}
       />
     </div>
   )

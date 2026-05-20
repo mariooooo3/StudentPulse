@@ -680,7 +680,7 @@ function FocusForest() {
   })
   const intervalRef = useRef(null)
   const prevDigitsRef = useRef(2)
-  const targetSeconds = minutes * 60
+  const targetSeconds = Math.max(1, minutes) * 60
   const hasTimer = mode === 'timer'
   const progress = hasTimer ? Math.min(1, elapsed / targetSeconds) : (elapsed % SECS_PER_DIGIT) / SECS_PER_DIGIT
 
@@ -1019,11 +1019,20 @@ function BudgetTab() {
   const CATEGORIES = ['Cazare', 'Mâncare', 'Transport', 'Cursuri', 'Distracție', 'Diverse']
   const AVERAGES = { Cazare: 800, Mâncare: 400, Transport: 100, Cursuri: 150, Distracție: 200, Diverse: 100 }
   const [budget, setBudget] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('sc_budget') || '{}') } catch { return {} }
+    try {
+      const raw = JSON.parse(localStorage.getItem('sc_budget') || '{}')
+      const sanitized = {}
+      for (const [k, v] of Object.entries(raw)) {
+        const n = Number(v)
+        if (!isNaN(n) && n >= 0) sanitized[k] = n
+      }
+      return sanitized
+    } catch { return {} }
   })
 
   function updateBudget(cat, val) {
-    const num = val === '' ? null : Math.max(0, Number(val))
+    const parsed = Number(val)
+    const num = val === '' ? null : isNaN(parsed) ? null : Math.max(0, parsed)
     const next = { ...budget, [cat]: num }
     setBudget(next)
     localStorage.setItem('sc_budget', JSON.stringify(next))

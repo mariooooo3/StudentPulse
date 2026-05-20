@@ -581,9 +581,11 @@ export default function DirectMessages({ session, profile }) {
 
   useEffect(() => {
     async function refresh() {
-      const threads = await listPortalThreadsForUser(currentUserId)
-      setPortalThreads(threads)
-      setActivePortal(prev => prev ? threads.find(thread => thread.id === prev.id) || null : null)
+      try {
+        const threads = await listPortalThreadsForUser(currentUserId)
+        setPortalThreads(threads)
+        setActivePortal(prev => prev ? threads.find(thread => thread.id === prev.id) || null : null)
+      } catch {}
     }
     refresh()
     window.addEventListener('sc:portal-messages', refresh)

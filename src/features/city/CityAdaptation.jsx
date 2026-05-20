@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MapPin, CheckSquare, Tag, Lightbulb, Bus, Shield, Home, ChevronRight, Star, Zap } from 'lucide-react'
+import { MapPin, CheckSquare, Tag, Lightbulb, Bus, Shield, Home, ChevronRight, Star } from 'lucide-react'
 import ArrivalAssistant from './ArrivalAssistant'
 import StudentDiscounts from './StudentDiscounts'
 import LocalTips from './LocalTips'
@@ -105,7 +105,7 @@ export default function CityAdaptation({ profile }) {
     if (activeModule === 'housing') return <StudentHousing {...props} />
   }
 
-  const city = profile?.university?.city || 'Iași'
+  const city = profile?.university?.city || profile?.universityCity || 'orașul tău'
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">
@@ -123,9 +123,9 @@ export default function CityAdaptation({ profile }) {
       {/* Quick stat chips */}
       <div className="flex gap-2 flex-wrap">
         {[
-          { icon: Zap, label: '3 sarcini urgente', color: '#ef4444' },
-          { icon: Tag, label: '12 reduceri active', color: '#10b981' },
-          { icon: Star, label: '10 sfaturi verificate', color: '#f59e0b' },
+          { icon: CheckSquare, label: 'Checklist sosire', color: '#6366f1' },
+          { icon: Tag, label: 'Reduceri studenți', color: '#10b981' },
+          { icon: Star, label: 'Sfaturi locale', color: '#f59e0b' },
         ].map(({ icon: Icon, label, color }) => (
           <div key={label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] text-xs text-slate-400">
             <Icon size={11} style={{ color }} />

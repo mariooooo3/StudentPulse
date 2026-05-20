@@ -44,8 +44,11 @@ export default function GlobalSearch({ profile, onNavigate, onClose }) {
 
   const showDefault = q.length < 1
 
+  useEffect(() => { setActive(0) }, [query])
+
   function handleKey(e) {
     if (e.key === 'Escape') { onClose(); return }
+    if (results.length === 0) return
     if (e.key === 'ArrowDown') { e.preventDefault(); setActive(i => Math.min(i + 1, results.length - 1)) }
     if (e.key === 'ArrowUp')   { e.preventDefault(); setActive(i => Math.max(i - 1, 0)) }
     if (e.key === 'Enter' && results[active]) { results[active].action(); onClose() }
@@ -108,7 +111,7 @@ export default function GlobalSearch({ profile, onNavigate, onClose }) {
                     const Icon = r.icon
                     return (
                       <button
-                        key={i}
+                        key={`${r.type}-${r.label}`}
                         onClick={() => { r.action(); onClose() }}
                         onMouseEnter={() => setActive(i)}
                         className={clsx(

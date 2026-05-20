@@ -12,6 +12,19 @@ The project was built during **FiiPractic Hackathon 2026** as a fast, modular pr
 
 ## Latest Updates
 
+- Navigation state (active module and platform mode) is now persisted in `sessionStorage` and restored on page refresh, so students no longer land back on the dashboard after refreshing mid-session.
+- Opening a new browser tab with an active session now correctly restores the user profile from `localStorage` instead of forcing the onboarding flow again.
+- Cross-module navigation from the Virtual Assistant and Global Search now switches both the platform mode and the target view atomically, eliminating a race condition that could send the user to the wrong section.
+- Global Search keyboard navigation resets the active index on each new query and guards against arrow-key presses when the result list is empty, preventing corrupted navigation state.
+- Global Search result items now use stable composite keys instead of array indices, fixing React DOM reuse that caused hover state to linger on the wrong result after a query change.
+- `useNotifications` unread count is now derived from the full notification list on each socket push instead of being incremented separately, eliminating the transient double-count that caused the badge to flash a higher number.
+- Virtual Assistant reset button now regenerates the greeting from the current role and context instead of preserving the original message from when the panel was first opened.
+- `socket.service` now falls back to a `'Request failed'` message when the server reply does not include an `error` field, replacing the previously silent `Error: undefined` rejection.
+- Budget Tracker input validation now guards against `NaN` values at both write time and `localStorage` restore, preventing corrupted data from breaking the progress bars and total calculation.
+- Focus Forest timer clamps the session duration to a minimum of one second, preventing a division-by-zero that turned the progress value into `Infinity` when the minutes field was cleared.
+- Schedule Hub swap view no longer renders empty group cards when no schedule data is available; a plain empty-state message is shown instead.
+- Peer Tutoring subject filter is now null-safe on the subjects array, preventing a crash when a tutor entry has a missing or incomplete subjects field.
+- City Adaptation header now shows `'orașul tău'` as a fallback when the university city is not present in the profile, instead of always defaulting to `'Iași'` for all users.
 - GPS coordinates for all TUIASI buildings and points of interest have been corrected to precise real-world positions, including AC Mangeron, Corp A, Rectorat, Cantina, ETTI, IEEIA, Mecanică, Construcții, ICPM, Arhitectură, CMMI, HGIM, SIM, DIMA, and all Tudor Vladimirescu dorm groups.
 - Campus Navigator now supports a transport mode selector — students can switch between walking and driving routes, each with its own OSRM profile, speed estimate, and formatted distance and duration.
 - Outdoor campus routing now uses a Dijkstra pathfinding algorithm on a pedestrian walk-graph with Haversine-accurate edge weights, providing realistic on-campus foot paths instead of straight-line fallbacks.
@@ -407,9 +420,14 @@ studentcompass/
 |   |   |-- student-life/
 |   |   |-- thesis/
 |   |   `-- tutoring/
-|   |-- hooks/
-|   |-- services/
 |   |-- shared/
+|   |   |-- api/
+|   |   |-- components/
+|   |   |-- config/
+|   |   |-- data/
+|   |   |-- hooks/
+|   |   |-- services/
+|   |   `-- utils/
 |   `-- main.jsx
 |-- ARCHITECTURE.md
 |-- README.md
@@ -464,7 +482,7 @@ server/data/studentcompass.db
 
 Student demo:
 - Any valid institutional-style email for a supported university
-- Access code: `0000`
+- Access code: `0000` (type it manually or use the **Demo** shortcut button)
 
 Professor demo:
 - Email: `mihai.ciobanu@academic.tuiasi.ro`

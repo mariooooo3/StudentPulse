@@ -274,7 +274,7 @@ export default function VirtualAssistant({
             <button
               type="button"
               onClick={() => {
-                setMessages(messages.slice(0, 1))
+                setMessages([{ role: 'assistant', text: initialAssistantMessage(session?.role) }])
                 setSuggestions(defaultSuggestions(context))
               }}
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-white/[0.06] hover:text-slate-300"

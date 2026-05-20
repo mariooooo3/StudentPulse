@@ -517,21 +517,19 @@ function AllGroupsView({ schedule }) {
   })
   const ALL_GROUPS = Object.entries(groupMap).map(([group, courses]) => ({ group, courses }))
 
-  const filtered = ALL_GROUPS.length > 0
-    ? ALL_GROUPS.filter(g =>
-        g.group.toLowerCase().includes(search.toLowerCase()) ||
-        g.courses.some(c => c.name.toLowerCase().includes(search.toLowerCase()))
-      )
-    : [
-        { group:'A1', courses: schedule.slice(0, 3).map(c => ({ name: c.short, day: DAYS[c.day-1], time: `${c.start}:00–${c.end}:00`, room: c.room })) },
-        { group:'A2', courses: schedule.slice(3, 6).map(c => ({ name: c.short, day: DAYS[c.day-1], time: `${c.start}:00–${c.end}:00`, room: c.room })) },
-      ]
+  const filtered = ALL_GROUPS.filter(g =>
+    g.group.toLowerCase().includes(search.toLowerCase()) ||
+    g.courses.some(c => c.name.toLowerCase().includes(search.toLowerCase()))
+  )
   return (
     <div className="p-4 space-y-4">
       <input value={search} onChange={e => setSearch(e.target.value)}
         placeholder="Caută materie sau grupă..."
         className="w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-indigo-500/50" />
       <div className="grid gap-3 sm:grid-cols-2">
+        {filtered.length === 0 && (
+          <p className="col-span-2 text-center text-sm text-slate-600 py-8">Nicio grupă găsită.</p>
+        )}
         {filtered.map(g => (
           <div key={g.group} className="glass-card p-4">
             <div className="flex items-center gap-2 mb-3">

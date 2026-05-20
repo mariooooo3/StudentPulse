@@ -169,7 +169,8 @@ export default function PeerTutoring({ profile }) {
   const filtered = tutors.filter(t => {
     const matchSearch = t.name.toLowerCase().includes(search.toLowerCase()) ||
       t.subjects.some(s => s.toLowerCase().includes(search.toLowerCase()))
-    const matchSubject = subject === 'Toate' || t.subjects.some(s => s.toLowerCase().includes(subject.toLowerCase().replace(' / ', '/').split('/')[0].trim().toLowerCase()))
+    const subjectKey = subject.toLowerCase().replace(' / ', '/').split('/')[0].trim()
+    const matchSubject = subject === 'Toate' || (t.subjects || []).some(s => s?.toLowerCase().includes(subjectKey))
     return matchSearch && matchSubject
   })
 

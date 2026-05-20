@@ -77,7 +77,7 @@ class SocketService extends EventTarget {
         if (pending) {
           clearTimeout(pending.timer)
           this.#pending.delete(msg.reqId)
-          msg.ok ? pending.resolve(msg) : pending.reject(new Error(msg.error))
+          msg.ok ? pending.resolve(msg) : pending.reject(new Error(msg.error || 'Request failed'))
         }
         break
       }
