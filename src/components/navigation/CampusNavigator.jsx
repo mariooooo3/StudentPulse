@@ -401,6 +401,30 @@ const UAIC_AI_DESTINATIONS = [
   { label: 'Sport', query: 'Cum ajung la Facultatea de Educatie Fizica si Sport UAIC?', type: 'Facultate' },
 ]
 
+const UAIC_WALK_NODES = [
+  { id: 'corp-a',    coords: [47.174207, 27.571376] },
+  { id: 'fii',       coords: [47.173984, 27.574863] },
+  { id: 'fizica',    coords: [47.175112, 27.573861] },
+  { id: 'feaa',      coords: [47.172152, 27.574391] },
+  { id: 'bcu',       coords: [47.170261, 27.575235] },
+  { id: 'camine',    coords: [47.177743, 27.573077] },
+  { id: 'psihologie',coords: [47.173648, 27.564996] },
+  { id: 'cantina',   coords: [47.174453, 27.569726] },
+]
+
+const UAIC_WALK_EDGES = [
+  ['corp-a', 'fii'],
+  ['corp-a', 'fizica'],
+  ['corp-a', 'cantina'],
+  ['fii', 'fizica'],
+  ['fii', 'feaa'],
+  ['fizica', 'feaa'],
+  ['feaa', 'bcu'],
+  ['corp-a', 'camine'],
+  ['cantina', 'psihologie'],
+  ['corp-a', 'psihologie'],
+]
+
 // ─── Campus config – keyed by university ID ───────────────────────────────────
 const CAMPUS_CONFIG = {
   tuiasi: {
@@ -425,6 +449,8 @@ const CAMPUS_CONFIG = {
     indRooms:        UAIC_IND_ROOMS,
     indGraph:        UAIC_IND_GRAPH,
     outdoorRouteIds: UAIC_ROUTE_IDS,
+    walkNodes:       UAIC_WALK_NODES,
+    walkEdges:       UAIC_WALK_EDGES,
     aiDestinations:  UAIC_AI_DESTINATIONS,
     name:            'UAIC Iași',
     greeting:        'Salut! Sunt asistentul tău de navigare pentru campusul UAIC. Cum te pot ajuta?',
@@ -1392,6 +1418,7 @@ export default function CampusNavigator() {
                     {routePath && (() => {
                       const from = buildings.find(b => String(b.id) === routeFrom)
                       const to = buildings.find(b => String(b.id) === routeTo)
+                      if (!from || !to) return null
                       return <>
                         <Marker position={from.coords} icon={makeLabel('A', '#2563eb')} />
                         <Marker position={to.coords} icon={makeLabel('B', '#16a34a')} />
