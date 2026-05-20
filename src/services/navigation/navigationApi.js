@@ -33,10 +33,7 @@ export async function analyzeNavigationPhoto({ base64, mimeType, university = 't
     const data = await post('/photo', { base64, mimeType, university })
     return data.answer
   } catch {
-    const fallback = university === 'uaic'
-      ? 'Analiză locală: imaginea a fost preluată. Cel mai probabil ești la Facultatea de Informatică FII (Corp B) sau în campusul UAIC de pe Bd. Carol I. Pornește API-ul de navigație cu cheia GROQ pentru recunoaștere reală.'
-      : 'Analiză locală: imaginea a fost preluată. Cel mai probabil ești la Facultatea de Automatică și Calculatoare TUIASI, zona Corp C / Corp A de pe Mangeron. Pornește API-ul de navigație cu cheia GROQ pentru recunoaștere reală.'
-    return fallback
+    return 'Recunoaștere indisponibilă momentan (API offline). Trimite poza din nou sau descrie verbal locația — te ajut cu navigația pe hartă.'
   }
 }
 

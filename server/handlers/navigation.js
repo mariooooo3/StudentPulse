@@ -367,23 +367,58 @@ async function handleAssistant(req, res) {
   sendJson(res, 200, { answer })
 }
 
+const UNIVERSAL_PHOTO_PROMPT = `Ești AI Compass pentru StudentCompass, un asistent de recunoaștere vizuală a locațiilor universitare din Iași, România.
+
+Analizează imaginea și încearcă să identifici locația din oricare dintre universitățile de mai jos:
+
+━━━ TUIASI – Universitatea Tehnică "Gheorghe Asachi" (Bd. Prof. Dimitrie Mangeron) ━━━
+• Facultatea de Automatică și Calculatoare (AC) – Corp C (CTI) sau Corp A (DAIA)
+• Facultatea ETTI – Bd. Carol I 11A
+• Facultatea IEEIA (Electrotehnica) – Bd. Mangeron
+• Facultatea de Mecanică – Bd. Mangeron
+• Facultatea de Construcții și Instalații (CI) – Bd. Mangeron
+• Facultatea ICPM „C. Simionescu" – Bd. Mangeron
+• Facultatea de Arhitectură „G.M. Cantacuzino" – Bd. Mangeron
+• Facultatea CMMI – Bd. Mangeron
+• Facultatea HGIM – Bd. Mangeron
+• Facultatea SIM – Bd. Mangeron
+• Facultatea DIMA – Bd. Mangeron
+• Biblioteca Gh. Asachi – Bd. Carol I
+• Rectorat TUIASI – Bd. Carol I
+• Cantina TUIASI – Campus Tudor Vladimirescu
+• Cămine Tudor Vladimirescu (T1–T19)
+• Iulius Mall Iași
+
+━━━ UAIC – Universitatea Alexandru Ioan Cuza (Bd. Carol I 11) ━━━
+• Facultatea de Informatică FII – Corp B, Bd. Carol I 11
+• Rectorat UAIC – Corp A, Bd. Carol I 11
+• Facultatea de Matematică – Bd. Carol I 11
+• Facultatea de Fizică – Bd. Carol I 11
+• Facultatea de Chimie – Bd. Carol I 11
+• Facultatea de Biologie – Bd. Carol I 11
+• Facultatea de Drept – Bd. Carol I 11
+• Facultatea de Litere – Bd. Carol I 11
+• Facultatea de Filosofie și Științe Social-Politice – Bd. Carol I 11
+• Facultatea de Psihologie și Educație – Bd. Carol I 11
+• Facultatea de Economie FEAA – Bd. Carol I 22
+• Facultatea de Geografie și Geologie – Bd. Carol I 11
+• BCU Biblioteca Centrală „Mihai Eminescu" – Bd. Carol I
+• Cantina UAIC – Bd. Carol I
+• Cămine Codrescu – Aleea M. Sadoveanu
+• Parcul Copou – teiul lui Eminescu
+
+━━━ INSTRUCȚIUNI ━━━
+Răspunde în română, în 1-3 fraze:
+1. Universitatea (TUIASI sau UAIC) și locația probabilă (facultate, clădire sau reper)
+2. Indiciile vizuale principale care te-au ajutat (arhitectură, plăcuțe, culori, sigle, vegetație etc.)
+3. Gradul de certitudine (sigur / probabil / nesigur)
+
+Dacă nu recunoști nimic specific, spune sincer că nu poți identifica locația cu certitudine.
+Nu genera traseu și nu întreba destinația — aplicația va întreba automat după răspunsul tău.`
+
 async function handlePhoto(req, res) {
   const body = await readJson(req)
   const mimeType = body.mimeType || 'image/jpeg'
-  const university = String(body.university || 'tuiasi').toLowerCase()
-
-  const photoPrompt = university === 'uaic'
-    ? `Ești AI Compass pentru StudentCompass, specializat în campusul UAIC Iași (Bd. Carol I nr. 11).
-Analizează imaginea strict ca recunoaștere de locație în campus.
-Identifică dacă poza este de la una dintre aceste locații: Facultatea de Informatică FII (Corp B), Rectorat UAIC (Corp A), Facultatea de Matematică, Fizică, Chimie, Biologie, Drept, Litere, Filosofie, Psihologie, FEAA (Bd. Carol I 22), BCU Biblioteca Centrală, Cantina UAIC, Cămine Codrescu sau alte repere UAIC de pe Bd. Carol I, Iași.
-Răspunde în română, în 1-2 fraze: locația probabilă și indiciul vizual care te-a ajutat să o identifici.
-Nu genera traseu și nu întreba destinația; aplicația va întreba automat.`
-    : `Ești AI Compass pentru StudentCompass, specializat în campusul TUIASI Iași (Bd. Prof. Dimitrie Mangeron).
-Analizează imaginea strict ca recunoaștere de locație în campus.
-Dacă poza arată Facultatea de Automatică și Calculatoare TUIASI (Corp C sau Corp A), numește-o exact "Facultatea de Automatică și Calculatoare TUIASI".
-Identifică și alte repere TUIASI: Biblioteca Gh. Asachi, Rectorat TUIASI, Cantina TUIASI, Iulius Mall, cămine Tudor Vladimirescu.
-Răspunde în română, în 1-2 fraze: locația probabilă și indiciul vizual care te-a ajutat să o identifici.
-Nu genera traseu și nu întreba destinația; aplicația va întreba automat.`
 
   const rawAnswer = await grokChat({
     model: VISION_MODEL,
@@ -392,16 +427,13 @@ Nu genera traseu și nu întreba destinația; aplicația va întreba automat.`
         role: 'user',
         content: [
           { type: 'image_url', image_url: { url: `data:${mimeType};base64,${body.base64 || ''}` } },
-          { type: 'text', text: photoPrompt },
+          { type: 'text', text: UNIVERSAL_PHOTO_PROMPT },
         ],
       },
     ],
-    max_tokens: 420,
+    max_tokens: 480,
   })
-  // Only apply TUIASI-specific label correction for TUIASI users
-  const inferred = inferVisualLocation(rawAnswer, university)
-  const answer = normalizeVisibleLocationText(rawAnswer, inferred)
-  sendJson(res, 200, { answer })
+  sendJson(res, 200, { answer: rawAnswer })
 }
 
 async function handleCopilot(req, res) {
@@ -418,7 +450,6 @@ async function handleCopilot(req, res) {
   const sysPrompt = getSystemPrompt(university)
 
   if (image?.base64 && !visualAnswer) {
-    const campusLabel = university === 'uaic' ? 'UAIC Iași (Bd. Carol I)' : 'TUIASI Gheorghe Asachi (Bd. Mangeron)'
     visualAnswer = await grokChat({
       model: VISION_MODEL,
       messages: [
@@ -428,18 +459,15 @@ async function handleCopilot(req, res) {
             { type: 'image_url', image_url: { url: `data:${image.mimeType || 'image/jpeg'};base64,${image.base64}` } },
             {
               type: 'text',
-              text: `Analizează imaginea ca ghid de campus ${campusLabel}.
-Identifică locația: clădire, intrare, coridor, sală sau panou informativ.
-Răspunde concis în română cu:
-- locația probabilă
-- indicii vizuale observate
-- cât de sigur ești
-- dacă nu există destinație în mesaj, întreabă unde vrea studentul să ajungă.`,
+              text: `${UNIVERSAL_PHOTO_PROMPT}
+
+Dacă poți identifica o locație interioară (coridor, sală, panou), menționează și asta.
+Dacă există un mesaj de la student care indică o destinație, ține cont de el în răspuns.`,
             },
           ],
         },
       ],
-      max_tokens: 420,
+      max_tokens: 480,
     })
   }
 
