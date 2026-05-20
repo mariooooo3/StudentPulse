@@ -1,25 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
 
 const WS_URL = import.meta.env.VITE_CROWD_WS_URL || 'ws://localhost:8000/ws/crowd'
-const CAMPUS = [47.154082, 27.5940514]
-const RADIUS = 0.008
 const GRID = 0.001
-const HOTSPOTS = [
-  [47.154082, 27.5940514],
-  [47.1549,   27.5948],
-  [47.1570,   27.5903],
-  [47.1547,   27.5932],
+const DEFAULT_CAMPUS = [47.153886, 27.593992]
+const DEFAULT_HOTSPOTS = [
+  [47.153886, 27.593992],
+  [47.155607, 27.603028],
+  [47.154484, 27.609974],
+  [47.157030, 27.590140],
 ]
 
 class SimulatedUser {
-  constructor() {
+  constructor(center = DEFAULT_CAMPUS, hotspots = DEFAULT_HOTSPOTS) {
+    const safeHotspots = hotspots?.length ? hotspots : [center]
+    const anchor = safeHotspots[Math.floor(Math.random() * safeHotspots.length)]
     const angle = Math.random() * 2 * Math.PI
-    const radius = Math.random() * RADIUS
-    this.lat = CAMPUS[0] + radius * Math.cos(angle)
-    this.lng = CAMPUS[1] + radius * Math.sin(angle)
+    const radius = Math.random() * 0.0012
+    this.center = center
+    this.lat = anchor[0] + radius * Math.cos(angle)
+    this.lng = anchor[1] + radius * Math.sin(angle)
     this.speed = 0.00003 + Math.random() * 0.00008
     this.direction = Math.random() * 2 * Math.PI
-    this.target = Math.random() < 0.65 ? HOTSPOTS[Math.floor(Math.random() * HOTSPOTS.length)] : null
+    this.target = Math.random() < 0.85 ? anchor : safeHotspots[Math.floor(Math.random() * safeHotspots.length)]
   }
 
   step() {
@@ -32,13 +34,13 @@ class SimulatedUser {
       this.lng += this.speed * Math.sin(this.direction)
     }
 
-    const dlat = this.lat - CAMPUS[0]
-    const dlng = this.lng - CAMPUS[1]
+    const dlat = this.lat - this.target[0]
+    const dlng = this.lng - this.target[1]
     const distance = Math.hypot(dlat, dlng)
-    if (distance > RADIUS) {
+    if (distance > 0.0024) {
       this.direction += Math.PI
-      this.lat = CAMPUS[0] + (dlat / distance) * RADIUS * 0.92
-      this.lng = CAMPUS[1] + (dlng / distance) * RADIUS * 0.92
+      this.lat = this.target[0] + (dlat / distance) * 0.002
+      this.lng = this.target[1] + (dlng / distance) * 0.002
     }
   }
 }
@@ -64,8 +66,8 @@ function toZones(users) {
   })
 }
 
-function startLocalSimulation(onUpdate) {
-  const users = Array.from({ length: 220 }, () => new SimulatedUser())
+function startLocalSimulation(onUpdate, center, hotspots) {
+  const users = Array.from({ length: 220 }, () => new SimulatedUser(center, hotspots))
   let timer = null
   const tick = () => {
     users.forEach((user) => user.step())
@@ -76,7 +78,7 @@ function startLocalSimulation(onUpdate) {
   return () => window.clearTimeout(timer)
 }
 
-export function useCrowdSocket(enabled) {
+export function useCrowdSocket(enabled, center = DEFAULT_CAMPUS, hotspots = DEFAULT_HOTSPOTS) {
   const [zones, setZones] = useState([])
   const [totalUsers, setTotalUsers] = useState(0)
   const [connected, setConnected] = useState(false)
@@ -106,7 +108,7 @@ export function useCrowdSocket(enabled) {
         if (stopped) return
         setZones(nextZones)
         setTotalUsers(total)
-      })
+      }, center, hotspots)
     }
 
     const fallbackTimer = window.setTimeout(fallbackToLocal, 2500)
@@ -118,7 +120,6 @@ export function useCrowdSocket(enabled) {
           ws.close()
           return
         }
-        window.clearTimeout(fallbackTimer)
         wsAlive = true
         setMode('ws')
         setConnected(true)
@@ -127,6 +128,11 @@ export function useCrowdSocket(enabled) {
         try {
           const data = JSON.parse(event.data)
           if (!stopped && data.type === 'crowd_update') {
+            window.clearTimeout(fallbackTimer)
+            cleanupRef.current?.()
+            cleanupRef.current = null
+            setMode('ws')
+            setConnected(true)
             setZones(data.zones || [])
             setTotalUsers(data.total_users || 0)
           }
@@ -144,7 +150,7 @@ export function useCrowdSocket(enabled) {
         if (!wsAlive && !stopped) {
           window.clearTimeout(fallbackTimer)
           fallbackToLocal()
-        } else {
+        } else if (!cleanupRef.current) {
           setConnected(false)
         }
       }
@@ -160,7 +166,7 @@ export function useCrowdSocket(enabled) {
       cleanupRef.current?.()
       cleanupRef.current = null
     }
-  }, [enabled])
+  }, [enabled, center, hotspots])
 
   return { zones, totalUsers, connected, mode }
 }

@@ -184,8 +184,18 @@ function inferOutdoorBuilding(...texts) {
   if (normalized.includes('biblioteca')) return 'library'
   if (normalized.includes('cantina')) return 'canteen'
   if (normalized.includes('corp a')) return 'corp-a'
-  if (normalized.includes('corp c') || normalized.includes('informatic') || normalized.includes('fii')) return 'corp-c'
+  if (normalized.includes('corp c') || normalized.includes('automatic') || normalized.includes('calculatoare') || normalized.includes('informatic') || normalized.includes('fii')) return 'corp-c'
   if (normalized.includes('secretariat')) return 'secretariat'
+  if (normalized.includes('etti') || normalized.includes('electronica') || normalized.includes('telecomunicatii')) return 'etti'
+  if (normalized.includes('ieeia') || normalized.includes('electrica') || normalized.includes('energetica')) return 'ieeia'
+  if (normalized.includes('mecanica') || normalized.includes('mecanic')) return 'mec'
+  if (normalized.includes('constructii') || normalized.includes('instalatii')) return 'ci'
+  if (normalized.includes('chimie') || normalized.includes('chimica') || normalized.includes('icpm') || normalized.includes('simionescu')) return 'icpm'
+  if (normalized.includes('arhitectura') || normalized.includes('cantacuzino')) return 'arh'
+  if (normalized.includes('cmmi') || normalized.includes('masini') || normalized.includes('management industrial')) return 'cmmi'
+  if (normalized.includes('hgim') || normalized.includes('hidrotehnica') || normalized.includes('geodezie')) return 'hgim'
+  if (normalized.includes('sim') || normalized.includes('materialelor')) return 'sim'
+  if (normalized.includes('dima') || normalized.includes('design industrial')) return 'dima'
   return null
 }
 
@@ -355,7 +365,7 @@ Context cunoscut:
 - Orar apropiat: ${JSON.stringify(context.schedule || [])}
 - Ora curenta: ${context.currentTime || new Date().toISOString()}
 
-Comporta-te ca AI Compass pentru StudentCompass. Foloseste analiza vizuala preliminara ca sursa principala pentru locatie. Daca exista poza si nu exista destinatie in mesaj, recunoaste zona si intreaba explicit unde vrea studentul sa ajunga. Daca utilizatorul cere C210, C308, C112, secretariat sau alta sala cunoscuta, propune ruta indoor. Daca cere biblioteca, cantina, Corp A sau Corp C, propune ruta outdoor.
+Comporta-te ca AI Compass pentru StudentCompass. Foloseste analiza vizuala preliminara ca sursa principala pentru locatie. Daca exista poza si nu exista destinatie in mesaj, recunoaste zona si intreaba explicit unde vrea studentul sa ajunga. Daca utilizatorul cere C210, C308, C112, secretariat sau alta sala cunoscuta, propune ruta indoor. Daca cere biblioteca, cantina, Corp A, Corp C sau oricare facultate TUIASI listata in cladirile outdoor, propune ruta outdoor.
 
 Raspunde strict cu JSON valid in schema:
 ${COPILOT_JSON_SCHEMA}

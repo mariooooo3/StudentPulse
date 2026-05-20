@@ -2,25 +2,25 @@ import { BookOpen, Coffee, CreditCard, FileText, Landmark, Printer, ShoppingBag,
 import { schedule } from '../../shared/data/mockData'
 
 // TUIASI AC – Bd. Prof. Dimitrie Mangeron 67, Iași
-export const CAMPUS_CENTER = [47.154082, 27.5940514]
-export const CURRENT_LOCATION = { id: 'current', label: 'Campus Tudor Vladimirescu', x: 110, y: 382, coords: [47.1498, 27.6093] }
+export const CAMPUS_CENTER = [47.153886, 27.593992]
+export const CURRENT_LOCATION = { id: 'current', label: 'Campus Tudor Vladimirescu', x: 110, y: 382, coords: [47.1549, 27.6089] }
 
 export const buildings = [
-  { id: 'corp-c', name: 'Facultatea de Automatica si Calculatoare', distance: '0m', time: '-', type: 'Cursuri', coords: [47.154082, 27.594051], x: 210, y: 248, w: 250, h: 74, color: '#6366f1', short: 'AC' },
-  { id: 'corp-a', name: 'Corp A - Departamentul Automatica', distance: '80m', time: '1 min', type: 'Cursuri', coords: [47.154300, 27.594300], x: 70, y: 145, w: 95, h: 65, color: '#64748b', short: 'A' },
-  { id: 'library', name: 'Biblioteca Gh. Asachi', distance: '650m', time: '9 min', type: 'Studiu', coords: [47.157000, 27.590300], x: 525, y: 135, w: 105, h: 75, color: '#f59e0b', short: 'BIB' },
-  { id: 'canteen', name: 'Cantina TUIASI Tudor Vladimirescu', distance: '1.3km', time: '17 min', type: 'Servicii', coords: [47.149650, 27.607650], x: 510, y: 380, w: 94, h: 54, color: '#ef4444', short: 'CAN' },
-  { id: 'secretariat', name: 'Secretariat AC', distance: '30m', time: '1 min', type: 'Admin', coords: [47.154082, 27.594051], x: 330, y: 110, w: 130, h: 85, color: '#10b981', short: 'SEC' },
-  { id: 'etti', name: 'Facultatea ETTI - Copou', distance: '2.7km', time: '12 min', type: 'Cursuri', coords: [47.177300, 27.572600], x: 400, y: 80, w: 110, h: 60, color: '#8b5cf6', short: 'ETTI' },
-  { id: 'ieeia', name: 'Facultatea IEEIA', distance: '370m', time: '5 min', type: 'Cursuri', coords: [47.156200, 27.591200], x: 460, y: 170, w: 100, h: 55, color: '#0ea5e9', short: 'IEEIA' },
-  { id: 'mec', name: 'Facultatea de Mecanica', distance: '200m', time: '3 min', type: 'Cursuri', coords: [47.153800, 27.595500], x: 590, y: 280, w: 90, h: 50, color: '#f97316', short: 'MEC' },
-  { id: 'ci', name: 'Facultatea de Constructii si Instalatii', distance: '290m', time: '4 min', type: 'Cursuri', coords: [47.155200, 27.592500], x: 480, y: 215, w: 90, h: 50, color: '#84cc16', short: 'CI' },
-  { id: 'icpm', name: 'Facultatea ICPM C. Simionescu', distance: '180m', time: '3 min', type: 'Cursuri', coords: [47.153700, 27.595200], x: 585, y: 222, w: 92, h: 50, color: '#ec4899', short: 'ICPM' },
-  { id: 'arh', name: 'Facultatea de Arhitectura G.M. Cantacuzino', distance: '450m', time: '6 min', type: 'Cursuri', coords: [47.155800, 27.591800], x: 580, y: 120, w: 95, h: 50, color: '#a16207', short: 'ARH' },
-  { id: 'cmmi', name: 'Facultatea CMMI', distance: '240m', time: '4 min', type: 'Cursuri', coords: [47.153950, 27.596050], x: 610, y: 335, w: 90, h: 50, color: '#0891b2', short: 'CMMI' },
-  { id: 'hgim', name: 'Facultatea HGIM', distance: '230m', time: '4 min', type: 'Cursuri', coords: [47.154700, 27.593200], x: 365, y: 195, w: 90, h: 50, color: '#65a30d', short: 'HGIM' },
-  { id: 'sim', name: 'Facultatea SIM', distance: '210m', time: '3 min', type: 'Cursuri', coords: [47.153600, 27.595900], x: 690, y: 280, w: 80, h: 50, color: '#dc2626', short: 'SIM' },
-  { id: 'dima', name: 'Facultatea DIMA', distance: '120m', time: '2 min', type: 'Cursuri', coords: [47.154500, 27.594900], x: 495, y: 315, w: 80, h: 50, color: '#7c3aed', short: 'DIMA' },
+  { id: 'corp-c', name: 'Facultatea de Automatica si Calculatoare', distance: '0m', time: '-', type: 'Cursuri', coords: [47.153886, 27.593992], x: 210, y: 248, w: 250, h: 74, color: '#6366f1', short: 'AC' },
+  { id: 'corp-a', name: 'Corp A - Departamentul Automatica', distance: '80m', time: '1 min', type: 'Cursuri', coords: [47.154232, 27.593145], x: 70, y: 145, w: 95, h: 65, color: '#64748b', short: 'A' },
+  { id: 'library', name: 'Biblioteca Gh. Asachi', distance: '650m', time: '9 min', type: 'Studiu', coords: [47.157030, 27.590140], x: 525, y: 135, w: 105, h: 75, color: '#f59e0b', short: 'BIB' },
+  { id: 'canteen', name: 'Cantina TUIASI Tudor Vladimirescu', distance: '1.3km', time: '17 min', type: 'Servicii', coords: [47.154484, 27.609974], x: 510, y: 380, w: 94, h: 54, color: '#ef4444', short: 'CAN' },
+  { id: 'secretariat', name: 'Secretariat AC', distance: '30m', time: '1 min', type: 'Admin', coords: [47.153886, 27.593992], x: 330, y: 110, w: 130, h: 85, color: '#10b981', short: 'SEC' },
+  { id: 'etti', name: 'Facultatea ETTI - Bd. Carol I 11A', distance: '2.8km', time: '35 min', type: 'Cursuri', coords: [47.174798, 27.571092], x: 400, y: 80, w: 110, h: 60, color: '#8b5cf6', short: 'ETTI' },
+  { id: 'ieeia', name: 'Facultatea IEEIA', distance: '370m', time: '5 min', type: 'Cursuri', coords: [47.153401, 27.596641], x: 460, y: 170, w: 100, h: 55, color: '#0ea5e9', short: 'IEEIA' },
+  { id: 'mec', name: 'Facultatea de Mecanica', distance: '200m', time: '3 min', type: 'Cursuri', coords: [47.154029, 27.597939], x: 590, y: 280, w: 90, h: 50, color: '#f97316', short: 'MEC' },
+  { id: 'ci', name: 'Facultatea de Constructii si Instalatii', distance: '290m', time: '4 min', type: 'Cursuri', coords: [47.152241, 27.589035], x: 480, y: 215, w: 90, h: 50, color: '#84cc16', short: 'CI' },
+  { id: 'icpm', name: 'Facultatea de Inginerie Chimica si Protectia Mediului C. Simionescu', distance: '1.0km', time: '13 min', type: 'Cursuri', coords: [47.155607, 27.603028], x: 585, y: 222, w: 92, h: 50, color: '#ec4899', short: 'ICPM' },
+  { id: 'arh', name: 'Facultatea de Arhitectura G.M. Cantacuzino', distance: '450m', time: '6 min', type: 'Cursuri', coords: [47.152718, 27.589454], x: 580, y: 120, w: 95, h: 50, color: '#a16207', short: 'ARH' },
+  { id: 'cmmi', name: 'Facultatea CMMI', distance: '240m', time: '4 min', type: 'Cursuri', coords: [47.153802, 27.596924], x: 610, y: 335, w: 90, h: 50, color: '#0891b2', short: 'CMMI' },
+  { id: 'hgim', name: 'Facultatea HGIM', distance: '230m', time: '4 min', type: 'Cursuri', coords: [47.155052, 27.599888], x: 365, y: 195, w: 90, h: 50, color: '#65a30d', short: 'HGIM' },
+  { id: 'sim', name: 'Facultatea SIM', distance: '210m', time: '3 min', type: 'Cursuri', coords: [47.154814, 27.597532], x: 690, y: 280, w: 80, h: 50, color: '#dc2626', short: 'SIM' },
+  { id: 'dima', name: 'Facultatea DIMA / Textile si Management Industrial', distance: '140m', time: '2 min', type: 'Cursuri', coords: [47.153434, 27.595632], x: 495, y: 315, w: 80, h: 50, color: '#7c3aed', short: 'DIMA' },
 ]
 
 export const pois = [
