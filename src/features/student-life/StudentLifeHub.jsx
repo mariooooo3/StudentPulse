@@ -17,7 +17,6 @@ import {
   HandHeart,
   Moon,
   Pause,
-  Phone,
   Play,
   RotateCcw,
   Search,
@@ -26,7 +25,6 @@ import {
   Sparkles,
   Tag,
   Timer,
-  TreePine,
   Trash2,
   Dumbbell,
   Users,
@@ -39,6 +37,7 @@ import { eventsData, booksData, carpoolData, roommateData, wellnessData, faculty
 import { getUniversityTheme } from '../../shared/utils/theme'
 import { dateInDays, daysUntil, eventTiming, rollingDays } from '../../shared/utils/dateTime'
 import { useNow } from '../../shared/hooks/useNow'
+import { PI_DECIMALS } from '../../shared/data/piDigits'
 
 const SECTION_META = {
   discounts: {
@@ -663,12 +662,11 @@ function PomodoroTimer() {
 }
 
 // Primele 400 de zecimale ale lui π (fără "3.")
-const PI_DECIMALS = '14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196'
-
 // O cifră la fiecare 12 secunde → 25 min = ~125 cifre
 const SECS_PER_DIGIT = 12
 
 function FocusForest() {
+  const [mode, setMode] = useState('timer')
   const [minutes, setMinutes] = useState(25)
   const [elapsed, setElapsed] = useState(0)
   const [running, setRunning] = useState(false)
@@ -683,15 +681,11 @@ function FocusForest() {
   const intervalRef = useRef(null)
   const prevDigitsRef = useRef(2)
   const targetSeconds = minutes * 60
-  const progress = Math.min(1, elapsed / targetSeconds)
+  const hasTimer = mode === 'timer'
+  const progress = hasTimer ? Math.min(1, elapsed / targetSeconds) : (elapsed % SECS_PER_DIGIT) / SECS_PER_DIGIT
 
-  // Câte zecimale sunt dezvăluite: încep cu 2 ("14"), cresc pe măsură ce studiezi
-  const revealedDecimals = Math.min(
-    PI_DECIMALS.length,
-    2 + Math.floor(elapsed / SECS_PER_DIGIT)
-  )
+  const revealedDecimals = Math.min(PI_DECIMALS.length, 2 + Math.floor(elapsed / SECS_PER_DIGIT))
 
-  // Detectează o cifră nouă și declanșează animația
   useEffect(() => {
     if (revealedDecimals > prevDigitsRef.current) {
       prevDigitsRef.current = revealedDecimals
@@ -701,12 +695,19 @@ function FocusForest() {
     }
   }, [revealedDecimals])
 
+  function saveBest(value) {
+    if (value > bestDigits) {
+      setBestDigits(value)
+      localStorage.setItem('sc_pi_best', String(value))
+    }
+  }
+
   useEffect(() => {
     if (!running) return undefined
     intervalRef.current = setInterval(() => {
       setElapsed(value => {
         const next = value + 1
-        if (next >= targetSeconds) {
+        if (hasTimer && next >= targetSeconds) {
           clearInterval(intervalRef.current)
           setRunning(false)
           setCompleted(total => {
@@ -714,12 +715,13 @@ function FocusForest() {
             localStorage.setItem('sc_focus_trees', String(saved))
             return saved
           })
+          return targetSeconds
         }
-        return Math.min(next, targetSeconds)
+        return next
       })
     }, 1000)
     return () => clearInterval(intervalRef.current)
-  }, [running, targetSeconds])
+  }, [running, hasTimer, targetSeconds])
 
   useEffect(() => {
     function failSession() {
@@ -727,7 +729,9 @@ function FocusForest() {
       clearInterval(intervalRef.current)
       setRunning(false)
       setFailed(true)
+      saveBest(revealedDecimals)
       setElapsed(0)
+      prevDigitsRef.current = 2
     }
     function handleVisibility() { if (document.hidden) failSession() }
     document.addEventListener('visibilitychange', handleVisibility)
@@ -736,7 +740,15 @@ function FocusForest() {
       document.removeEventListener('visibilitychange', handleVisibility)
       window.removeEventListener('blur', failSession)
     }
-  }, [running])
+  }, [running, revealedDecimals])
+
+  function switchMode(nextMode) {
+    if (running) return
+    setMode(nextMode)
+    setElapsed(0)
+    setFailed(false)
+    prevDigitsRef.current = 2
+  }
 
   function start() {
     setElapsed(0)
@@ -745,170 +757,181 @@ function FocusForest() {
     prevDigitsRef.current = 2
   }
 
+  function stop() {
+    clearInterval(intervalRef.current)
+    setRunning(false)
+    saveBest(revealedDecimals)
+  }
+
   function reset() {
     clearInterval(intervalRef.current)
     setRunning(false)
     setFailed(false)
-    // Salvează recordul de cifre descoperite
-    if (revealedDecimals > bestDigits) {
-      setBestDigits(revealedDecimals)
-      localStorage.setItem('sc_pi_best', String(revealedDecimals))
-    }
+    saveBest(revealedDecimals)
     setElapsed(0)
+    prevDigitsRef.current = 2
   }
 
   const remaining = Math.max(0, targetSeconds - elapsed)
-  const mins = String(Math.floor(remaining / 60)).padStart(2, '0')
-  const secs = String(remaining % 60).padStart(2, '0')
-
-  // Grupează cifrele dezvăluite câte 5 pentru lizibilitate
+  const displaySeconds = hasTimer ? remaining : elapsed
+  const mins = String(Math.floor(displaySeconds / 60)).padStart(2, '0')
+  const secs = String(displaySeconds % 60).padStart(2, '0')
   const visibleStr = PI_DECIMALS.slice(0, revealedDecimals)
-  const hiddenStr  = PI_DECIMALS.slice(revealedDecimals, revealedDecimals + 30)
+  const hiddenStr = PI_DECIMALS.slice(revealedDecimals, revealedDecimals + 42)
   const groups = []
   for (let i = 0; i < visibleStr.length; i += 5) groups.push(visibleStr.slice(i, i + 5))
 
-  const maxPossible = Math.min(PI_DECIMALS.length, 2 + Math.floor(targetSeconds / SECS_PER_DIGIT))
+  const maxPossible = hasTimer ? Math.min(PI_DECIMALS.length, 2 + Math.floor(targetSeconds / SECS_PER_DIGIT)) : PI_DECIMALS.length
+  const nextDigitIn = SECS_PER_DIGIT - (elapsed % SECS_PER_DIGIT)
+  const modeCopy = hasTimer
+    ? { eyebrow: 'sesiune cronometrata', title: 'Creste sirul lui pi in reprize clare.', metric: Math.round((elapsed / targetSeconds) * 100) + '% din sesiune' }
+    : { eyebrow: 'fara limita', title: 'Stai cat vrei si impinge recordul cat mai departe.', metric: 'urmatoarea cifra in ' + nextDigitIn + 's' }
 
   return (
-    <div className="glass-card overflow-hidden p-6">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
-
-        {/* ── Vizualizare π ── */}
-        <div className="relative flex-1 min-h-64 rounded-2xl border border-violet-500/20 bg-gradient-to-br from-slate-900 via-violet-950/30 to-slate-900 p-5 overflow-hidden flex flex-col justify-between">
-
-          {/* π gigant în fundal */}
-          <div className="pointer-events-none absolute -right-4 -top-6 select-none text-[160px] font-black text-violet-500/[0.07] leading-none">π</div>
-
-          {/* Badge cifre */}
-          <div className="flex items-center justify-between">
-            <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1 text-[11px] font-bold text-violet-200">
-              <span>π</span>
-              {revealedDecimals} zecimale descoperite
+    <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-[#080d18] shadow-[0_22px_80px_-42px_rgba(0,0,0,0.9)]">
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px]">
+        <div className="relative min-h-[360px] overflow-hidden border-b border-white/[0.06] bg-[radial-gradient(circle_at_20%_0%,rgba(20,184,166,0.18),transparent_32%),radial-gradient(circle_at_85%_18%,rgba(124,58,237,0.24),transparent_34%),linear-gradient(135deg,#090f1c,#111827_55%,#07111f)] p-6 xl:border-b-0 xl:border-r">
+          <div className="pointer-events-none absolute -right-10 -top-16 select-none text-[210px] font-black leading-none text-white/[0.035]">?</div>
+          <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="section-label text-teal-200/70">? Focus ? {modeCopy.eyebrow}</p>
+              <h3 className="mt-2 max-w-xl text-2xl font-black tracking-tight text-white">{modeCopy.title}</h3>
             </div>
-            {running && (
-              <div className="font-mono text-lg font-black text-white tabular-nums">
-                {mins}:{secs}
+            <div className="rounded-2xl border border-white/[0.08] bg-black/20 px-4 py-3 text-right backdrop-blur">
+              <p className="font-mono text-2xl font-black tabular-nums text-white">{mins}:{secs}</p>
+              <p className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">{hasTimer ? 'ramas' : 'focus total'}</p>
+            </div>
+          </div>
+
+          <div className="relative z-10 mt-10 rounded-2xl border border-white/[0.08] bg-black/20 p-5 backdrop-blur-sm">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1 text-[11px] font-bold text-teal-100">
+                <Sparkles size={12} /> {revealedDecimals} zecimale descoperite
               </div>
-            )}
-          </div>
-
-          {/* Afișaj cifre */}
-          <div className="mt-4 font-mono leading-loose">
-            {/* "3." fix */}
-            <span className="text-2xl font-black text-violet-300">3.</span>
-
-            {/* Cifre dezvăluite grupate câte 5 */}
-            <span className="text-lg font-bold text-white">
-              {groups.map((g, gi) => (
-                <span key={gi}>
-                  {g.split('').map((d, di) => {
-                    const isLast = gi === groups.length - 1 && di === g.length - 1
-                    return (
-                      <span
-                        key={di}
-                        className={clsx(
-                          'transition-all duration-300',
-                          isLast && justRevealed
-                            ? 'text-teal-300 drop-shadow-[0_0_8px_rgba(94,234,212,0.9)]'
-                            : isLast
-                            ? 'text-teal-200'
-                            : 'text-white'
-                        )}
-                      >
-                        {d}
-                      </span>
-                    )
-                  })}
-                  <span className="text-slate-700 select-none"> </span>
-                </span>
-              ))}
-            </span>
-
-            {/* Cifre ascunse ca dots */}
-            {hiddenStr && (
-              <span className="text-slate-700 text-base select-none">
-                {hiddenStr.split('').map((_, i) => (
-                  <span key={i}>•</span>
-                ))}
-                ...
-              </span>
-            )}
-          </div>
-
-          {/* Bară progres */}
-          <div className="mt-4">
-            <div className="flex justify-between text-[10px] text-slate-500 mb-1.5 font-mono">
-              <span>3.14</span>
-              <span>{Math.round(progress * 100)}% din sesiune</span>
-              <span>+{maxPossible} zec. posibile</span>
+              <span className="text-xs font-semibold text-slate-500">{modeCopy.metric}</span>
             </div>
-            <div className="h-1.5 w-full rounded-full bg-white/[0.05] overflow-hidden">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-violet-500 to-teal-400 transition-all duration-1000"
-                style={{ width: `${progress * 100}%` }}
-              />
+            <div className="font-mono leading-loose break-words">
+              <span className="text-3xl font-black text-teal-200">3.</span>
+              <span className="text-xl font-bold text-white">
+                {groups.map((group, groupIndex) => (
+                  <span key={groupIndex} className="mr-2 inline-block">
+                    {group.split('').map((digit, digitIndex) => {
+                      const isLast = groupIndex === groups.length - 1 && digitIndex === group.length - 1
+                      return (
+                        <span
+                          key={digitIndex}
+                          className={clsx(
+                            'transition-all duration-300',
+                            isLast && justRevealed
+                              ? 'text-emerald-200 drop-shadow-[0_0_12px_rgba(110,231,183,0.95)]'
+                              : isLast
+                              ? 'text-teal-200'
+                              : 'text-white'
+                          )}
+                        >
+                          {digit}
+                        </span>
+                      )
+                    })}
+                  </span>
+                ))}
+              </span>
+              {hiddenStr && <span className="text-base text-slate-700 select-none">{'?'.repeat(hiddenStr.length)}...</span>}
+            </div>
+          </div>
+
+          <div className="relative z-10 mt-6">
+            <div className="mb-2 flex justify-between text-[10px] font-bold uppercase tracking-widest text-slate-600">
+              <span>3.14</span>
+              <span>{hasTimer ? Math.round(progress * 100) + '%' : 'cifra urmatoare'}</span>
+              <span>{hasTimer ? maxPossible + ' zec. posibile' : 'fara limita practica'}</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+              <div className="h-full rounded-full bg-gradient-to-r from-teal-300 via-cyan-300 to-violet-300 transition-all duration-1000" style={{ width: (progress * 100) + '%' }} />
             </div>
           </div>
         </div>
 
-        {/* ── Controale ── */}
-        <div className="w-full lg:w-72">
-          <p className="section-label">π Focus</p>
-          <h3 className="mt-2 text-lg font-bold text-white">Descoperă zecimalele lui π studiind.</h3>
-          <p className="mt-2 text-sm leading-relaxed text-slate-400">
-            Pornești de la <span className="font-bold text-violet-300">3.14</span> — o cifră nouă din π apare la fiecare {SECS_PER_DIGIT} secunde de focus. Dacă schimbi tabul, sesiunea se pierde.
-          </p>
-
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            {[15, 25, 45].map(value => (
+        <div className="p-5">
+          <p className="section-label">control sesiune</p>
+          <div className="mt-3 grid grid-cols-2 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-1">
+            {[
+              ['timer', 'Cu timer'],
+              ['endless', 'Fara timer'],
+            ].map(([value, label]) => (
               <button
                 key={value}
-                onClick={() => !running && setMinutes(value)}
+                onClick={() => switchMode(value)}
                 disabled={running}
                 className={clsx(
-                  'h-9 rounded-xl border text-xs font-bold transition-all active:scale-[0.98] disabled:cursor-default',
-                  minutes === value
-                    ? 'border-violet-400/30 bg-violet-400/15 text-violet-200'
-                    : 'border-white/[0.06] bg-white/[0.03] text-slate-500 hover:text-slate-300',
+                  'h-9 rounded-xl text-xs font-bold transition-all disabled:cursor-default',
+                  mode === value ? 'bg-white/[0.1] text-white' : 'text-slate-500 hover:text-slate-300'
                 )}
               >
-                {value} min
+                {label}
               </button>
             ))}
           </div>
 
-          <div className="mt-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-xs text-slate-400 font-mono">
-            {minutes} min → până la <span className="text-violet-300 font-bold">3.{PI_DECIMALS.slice(0, maxPossible)}</span>
+          {hasTimer && (
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              {[15, 25, 45].map(value => (
+                <button
+                  key={value}
+                  onClick={() => !running && setMinutes(value)}
+                  disabled={running}
+                  className={clsx(
+                    'h-10 rounded-xl border text-xs font-bold transition-all active:scale-[0.98] disabled:cursor-default',
+                    minutes === value
+                      ? 'border-teal-300/30 bg-teal-300/12 text-teal-100'
+                      : 'border-white/[0.06] bg-white/[0.03] text-slate-500 hover:text-slate-300',
+                  )}
+                >
+                  {value} min
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
+            <p className="text-xs font-semibold leading-relaxed text-slate-400">
+              O cifra noua apare la fiecare <span className="font-bold text-teal-200">{SECS_PER_DIGIT}s</span>. Daca schimbi tabul sau pierzi focusul ferestrei, sesiunea se opreste si progresul curent se salveaza doar ca record.
+            </p>
+            <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+              <div className="rounded-xl bg-black/20 p-3">
+                <p className="text-slate-600">Record</p>
+                <p className="mt-1 font-mono text-lg font-black text-white">{bestDigits}</p>
+              </div>
+              <div className="rounded-xl bg-black/20 p-3">
+                <p className="text-slate-600">Sesiuni</p>
+                <p className="mt-1 font-mono text-lg font-black text-white">{completed}</p>
+              </div>
+            </div>
           </div>
 
           <div className="mt-4 flex items-center gap-2">
             <button
-              onClick={running ? reset : start}
+              onClick={running ? stop : start}
               className={clsx(
-                'inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold transition-all active:scale-[0.98]',
+                'inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold transition-all active:scale-[0.98]',
                 running
                   ? 'border border-red-500/30 bg-red-500/10 text-red-300'
-                  : 'border border-violet-400/30 bg-violet-500/20 text-violet-100',
+                  : 'border border-teal-300/30 bg-teal-400/15 text-teal-100',
               )}
             >
               {running ? <X size={15} /> : <Sprout size={15} />}
-              {running ? 'Oprește' : 'Pornește focus'}
+              {running ? 'Opreste' : 'Porneste'}
             </button>
-            <button onClick={reset} className="h-10 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 text-slate-500 transition-all hover:text-slate-300 active:scale-[0.98]">
+            <button onClick={reset} className="h-11 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 text-slate-500 transition-all hover:text-slate-300 active:scale-[0.98]">
               <RotateCcw size={15} />
             </button>
           </div>
 
           {failed && (
             <p className="mt-3 rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-semibold text-amber-200">
-              Sesiunea a fost întreruptă. Ai descoperit {revealedDecimals} zecimale până acum.
+              Sesiunea a fost intrerupta pentru ca fereastra nu a mai fost activa.
             </p>
           )}
-
-          <div className="mt-3 space-y-1 text-xs text-slate-600">
-            <p>🏆 Record personal: <span className="text-slate-400 font-bold">{bestDigits} zecimale</span></p>
-            <p>📚 Sesiuni completate: <span className="text-slate-400 font-bold">{completed}</span></p>
-          </div>
         </div>
       </div>
     </div>
@@ -953,7 +976,44 @@ function WellnessSection() {
   )
 }
 
-const TOOLS_TABS = ['Budget', 'Cărți', 'Carpool', 'Colegi cameră']
+const TOOLS_TABS = [
+  {
+    id: 'Budget',
+    label: 'Budget',
+    icon: Wallet,
+    title: 'Plan lunar',
+    description: 'Completezi cheltuielile pe categorii si vezi imediat abaterea fata de media studentilor.',
+    hint: 'Introdu sume in RON/luna. Bara rosie inseamna peste medie, bara indigo inseamna in zona normala.',
+    stat: '6 categorii',
+  },
+  {
+    id: 'Carti',
+    label: 'Carti',
+    icon: BookOpen,
+    title: 'Schimb de carti',
+    description: 'Cauti cursuri, manuale sau culegeri disponibile la colegi.',
+    hint: 'Filtreaza dupa titlu, materie sau tip: donatie ori vanzare.',
+    stat: `${booksData.length} anunturi`,
+  },
+  {
+    id: 'Carpool',
+    label: 'Carpool',
+    icon: Car,
+    title: 'Drumuri comune',
+    description: 'Gasesti curse intre oras, campus si localitati apropiate.',
+    hint: 'Cauta destinatia, verifica locurile libere si contacteaza soferul pe Telegram.',
+    stat: `${carpoolData.length} curse`,
+  },
+  {
+    id: 'Colegi camera',
+    label: 'Colegi camera',
+    icon: Users2,
+    title: 'Coleg de camera',
+    description: 'Compari buget, zona, program si preferinte inainte sa contactezi persoana.',
+    hint: 'Cauta dupa zona sau facultate, apoi foloseste tag-urile pentru compatibilitate rapida.',
+    stat: `${roommateData.length} profiluri`,
+  },
+]
 
 function BudgetTab() {
   const CATEGORIES = ['Cazare', 'Mâncare', 'Transport', 'Cursuri', 'Distracție', 'Diverse']
@@ -1160,20 +1220,60 @@ function RoommateTab() {
 
 function ToolsSection() {
   const [toolTab, setToolTab] = useState('Budget')
+  const activeTool = TOOLS_TABS.find(tool => tool.id === toolTab) || TOOLS_TABS[0]
+  const ActiveIcon = activeTool.icon
+
   return (
     <section className="space-y-4">
-      <div className="flex gap-2 border-b border-white/[0.05] pb-4">
-        {TOOLS_TABS.map(t => (
-          <button key={t} onClick={() => setToolTab(t)}
-            className={clsx('px-4 py-2 rounded-xl text-sm font-semibold transition-all',
-              toolTab === t ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]')}
-          >{t}</button>
-        ))}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
+        {TOOLS_TABS.map(tool => {
+          const Icon = tool.icon
+          const active = toolTab === tool.id
+          return (
+            <button
+              key={tool.id}
+              onClick={() => setToolTab(tool.id)}
+              className={clsx(
+                'rounded-2xl border p-4 text-left transition-all active:scale-[0.99]',
+                active
+                  ? 'border-indigo-400/40 bg-indigo-500/15 shadow-[0_18px_45px_-30px_rgba(99,102,241,0.9)]'
+                  : 'border-white/[0.06] bg-white/[0.025] hover:border-white/[0.12] hover:bg-white/[0.045]',
+              )}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className={clsx('flex h-10 w-10 items-center justify-center rounded-xl border', active ? 'border-indigo-300/30 bg-indigo-400/15 text-indigo-200' : 'border-white/[0.07] bg-white/[0.035] text-slate-500')}>
+                  <Icon size={17} />
+                </span>
+                <span className="rounded-full border border-white/[0.07] bg-black/20 px-2 py-1 text-[10px] font-bold text-slate-500">{tool.stat}</span>
+              </div>
+              <p className="mt-3 text-sm font-bold text-white">{tool.label}</p>
+              <p className="mt-1 text-xs leading-relaxed text-slate-500">{tool.description}</p>
+            </button>
+          )
+        })}
       </div>
+
+      <div className="glass-card p-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-indigo-400/25 bg-indigo-400/10 text-indigo-200">
+              <ActiveIcon size={18} />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white">{activeTool.title}</p>
+              <p className="mt-1 text-xs leading-relaxed text-slate-500">{activeTool.hint}</p>
+            </div>
+          </div>
+          <span className="w-fit rounded-full border border-white/[0.07] bg-white/[0.03] px-3 py-1 text-[11px] font-bold text-slate-400">
+            Datele raman local in browser unde exista input direct.
+          </span>
+        </div>
+      </div>
+
       {toolTab === 'Budget' && <BudgetTab />}
-      {toolTab === 'Cărți' && <BooksTab />}
+      {toolTab === 'Carti' && <BooksTab />}
       {toolTab === 'Carpool' && <CarpoolTab />}
-      {toolTab === 'Colegi cameră' && <RoommateTab />}
+      {toolTab === 'Colegi camera' && <RoommateTab />}
     </section>
   )
 }

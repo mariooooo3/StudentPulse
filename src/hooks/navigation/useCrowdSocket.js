@@ -1,30 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
 
 const WS_URL = import.meta.env.VITE_CROWD_WS_URL || 'ws://localhost:8000/ws/crowd'
-const RADIUS = 0.008
 const GRID = 0.001
-
-function makeHotspots(center) {
-  const [lat, lng] = center
-  return [
-    [lat,        lng       ],
-    [lat + 0.001, lng + 0.001],
-    [lat + 0.003, lng - 0.004],
-    [lat - 0.001, lng - 0.001],
-  ]
-}
+const DEFAULT_CAMPUS = [47.153886, 27.593992]
+const DEFAULT_HOTSPOTS = [
+  [47.153886, 27.593992],
+  [47.155607, 27.603028],
+  [47.154484, 27.609974],
+  [47.157030, 27.590140],
+]
 
 class SimulatedUser {
-  constructor(campus, hotspots) {
+  constructor(center = DEFAULT_CAMPUS, hotspots = DEFAULT_HOTSPOTS) {
+    const safeHotspots = hotspots?.length ? hotspots : [center]
+    const anchor = safeHotspots[Math.floor(Math.random() * safeHotspots.length)]
     const angle = Math.random() * 2 * Math.PI
-    const radius = Math.random() * RADIUS
-    this.lat = campus[0] + radius * Math.cos(angle)
-    this.lng = campus[1] + radius * Math.sin(angle)
-    this.campus = campus
-    this.hotspots = hotspots
+    const radius = Math.random() * 0.0012
+    this.center = center
+    this.lat = anchor[0] + radius * Math.cos(angle)
+    this.lng = anchor[1] + radius * Math.sin(angle)
     this.speed = 0.00003 + Math.random() * 0.00008
     this.direction = Math.random() * 2 * Math.PI
-    this.target = Math.random() < 0.65 ? hotspots[Math.floor(Math.random() * hotspots.length)] : null
+    this.target = Math.random() < 0.85 ? anchor : safeHotspots[Math.floor(Math.random() * safeHotspots.length)]
   }
 
   step() {
@@ -37,13 +34,13 @@ class SimulatedUser {
       this.lng += this.speed * Math.sin(this.direction)
     }
 
-    const dlat = this.lat - this.campus[0]
-    const dlng = this.lng - this.campus[1]
+    const dlat = this.lat - this.target[0]
+    const dlng = this.lng - this.target[1]
     const distance = Math.hypot(dlat, dlng)
-    if (distance > RADIUS) {
+    if (distance > 0.0024) {
       this.direction += Math.PI
-      this.lat = this.campus[0] + (dlat / distance) * RADIUS * 0.92
-      this.lng = this.campus[1] + (dlng / distance) * RADIUS * 0.92
+      this.lat = this.target[0] + (dlat / distance) * 0.002
+      this.lng = this.target[1] + (dlng / distance) * 0.002
     }
   }
 }
@@ -69,9 +66,18 @@ function toZones(users) {
   })
 }
 
-function startLocalSimulation(onUpdate, campusCenter) {
-  const hotspots = makeHotspots(campusCenter)
-  const users = Array.from({ length: 220 }, () => new SimulatedUser(campusCenter, hotspots))
+function makeHotspotsFromCenter(center) {
+  const [lat, lng] = center
+  return [
+    [lat,         lng        ],
+    [lat + 0.001, lng + 0.001],
+    [lat + 0.003, lng - 0.004],
+    [lat - 0.001, lng - 0.001],
+  ]
+}
+
+function startLocalSimulation(onUpdate, center, hotspots) {
+  const users = Array.from({ length: 220 }, () => new SimulatedUser(center, hotspots))
   let timer = null
   const tick = () => {
     users.forEach((user) => user.step())
@@ -82,12 +88,14 @@ function startLocalSimulation(onUpdate, campusCenter) {
   return () => window.clearTimeout(timer)
 }
 
-export function useCrowdSocket(enabled, campusCenter = [47.154082, 27.5940514]) {
+export function useCrowdSocket(enabled, center = DEFAULT_CAMPUS, hotspots) {
   const [zones, setZones] = useState([])
   const [totalUsers, setTotalUsers] = useState(0)
   const [connected, setConnected] = useState(false)
   const [mode, setMode] = useState(null)
   const cleanupRef = useRef(null)
+
+  const resolvedHotspots = hotspots?.length ? hotspots : makeHotspotsFromCenter(center)
 
   useEffect(() => {
     if (!enabled) {
@@ -112,7 +120,7 @@ export function useCrowdSocket(enabled, campusCenter = [47.154082, 27.5940514]) 
         if (stopped) return
         setZones(nextZones)
         setTotalUsers(total)
-      }, campusCenter)
+      }, center, resolvedHotspots)
     }
 
     const fallbackTimer = window.setTimeout(fallbackToLocal, 2500)
@@ -124,7 +132,6 @@ export function useCrowdSocket(enabled, campusCenter = [47.154082, 27.5940514]) 
           ws.close()
           return
         }
-        window.clearTimeout(fallbackTimer)
         wsAlive = true
         setMode('ws')
         setConnected(true)
@@ -133,6 +140,11 @@ export function useCrowdSocket(enabled, campusCenter = [47.154082, 27.5940514]) 
         try {
           const data = JSON.parse(event.data)
           if (!stopped && data.type === 'crowd_update') {
+            window.clearTimeout(fallbackTimer)
+            cleanupRef.current?.()
+            cleanupRef.current = null
+            setMode('ws')
+            setConnected(true)
             setZones(data.zones || [])
             setTotalUsers(data.total_users || 0)
           }
@@ -150,7 +162,7 @@ export function useCrowdSocket(enabled, campusCenter = [47.154082, 27.5940514]) 
         if (!wsAlive && !stopped) {
           window.clearTimeout(fallbackTimer)
           fallbackToLocal()
-        } else {
+        } else if (!cleanupRef.current) {
           setConnected(false)
         }
       }
@@ -166,7 +178,7 @@ export function useCrowdSocket(enabled, campusCenter = [47.154082, 27.5940514]) 
       cleanupRef.current?.()
       cleanupRef.current = null
     }
-  }, [enabled, campusCenter])
+  }, [enabled, center, resolvedHotspots])
 
   return { zones, totalUsers, connected, mode }
 }
