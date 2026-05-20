@@ -312,29 +312,64 @@ function DiscountsSection({ lifeProfile, saved, savedOps }) {
 
 const CV_API_URL = '/api/career/cv-analyze'
 
+async function extractTextFromPDF(arrayBuffer) {
+  const pdfjsLib = await import('pdfjs-dist')
+  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url,
+  ).toString()
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+  const pages = []
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i)
+    const content = await page.getTextContent()
+    pages.push(content.items.map(item => item.str).join(' '))
+  }
+  return pages.join('\n').trim()
+}
+
 function CVAnalysisPanel({ allJobs, onAnalysis, cvAnalysis }) {
   const [cvText, setCvText] = useState('')
   const [loading, setLoading] = useState(false)
+  const [extracting, setExtracting] = useState(false)
   const [error, setError] = useState('')
   const [open, setOpen] = useState(false)
   const fileRef = useRef(null)
 
-  function onFile(e) {
+  async function onFile(e) {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 2 * 1024 * 1024) { setError('Fișierul e prea mare. Maxim 2MB.'); return }
-    const reader = new FileReader()
-    reader.onload = ev => {
-      const text = ev.target.result
-      if (text && text.trim().length > 30) {
-        setCvText(text.trim())
-        setError('')
-      } else {
-        setError('Nu am putut citi textul din fișier. Copiați conținutul manual în câmpul de mai jos.')
+    if (file.size > 5 * 1024 * 1024) { setError('Fișierul e prea mare. Maxim 5MB.'); return }
+    setError('')
+    const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+    if (isPDF) {
+      setExtracting(true)
+      try {
+        const arrayBuffer = await file.arrayBuffer()
+        const text = await extractTextFromPDF(arrayBuffer)
+        if (text.length > 30) {
+          setCvText(text)
+        } else {
+          setError('Nu am putut extrage text din PDF. Încearcă să copiezi conținutul manual.')
+        }
+      } catch {
+        setError('Eroare la citirea PDF-ului. Încearcă să copiezi conținutul manual.')
+      } finally {
+        setExtracting(false)
       }
+    } else {
+      const reader = new FileReader()
+      reader.onload = ev => {
+        const text = ev.target.result
+        if (text && text.trim().length > 30) {
+          setCvText(text.trim())
+        } else {
+          setError('Nu am putut citi textul din fișier.')
+        }
+      }
+      reader.onerror = () => setError('Eroare la citirea fișierului.')
+      reader.readAsText(file)
     }
-    reader.onerror = () => setError('Eroare la citirea fișierului.')
-    reader.readAsText(file)
     e.target.value = ''
   }
 
@@ -440,7 +475,7 @@ function CVAnalysisPanel({ allJobs, onAnalysis, cvAnalysis }) {
           <X size={14} />
         </button>
       </div>
-      <p className="text-xs text-slate-500">Lipește textul CV-ului sau încarcă un fișier <span className="text-slate-400">.txt</span>. Pentru PDF, copiați conținutul din document.</p>
+      <p className="text-xs text-slate-500">Încarcă CV-ul ca <span className="text-slate-400">.pdf</span> sau <span className="text-slate-400">.txt</span>, sau lipește textul direct mai jos.</p>
       <textarea
         value={cvText}
         onChange={e => { setCvText(e.target.value); setError('') }}
@@ -451,9 +486,9 @@ function CVAnalysisPanel({ allJobs, onAnalysis, cvAnalysis }) {
       {error && <p className="text-xs text-red-400 flex items-center gap-1"><AlertCircle size={12} />{error}</p>}
       <div className="flex items-center gap-2">
         <input ref={fileRef} type="file" accept=".txt,.pdf,.doc,.docx" className="hidden" onChange={onFile} />
-        <button onClick={() => fileRef.current?.click()}
-          className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-slate-400 hover:text-slate-200 hover:border-white/[0.15] transition-all">
-          <Upload size={12} /> Încarcă fișier
+        <button onClick={() => fileRef.current?.click()} disabled={extracting}
+          className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-slate-400 hover:text-slate-200 hover:border-white/[0.15] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+          {extracting ? <><Loader2 size={12} className="animate-spin" /> Se citește PDF...</> : <><Upload size={12} /> Încarcă PDF / TXT</>}
         </button>
         <button onClick={analyze} disabled={loading || cvText.trim().length < 30}
           className="btn-primary text-sm h-9 px-4 flex items-center gap-2 ml-auto disabled:opacity-50 disabled:cursor-not-allowed">
