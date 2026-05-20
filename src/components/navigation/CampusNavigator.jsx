@@ -25,12 +25,28 @@ const ROUTE_PROFILES = {
     osrmProfile: 'foot',
     durationLabel: 'pe jos',
     fallbackSpeedKmh: 4.8,
+    speedKmh: 5,
+  },
+  bike: {
+    label: 'Cu bicicleta',
+    osrmProfile: 'foot',
+    durationLabel: 'cu bicicleta',
+    fallbackSpeedKmh: 15,
+    speedKmh: 15,
+  },
+  car: {
+    label: 'Cu masina',
+    osrmProfile: 'foot',
+    durationLabel: 'cu masina',
+    fallbackSpeedKmh: 40,
+    speedKmh: 40,
   },
   driving: {
     label: 'Cu masina',
-    osrmProfile: 'driving',
+    osrmProfile: 'foot',
     durationLabel: 'cu masina',
-    fallbackSpeedKmh: 24,
+    fallbackSpeedKmh: 40,
+    speedKmh: 40,
   },
 }
 
@@ -777,6 +793,8 @@ export default function CampusNavigator() {
     setFromRoom('')
     setToRoom('')
     setIndoorPath(null)
+    setChatMessages([{ role: 'model', text: campus.greeting }])
+    chatHistory.current = []
   }, [universityId])
 
   useEffect(() => {
@@ -875,8 +893,7 @@ export default function CampusNavigator() {
     setRouteLoading(true)
     setRoutePath(null)
     setRouteInfo(null)
-    // kmh per mode; OSRM demo only has foot data for this region so always fetch foot geometry
-    const speedKmh = mode === 'car' ? 40 : mode === 'bike' ? 15 : 5
+    const speedKmh = profile.speedKmh
     try {
       if (mode === 'foot') {
         const campusWalkRoute = buildCampusWalkRoute(campus, from, to)
@@ -998,7 +1015,7 @@ export default function CampusNavigator() {
         if (data.routes?.[0]) {
           pathData = data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng])
           const dist = data.routes[0].distance
-          const dur = Math.ceil(data.routes[0].duration / 60)
+          const dur = Math.max(1, Math.ceil((dist / 1000) / profile.speedKmh * 60))
           setRoutePath(pathData)
           setRouteInfo({ distance: formatDistance(dist), duration: `${dur} min`, mode: profile.label })
         }
