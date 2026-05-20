@@ -1218,29 +1218,6 @@ export default function CampusNavigator() {
                     {buildings.map(b => <option key={b.id} value={b.id} className="bg-slate-900">{b.name}</option>)}
                   </select>
                 </div>
-                <div className="min-w-40">
-                  <label className="text-xs text-slate-400 mb-1 block">Mod traseu</label>
-                  <div className="grid grid-cols-2 rounded-xl border border-white/[0.07] bg-white/[0.03] p-1">
-                    {Object.entries(ROUTE_PROFILES).map(([mode, profile]) => (
-                      <button
-                        key={mode}
-                        type="button"
-                        onClick={() => {
-                          setRouteMode(mode)
-                          setRoutePath(null)
-                          setRouteInfo(null)
-                        }}
-                        className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                          routeMode === mode
-                            ? 'bg-indigo-600 text-white'
-                            : 'text-slate-400 hover:text-slate-200'
-                        }`}
-                      >
-                        {profile.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
                 <Button onClick={fetchRoute} disabled={!routeFrom || !routeTo || routeLoading}>
                   {routeLoading ? <Loader2 size={15} className="animate-spin" /> : <Route size={15} />}
                   {routeLoading ? 'Se calculează...' : 'Calculează'}
