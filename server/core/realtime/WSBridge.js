@@ -19,6 +19,8 @@ export class WSBridge {
   #store
   #handlers
   #presence = new Map()
+  #pulseEvents = []
+  #pulseSeq = 0
 
   constructor(pubsub, store, handlers, httpServer = null) {
     this.#pubsub = pubsub
@@ -137,6 +139,44 @@ export class WSBridge {
       case 'PRESENCE_LIST':
         reply({ ok: true, users: [...this.#presence.values()] })
         break
+
+      case 'PULSE_LIST': {
+        if (!ws.userId) {
+          reply({ ok: false, error: 'Authentication required' })
+          break
+        }
+        const events = this.#getPulseEvents(ws.scope)
+        reply({ ok: true, channel: this.#pulseChannel(ws), events })
+        break
+      }
+
+      case 'PULSE_CREATE': {
+        if (!ws.userId) {
+          reply({ ok: false, error: 'Authentication required' })
+          break
+        }
+        const event = this.#createPulseEvent(ws, data)
+        const events = this.#getPulseEvents(ws.scope)
+        this.#pubsub.publish(this.#pulseChannel(ws), { kind: 'snapshot', events })
+        reply({ ok: true, channel: this.#pulseChannel(ws), event, events })
+        break
+      }
+
+      case 'PULSE_REACT': {
+        if (!ws.userId) {
+          reply({ ok: false, error: 'Authentication required' })
+          break
+        }
+        const event = this.#reactPulseEvent(ws, data)
+        if (!event) {
+          reply({ ok: false, error: 'Pulse event not found' })
+          break
+        }
+        const events = this.#getPulseEvents(ws.scope)
+        this.#pubsub.publish(this.#pulseChannel(ws), { kind: 'snapshot', events })
+        reply({ ok: true, channel: this.#pulseChannel(ws), event, events })
+        break
+      }
 
       case 'GET': {
         reply({ ok: false, error: 'Store commands are not available over WebSocket' })
@@ -283,6 +323,69 @@ export class WSBridge {
           messageId: message.id,
         },
       })
+    }
+  }
+
+  #pulseChannel(ws) {
+    return `pulse:${ws.scope || 'unknown-university:unknown-faculty'}`
+  }
+
+  #cleanupPulseEvents() {
+    const now = Date.now()
+    this.#pulseEvents = this.#pulseEvents.filter(event => new Date(event.expiresAt).getTime() > now)
+  }
+
+  #getPulseEvents(scope) {
+    this.#cleanupPulseEvents()
+    return this.#pulseEvents
+      .filter(event => event.scope === scope)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .map(event => ({
+        ...event,
+        confirmations: event.confirmedBy.length,
+        confirmedBy: undefined,
+      }))
+  }
+
+  #createPulseEvent(ws, data = {}) {
+    this.#cleanupPulseEvents()
+    const type = String(data.type || 'study').slice(0, 32)
+    const location = String(data.location || 'Campus').slice(0, 80)
+    const note = String(data.note || '').slice(0, 160)
+    const ttlMinutes = Math.max(15, Math.min(Number(data.ttlMinutes) || 120, 360))
+    const now = Date.now()
+    const event = {
+      id: `pulse-${now}-${++this.#pulseSeq}`,
+      scope: ws.scope,
+      type,
+      location,
+      note,
+      createdAt: new Date(now).toISOString(),
+      expiresAt: new Date(now + ttlMinutes * 60_000).toISOString(),
+      authorId: ws.userId,
+      authorName: ws.userName || 'Student',
+      confirmedBy: [ws.userId],
+    }
+    this.#pulseEvents.unshift(event)
+    this.#pulseEvents = this.#pulseEvents.slice(0, 120)
+    return {
+      ...event,
+      confirmations: event.confirmedBy.length,
+      confirmedBy: undefined,
+    }
+  }
+
+  #reactPulseEvent(ws, data = {}) {
+    this.#cleanupPulseEvents()
+    const event = this.#pulseEvents.find(item => item.scope === ws.scope && item.id === data.id)
+    if (!event) return null
+    if (data.reaction === 'confirm' && !event.confirmedBy.includes(ws.userId)) {
+      event.confirmedBy.push(ws.userId)
+    }
+    return {
+      ...event,
+      confirmations: event.confirmedBy.length,
+      confirmedBy: undefined,
     }
   }
 

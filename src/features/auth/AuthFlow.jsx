@@ -331,25 +331,56 @@ export default function AuthFlow() {
   const STEP_LABELS = ['Universitate', 'Email', 'Verificare', 'Confirmat']
 
   return (
-    <div className="min-h-screen bg-[#050810] flex items-center justify-center p-6">
-      <div className="pointer-events-none absolute inset-0"
-        style={{ background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.08) 0%, transparent 70%)' }} />
+    <div className="min-h-screen bg-[#050810] flex items-center justify-center p-6 relative overflow-hidden">
+
+      {/* Background */}
+      <div className="pointer-events-none absolute inset-0">
+        <div
+          className="absolute -top-[20%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full blur-[160px] animate-glow-pulse"
+          style={{ background: 'radial-gradient(ellipse, rgba(99,102,241,0.32) 0%, rgba(139,92,246,0.14) 45%, transparent 70%)' }}
+        />
+        <div className="absolute inset-0 grid-lines" />
+        <div className="absolute inset-0 dot-grid opacity-40" />
+        <div
+          className="absolute bottom-0 inset-x-0 h-64"
+          style={{ background: 'linear-gradient(to top, #050810 0%, transparent 100%)' }}
+        />
+      </div>
 
       <div className="w-full max-w-md relative z-10 animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="p-[1.5px] rounded-2xl bg-gradient-to-b from-white/20 to-white/[0.04] w-fit mx-auto mb-4">
-            <div className="w-14 h-14 rounded-[calc(1rem-1.5px)] bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
-              <Compass size={24} className="text-white" strokeWidth={2} />
+          <div className="relative w-fit mx-auto mb-5">
+            {/* Outer glow */}
+            <div
+              className="absolute inset-[-8px] rounded-[1.5rem] blur-xl opacity-60 animate-glow-pulse"
+              style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.6), transparent 70%)' }}
+            />
+            <div className="relative p-[2px] rounded-[1.4rem] bg-gradient-to-b from-white/25 to-white/[0.03]">
+              <div
+                className="w-16 h-16 rounded-[calc(1.4rem-2px)] flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(140deg, #6366f1 0%, #4f46e5 40%, #7c3aed 100%)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.2), 0 4px 20px rgba(99,102,241,0.4)',
+                }}
+              >
+                <Compass size={26} className="text-white" strokeWidth={2} />
+              </div>
             </div>
           </div>
-          <h1 className="text-[22px] font-bold text-white tracking-tight">StudentAcademic</h1>
-          <p className="text-slate-600 text-[12px] mt-1 font-medium">De la pierdut, la acasă.</p>
+          <h1 className="text-[24px] font-bold text-white tracking-tight">StudentCompass</h1>
+          <p className="text-slate-600 text-[12px] mt-1.5 font-medium">De la pierdut, la acasă.</p>
         </div>
 
         {/* Card — double bezel */}
-        <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.08] to-white/[0.02]">
-          <div className="bg-[#0c1120] border border-white/[0.04] rounded-[calc(1rem-1px)] p-6 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.8)]">
+        <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.1] to-white/[0.02]">
+          <div
+            className="rounded-[calc(1rem-1px)] p-6 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.9),0_2px_4px_rgba(0,0,0,0.5)]"
+            style={{
+              background: 'linear-gradient(160deg, #0d1426 0%, #0a0f1e 100%)',
+              border: '1px solid rgba(255,255,255,0.05)',
+            }}
+          >
             <div className="grid grid-cols-2 gap-2 mb-5">
               {[
                 ['student', 'Student', Compass],
@@ -377,27 +408,46 @@ export default function AuthFlow() {
             </div>
 
             {/* Step indicator */}
-            {role === 'student' && <div className="flex items-center gap-2 mb-6">
-              {step > STEP.SELECT_UNI && (
-                <button onClick={() => setStep(s => s - 1)}
-                  className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.08] transition-colors mr-1">
-                  <ChevronLeft size={13} className="text-slate-500" strokeWidth={1.75} />
-                </button>
-              )}
-              {STEP_LABELS.map((label, i) => (
-                <div key={i} className="flex items-center gap-1.5">
-                  <div className={clsx('w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold transition-all',
-                    i < step ? 'bg-indigo-600 text-white' :
-                    i === step ? 'bg-indigo-500/20 border border-indigo-500/50 text-indigo-400' :
-                    'bg-white/[0.04] border border-white/[0.07] text-slate-600')}>
-                    {i < step ? <Check size={9} strokeWidth={2.5} /> : i + 1}
+            {role === 'student' && (
+              <div className="flex items-center gap-2 mb-6">
+                {step > STEP.SELECT_UNI && (
+                  <button
+                    onClick={() => setStep(s => s - 1)}
+                    className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.08] hover:border-white/[0.12] transition-all mr-1"
+                  >
+                    <ChevronLeft size={13} className="text-slate-500" strokeWidth={1.75} />
+                  </button>
+                )}
+                {STEP_LABELS.map((label, i) => (
+                  <div key={i} className="flex items-center gap-1.5">
+                    <div
+                      title={label}
+                      className={clsx(
+                        'w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold transition-all duration-300',
+                        i < step
+                          ? 'text-white shadow-[0_0_8px_rgba(99,102,241,0.5)]'
+                          : i === step
+                          ? 'border border-indigo-500/50 text-indigo-400 bg-indigo-500/10'
+                          : 'bg-white/[0.03] border border-white/[0.07] text-slate-700',
+                      )}
+                      style={i < step ? { background: 'linear-gradient(135deg,#6366f1,#7c3aed)' } : undefined}
+                    >
+                      {i < step ? <Check size={10} strokeWidth={2.5} /> : i + 1}
+                    </div>
+                    {i < STEP_LABELS.length - 1 && (
+                      <div
+                        className="h-px w-5 rounded-full transition-all duration-500"
+                        style={{
+                          background: i < step
+                            ? 'linear-gradient(90deg,#6366f1,#7c3aed)'
+                            : 'rgba(255,255,255,0.07)',
+                        }}
+                      />
+                    )}
                   </div>
-                  {i < STEP_LABELS.length - 1 && (
-                    <div className={clsx('h-px w-4 transition-colors', i < step ? 'bg-indigo-600' : 'bg-white/[0.07]')} />
-                  )}
-                </div>
-              ))}
-            </div>}
+                ))}
+              </div>
+            )}
 
             {/* Step title */}
             <div className="mb-5">

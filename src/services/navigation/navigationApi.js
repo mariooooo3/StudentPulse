@@ -72,7 +72,7 @@ function localRecoAnswer(message) {
     return 'Pentru AC TUIASI, cea mai sigura recomandare este Cantina TUIASI din Campus Tudor Vladimirescu, Aleea Prof. Vasile Petrescu nr. 29. Programul oficial este L-V 11:00-19:00. Evita varful 12:00-13:30 si verifica harta pentru Google Maps sau Waze.'
   }
   if (n.includes('studiu') || n.includes('studiat') || n.includes('sala') || n.includes('biblioteca')) {
-    return 'Pentru studiu ai Biblioteca Gh. Asachi, biblioteca Facultatii AC si salile/laboratoarele libere din Corp C. In sesiune, foloseste Focus Forest din Wellness pentru sesiuni fara schimbat tabul.'
+    return 'Pentru studiu ai Biblioteca Gh. Asachi, biblioteca Facultatii AC si salile/laboratoarele libere din Corp C. In sesiune, foloseste Focus Forest din Focus pentru sesiuni fara schimbat tabul.'
   }
   if (n.includes('secretariat') || n.includes('acte') || n.includes('adeverinta') || n.includes('deschis')) {
     return 'Secretariatul AC este in Facultatea de Automatica si Calculatoare, Str. Prof. dr. doc. Dimitrie Mangeron nr. 27. Pentru program exact si acte, verifica pagina oficiala AC sau intreaba secretariatul inainte sa mergi.'

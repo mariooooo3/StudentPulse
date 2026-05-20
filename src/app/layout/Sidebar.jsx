@@ -9,6 +9,7 @@ import {
   Map,
   MapPin,
   MessageSquare,
+  Radio,
   Sparkles,
   Tag,
   Users,
@@ -34,11 +35,12 @@ const NAV_BY_MODE = {
     { id: 'messages', label: 'Mesaje', icon: MessageSquare },
   ],
   life: [
+    { id: 'pulse', label: 'Campus Pulse', icon: Radio },
     { id: 'discounts', label: 'Reduceri & Beneficii', icon: Tag },
     { id: 'career', label: 'Carieră & Internship-uri', icon: Briefcase },
     { id: 'community', label: 'Comunitate', icon: Users },
     { id: 'events', label: 'Evenimente', icon: Calendar },
-    { id: 'wellness', label: 'Wellness', icon: Heart },
+    { id: 'wellness', label: 'Focus', icon: Heart },
     { id: 'tools', label: 'Unelte Studențești', icon: Wrench },
     { id: 'citylife', label: 'Viața în Oraș', icon: MapPin },
   ],
@@ -183,7 +185,12 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
   const initials = displayName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
   const sidebarContent = (
-    <aside className="w-60 flex flex-col h-full shrink-0 bg-[#060a15] border-r border-white/[0.05]">
+    <aside
+      className="w-60 flex flex-col h-full shrink-0 border-r border-white/[0.05]"
+      style={{
+        background: 'linear-gradient(180deg, #070c18 0%, #060a14 100%)',
+      }}
+    >
 
       {/* Brand */}
       <div className="px-5 pt-6 pb-4">
@@ -299,7 +306,14 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
 
       {/* User card */}
       <div className="p-3 pt-2">
-        <div className="rounded-xl bg-white/[0.025] border border-white/[0.05] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+        <div
+          className="rounded-xl p-3"
+          style={{
+            background: 'rgba(255,255,255,0.025)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), 0 2px 8px rgba(0,0,0,0.3)',
+          }}
+        >
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => setShowProfile(true)}

@@ -1,31 +1,98 @@
-import { Compass, Map, Calendar, BookOpen, Users, ArrowRight, Sparkles, Shield, MessageSquare, MapPin, GraduationCap, Zap } from 'lucide-react'
+import { Compass, Map, Calendar, BookOpen, Users, ArrowRight, Sparkles, Shield, MessageSquare, GraduationCap, Zap, ChevronRight, Heart, Briefcase, Bell, Bot, ClipboardCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { UNIVERSITIES } from '../../shared/config/universities'
 
 const FEATURES = [
-  { icon: Map,           label: 'Campus Navigator',  desc: 'Găsești orice sală în câteva secunde cu hartă live și AI chat.',  color: '#6366f1', num: '01' },
-  { icon: Calendar,      label: 'Schedule Hub',      desc: 'Orar personalizat, recuperări și transfer de grupă automat.',      color: '#10b981', num: '02' },
-  { icon: BookOpen,      label: 'Thesis Finder',     desc: 'Profesori disponibili pentru licență, cu locuri în timp real.',    color: '#f59e0b', num: '03' },
-  { icon: Users,         label: 'Peer Tutoring',     desc: 'Sesiuni 1-la-1 și Skill Swap cu colegii care te ajută.',          color: '#f43f5e', num: '04' },
-  { icon: MessageSquare, label: 'Mesaje',            desc: 'Comunicare directă și securizată cu profesori și colegi.',         color: '#3b82f6', num: '05' },
-  { icon: MapPin,        label: 'Viața în Oraș',     desc: 'Sconturi, transport, zone sigure și ghid complet de housing.',     color: '#a855f7', num: '06' },
+  {
+    icon: Map,
+    label: 'Campus Navigator',
+    desc: 'Hartă live, AI chat, routing pedestrian și recunoaștere vizuală a clădirilor.',
+    color: '#6366f1',
+    num: '01',
+    span: 'sm:col-span-2',
+    size: 'large',
+  },
+  {
+    icon: Calendar,
+    label: 'Schedule Hub',
+    desc: 'Orar personal, recuperări și transfer de grupă în timp real.',
+    color: '#10b981',
+    num: '02',
+  },
+  {
+    icon: BookOpen,
+    label: 'Thesis Finder',
+    desc: 'Profesori disponibili pentru licență, cu locuri și status live.',
+    color: '#f59e0b',
+    num: '03',
+  },
+  {
+    icon: Users,
+    label: 'Peer Tutoring',
+    desc: 'Sesiuni 1-la-1, grupuri și Skill Swap automat cu colegii.',
+    color: '#f43f5e',
+    num: '04',
+  },
+  {
+    icon: MessageSquare,
+    label: 'Mesaje',
+    desc: 'Chat direct cu profesori și colegi, canale de facultate live.',
+    color: '#3b82f6',
+    num: '05',
+  },
+  {
+    icon: Heart,
+    label: 'Focus & Tools',
+    desc: 'Focus Forest, Pomodoro, Budget Tracker, Book Exchange si Carpool.',
+    color: '#10b981',
+    num: '06',
+  },
+  {
+    icon: Briefcase,
+    label: 'Carieră & Comunitate',
+    desc: 'Internship-uri, evenimente studențești, cluburi și mentori.',
+    color: '#8b5cf6',
+    num: '07',
+  },
+  {
+    icon: ClipboardCheck,
+    label: 'Campus Pulse',
+    desc: 'Noutati live din campus, aglomeratie, evenimente si recomandari pentru momentul zilei.',
+    color: '#14b8a6',
+    num: '08',
+    span: 'sm:col-span-2',
+  },
+  {
+    icon: Bot,
+    label: 'Asistent AI',
+    desc: 'Asistent virtual care navighează aplicația din comenzi în limbaj natural.',
+    color: '#06b6d4',
+    num: '09',
+  },
+  {
+    icon: Bell,
+    label: 'Notificări Live',
+    desc: 'Push-uri instant pentru teze, swap-uri, mesaje și recuperări.',
+    color: '#f59e0b',
+    num: '10',
+  },
 ]
 
 const STATS = [
-  { val: UNIVERSITIES.length + '+', label: 'Universități' },
-  { val: '6',   label: 'Module' },
+  { val: `${UNIVERSITIES.length}+`, label: 'Universități' },
+  { val: '10+', label: 'Module' },
   { val: '100%', label: 'Gratuit' },
   { val: 'Live', label: 'Real-time' },
 ]
 
 const containerVariants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.07 } },
+  show: { transition: { staggerChildren: 0.065 } },
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 80, damping: 18 } },
+  hidden: { opacity: 0, y: 20, filter: 'blur(6px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { type: 'spring', stiffness: 80, damping: 18 } },
 }
 
 export default function LandingPage({ onStart }) {
@@ -34,215 +101,270 @@ export default function LandingPage({ onStart }) {
 
       {/* ── Background ────────────────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {/* Primary glow */}
+        {/* Primary orb */}
         <div
-          className="absolute -top-[25%] left-1/2 -translate-x-1/2 w-[1000px] h-[700px] rounded-full blur-[180px] animate-glow-pulse"
-          style={{ background: 'radial-gradient(ellipse, rgba(99,102,241,0.5) 0%, rgba(139,92,246,0.25) 40%, transparent 70%)' }}
+          className="absolute -top-[30%] left-1/2 -translate-x-1/2 w-[1200px] h-[800px] rounded-full blur-[200px] animate-glow-pulse"
+          style={{ background: 'radial-gradient(ellipse, rgba(99,102,241,0.45) 0%, rgba(139,92,246,0.2) 45%, transparent 72%)' }}
         />
-        {/* Side orbs */}
+        {/* Left accent */}
         <div
-          className="absolute top-[45%] -left-[15%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-[0.08]"
+          className="absolute top-[40%] -left-[18%] w-[600px] h-[600px] rounded-full blur-[130px] opacity-[0.07]"
           style={{ background: '#10b981' }}
         />
+        {/* Right accent */}
         <div
-          className="absolute top-[55%] -right-[15%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-[0.08]"
+          className="absolute top-[50%] -right-[18%] w-[600px] h-[600px] rounded-full blur-[130px] opacity-[0.07]"
           style={{ background: '#6366f1' }}
         />
         {/* Grid lines */}
         <div className="absolute inset-0 grid-lines" />
         {/* Dot grid */}
-        <div className="absolute inset-0 dot-grid opacity-60" />
+        <div className="absolute inset-0 dot-grid opacity-50" />
         {/* Bottom fade */}
         <div
-          className="absolute bottom-0 inset-x-0 h-64"
+          className="absolute bottom-0 inset-x-0 h-80"
           style={{ background: 'linear-gradient(to top, #050810 0%, transparent 100%)' }}
         />
         {/* Top vignette */}
         <div
-          className="absolute top-0 inset-x-0 h-32"
-          style={{ background: 'linear-gradient(to bottom, rgba(5,8,16,0.6) 0%, transparent 100%)' }}
+          className="absolute top-0 inset-x-0 h-40"
+          style={{ background: 'linear-gradient(to bottom, rgba(5,8,16,0.7) 0%, transparent 100%)' }}
         />
       </div>
 
       {/* ── Header ────────────────────────────────────────── */}
-      <header className="relative z-10 flex items-center justify-between px-6 sm:px-10 py-5 max-w-6xl mx-auto w-full">
+      <header className="relative z-10 flex items-center justify-between px-6 sm:px-12 py-5 max-w-6xl mx-auto w-full">
         <div className="flex items-center gap-2.5">
-          <div className="p-[1.5px] rounded-[0.75rem] bg-gradient-to-b from-white/25 to-white/[0.04]">
-            <div className="w-8 h-8 rounded-[calc(0.75rem-1.5px)] bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.25),inset_0_-1px_0_rgba(0,0,0,0.15)]">
-              <Compass size={15} className="text-white" strokeWidth={2} />
+          <div className="p-[1.5px] rounded-[0.85rem] bg-gradient-to-b from-white/30 to-white/[0.04]">
+            <div
+              className="w-9 h-9 rounded-[calc(0.85rem-1.5px)] flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(140deg, #6366f1, #7c3aed)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.15), 0 4px 12px rgba(99,102,241,0.4)',
+              }}
+            >
+              <Compass size={17} className="text-white" strokeWidth={2} />
             </div>
           </div>
-          <span className="font-bold text-white text-[14px] tracking-tight">StudentCompass</span>
+          <div>
+            <span className="font-bold text-white text-[14px] tracking-tight leading-none block">StudentCompass</span>
+            <span className="text-[10px] text-slate-600 font-medium leading-none">Academic Platform</span>
+          </div>
         </div>
 
         <button
           onClick={onStart}
-          className="group inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[13px] font-semibold text-slate-400 hover:bg-white/[0.08] hover:text-white hover:border-white/[0.14] transition-all duration-200"
+          className="group inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/[0.09] text-[13px] font-semibold text-slate-400 hover:bg-white/[0.08] hover:text-white hover:border-white/[0.16] transition-all duration-200"
         >
           Intră în cont
-          <ArrowRight size={13} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform duration-200" />
+          <ChevronRight size={13} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform duration-200" />
         </button>
       </header>
 
       {/* ── Hero ──────────────────────────────────────────── */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 pt-4 pb-24">
+      <main className="relative z-10 flex-1 flex flex-col items-center text-center px-6 pt-6 pb-28">
+
         <motion.div
-          initial={{ opacity: 0, y: 36 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 60, damping: 18 }}
-          className="flex flex-col items-center"
+          transition={{ type: 'spring', stiffness: 55, damping: 18 }}
+          className="flex flex-col items-center w-full max-w-4xl"
         >
           {/* Badge */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, type: 'spring', stiffness: 120, damping: 20 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-indigo-500/25 bg-indigo-500/[0.07] text-indigo-300 text-[11px] font-semibold mb-10 tracking-wide"
+            initial={{ opacity: 0, scale: 0.88, y: -8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: 0.08, type: 'spring', stiffness: 140, damping: 22 }}
+            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-indigo-500/25 bg-indigo-500/[0.07] text-indigo-300 text-[11px] font-semibold mb-12 tracking-wide"
           >
-            <Sparkles size={10} strokeWidth={2.5} className="text-indigo-400" />
-            Disponibil pentru {UNIVERSITIES.length} universități din România
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse-slow ml-0.5" />
+            <span className="flex items-center gap-1.5">
+              <span
+                className="w-1.5 h-1.5 rounded-full bg-indigo-400"
+                style={{ animation: 'pulse-dot 2s ease-in-out infinite' }}
+              />
+              Disponibil pentru {UNIVERSITIES.length} universități din România
+            </span>
+            <Sparkles size={10} strokeWidth={2.5} className="text-indigo-400 opacity-80" />
           </motion.div>
 
-          {/* Logo with float animation */}
+          {/* Logo */}
           <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-            className="relative mb-10"
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+            className="relative mb-12"
           >
+            {/* Outer glow */}
             <div
-              className="absolute inset-0 rounded-[1.7rem] blur-2xl opacity-60"
-              style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.6), rgba(139,92,246,0.3))' }}
+              className="absolute inset-[-12px] rounded-[2rem] blur-2xl animate-glow-pulse-fast"
+              style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.65), rgba(139,92,246,0.3), transparent 70%)' }}
             />
-            <div className="relative p-[2px] rounded-[1.6rem] bg-gradient-to-b from-white/30 to-white/[0.04]">
-              <div className="w-28 h-28 rounded-[calc(1.6rem-2px)] bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-600 flex items-center justify-center shadow-[inset_0_2px_0_rgba(255,255,255,0.3),inset_0_-2px_0_rgba(0,0,0,0.2)]">
-                <Compass size={52} className="text-white drop-shadow-lg" strokeWidth={1.5} />
+            {/* Bezel */}
+            <div className="relative p-[2.5px] rounded-[1.75rem] bg-gradient-to-b from-white/35 to-white/[0.03]">
+              <div
+                className="w-32 h-32 rounded-[calc(1.75rem-2.5px)] flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(140deg, #6366f1 0%, #4f46e5 40%, #7c3aed 100%)',
+                  boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -2px 0 rgba(0,0,0,0.25), 0 8px 32px rgba(99,102,241,0.5)',
+                }}
+              >
+                <Compass size={56} className="text-white drop-shadow-lg" strokeWidth={1.5} />
               </div>
             </div>
           </motion.div>
 
-          {/* Main heading */}
-          <h1 className="text-[3.8rem] sm:text-[5.5rem] font-bold tracking-[-0.03em] leading-none mb-5 text-balance">
+          {/* Heading */}
+          <h1 className="text-[4rem] sm:text-[6rem] font-bold tracking-[-0.035em] leading-[0.92] mb-6 text-balance">
             <span className="text-white">Student</span>
             <span className="text-gradient-indigo">Compass</span>
           </h1>
 
           {/* Tagline */}
-          <p className="text-[1.4rem] sm:text-[1.75rem] font-bold tracking-tight mb-4">
-            <span className="text-gradient-white">De la pierdut, la </span>
+          <p className="text-[1.5rem] sm:text-[1.9rem] font-bold tracking-tight mb-5 leading-snug">
+            <span className="text-gradient-white">De la pierdut,&nbsp;</span>
             <span
               className="italic"
               style={{
-                background: 'linear-gradient(90deg, #818cf8, #a855f7)',
+                background: 'linear-gradient(90deg, #818cf8 0%, #a855f7 50%, #c084fc 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}
             >
-              acasă.
+              la acasă.
             </span>
           </p>
 
           {/* Description */}
-          <p className="text-[14px] text-slate-500 max-w-sm mx-auto mb-10 leading-relaxed font-medium">
-            Platforma academică personalizată pentru studenții din România.
-            Orar, licență, tutoring și navigare campus — totul într-un loc.
+          <p className="text-[14px] text-slate-500 max-w-[360px] mx-auto mb-12 leading-relaxed font-medium">
+            Platforma academică completă pentru studenții din România — orar, licență, tutoring și navigare campus, toate într-un singur loc.
           </p>
 
           {/* CTA */}
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-4 mb-14">
             <motion.button
               onClick={onStart}
-              whileHover={{ scale: 1.03 }}
+              whileHover={{ scale: 1.04, y: -1 }}
               whileTap={{ scale: 0.97 }}
-              className="relative inline-flex items-center gap-3 px-9 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[15px] transition-colors duration-200 overflow-hidden group"
+              className="relative inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-white font-bold text-[15px] overflow-hidden"
               style={{
-                boxShadow: '0 0 0 1px rgba(99,102,241,0.5), 0 8px 40px rgba(99,102,241,0.45), 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2)',
+                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #7c3aed 100%)',
+                boxShadow: '0 0 0 1px rgba(99,102,241,0.5), 0 8px 48px rgba(99,102,241,0.5), 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.22)',
               }}
             >
-              {/* Shimmer */}
+              {/* Shimmer sweep */}
               <span
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="pointer-events-none absolute inset-0"
                 style={{
-                  background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%)',
+                  background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.14) 50%, transparent 60%)',
                   backgroundSize: '200% 100%',
-                  animation: 'shimmer 1.5s linear infinite',
+                  animation: 'shine-sweep 2.5s ease-in-out infinite',
                 }}
               />
               <Zap size={16} strokeWidth={2.5} className="relative" />
-              <span className="relative">Începe acum</span>
-              <ArrowRight size={18} strokeWidth={2.5} className="relative group-hover:translate-x-0.5 transition-transform duration-200" />
+              <span className="relative">Începe acum — e gratuit</span>
+              <ArrowRight size={17} strokeWidth={2.5} className="relative" />
             </motion.button>
 
-            <p className="text-[11px] text-slate-700 flex items-center gap-2 justify-center flex-wrap">
-              <Shield size={10} strokeWidth={1.75} />
-              Email instituțional
+            <div className="flex items-center gap-3 text-[11px] text-slate-700 flex-wrap justify-center">
+              <span className="flex items-center gap-1.5">
+                <Shield size={10} strokeWidth={1.75} />
+                Email instituțional
+              </span>
               <span className="text-slate-800">·</span>
-              <GraduationCap size={10} strokeWidth={1.75} />
-              100% gratuit
+              <span className="flex items-center gap-1.5">
+                <GraduationCap size={10} strokeWidth={1.75} />
+                100% gratuit
+              </span>
               <span className="text-slate-800">·</span>
-              <Sparkles size={10} strokeWidth={1.75} />
-              AI-powered
-            </p>
+              <span className="flex items-center gap-1.5">
+                <Sparkles size={10} strokeWidth={1.75} />
+                AI-powered
+              </span>
+            </div>
           </div>
 
           {/* Stats strip */}
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, type: 'spring', stiffness: 80, damping: 18 }}
-            className="flex items-center gap-6 mt-12 mb-2"
+            transition={{ delay: 0.45, type: 'spring', stiffness: 80, damping: 18 }}
+            className="flex items-center gap-0 mb-20"
           >
             {STATS.map((s, i) => (
-              <div key={s.label} className="flex flex-col items-center">
-                <span className="font-mono text-[1.4rem] font-bold text-white leading-none">{s.val}</span>
-                <span className="text-[10px] text-slate-600 font-semibold mt-1 tracking-wide">{s.label}</span>
+              <div key={s.label} className="flex items-center">
+                <div className="flex flex-col items-center px-7 sm:px-10">
+                  <span className="font-mono text-[1.6rem] sm:text-[1.8rem] font-bold text-white leading-none tracking-tight">{s.val}</span>
+                  <span className="text-[10px] text-slate-600 font-semibold mt-1.5 tracking-[0.1em] uppercase">{s.label}</span>
+                </div>
+                {i < STATS.length - 1 && (
+                  <div className="w-px h-10 bg-white/[0.07] shrink-0" />
+                )}
               </div>
             ))}
           </motion.div>
         </motion.div>
 
-        {/* ── Features grid ───────────────────────────────── */}
+        {/* ── Bento Features grid ──────────────────────────── */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-16 max-w-3xl w-full"
+          className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-4xl w-full"
         >
-          {FEATURES.map(({ icon: Icon, label, desc, color, num }) => (
+          {FEATURES.map(({ icon: Icon, label, desc, color, num, span, size }) => (
             <motion.div
               key={label}
               variants={itemVariants}
-              className="group relative p-5 text-left rounded-2xl border border-white/[0.05] bg-white/[0.015] hover:border-white/[0.11] hover:bg-white/[0.04] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] overflow-hidden cursor-default"
+              className={`group relative p-5 text-left rounded-2xl border border-white/[0.05] bg-white/[0.015]
+                hover:border-white/[0.11] hover:bg-white/[0.04]
+                transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
+                overflow-hidden cursor-default
+                ${span || ''} ${size === 'large' ? 'min-h-[140px]' : ''}`}
             >
               {/* Number */}
               <span className="absolute top-3.5 right-4 text-[10px] font-bold font-mono text-slate-800 tabular-nums select-none">{num}</span>
 
-              {/* Radial glow on hover */}
+              {/* Radial hover glow */}
               <div
                 className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                style={{ background: `radial-gradient(ellipse at 20% 20%, ${color}14, transparent 70%)` }}
+                style={{ background: `radial-gradient(ellipse at 15% 15%, ${color}12, transparent 65%)` }}
               />
 
-              {/* Colored top border */}
+              {/* Top gradient line */}
               <div
-                className="absolute top-0 left-4 right-4 h-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"
-                style={{ background: `linear-gradient(90deg, transparent, ${color}60, transparent)` }}
+                className="absolute top-0 left-6 right-6 h-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"
+                style={{ background: `linear-gradient(90deg, transparent, ${color}70, transparent)` }}
+              />
+
+              {/* Left border accent */}
+              <div
+                className="absolute left-0 top-5 bottom-5 w-[2px] rounded-r-full opacity-0 group-hover:opacity-60 transition-opacity duration-300"
+                style={{ background: color }}
               />
 
               {/* Icon */}
               <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
+                className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110"
                 style={{
-                  background: color + '16',
-                  border: `1px solid ${color}28`,
+                  background: color + '18',
+                  border: `1px solid ${color}30`,
+                  boxShadow: `0 0 0 0 ${color}00`,
                 }}
               >
-                <Icon size={16} strokeWidth={1.75} style={{ color }} />
+                <Icon size={17} strokeWidth={1.75} style={{ color }} />
               </div>
 
               <p className="text-[13px] font-bold text-slate-200 mb-1.5 leading-tight">{label}</p>
               <p className="text-[11px] text-slate-600 leading-relaxed">{desc}</p>
+
+              {size === 'large' && (
+                <div
+                  className="flex items-center gap-1 mt-4 text-[11px] font-semibold opacity-0 group-hover:opacity-100 transition-all duration-200"
+                  style={{ color }}
+                >
+                  Explorează <ArrowRight size={11} strokeWidth={2.5} />
+                </div>
+              )}
             </motion.div>
           ))}
         </motion.div>
@@ -251,16 +373,15 @@ export default function LandingPage({ onStart }) {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.6 }}
-          className="mt-16 w-full max-w-3xl"
+          transition={{ delay: 0.65, duration: 0.6 }}
+          className="mt-20 w-full max-w-4xl"
         >
-          <p className="section-label mb-5 text-center">Universități partenere</p>
+          <p className="section-label mb-6 text-center">Universități partenere</p>
           <div className="flex flex-wrap items-center justify-center gap-2">
             {UNIVERSITIES.map(u => (
               <div
                 key={u.id}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.025] border border-white/[0.05] text-[11px] font-semibold hover:bg-white/[0.05] hover:border-white/[0.09] transition-all duration-200 cursor-default"
-                style={{ color: u.color }}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.025] border border-white/[0.05] text-[11px] font-semibold hover:bg-white/[0.06] hover:border-white/[0.1] transition-all duration-200 cursor-default"
               >
                 <span className="text-xs leading-none">{u.avatar}</span>
                 <span className="text-slate-400">{u.shortName}</span>
@@ -271,14 +392,18 @@ export default function LandingPage({ onStart }) {
       </main>
 
       {/* ── Footer ────────────────────────────────────────── */}
-      <footer className="relative z-10 py-6 border-t border-white/[0.04]">
-        <div className="gradient-separator mb-5" />
-        <div className="flex items-center justify-center gap-3 text-[11px] text-slate-800">
-          <span>StudentCompass v2.0</span>
-          <span className="opacity-40">·</span>
-          <span>Prototip academic</span>
-          <span className="opacity-40">·</span>
-          <span>România 🇷🇴</span>
+      <footer className="relative z-10 py-8 border-t border-white/[0.04]">
+        <div className="line-indigo mb-6 max-w-6xl mx-auto px-6" />
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-[11px] text-slate-800">
+          <div className="flex items-center gap-3">
+            <span>StudentCompass v2.0</span>
+            <span className="opacity-40">·</span>
+            <span>Prototip academic</span>
+            <span className="opacity-40">·</span>
+            <span className="flex items-center gap-1">România <span>🇷🇴</span></span>
+          </div>
+          <span className="hidden sm:block opacity-40">·</span>
+          <span className="text-slate-800">FiiPractic Hackathon 2026</span>
         </div>
       </footer>
     </div>
