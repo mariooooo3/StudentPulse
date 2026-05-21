@@ -10,22 +10,30 @@ StudentCompass este organizat ca un demo modular. Scopul structurii este ca fiec
 src/main.jsx
   -> src/app/App.jsx
      -> AuthProvider
+     -> SettingsProvider
+     -> LandingPage
      -> AuthFlow
      -> OnboardingFlow
      -> AppShell
         -> Sidebar
         -> Header
+        -> SettingsPanel
         -> feature view
+        -> VirtualAssistant
+        -> GlobalSearch
 ```
 
 `src/app` este zona de compozitie:
 
-- `App.jsx` decide starea principala a aplicatiei: loading, login, onboarding sau dashboard.
+- `App.jsx` decide starea principala a aplicatiei: loading, landing, login, onboarding sau dashboard.
 - `providers/AuthContext.jsx` tine sesiunea si profilul curent.
-- `layout/` contine elementele stabile ale interfetei.
+- `providers/SettingsContext.jsx` tine setarile de tema si accesibilitate per-cont.
+- `hooks/useAppNavigation.js` gestioneaza navigarea intre moduri (academic/life) si view-uri.
+- `layout/` contine elementele stabile ale interfetei (Header, Sidebar, SettingsPanel).
 
 `src/features` este impartit dupa functionalitate:
 
+- `landing` - pagina de prezentare inainte de autentificare.
 - `auth` - autentificare demo cu email institutional.
 - `onboarding` - profil initial student.
 - `dashboard` - ecranul principal.
@@ -35,6 +43,8 @@ src/main.jsx
 - `tutoring` - peer tutoring si skill swap.
 - `city` - adaptare in oras.
 - `messages` - mesagerie realtime.
+- `student-life` - hub viata studenteasca: cariera, reduceri, evenimente, comunitate, wellness, tools.
+- `professor` - portal profesor: gestionare teze, mesaje cu studentii.
 
 `src/shared` contine infrastructura comuna:
 
@@ -42,8 +52,8 @@ src/main.jsx
 - `config` - constante si universitati.
 - `data` - date demo.
 - `hooks` - hook-uri reutilizabile.
-- `services` - auth, cache, socket si AI.
-- `utils` - helper-e mici.
+- `services` - auth, cache, socket, AI, virtualAssistant, professorPortal.
+- `utils` - helper-e mici (theme, tenantScope, dateTime, cn).
 
 ## Backend
 
