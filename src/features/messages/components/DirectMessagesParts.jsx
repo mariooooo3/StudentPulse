@@ -175,6 +175,10 @@ export function GroupThread({ groupId, groupLabel, scope, currentUserId, current
   const typingTimer = useRef(null)
 
   useEffect(() => {
+    return () => clearTimeout(typingTimer.current)
+  }, [])
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
@@ -265,6 +269,10 @@ export function ChatThread({ contact, currentUserId, currentName, scope, onBack 
   const bottomRef = useRef(null)
   const fileRef = useRef(null)
   const typingTimer = useRef(null)
+
+  useEffect(() => {
+    return () => clearTimeout(typingTimer.current)
+  }, [])
 
   // Trimite read receipt doar când cresc mesajele primite de la contact (nu cele trimise de noi)
   const contactMsgCount = messages.filter(m => m.senderId !== currentUserId).length

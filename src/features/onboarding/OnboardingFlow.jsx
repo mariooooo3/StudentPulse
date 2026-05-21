@@ -298,10 +298,12 @@ export default function OnboardingFlow({ onComplete, session }) {
 
   useEffect(() => {
     if (!done) return
+    let cancelled = false
     setAiLoading(true)
     generateAdaptationProfile(answersRef.current)
-      .then(profile => setAiProfile(profile))
-      .finally(() => setAiLoading(false))
+      .then(profile => { if (!cancelled) setAiProfile(profile) })
+      .finally(() => { if (!cancelled) setAiLoading(false) })
+    return () => { cancelled = true }
   }, [done])
 
   function next() {
