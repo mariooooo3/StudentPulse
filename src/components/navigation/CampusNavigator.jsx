@@ -94,7 +94,7 @@ export default function CampusNavigator() {
   useEffect(() => {
     if (activeTab !== 'reco' || pulseLoaded) return
     loadPulse()
-  }, [activeTab])
+  }, [activeTab, pulseLoaded])
 
   useEffect(() => {
     return () => {
@@ -253,19 +253,15 @@ export default function CampusNavigator() {
   }
 
   function goCinematicNext() {
-    setCinematicStep(prev => {
-      const next = Math.min(prev + 1, cinematicSteps.length - 1)
-      speak(cinematicSteps[next]?.instruction, voiceEnabled)
-      return next
-    })
+    const next = Math.min(cinematicStep + 1, cinematicSteps.length - 1)
+    speak(cinematicSteps[next]?.instruction, voiceEnabled)
+    setCinematicStep(next)
   }
 
   function goCinematicPrev() {
-    setCinematicStep(prev => {
-      const p = Math.max(prev - 1, 0)
-      speak(cinematicSteps[p]?.instruction, voiceEnabled)
-      return p
-    })
+    const p = Math.max(cinematicStep - 1, 0)
+    speak(cinematicSteps[p]?.instruction, voiceEnabled)
+    setCinematicStep(p)
   }
 
   async function startCinematicMode(copilotResult) {

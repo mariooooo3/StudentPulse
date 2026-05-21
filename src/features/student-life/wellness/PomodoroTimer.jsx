@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
 import { Pause, Play, RotateCcw } from 'lucide-react'
 import { SECTION_ACCENTS } from '../constants/sectionConfig'
@@ -32,6 +32,10 @@ export default function PomodoroTimer() {
       clearInterval(intervalRef.current)
     }
   }
+
+  useEffect(() => {
+    return () => clearInterval(intervalRef.current)
+  }, [])
 
   function switchMode(m) {
     clearInterval(intervalRef.current)
