@@ -39,9 +39,10 @@ export function createPortalRequestHandler(repository, notifications, pubsub = n
 
       if (req.method === 'POST' && path === '/thesis-requests') {
         const request = repository.createThesisRequest(await readJson(req))
+        const professorId = request.professorId || DEMO_PROFESSOR.id
         const thread = repository.upsertThread({
           student: { userId: request.studentId, name: request.studentName, email: request.studentEmail },
-          professor: { id: DEMO_PROFESSOR.id, name: request.professorName || DEMO_PROFESSOR.name },
+          professor: { id: professorId, name: request.professorName || DEMO_PROFESSOR.name },
           subject: `Licenta: ${request.idea}`,
         })
         repository.addPortalMessage(thread.id, {
@@ -50,14 +51,14 @@ export function createPortalRequestHandler(repository, notifications, pubsub = n
           senderRole: 'student',
           text: `Am trimis o cerere de licenta: ${request.idea}`,
         })
-        notifications.push(DEMO_PROFESSOR.id, {
+        notifications.push(professorId, {
           title: 'Cerere licenta noua',
           body: `${request.studentName} a trimis o cerere: ${request.idea}`,
           type: 'info',
           action: 'professor.thesis.requested',
           meta: { requestId: request.id, threadId: thread.id, studentId: request.studentId },
         })
-        pubsub?.publish(`portal:${DEMO_PROFESSOR.id}`, { kind: 'thesis-request-created', request, thread })
+        pubsub?.publish(`portal:${professorId}`, { kind: 'thesis-request-created', request, thread })
         return sendJson(res, 201, { request })
       }
 
@@ -86,9 +87,11 @@ export function createPortalRequestHandler(repository, notifications, pubsub = n
 
       if (req.method === 'POST' && path === '/recovery-requests') {
         const request = repository.createRecoveryRequest(await readJson(req))
+        const professorId = request.professorId || DEMO_PROFESSOR.id
+        const professorName = request.professorName || DEMO_PROFESSOR.name
         const thread = repository.upsertThread({
           student: { userId: request.studentId, name: request.studentName, email: request.studentEmail },
-          professor: DEMO_PROFESSOR,
+          professor: { id: professorId, name: professorName },
           subject: `Recuperare: ${request.subject}`,
         })
         repository.addPortalMessage(thread.id, {
@@ -97,14 +100,14 @@ export function createPortalRequestHandler(repository, notifications, pubsub = n
           senderRole: 'student',
           text: `Am trimis o cerere de recuperare pentru ${request.subject}. Motiv: ${request.reason}`,
         })
-        notifications.push(DEMO_PROFESSOR.id, {
+        notifications.push(professorId, {
           title: 'Cerere recuperare noua',
           body: `${request.studentName} cere recuperare la ${request.subject}.`,
           type: 'info',
           action: 'professor.recovery.requested',
           meta: { requestId: request.id, threadId: thread.id, studentId: request.studentId },
         })
-        pubsub?.publish(`portal:${DEMO_PROFESSOR.id}`, { kind: 'recovery-request-created', request, thread })
+        pubsub?.publish(`portal:${professorId}`, { kind: 'recovery-request-created', request, thread })
         return sendJson(res, 201, { request })
       }
 

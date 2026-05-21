@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react'
-import { ChevronRight, ChevronLeft, Check, Compass, Search, Sparkles } from 'lucide-react'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { ChevronRight, ChevronLeft, Check, Compass, Search, Sparkles, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ALL_FACULTY_QUESTIONS as FACULTY_QUESTIONS } from '../../shared/data/domainPersonalization'
+import { generateAdaptationProfile } from '../../shared/services/ai.service'
 import clsx from 'clsx'
 
 // ─── Progress bar ─────────────────────────────────────────────────────────────
@@ -208,6 +209,9 @@ export default function OnboardingFlow({ onComplete, session }) {
   const [direction, setDirection] = useState(1) // 1 = forward, -1 = back
   const [answers, setAnswers] = useState({})
   const [done, setDone] = useState(false)
+  const [aiProfile, setAiProfile] = useState(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  const answersRef = useRef(answers)
 
   const universityFaculties = session?.university?.faculties || []
   const university = session?.university
@@ -289,6 +293,17 @@ export default function OnboardingFlow({ onComplete, session }) {
     })
   }
 
+  // Ține mereu o referință actualizată la answers pentru a o folosi la generarea profilului
+  useEffect(() => { answersRef.current = answers }, [answers])
+
+  useEffect(() => {
+    if (!done) return
+    setAiLoading(true)
+    generateAdaptationProfile(answersRef.current)
+      .then(profile => setAiProfile(profile))
+      .finally(() => setAiLoading(false))
+  }, [done])
+
   function next() {
     if (!canProceed()) return
     if (step < total - 1) { setDirection(1); setStep(s => s + 1) }
@@ -322,10 +337,52 @@ export default function OnboardingFlow({ onComplete, session }) {
           </div>
 
           <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">Profilul tău este gata!</h2>
-          <p className="text-slate-400 mb-10 leading-relaxed text-sm">
-            StudentCompass a personalizat toate modulele în funcție de facultatea, anul și interesele tale.
-            De acum, nu te mai pierzi.
-          </p>
+
+          {/* AI personalized message */}
+          <AnimatePresence mode="wait">
+            {aiLoading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex items-center justify-center gap-2 text-slate-400 text-sm mb-6"
+              >
+                <Loader2 size={14} className="animate-spin text-emerald-400" />
+                <span>Se generează profilul tău personalizat...</span>
+              </motion.div>
+            ) : aiProfile ? (
+              <motion.div
+                key="profile"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: 'spring', stiffness: 80, damping: 18 }}
+                className="mb-6 space-y-3"
+              >
+                <p className="text-slate-300 leading-relaxed text-sm">{aiProfile.welcomeMessage}</p>
+                {aiProfile.personalityTag && (
+                  <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
+                    {aiProfile.personalityTag}
+                  </span>
+                )}
+                {aiProfile.urgentTasks?.length > 0 && (
+                  <div className="text-left rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-3 space-y-1">
+                    <p className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider mb-1.5">Primii pași</p>
+                    {aiProfile.urgentTasks.map((task, i) => (
+                      <div key={i} className="flex items-start gap-2 text-xs text-slate-300">
+                        <span className="text-amber-400 mt-0.5 shrink-0">→</span> {task}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            ) : (
+              <motion.p key="default" className="text-slate-400 mb-6 leading-relaxed text-sm">
+                StudentCompass a personalizat toate modulele în funcție de facultatea, anul și interesele tale.
+                De acum, nu te mai pierzi.
+              </motion.p>
+            )}
+          </AnimatePresence>
 
           {/* Module grid */}
           <div className="grid grid-cols-3 gap-2.5 mb-8">

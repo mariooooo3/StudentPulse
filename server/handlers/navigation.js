@@ -387,45 +387,57 @@ async function handleAssistant(req, res) {
 
 const PHOTO_PROMPT_UAIC = `Ești AI Compass pentru StudentCompass.
 Studentul este înscris la UAIC (Universitatea Alexandru Ioan Cuza din Iași, Bd. Carol I 11).
-Poza este din campusul UAIC. Identifică clădirea sau zona exactă.
+Poza este din campusul UAIC sau din zona Bd. Carol I, Iași. Identifică clădirea sau zona exactă.
 
-Clădirile UAIC pe care le poți recunoaște:
-• Facultatea de Informatică FII – Corp B, intrare separată, clădire modernă
-• Rectorat UAIC – Corp A, clădire istorică, Bd. Carol I 11
-• Facultatea de Matematică, Fizică, Chimie, Biologie, Drept, Litere, Filosofie, Psihologie – Bd. Carol I 11
-• Facultatea de Economie FEAA – Bd. Carol I 22
-• BCU Biblioteca Centrală „Mihai Eminescu" – Bd. Carol I
-• Cantina UAIC – Bd. Carol I
-• Cămine Codrescu – Aleea M. Sadoveanu
-• Parcul Copou
+DESCRIERI VIZUALE ale clădirilor UAIC:
+• Rectorat UAIC / Corp A – clădire istorică monument, fațadă neoromânească crem-gălbui, coloane și arcade, inscripție "Universitatea Alexandru Ioan Cuza" deasupra intrării, steag UAIC
+• Facultatea de Informatică FII – clădire modernă din sticlă și beton, corp separat față de rectorat, intrare cu banner FII, eventual logo Facultatea de Informatică
+• Facultatea de Economie FEAA – clădire pe Bd. Carol I nr. 22, separată de campus principal, fațadă modernă
+• BCU Biblioteca Centrală „Mihai Eminescu" – clădire impunătoare, arhitectură clasică, intrare cu trepte largi, inscripție BCU sau Biblioteca Centrală
+• Cantina UAIC – clădire funcțională, mai simplă, flux de studenți la ore de prânz
+• Cămine Codrescu – blocuri tip cămin, mai înalte, cu camere mici și coridoare lungi
+• Parcul Copou – spațiu verde, alei, teiul lui Eminescu (copac vechi), bănci de studiu
+
+INDICII VIZUALE GENERALE:
+- Plăcuțe indicatoare cu "UAIC", "Alexandru Ioan Cuza", sigla universității
+- Panourile de avizier cu anunțuri în română
+- Studenți cu ghiozdan, corturi de campanie estudiantină
+- Bd. Carol I – stradă mare cu tramvai, clădiri istorice pe ambele laturi
 
 Răspunde în română, în 2-3 fraze:
-1. Universitatea: UAIC și locația probabilă (clădire sau reper)
-2. Indiciile vizuale principale (arhitectură, plăcuțe, sigle, vegetație etc.)
-3. Gradul de certitudine (sigur / probabil / nesigur)
+1. Locația probabilă (clădire sau zonă din UAIC)
+2. Indiciile vizuale pe care le-ai identificat în poză
+3. Gradul de certitudine: sigur (>80%) / probabil (50-80%) / nesigur (<50%)
 
+Dacă nu poți identifica nimic specific, spune "Nu pot identifica locația cu certitudine din această poză."
 Nu genera traseu și nu întreba destinația.`
 
 const PHOTO_PROMPT_TUIASI = `Ești AI Compass pentru StudentCompass.
-Studentul este înscris la TUIASI (Universitatea Tehnică "Gheorghe Asachi" din Iași, Bd. Mangeron).
-Poza este din campusul TUIASI. Identifică clădirea sau zona exactă.
+Studentul este înscris la TUIASI (Universitatea Tehnică "Gheorghe Asachi" din Iași, Bd. Prof. Dimitrie Mangeron 27).
+Poza este din campusul TUIASI sau din zona Bd. Mangeron, Iași. Identifică clădirea sau zona exactă.
 
-Clădirile TUIASI pe care le poți recunoaște:
-• Facultatea de Automatică și Calculatoare (AC) – Corp C (CTI) sau Corp A (DAIA), Bd. Mangeron 27
-• Facultatea ETTI – Bd. Carol I 11A
-• Facultatea IEEIA – Bd. Mangeron
-• Facultatea de Mecanică – Bd. Mangeron
-• Facultatea CI, ICPM, Arhitectură, CMMI, HGIM, SIM, DIMA – Bd. Mangeron
-• Biblioteca Gh. Asachi – Bd. Carol I
-• Rectorat TUIASI – Bd. Carol I
-• Cantina TUIASI – Campus Tudor Vladimirescu
-• Cămine Tudor Vladimirescu (T1–T19)
+DESCRIERI VIZUALE ale clădirilor TUIASI:
+• Corp C / CTI (Calculatoare) – bloc cu 4 etaje, fațadă clasică de instituție, intrare principală pe Bd. Mangeron, coridoare lungi cu săli numerotate (C1xx, C2xx), secretariat la parter cu ghișee
+• Corp A / DAIA (Automatică) – clădire alipită sau apropiată de Corp C, birouri profesori, laboratoare de control, plăcuță "Automatică și Informatică Aplicată"
+• Rectorat TUIASI – clădire reprezentativă pe Bd. Carol I, fațadă neoromânească, inscripție "Universitatea Tehnică Gheorghe Asachi din Iași", steag TUIASI
+• Biblioteca Gh. Asachi – clădire mare cu intrare monumentală, inscripție "Biblioteca Gheorghe Asachi" sau "Biblioteca TUIASI", sală de lectură cu mese lungi
+• Cantina TUIASI – clădire în Campus Tudor Vladimirescu, flux mare de studenți 11-15, cozi la ghișeu, tăvi, mese tip cantină
+• Cămine Tudor Vladimirescu (T1-T19) – blocuri rezidențiale înalte, cu camere mici, afișe pe holuri, cutii poștale, coridoare cu uși numerotat
+• Facultatea ETTI – clădire pe Bd. Carol I 11A, profil electrotehnică/telecom, ecrane și panouri specifice
+• Facultatea IEEIA – pe Bd. Mangeron, cu laboratoare electrice, transformatoare demo
+
+INDICII VIZUALE GENERALE:
+- Plăcuțe cu "TUIASI", "Gheorghe Asachi", sigla universității (roată dințată stilizată)
+- Numerotare săli: C1xx = Etaj 1 Corp C, C2xx = Etaj 2, A3xx = Etaj 3 Corp A
+- Coridoare lungi cu linoleum, iluminat fluorescent, panouri de avizier cu orar
+- Studenți cu laptop și cărți tehnice, afișe cu proiecte tehnice și robotică
 
 Răspunde în română, în 2-3 fraze:
-1. Universitatea: TUIASI și locația probabilă (clădire sau reper)
-2. Indiciile vizuale principale (arhitectură, plăcuțe, sigle, vegetație etc.)
-3. Gradul de certitudine (sigur / probabil / nesigur)
+1. Locația probabilă (clădire specifică sau zonă din TUIASI)
+2. Indiciile vizuale concrete pe care le-ai identificat în poză
+3. Gradul de certitudine: sigur (>80%) / probabil (50-80%) / nesigur (<50%)
 
+Dacă nu poți identifica nimic specific, spune "Nu pot identifica locația cu certitudine din această poză."
 Nu genera traseu și nu întreba destinația.`
 
 async function handlePhoto(req, res) {
@@ -476,7 +488,8 @@ async function handleCopilot(req, res) {
               type: 'text',
               text: `${university === 'uaic' ? PHOTO_PROMPT_UAIC : PHOTO_PROMPT_TUIASI}
 
-Dacă poți identifica o locație interioară (coridor, sală, panou), menționează și asta.
+Dacă poți identifica o locație interioară (coridor, sală, panou de etaj, ușă cu număr), menționează etajul sau sala.
+Dacă poza e neclară sau nu conține indicii suficiente, spune explicit că nu poți identifica locația în loc să ghicești.
 Dacă există un mesaj de la student care indică o destinație, ține cont de el în răspuns.`,
             },
           ],
@@ -751,6 +764,148 @@ ${cvText.slice(0, 4000)}`,
   })
 }
 
+async function handleAdaptationProfile(req, res) {
+  const body = await readJson(req)
+  const { answers = {} } = body
+
+  const raw = await grokChat({
+    model: TEXT_MODEL,
+    messages: [
+      {
+        role: 'system',
+        content: `Ești un asistent de onboarding pentru studenți români. Primești răspunsurile unui chestionar și generezi un profil personalizat.
+Răspunzi ÎNTOTDEAUNA în română. Răspunsul tău este STRICT un obiect JSON valid, fără text suplimentar.`,
+      },
+      {
+        role: 'user',
+        content: `Analizează răspunsurile și generează un profil JSON cu exact aceste câmpuri:
+{
+  "welcomeMessage": "mesaj personalizat de 1-2 propoziții care să reflecte situația reală a studentului",
+  "urgentTasks": ["task1", "task2", "task3"],
+  "tips": ["sfat specific situației 1", "sfat specific situației 2"],
+  "personalityTag": "etichetă scurtă (ex: Student practic, Vizual & colaborativ, etc.)",
+  "recommendedModules": ["modul1", "modul2", "modul3"]
+}
+
+Răspunsuri onboarding:
+${JSON.stringify(answers, null, 2)}`,
+      },
+    ],
+    max_tokens: 600,
+    response_format: { type: 'json_object' },
+  })
+
+  const fallback = {
+    welcomeMessage: 'Bun venit în StudentCompass! Am personalizat platforma în funcție de profilul tău.',
+    urgentTasks: ['Mergi la secretariat cu dosarul', 'Obține carnetul de student', 'Configurează orarul'],
+    tips: ['Explorează Campus Navigator pentru a te orienta rapid', 'Verifică orarul în Schedule Hub'],
+    personalityTag: 'Student motivat',
+    recommendedModules: ['Campus Navigator', 'Schedule Hub', 'Peer Tutoring'],
+  }
+
+  const parsed = safeJson(raw, fallback)
+  sendJson(res, 200, {
+    welcomeMessage: String(parsed.welcomeMessage || fallback.welcomeMessage),
+    urgentTasks: Array.isArray(parsed.urgentTasks) ? parsed.urgentTasks.slice(0, 4).map(String) : fallback.urgentTasks,
+    tips: Array.isArray(parsed.tips) ? parsed.tips.slice(0, 3).map(String) : fallback.tips,
+    personalityTag: String(parsed.personalityTag || fallback.personalityTag),
+    recommendedModules: Array.isArray(parsed.recommendedModules) ? parsed.recommendedModules.slice(0, 4).map(String) : fallback.recommendedModules,
+  })
+}
+
+async function handleCityAssistant(req, res) {
+  const body = await readJson(req)
+  const { question, userProfile = {}, history = [] } = body
+
+  const universityName = userProfile.university?.name || userProfile.universityName || 'universitate din România'
+  const city = userProfile.university?.city || userProfile.city || 'Iași'
+  const faculty = userProfile.faculty || userProfile.detectedFaculty || ''
+  const year = userProfile.year || ''
+
+  const systemPrompt = `Ești asistentul de adaptare urbană pentru StudentCompass. Ajuți studenți noi să se adapteze la viața de student în ${city}, România.
+Răspunzi ÎNTOTDEAUNA în română, concis și practic. Fii empatic și util.
+
+Studentul: ${year ? year + ' la ' : ''}${faculty ? faculty + ', ' : ''}${universityName}, ${city}.
+
+Poți ajuta cu: documente și acte, transport și abonamente student, cazare, bănci și card student, servicii medicale, viață socială, mâncare și cafenele, studiu.
+
+Reguli:
+- Fii specific la ${city} și universitatea studentului
+- Maxim 3-4 propoziții, la obiect
+- Nu inventa adrese sau programe — spune "verifică la fața locului" dacă nu ești sigur
+- Răspunde JSON: {"answer": "...", "suggestedNext": ["acțiune1", "acțiune2"]}`
+
+  const raw = await grokChat({
+    model: TEXT_MODEL,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...(Array.isArray(history) ? history.slice(-6) : []),
+      { role: 'user', content: String(question || '') },
+    ],
+    max_tokens: 400,
+    response_format: { type: 'json_object' },
+  })
+
+  const fallback = {
+    answer: `Ca student nou la ${universityName}, primul pas este să mergi la secretariat cu dosarul complet în prima săptămână.`,
+    suggestedNext: ['Deschide cont bancar', 'Obține abonament transport'],
+  }
+
+  const parsed = safeJson(raw, fallback)
+  sendJson(res, 200, {
+    answer: String(parsed.answer || fallback.answer),
+    suggestedNext: Array.isArray(parsed.suggestedNext) ? parsed.suggestedNext.slice(0, 3).map(String) : fallback.suggestedNext,
+  })
+}
+
+async function handleSmartMatches(req, res) {
+  const body = await readJson(req)
+  const { userProfile = {}, pool = [] } = body
+
+  if (!pool.length) { sendJson(res, 200, []); return }
+
+  const raw = await grokChat({
+    model: TEXT_MODEL,
+    messages: [
+      {
+        role: 'system',
+        content: `Ești un sistem de matching pentru studenți. Sortezi potențiali parteneri de skill-swap după compatibilitate cu profilul dat.
+Răspunzi STRICT cu un array JSON de id-uri sortate descrescător după compatibilitate, fără text suplimentar: ["id1", "id2", ...]`,
+      },
+      {
+        role: 'user',
+        content: `Sortează acești studenți după compatibilitate cu profilul meu:
+
+Profilul meu:
+- Skill-uri oferite: ${JSON.stringify(userProfile.skills || [])}
+- Skill-uri dorite: ${JSON.stringify(userProfile.wants || [])}
+- Interese: ${JSON.stringify(userProfile.interests || [])}
+- An: ${userProfile.year || 'necunoscut'}
+
+Studenți disponibili:
+${JSON.stringify(pool.map(p => ({ id: p.id, skills: p.skills || [], wants: p.wants || [], year: p.year })))}
+
+Returnează DOAR array-ul JSON cu id-urile sortate.`,
+      },
+    ],
+    max_tokens: 200,
+  })
+
+  try {
+    const match = String(raw || '').match(/\[[\s\S]*?\]/)
+    const sortedIds = match ? JSON.parse(match[0]) : []
+    const idOrder = new Map(sortedIds.map((id, i) => [String(id), i]))
+    const sorted = [...pool].sort((a, b) => {
+      const ai = idOrder.has(String(a.id)) ? idOrder.get(String(a.id)) : pool.length
+      const bi = idOrder.has(String(b.id)) ? idOrder.get(String(b.id)) : pool.length
+      return ai - bi
+    })
+    sendJson(res, 200, sorted.map(u => ({ ...u, match: true })))
+  } catch {
+    sendJson(res, 200, pool.map(u => ({ ...u, match: true })))
+  }
+}
+
 export function createNavigationRequestHandler() {
   return async (req, res) => {
     try {
@@ -762,6 +917,9 @@ export function createNavigationRequestHandler() {
       if (req.url === '/api/navigation/recommendations') { await handleRecommendations(req, res); return }
       if (req.url === '/api/navigation/support-assistant') { await handleSupportAssistant(req, res); return }
       if (req.url === '/api/career/cv-analyze') { await handleCVAnalysis(req, res); return }
+      if (req.url === '/api/ai/adaptation-profile') { await handleAdaptationProfile(req, res); return }
+      if (req.url === '/api/ai/city-assistant') { await handleCityAssistant(req, res); return }
+      if (req.url === '/api/ai/smart-matches') { await handleSmartMatches(req, res); return }
       sendJson(res, 404, { error: 'Not found' })
     } catch (error) {
       sendJson(res, error.statusCode || 500, { error: error.message || 'Navigation API error' })
