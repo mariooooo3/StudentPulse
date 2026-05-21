@@ -35,7 +35,6 @@ export function useCampusNavigatorState() {
   const [cinematicMode, setCinematicMode] = useState(false)
   const [cinematicStep, setCinematicStep] = useState(0)
   const [cinematicSteps, setCinematicSteps] = useState([])
-  const [voiceEnabled, setVoiceEnabled] = useState(true)
 
   return {
     selectedBuilding, setSelectedBuilding,
@@ -70,6 +69,5 @@ export function useCampusNavigatorState() {
     cinematicMode, setCinematicMode,
     cinematicStep, setCinematicStep,
     cinematicSteps, setCinematicSteps,
-    voiceEnabled, setVoiceEnabled,
   }
 }

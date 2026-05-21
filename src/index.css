@@ -32,6 +32,45 @@
   ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.12); }
 }
 
+/* ── Settings: Reduced motion ─────────────────────────── */
+.sc-reduced-motion *,
+.sc-reduced-motion *::before,
+.sc-reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ── Settings: High contrast ──────────────────────────── */
+.sc-high-contrast #root {
+  filter: contrast(1.25) brightness(1.08);
+}
+
+/* ── Settings: Font size — Small (~92%) ───────────────── */
+html.sc-font-small [class*="text-[11px]"] { font-size: 10px !important; }
+html.sc-font-small [class*="text-[12px]"] { font-size: 11px !important; }
+html.sc-font-small [class*="text-[13px]"] { font-size: 12px !important; }
+html.sc-font-small [class*="text-[14px]"] { font-size: 13px !important; }
+html.sc-font-small [class*="text-[15px]"] { font-size: 13px !important; }
+html.sc-font-small [class*="text-[16px]"] { font-size: 14px !important; }
+html.sc-font-small .text-xs               { font-size: 11px !important; }
+html.sc-font-small .text-sm               { font-size: 12px !important; }
+html.sc-font-small .text-base             { font-size: 14px !important; }
+html.sc-font-small .text-lg               { font-size: 16px !important; }
+
+/* ── Settings: Font size — Large (~118%) ──────────────── */
+html.sc-font-large [class*="text-[11px]"] { font-size: 13px !important; }
+html.sc-font-large [class*="text-[12px]"] { font-size: 14px !important; }
+html.sc-font-large [class*="text-[13px]"] { font-size: 16px !important; }
+html.sc-font-large [class*="text-[14px]"] { font-size: 17px !important; }
+html.sc-font-large [class*="text-[15px]"] { font-size: 18px !important; }
+html.sc-font-large [class*="text-[16px]"] { font-size: 19px !important; }
+html.sc-font-large .text-xs               { font-size: 14px !important; }
+html.sc-font-large .text-sm               { font-size: 16px !important; }
+html.sc-font-large .text-base             { font-size: 19px !important; }
+html.sc-font-large .text-lg               { font-size: 22px !important; }
+
 @layer components {
 
   /* ── Double-Bezel card ────────────────────────────────── */
@@ -390,4 +429,25 @@
 @keyframes orbit {
   from { transform: rotate(0deg)   translateX(28px) rotate(0deg); }
   to   { transform: rotate(360deg) translateX(28px) rotate(-360deg); }
+}
+
+/* ── Light theme — CSS filter inversion ───────────────────── */
+/*
+ * Applying invert(1) hue-rotate(180deg) to <html> flips every dark
+ * background to light and every light text to dark automatically,
+ * covering all hardcoded hex values, Tailwind classes, and inline
+ * styles in one rule. We then re-invert the Leaflet map and images
+ * so they render in their original colours.
+ */
+html.sc-theme-light {
+  filter: invert(1) hue-rotate(180deg);
+  color-scheme: light;
+}
+
+/* Re-invert media/map so they look normal (double-invert = identity) */
+html.sc-theme-light img,
+html.sc-theme-light video,
+html.sc-theme-light canvas,
+html.sc-theme-light .leaflet-container {
+  filter: invert(1) hue-rotate(180deg);
 }

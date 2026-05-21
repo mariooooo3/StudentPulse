@@ -1,10 +1,18 @@
 export function speak(text, enabled) {
   if (!enabled || typeof window === 'undefined' || !window.speechSynthesis) return
-  window.speechSynthesis.cancel()
-  const utt = new SpeechSynthesisUtterance(text)
-  utt.lang = 'ro-RO'
-  utt.rate = 0.92
-  window.speechSynthesis.speak(utt)
+  const synth = window.speechSynthesis
+  synth.cancel()
+  // Chrome needs a brief pause after cancel() before speak() works reliably
+  setTimeout(() => {
+    const utt = new SpeechSynthesisUtterance(text)
+    const voices = synth.getVoices()
+    const roVoice = voices.find(v => v.lang.startsWith('ro')) || voices.find(v => v.lang.startsWith('en'))
+    if (roVoice) utt.voice = roVoice
+    utt.lang = roVoice?.lang || 'ro-RO'
+    utt.rate = 0.92
+    utt.onerror = () => {}
+    synth.speak(utt)
+  }, 80)
 }
 
 export function buildIndoorCinematicSteps(nodePath, indRooms) {
