@@ -19,6 +19,10 @@ import {
   Save,
   GraduationCap,
   ChevronRight,
+  Lock,
+  Github,
+  Linkedin,
+  Hash,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useState } from 'react'
@@ -51,20 +55,33 @@ const MODE_COPY = {
   life: { name: 'StudentCompass', subtitle: 'Viața Studențească', label: 'Viața Studențească', icon: Sparkles },
 }
 
+const IT_FACULTY_TYPES = new Set(['CS', 'ENGINEERING_CS', 'MATH_CS'])
+
+function isItFaculty(profile, session) {
+  const type = profile?.facultyType || session?.detectedFaculty?.type || ''
+  return IT_FACULTY_TYPES.has(type)
+}
+
 function ProfileModal({ profile, session, theme, initials, onClose }) {
   const { updateProfile } = useAuth()
   const displayName = profile?.name || session?.email?.split('@')[0] || 'Student'
-  const [name, setName] = useState(displayName)
-  const [year, setYear] = useState(profile?.year || '')
+  const showSocialLinks = isItFaculty(profile, session)
   const [interests, setInterests] = useState((profile?.interests || []).join(', '))
+  const [group, setGroup] = useState(profile?.group || '')
+  const [github, setGithub] = useState(profile?.github || '')
+  const [linkedin, setLinkedin] = useState(profile?.linkedin || '')
   const [saved, setSaved] = useState(false)
 
   function handleSave() {
-    updateProfile({
-      name: name.trim() || displayName,
-      year,
+    const patch = {
       interests: interests.split(',').map(item => item.trim()).filter(Boolean),
-    })
+      group: group.trim(),
+    }
+    if (showSocialLinks) {
+      patch.github = github.trim()
+      patch.linkedin = linkedin.trim()
+    }
+    updateProfile(patch)
     setSaved(true)
     setTimeout(() => { setSaved(false); onClose() }, 800)
   }
@@ -84,7 +101,7 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
               </button>
             </div>
 
-            <div className="p-5 space-y-4">
+            <div className="p-5 space-y-4 overflow-y-auto max-h-[70vh]">
               {/* Avatar */}
               <div className="flex items-center gap-4">
                 <div
@@ -110,35 +127,27 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
                 </div>
               </div>
 
-              {/* Name */}
+              {/* Name — read-only */}
               <div>
                 <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">Nume</label>
-                <input
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  className="input-base"
-                  placeholder="Numele tău..."
-                />
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-white/[0.04] bg-white/[0.02] text-slate-400 text-[13px] select-none">
+                  <span className="flex-1 truncate">{displayName}</span>
+                  <Lock size={11} className="text-slate-700 shrink-0" />
+                </div>
               </div>
 
-              {/* Year */}
+              {/* Group */}
               <div>
-                <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">An de studiu</label>
-                <div className="flex gap-1.5">
-                  {['1', '2', '3', '4', 'M1', 'M2'].map(y => (
-                    <button
-                      key={y}
-                      onClick={() => setYear(y)}
-                      className={clsx(
-                        'flex-1 py-2 rounded-lg text-[11px] font-semibold transition-all border',
-                        year === y
-                          ? 'border-indigo-500/40 bg-indigo-600/20 text-indigo-300'
-                          : 'border-white/[0.06] bg-white/[0.02] text-slate-600 hover:text-slate-300 hover:border-white/[0.1]',
-                      )}
-                    >
-                      {y}
-                    </button>
-                  ))}
+                <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">Grupă</label>
+                <div className="relative">
+                  <Hash size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none" />
+                  <input
+                    value={group}
+                    onChange={e => setGroup(e.target.value)}
+                    className="input-base pl-8"
+                    placeholder="ex: B1, B3, C2..."
+                    maxLength={10}
+                  />
                 </div>
               </div>
 
@@ -152,6 +161,37 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
                   placeholder="ex: AI, web dev, mobile..."
                 />
               </div>
+
+              {/* GitHub + LinkedIn — only for IT faculties */}
+              {showSocialLinks && (
+                <>
+                  <div>
+                    <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">GitHub</label>
+                    <div className="relative">
+                      <Github size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none" />
+                      <input
+                        value={github}
+                        onChange={e => setGithub(e.target.value)}
+                        className="input-base pl-8"
+                        placeholder="username sau link..."
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">LinkedIn</label>
+                    <div className="relative">
+                      <Linkedin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none" />
+                      <input
+                        value={linkedin}
+                        onChange={e => setLinkedin(e.target.value)}
+                        className="input-base pl-8"
+                        placeholder="username sau link..."
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Save */}
               <button
