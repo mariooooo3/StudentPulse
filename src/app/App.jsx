@@ -12,6 +12,7 @@ import VirtualAssistant from '../shared/components/VirtualAssistant'
 import { OnlineCountProvider, useOnlineCount } from '../shared/hooks/useOnlineCount'
 import { socketService } from '../shared/services/socket.service'
 import LandingPage from '../features/landing/LandingPage'
+import { useAppNavigation } from './hooks/useAppNavigation'
 
 const AuthFlow       = lazy(() => import('../features/auth/AuthFlow'))
 const OnboardingFlow = lazy(() => import('../features/onboarding/OnboardingFlow'))
@@ -34,20 +35,10 @@ const DEFAULT_VIEW_BY_MODE = {
   life: 'discounts',
 }
 
-function loadViewState() {
-  try {
-    const raw = sessionStorage.getItem('sc_view_state')
-    if (!raw) return null
-    return JSON.parse(raw)
-  } catch { return null }
-}
-
 function AppShell() {
   const { authState, profileStage, session, profile, completeOnboarding } = useAuth()
   const [showAuth, setShowAuth] = useState(false)
-  const savedViewState = loadViewState()
-  const [platformMode, setPlatformMode] = useState(savedViewState?.platformMode || 'academic')
-  const [currentViewByMode, setCurrentViewByMode] = useState(savedViewState?.currentViewByMode || DEFAULT_VIEW_BY_MODE)
+  const { platformMode, currentViewByMode, navigate, changeMode } = useAppNavigation(DEFAULT_VIEW_BY_MODE)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const { count: onlineCount } = useOnlineCount()
@@ -80,37 +71,9 @@ function AppShell() {
     const name = profile?.name || session.email?.split('@')[0]?.split('.').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ') || session.email
     socketService.auth(session.userId, name, socketProfile)
   }, [authState, session?.userId, session?.email, session?.university, session?.detectedFaculty, profile])
-
-  const persistViewState = (mode, views) => {
-    try {
-      sessionStorage.setItem('sc_view_state', JSON.stringify({ platformMode: mode, currentViewByMode: views }))
-    } catch {}
-  }
-
-  const handleModeChange = (mode) => {
-    setPlatformMode(mode)
-    setCurrentViewByMode((views) => {
-      const updated = { ...views, [mode]: views[mode] || DEFAULT_VIEW_BY_MODE[mode] }
-      persistViewState(mode, updated)
-      return updated
-    })
-  }
-
-  const handleNavigate = (view, mode) => {
-    const targetMode = mode || platformMode
-    if (mode && mode !== platformMode) {
-      setPlatformMode(mode)
-    }
-    setCurrentViewByMode((views) => {
-      const updated = { ...views, [targetMode]: view }
-      persistViewState(targetMode, updated)
-      return updated
-    })
-  }
-
-  const handleNotificationNavigate = (view, mode = 'academic') => {
-    handleNavigate(view, mode)
-  }
+  const handleModeChange = (mode) => changeMode(mode)
+  const handleNavigate = (view, mode) => navigate(view, mode)
+  const handleNotificationNavigate = (view, mode = 'academic') => navigate(view, mode)
 
   if (authState === AUTH_STATE.LOADING) {
     return (
