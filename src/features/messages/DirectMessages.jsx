@@ -52,12 +52,17 @@ export default function DirectMessages({ session, profile }) {
   }, [currentUserId, scope])
 
   useEffect(() => {
+    let timer = null
     function onThreadRemoved() {
       setThreadRemovedWarning(true)
-      setTimeout(() => setThreadRemovedWarning(false), 4000)
+      clearTimeout(timer)
+      timer = setTimeout(() => setThreadRemovedWarning(false), 4000)
     }
     window.addEventListener('sc:thread-removed', onThreadRemoved)
-    return () => window.removeEventListener('sc:thread-removed', onThreadRemoved)
+    return () => {
+      window.removeEventListener('sc:thread-removed', onThreadRemoved)
+      clearTimeout(timer)
+    }
   }, [])
 
   // Auth + initial presence fetch — runs only when stable deps change
