@@ -3,44 +3,48 @@
 ## Goal
 Reduce oversized files and separate responsibilities by feature (UI, hooks, services, data, adapters).
 
-## Phase 1 (done)
+## Phase 1 ✓ done
 - Extracted shared message helpers/constants from `DirectMessages.jsx`:
   - `src/features/messages/messages.utils.js`
 
-## Phase 2 (next)
+## Phase 2 ✓ done
 - `src/components/navigation/CampusNavigator.jsx`
-  - split into:
-    - `hooks/useCampusNavigatorState.js`
-    - `hooks/useCampusNavigatorAI.js`
-    - `utils/camera.js`
-    - keep `CampusNavigator.jsx` as orchestrator/container
+  - `hooks/useCampusNavigatorState.js` ✓
+  - `hooks/useCampusNavigatorCamera.js` ✓
+  - kept `CampusNavigator.jsx` as orchestrator/container ✓
 
 - `src/features/schedule/ScheduleHub.jsx`
-  - split into:
-    - `components/WeeklyView.jsx`
-    - `components/AllGroupsView.jsx`
-    - `components/RecoveryGrid.jsx`
-    - `components/SlotSwapView.jsx`
-    - `components/RecoveryModal.jsx`
-  - move local constants/variants to `schedule.constants.js`
+  - `components/ScheduleHubParts.jsx` ✓
+  - `schedule.constants.js` ✓
 
 - `server/handlers/navigation.js`
-  - split into:
-    - `navigation/copilot.handler.js`
-    - `navigation/photo.handler.js`
-    - `navigation/recommendations.handler.js`
-    - `navigation/support.handler.js`
-    - `career/cv.handler.js`
-    - `ai/adaptation.handler.js`, `ai/city.handler.js`, `ai/matches.handler.js`
-    - `shared/prompting.js`, `shared/normalize.js`, `shared/http.js`
+  - `navigation/copilot.handler.js` ✓
+  - `navigation/photo.handler.js` ✓
+  - `navigation/recommendations.handler.js` ✓
+  - `navigation/support.handler.js` ✓
+  - `navigation/assistant.handler.js` ✓
+  - `navigation/prompts.js` ✓
+  - `navigation.constants.js` ✓
+  - `navigation.http.js` ✓
+  - `navigation.validation.js` ✓
+  - `ai/cv.handler.js` ✓
+  - `ai/adaptation.handler.js` ✓
+  - `ai/city.handler.js` ✓
+  - `ai/matches.handler.js` ✓
 
-## Phase 3
+## Phase 3 ✓ done
 - `src/features/messages/DirectMessages.jsx`
-  - split view components (`ChatThread`, `GroupThread`, `PortalThread`, rows) into `components/`
-  - keep page-level state + orchestration in container
+  - `components/DirectMessagesParts.jsx` ✓ (ChatThread, GroupThread, PortalThread, rows)
+  - `messages.utils.js` ✓
 
 - `src/app/layout/Header.jsx`
-  - split notifications/search controls into dedicated components + hooks
+  - `header.constants.js` ✓
+  - `header.utils.js` ✓
+
+- `src/shared/data/`
+  - `mockData.datasets.js` ✓ (split din mockData.js)
+  - `domainPersonalization.datasets.js` ✓ (split din domainPersonalization.js)
+  - `studentLifeData.datasets.js` ✓ (split din studentLifeData.js)
 
 ## Guardrails
 - Keep behavior identical after each split.
