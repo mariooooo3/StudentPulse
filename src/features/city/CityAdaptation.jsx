@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MapPin, CheckSquare, Tag, Lightbulb, Bus, Shield, Home, ChevronRight, Star, Sparkles } from 'lucide-react'
+import { MapPin, CheckSquare, Tag, Lightbulb, Bus, Shield, Home, ChevronRight, Star, Sparkles, MessageCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import ArrivalAssistant from './ArrivalAssistant'
 import StudentDiscounts from './StudentDiscounts'
@@ -7,8 +7,18 @@ import LocalTips from './LocalTips'
 import StudentTransport from './StudentTransport'
 import SafeZones from './SafeZones'
 import StudentHousing from './StudentHousing'
+import CityChat from './CityChat'
 
 const MODULES = [
+  {
+    id: 'city-chat',
+    icon: MessageCircle,
+    label: 'Asistent AI',
+    desc: 'Întreabă orice despre viața de student în orașul tău',
+    color: '#818cf8',
+    badge: 'AI',
+    badgeColor: '#6366f1',
+  },
   {
     id: 'arrival',
     icon: CheckSquare,
@@ -126,6 +136,7 @@ export default function CityAdaptation({ profile }) {
 
   if (activeModule) {
     const props = { profile, onBack: () => setActiveModule(null) }
+    if (activeModule === 'city-chat') return <CityChat {...props} />
     if (activeModule === 'arrival') return <ArrivalAssistant {...props} />
     if (activeModule === 'discounts') return <StudentDiscounts {...props} />
     if (activeModule === 'tips') return <LocalTips {...props} />

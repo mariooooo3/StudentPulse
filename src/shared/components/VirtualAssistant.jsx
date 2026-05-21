@@ -243,13 +243,21 @@ export default function VirtualAssistant({
     if (!text || loading) return
 
     const navAction = findNavigationAction(text, context.role)
-    if (navAction && onNavigate) {
-      onNavigate(navAction.view, navAction.mode)
-    }
 
     const nextMessages = [...messages, { role: 'user', text }]
     setMessages(nextMessages)
     setInput('')
+
+    if (navAction && onNavigate) {
+      onNavigate(navAction.view, navAction.mode)
+      const label = VIEW_LABELS[navAction.view] || navAction.view
+      const confirmMsg = `Te-am dus la ${label}. Cu ce te pot ajuta acolo?`
+      setMessages(prev => [...prev, { role: 'assistant', text: confirmMsg }])
+      setSuggestions(defaultSuggestions(context))
+      if (!open) setUnread(value => value + 1)
+      return
+    }
+
     setLoading(true)
 
     const response = await askVirtualAssistant({

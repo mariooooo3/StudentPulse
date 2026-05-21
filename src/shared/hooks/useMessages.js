@@ -89,6 +89,10 @@ export function useMessages(channel, currentUserId) {
 
     const onConnect = () => {
       setConnected(true)
+      // Curăță indicatorii de typing rămași din sesiunea anterioară
+      Object.values(typingTimers.current).forEach(clearTimeout)
+      typingTimers.current = {}
+      setTypingUsers({})
       // Reload history to catch messages missed during disconnect
       socketService.getChatHistory(channel)
         .then(({ messages: hist }) => {

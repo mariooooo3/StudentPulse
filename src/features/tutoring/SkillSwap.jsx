@@ -1,9 +1,10 @@
-import { useState } from 'react'
-import { ArrowLeftRight, Plus, Users, Calendar, Check, Zap, Repeat2, BookOpen, Sparkles } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { ArrowLeftRight, Plus, Users, Calendar, Check, Zap, Repeat2, BookOpen, Sparkles, Loader2 } from 'lucide-react'
 import { getGroupSessions, getSkillSwapUsers } from '../../shared/data/facultyCatalog'
 import clsx from 'clsx'
 import { useToast } from '../../shared/components/Toast'
 import { motion, AnimatePresence } from 'framer-motion'
+import { findSmartMatches } from '../../shared/services/ai.service'
 
 const containerVariants = {
   hidden: {},
@@ -19,7 +20,7 @@ const itemVariants = {
 }
 
 /* ─── Skill Swap 1-la-1 ─── */
-function SkillSwapTab({ users }) {
+function SkillSwapTab({ users, matchLoading }) {
   const [contacted, setContacted] = useState({})
   const [skills, setSkills] = useState(() => JSON.parse(localStorage.getItem('sc_swap_skills') || '[]'))
   const [wants, setWants] = useState(() => JSON.parse(localStorage.getItem('sc_swap_wants') || '[]'))
@@ -115,7 +116,11 @@ function SkillSwapTab({ users }) {
         <div className="flex items-center gap-2 mb-3">
           <Zap size={13} className="text-amber-400" />
           <p className="text-xs font-bold text-white">Match-uri compatibile</p>
-          {users.filter(u => u.match).length > 0 && (
+          {matchLoading ? (
+            <span className="flex items-center gap-1 text-[10px] text-slate-500">
+              <Loader2 size={10} className="animate-spin" /> Se calculează...
+            </span>
+          ) : users.filter(u => u.match).length > 0 && (
             <span className="badge-amber text-[9px] py-0 px-1.5">{users.filter(u => u.match).length} top match</span>
           )}
         </div>
@@ -365,8 +370,28 @@ function GroupSessionsTab({ sessions }) {
 
 /* ─── Root export ─── */
 export default function SkillSwap({ profile }) {
-  const users = getSkillSwapUsers(profile)
   const sessions = getGroupSessions(profile)
+  const [users, setUsers] = useState(() => getSkillSwapUsers(profile))
+  const [matchLoading, setMatchLoading] = useState(true)
+
+  // Cheie stabilă care se schimbă doar când profilul relevant se modifică
+  const profileKey = `${profile?.faculty}-${profile?.year}-${(profile?.interests || []).join(',')}`
+
+  useEffect(() => {
+    const pool = getSkillSwapUsers(profile)
+    const skills = JSON.parse(localStorage.getItem('sc_swap_skills') || '[]')
+    const wants = JSON.parse(localStorage.getItem('sc_swap_wants') || '[]')
+    const userProfile = {
+      skills,
+      wants,
+      interests: profile?.interests || [],
+      year: profile?.year,
+    }
+    setMatchLoading(true)
+    findSmartMatches(userProfile, pool)
+      .then(sorted => setUsers(sorted))
+      .finally(() => setMatchLoading(false))
+  }, [profileKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [tab, setTab] = useState(0)
 
@@ -404,7 +429,7 @@ export default function SkillSwap({ profile }) {
           transition={{ type: 'spring', stiffness: 200, damping: 26 }}
         >
           {tab === 0
-            ? <SkillSwapTab users={users} />
+            ? <SkillSwapTab users={users} matchLoading={matchLoading} />
             : <GroupSessionsTab sessions={sessions} />
           }
         </motion.div>

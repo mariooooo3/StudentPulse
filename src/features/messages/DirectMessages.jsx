@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import { Send, Search, Wifi, WifiOff, Users, ShieldCheck, Paperclip, X, FileText, ArrowLeft, Hash, Check, CheckCheck, MessageSquare, Compass } from 'lucide-react'
+import { Send, Search, Wifi, WifiOff, Users, ShieldCheck, Paperclip, X, FileText, ArrowLeft, Hash, Check, CheckCheck, MessageSquare, Compass, AlertTriangle } from 'lucide-react'
 import { useMessages } from '../../shared/hooks/useMessages'
 import { socketService } from '../../shared/services/socket.service'
 import { useOnlineCount } from '../../shared/hooks/useOnlineCount'
@@ -301,10 +301,11 @@ function ChatThread({ contact, currentUserId, currentName, scope, onBack }) {
   const fileRef = useRef(null)
   const typingTimer = useRef(null)
 
-  // Trimite read receipt când se deschide chat-ul sau vin mesaje noi de la contact
+  // Trimite read receipt doar când cresc mesajele primite de la contact (nu cele trimise de noi)
+  const contactMsgCount = messages.filter(m => m.senderId !== currentUserId).length
   useEffect(() => {
-    if (!isSelfConversation) sendRead()
-  }, [channel, messages.length, isSelfConversation, sendRead])
+    if (!isSelfConversation && contactMsgCount > 0) sendRead()
+  }, [channel, contactMsgCount, isSelfConversation, sendRead])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -502,9 +503,15 @@ function PortalThread({ thread, currentUserId, currentName }) {
     }
   }, [currentUserId, localThread.professorName, readChannel, typingChannel])
 
+  // Trimite read receipt doar când contact adaugă mesaje noi (nu când noi trimitem)
+  const portalContactMsgCount = (localThread?.messages || []).filter(m => m.senderId !== currentUserId).length
   useEffect(() => {
-    socketService.publish(readChannel, { userId: currentUserId, seenAt: new Date().toISOString() }).catch(() => {})
-  }, [currentUserId, localThread?.messages?.length, readChannel])
+    if (!portalContactMsgCount) return
+    let alive = true
+    socketService.publish(readChannel, { userId: currentUserId, seenAt: new Date().toISOString() })
+      .catch(() => { if (!alive) return })
+    return () => { alive = false }
+  }, [currentUserId, portalContactMsgCount, readChannel])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -712,12 +719,22 @@ export default function DirectMessages({ session, profile }) {
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState('dm') // 'dm' | 'channels'
   const [mobileView, setMobileView] = useState('list') // 'list' | 'chat'
+  const [threadRemovedWarning, setThreadRemovedWarning] = useState(false)
   const { report: reportOnlineCount } = useOnlineCount()
   const { notifications } = useNotifications(currentUserId)
 
   const eligibleUsers = useCallback((users) => {
     return (users || []).filter(u => u.userId !== currentUserId && u.scope === scope)
   }, [currentUserId, scope])
+
+  useEffect(() => {
+    function onThreadRemoved() {
+      setThreadRemovedWarning(true)
+      setTimeout(() => setThreadRemovedWarning(false), 4000)
+    }
+    window.addEventListener('sc:thread-removed', onThreadRemoved)
+    return () => window.removeEventListener('sc:thread-removed', onThreadRemoved)
+  }, [])
 
   // Auth + initial presence fetch — runs only when stable deps change
   useEffect(() => {
@@ -761,7 +778,16 @@ export default function DirectMessages({ session, profile }) {
     const unsub = socketService.subscribe(`portal:${currentUserId}`, async () => {
       const threads = await listPortalThreadsForUser(currentUserId)
       setPortalThreads(threads)
-      setActivePortal(prev => prev ? threads.find(thread => thread.id === prev.id) || null : prev)
+      setActivePortal(prev => {
+        if (!prev) return prev
+        const stillExists = threads.find(thread => thread.id === prev.id)
+        if (!stillExists) {
+          // Thread-ul a fost șters — întoarcem la listă
+          setTimeout(() => window.dispatchEvent(new CustomEvent('sc:thread-removed')), 0)
+          return null
+        }
+        return stillExists
+      })
     })
     return unsub
   }, [currentUserId])
@@ -972,13 +998,27 @@ export default function DirectMessages({ session, profile }) {
           /* Empty state */
           <div className="flex-1 flex items-center justify-center animate-fade-in-up">
             <div className="text-center max-w-xs px-6">
-              <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-5">
-                <Compass size={28} className="text-slate-600" />
-              </div>
-              <p className="text-slate-300 font-semibold text-base mb-1">Selectează o conversație</p>
-              <p className="text-slate-600 text-sm leading-relaxed">
-                Studenții din alte facultăți sau universități nu apar în lista DM.
-              </p>
+              {threadRemovedWarning ? (
+                <>
+                  <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-5">
+                    <AlertTriangle size={28} className="text-amber-400" />
+                  </div>
+                  <p className="text-slate-300 font-semibold text-base mb-1">Conversație indisponibilă</p>
+                  <p className="text-slate-500 text-sm leading-relaxed">
+                    Conversația a fost închisă sau ștearsă. Selectează alta din listă.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-5">
+                    <Compass size={28} className="text-slate-600" />
+                  </div>
+                  <p className="text-slate-300 font-semibold text-base mb-1">Selectează o conversație</p>
+                  <p className="text-slate-600 text-sm leading-relaxed">
+                    Studenții din alte facultăți sau universități nu apar în lista DM.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         )}
