@@ -22,7 +22,8 @@ export default function ChatTab({
   const chatBottomRef = useRef(null)
 
   useEffect(() => {
-    setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+    const timer = setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+    return () => clearTimeout(timer)
   }, [chatMessages])
 
   function handleChatPhoto(e) {

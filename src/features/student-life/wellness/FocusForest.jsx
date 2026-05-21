@@ -154,12 +154,12 @@ export default function FocusForest() {
               <span className="text-3xl font-black text-teal-200">3.</span>
               <span className="text-xl font-bold text-white">
                 {groups.map((group, gi) => (
-                  <span key={gi} className="mr-2 inline-block">
+                  <span key={`g-${gi}`} className="mr-2 inline-block">
                     {group.split('').map((digit, di) => {
                       const isLast = gi === groups.length - 1 && di === group.length - 1
                       return (
                         <span
-                          key={di}
+                          key={`${gi}-${di}`}
                           className={clsx(
                             'transition-all duration-300',
                             isLast && justRevealed
