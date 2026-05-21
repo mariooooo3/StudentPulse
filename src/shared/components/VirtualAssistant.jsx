@@ -227,10 +227,7 @@ export default function VirtualAssistant({
 
   useEffect(() => {
     setSuggestions(defaultSuggestions(context))
-    setMessages(prev => {
-      if (prev.length > 1) return prev
-      return [{ role: 'assistant', text: initialAssistantMessage(context.role) }]
-    })
+    setMessages([{ role: 'assistant', text: initialAssistantMessage(context.role) }])
   }, [context.role])
 
   useEffect(() => {

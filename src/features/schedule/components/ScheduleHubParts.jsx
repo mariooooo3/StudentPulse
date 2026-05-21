@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { X, Check, Send, Zap, MessageSquare, Users, CalendarClock, GraduationCap, BookOpen } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { DAYS, HOURS } from '../../../shared/data/mockData'
@@ -126,7 +126,9 @@ const STATUS_LABEL = {
 
 export function RecoveryGrid({ recoverySlots, onNotify, session }) {
   const [pendingModal, setPendingModal] = useState(null)
-  const [confirmed, setConfirmed]       = useState({})
+  const [confirmed, setConfirmed] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(`sc_recovery_${session?.userId}`) || '{}') } catch { return {} }
+  })
   const [studentRequests, setStudentRequests] = useState([])
 
   const subjects = Object.keys(recoverySlots)
@@ -307,7 +309,11 @@ export function RecoveryGrid({ recoverySlots, onNotify, session }) {
           subject={pendingModal.subject}
           onClose={() => setPendingModal(null)}
           onConfirm={async (reason) => {
-            setConfirmed(p => ({ ...p, [pendingModal.key]: true }))
+            setConfirmed(p => {
+              const next = { ...p, [pendingModal.key]: true }
+              try { localStorage.setItem(`sc_recovery_${session?.userId}`, JSON.stringify(next)) } catch {}
+              return next
+            })
             await createRecoveryRequest({
               slot: pendingModal.slot,
               subject: pendingModal.subject,
@@ -841,7 +847,14 @@ export function ExamMapView({ exams }) {
     <motion.div className="p-4 sm:p-6 space-y-3" variants={staggerContainer} initial="hidden" animate="show">
       <div className="flex items-center gap-2 mb-1">
         <CalendarClock size={14} className="text-indigo-400" strokeWidth={1.75} />
-        <p className="section-label">Sesiune · Iunie 2026</p>
+        <p className="section-label">{(() => {
+          const MONTHS = ['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec']
+          const first = sorted[0].date, last = sorted[sorted.length - 1].date
+          const label = first.getMonth() === last.getMonth()
+            ? `${MONTHS[first.getMonth()]} ${first.getFullYear()}`
+            : `${MONTHS[first.getMonth()]}–${MONTHS[last.getMonth()]} ${last.getFullYear()}`
+          return `Sesiune · ${label}`
+        })()}</p>
       </div>
       {sorted.map(exam => {
         const daysLeft = Math.ceil((exam.date - now) / 86400000)

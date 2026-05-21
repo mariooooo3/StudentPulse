@@ -39,13 +39,20 @@ export default function CityChat({ profile, onBack }) {
     setInput('')
     setLoading(true)
 
-    const result = await askCityAssistant(question, profile, history)
-
-    setMessages(prev => [
-      ...prev,
-      { role: 'assistant', content: result.answer, suggestedNext: result.suggestedNext },
-    ])
-    setLoading(false)
+    try {
+      const result = await askCityAssistant(question, profile, history)
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: result.answer, suggestedNext: result.suggestedNext },
+      ])
+    } catch {
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: 'Momentan nu pot răspunde. Încearcă din nou.' },
+      ])
+    } finally {
+      setLoading(false)
+    }
   }
 
   function handleKey(e) {

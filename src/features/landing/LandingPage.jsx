@@ -15,7 +15,7 @@ const FEATURES = [
   {
     icon: Calendar,
     label: 'Schedule Hub',
-    desc: 'Orar personal, recuperări și transfer de grupă în timp real.',
+    desc: 'Orar personal, recuperări, transfer de grupă, hartă sesiune și calculator medie ECTS.',
     color: '#10b981',
     num: '02',
   },
@@ -148,7 +148,7 @@ export default function LandingPage({ onStart }) {
           </div>
           <div>
             <span className="font-bold text-white text-[14px] tracking-tight leading-none block">StudentCompass</span>
-            <span className="text-[10px] text-slate-600 font-medium leading-none">Academic Platform</span>
+            <span className="text-[10px] text-slate-600 font-medium leading-none">Platforma Studențească</span>
           </div>
         </div>
 
@@ -272,7 +272,7 @@ export default function LandingPage({ onStart }) {
           </motion.div>
 
           {/* Heading */}
-          <h1 className="text-[4rem] sm:text-[6rem] font-bold tracking-[-0.035em] leading-[0.92] mb-6 text-balance">
+          <h1 className="text-[4rem] sm:text-[6rem] font-bold tracking-[-0.035em] leading-[0.92] mb-6">
             <span className="text-white">Student</span>
             <span className="text-gradient-indigo">Compass</span>
           </h1>
@@ -294,8 +294,8 @@ export default function LandingPage({ onStart }) {
           </p>
 
           {/* Description */}
-          <p className="text-[14px] text-slate-500 max-w-[360px] mx-auto mb-12 leading-relaxed font-medium">
-            Platforma academică completă pentru studenții din România — orar, licență, tutoring și navigare campus, toate într-un singur loc.
+          <p className="text-[14px] text-slate-500 max-w-[380px] mx-auto mb-12 leading-relaxed font-medium">
+            Tot ce ai nevoie ca student în România — orar, sesiune, licență, tutoring, carieră, viață studențească și navigare campus, într-un singur loc.
           </p>
 
           {/* CTA */}
@@ -455,14 +455,12 @@ export default function LandingPage({ onStart }) {
         <div className="line-indigo mb-6 max-w-6xl mx-auto px-6" />
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-[11px] text-slate-800">
           <div className="flex items-center gap-3">
-            <span>StudentCompass v2.0</span>
+            <span>StudentCompass</span>
             <span className="opacity-40">·</span>
-            <span>Prototip academic</span>
+            <span>Pentru studenții din România</span>
             <span className="opacity-40">·</span>
             <span className="flex items-center gap-1">România <span>🇷🇴</span></span>
           </div>
-          <span className="hidden sm:block opacity-40">·</span>
-          <span className="text-slate-800">FiiPractic Hackathon 2026</span>
         </div>
       </footer>
     </div>

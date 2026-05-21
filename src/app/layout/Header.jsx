@@ -124,7 +124,7 @@ export default function Header({
       <div className="hidden lg:flex items-center gap-1.5 shrink-0">
         <div className={clsx('w-1.5 h-1.5 rounded-full shrink-0', connected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400')} />
         <span className={clsx('text-[11px] font-semibold', connected ? 'text-emerald-500' : 'text-amber-500')}>
-          {connected ? 'Live' : 'Offline'}
+          {connected ? 'Online' : 'Offline'}
         </span>
       </div>
 
@@ -224,7 +224,7 @@ export default function Header({
                             {connected
                               ? <Wifi size={10} className="text-emerald-400" />
                               : <WifiOff size={10} className="text-amber-400" />}
-                            {connected ? 'Live conectat' : 'Offline, sincronizare locala'}
+                            {connected ? 'Online' : 'Offline, sincronizare locala'}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">

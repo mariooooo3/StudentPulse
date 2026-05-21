@@ -64,18 +64,33 @@ function TutorSkeleton() {
 }
 
 function TutorCard({ t }) {
-  const [booked, setBooked] = useState(false)
-  const [contacted, setContacted] = useState(false)
+  const storageKey = 'sc_tutor_actions'
+  const [booked, setBooked] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(storageKey) || '{}')[t.name]?.booked || false } catch { return false }
+  })
+  const [contacted, setContacted] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(storageKey) || '{}')[t.name]?.contacted || false } catch { return false }
+  })
   const [showSlots, setShowSlots] = useState(false)
   const toast = useToast()
 
+  function saveTutorAction(field, value) {
+    try {
+      const all = JSON.parse(localStorage.getItem(storageKey) || '{}')
+      all[t.name] = { ...all[t.name], [field]: value }
+      localStorage.setItem(storageKey, JSON.stringify(all))
+    } catch {}
+  }
+
   function handleBook() {
     setBooked(true)
+    saveTutorAction('booked', true)
     toast({ type: 'success', title: 'Sesiune rezervată!', message: `${t.name} te va contacta pentru confirmare.` })
   }
 
   function handleContact() {
     setContacted(true)
+    saveTutorAction('contacted', true)
     toast({ type: 'info', title: 'Contact cerut', message: `Ai cerut contact cu ${t.name}. Cand este online, il gasesti in Mesaje.` })
   }
 
