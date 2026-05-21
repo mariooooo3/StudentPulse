@@ -6,10 +6,11 @@ import {
   Clock,
   ExternalLink,
   Users,
+  Building2,
 } from 'lucide-react'
 import { useNow } from '../../../shared/hooks/useNow'
 import { eventTiming } from '../../../shared/utils/dateTime'
-import { studentLifeData } from '../studentLifeData'
+import { getScopedCommunityGroups, studentLifeData } from '../studentLifeData'
 import { SECTION_ACCENTS, SECTION_META, GROUP_TYPES } from '../constants/sectionConfig'
 import { containerVariants, itemVariants } from '../utils/motionVariants'
 import SectionHeader from '../components/SectionHeader'
@@ -17,6 +18,7 @@ import SearchField from '../components/SearchField'
 import FilterPills from '../components/FilterPills'
 import AccentLine from '../components/AccentLine'
 import EmptyState from '../components/EmptyState'
+import { getScopeLabel } from '../../../shared/utils/tenantScope'
 
 export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
   const accent = SECTION_ACCENTS.community
@@ -24,12 +26,11 @@ export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
   const [query, setQuery] = useState('')
   const now = useNow()
 
-  const universityId = lifeProfile?.universityId
+  const allScoped = useMemo(() => getScopedCommunityGroups(lifeProfile, studentLifeData), [lifeProfile])
 
   const groups = useMemo(() => {
     const q = query.toLowerCase()
-    return studentLifeData.community.groups
-      .filter((group) => !universityId || group.university === 'all' || group.university === universityId)
+    return allScoped
       .filter((group) => type === 'Toate' || group.type === type)
       .filter((group) => !q || [group.name, group.type, group.description, ...group.interests].some((f) => f.toLowerCase().includes(q)))
       .map((group) => {
@@ -37,7 +38,10 @@ export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
         return { ...group, shared, event: eventTiming(group.id, now), score: shared.length * 15 + group.members }
       })
       .sort((a, b) => b.score - a.score)
-  }, [lifeProfile.interests, now, query, type, universityId])
+  }, [allScoped, lifeProfile.interests, now, query, type])
+
+  const scopeLabel = getScopeLabel(lifeProfile)
+  const noScopedData = allScoped.length === 0
 
   return (
     <section className="space-y-5">
@@ -65,7 +69,14 @@ export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
       </div>
 
       {groups.length === 0 ? (
-        <EmptyState icon={Users} title="Niciun grup găsit" text="Încearcă o activitate sau tip mai general." accent={accent} />
+        <EmptyState
+          icon={noScopedData ? Building2 : Users}
+          title={noScopedData ? 'Nu există conținut pentru facultatea ta' : 'Niciun grup găsit'}
+          text={noScopedData
+            ? `Nu am găsit grupuri pentru ${scopeLabel || 'profilul tău academic'}. Poți crea primul grup pentru colegii tăi.`
+            : 'Încearcă o activitate sau tip mai general.'}
+          accent={accent}
+        />
       ) : (
         <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           {groups.map((group) => (
