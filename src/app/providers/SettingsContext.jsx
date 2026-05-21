@@ -1,11 +1,13 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { setGlobalAccentOverride, alpha } from '../../shared/utils/theme'
+import { useAuth } from './AuthContext'
 
 const SettingsContext = createContext(null)
 
-function loadSettings() {
+function loadSettings(userEmail) {
   try {
-    const saved = JSON.parse(localStorage.getItem('sc_settings') || '{}')
+    const key = userEmail ? `sc_settings_${userEmail}` : 'sc_settings_guest'
+    const saved = JSON.parse(localStorage.getItem(key) || '{}')
     return { colorTheme: 'dark', ...saved }
   }
   catch { return { colorTheme: 'dark' } }
@@ -52,21 +54,32 @@ function applyAllEffects(settings) {
 }
 
 export function SettingsProvider({ children }) {
+  const { session } = useAuth()
+  const userEmail = session?.email || null
+  const storageKey = userEmail ? `sc_settings_${userEmail}` : 'sc_settings_guest'
+
   const [settings, setSettings] = useState(() => {
-    const s = loadSettings()
+    const s = loadSettings(userEmail)
     applyAllEffects(s)
     return s
   })
 
+  // Reload settings when user changes (login / logout / switch account)
+  useEffect(() => {
+    const s = loadSettings(userEmail)
+    setSettings(s)
+    applyAllEffects(s)
+  }, [storageKey]) // eslint-disable-line react-hooks/exhaustive-deps
+
   function updateSetting(key, value) {
     const next = { ...settings, [key]: value }
     setSettings(next)
-    localStorage.setItem('sc_settings', JSON.stringify(next))
+    localStorage.setItem(storageKey, JSON.stringify(next))
     applyEffect(key, value)
   }
 
   function resetSettings() {
-    localStorage.removeItem('sc_settings')
+    localStorage.removeItem(storageKey)
     const empty = {}
     setSettings(empty)
     applyAllEffects(empty)
