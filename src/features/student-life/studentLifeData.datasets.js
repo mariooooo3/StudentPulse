@@ -944,6 +944,7 @@ export const eventsData = [
 ]
 
 export const booksData = [
+  // ── AC TUIASI ──────────────────────────────────────────────────────────
   { id: 'bk1', title: 'Algoritmi și Structuri de Date', author: 'Knuth', subject: 'Informatică', yearNeeded: 2, condition: 'Bună', price: 0, type: 'donez', contact: 'Rareș B.', faculty: 'AC' },
   { id: 'bk2', title: 'Calcul Diferențial și Integral', author: 'Boboc', subject: 'Matematică', yearNeeded: 1, condition: 'Foarte bună', price: 30, type: 'vând', contact: 'Maria C.', faculty: 'AC' },
   { id: 'bk3', title: 'Baze de Date — Teorie și Practică', author: 'Fotache', subject: 'Baze de Date', yearNeeded: 2, condition: 'Uzată', price: 15, type: 'vând', contact: 'Andrei P.', faculty: 'AC' },
@@ -953,6 +954,13 @@ export const booksData = [
   { id: 'bk7', title: 'Sisteme de Operare', author: 'Silberschatz', subject: 'SO', yearNeeded: 3, condition: 'Bună', price: 35, type: 'vând', contact: 'Ioana R.', faculty: 'AC' },
   { id: 'bk8', title: 'Inteligență Artificială — O abordare modernă', author: 'Russell & Norvig', subject: 'AI', yearNeeded: 4, condition: 'Nouă', price: 80, type: 'vând', contact: 'Mihai S.', faculty: 'AC' },
   { id: 'bk9', title: 'Teoria Sistemelor de Reglare', author: 'Ionescu', subject: 'Automatică', yearNeeded: 2, condition: 'Bună', price: 25, type: 'vând', contact: 'Alex T.', faculty: 'AC' },
+  // ── FII UAIC ──────────────────────────────────────────────────────────
+  { id: 'bk10', title: 'Structuri de Date în C++ și Java', author: 'Crăiniceanu', subject: 'Informatică', yearNeeded: 1, condition: 'Bună', price: 20, type: 'vând', contact: 'Vlad N.', faculty: 'FII' },
+  { id: 'bk11', title: 'Logică și Tehnici de Demonstrare', author: 'Buraga', subject: 'Logică', yearNeeded: 1, condition: 'Foarte bună', price: 0, type: 'donez', contact: 'Ana T.', faculty: 'FII' },
+  { id: 'bk12', title: 'Proiectarea Algoritmilor', author: 'Cormen (CLRS)', subject: 'PA', yearNeeded: 2, condition: 'Bună', price: 90, type: 'vând', contact: 'Mihai D.', faculty: 'FII' },
+  { id: 'bk13', title: 'Baze de Date și SQL', author: 'Lupșe', subject: 'Baze de Date', yearNeeded: 2, condition: 'Uzată', price: 10, type: 'vând', contact: 'Ioana P.', faculty: 'FII' },
+  { id: 'bk14', title: 'Sisteme de Operare — Concept și Practică', author: 'Silberschatz', subject: 'SO', yearNeeded: 3, condition: 'Bună', price: 40, type: 'vând', contact: 'Radu B.', faculty: 'FII' },
+  { id: 'bk15', title: 'Introducere în Machine Learning', author: 'Mitchell', subject: 'ML', yearNeeded: 3, condition: 'Nouă', price: 0, type: 'donez', contact: 'Cristina L.', faculty: 'FII' },
 ]
 
 export const carpoolData = [
@@ -965,11 +973,16 @@ export const carpoolData = [
 ]
 
 export const roommateData = [
+  // ── AC / ETTI TUIASI ──────────────────────────────────────────────────
   { id: 'rm1', name: 'Maria C.', faculty: 'AC', year: 2, budget: '800-1000 RON/lună', zone: 'Tătărași', smoking: false, pets: false, schedule: 'Matinal', bio: 'Caut colegă serioasă pentru apartament 2 camere lângă Tudor Vladimirescu. Ordonată și liniștită.', contact: '@mariac_tuiasi' },
   { id: 'rm2', name: 'Andrei P.', faculty: 'AC', year: 3, budget: '600-800 RON/lună', zone: 'Tudor Vladimirescu', smoking: false, pets: true, schedule: 'Flexibil', bio: 'Caut 1-2 colegi pentru apartament 3 camere lângă campus. Am pisică prietenoasă.', contact: '@andreip_ac' },
   { id: 'rm3', name: 'Elena M.', faculty: 'ETTI', year: 1, budget: '700-900 RON/lună', zone: 'Copou', smoking: false, pets: false, schedule: 'Variabil', bio: 'Studentă la ETTI, program intens. Caut coleg/colegă tolerant/ă cu orele ciudate.', contact: '@elenam_etti' },
   { id: 'rm4', name: 'Bogdan T.', faculty: 'AC', year: 4, budget: '500-700 RON/lună', zone: 'Manta Roșie', smoking: false, pets: false, schedule: 'Nocturn', bio: 'Developer, lucrez mult de acasă. Caut apartament liniștit, preferabil cu internet bun (fibră).', contact: '@bogdant_cti' },
   { id: 'rm5', name: 'Ioana R.', faculty: 'IEEIA', year: 2, budget: '900-1200 RON/lună', zone: 'Tudor Vladimirescu', smoking: false, pets: false, schedule: 'Matinal', bio: 'Caut colegă în zona Tudor Vladimirescu, aproape de campus. Gătesc și fac curat regulat.', contact: '@ioanar_ieeia' },
+  // ── FII UAIC ──────────────────────────────────────────────────────────
+  { id: 'rm6', name: 'Vlad N.', faculty: 'FII', year: 1, budget: '700-900 RON/lună', zone: 'Copou', smoking: false, pets: false, schedule: 'Flexibil', bio: 'Student FII, caut coleg(ă) pentru garsonieră sau cameră în zona Copou / Liceului. Prefer internet bun.', contact: '@vladn_fii' },
+  { id: 'rm7', name: 'Ana T.', faculty: 'FII', year: 2, budget: '800-1000 RON/lună', zone: 'Copou', smoking: false, pets: false, schedule: 'Matinal', bio: 'Caut colegă de apartament 2 camere în Copou, aproape de UAIC. Serioasă și curată.', contact: '@anat_uaic' },
+  { id: 'rm8', name: 'Mihai D.', faculty: 'FII', year: 3, budget: '600-850 RON/lună', zone: 'Independenței', smoking: false, pets: false, schedule: 'Nocturn', bio: 'Programator freelance, caut apartament liniștit. Orar neregulat, dar curat și ordonat.', contact: '@mihaid_fii' },
 ]
 
 export const wellnessData = {

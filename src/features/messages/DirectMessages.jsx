@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Search, Users, Compass, AlertTriangle } from 'lucide-react'
+import { Search, Users, Compass, AlertTriangle, ShieldCheck } from 'lucide-react'
 import { useOnlineCount } from '../../shared/hooks/useOnlineCount'
 import { createUserId } from '../../shared/services/auth.service'
 import { listPortalThreadsForUser } from '../../shared/services/professorPortal.service'

@@ -1,20 +1,37 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { roommateData } from '../studentLifeData'
+import { Users, Building2 } from 'lucide-react'
+import { booksData, carpoolData, getScopedToolsData, roommateData } from '../studentLifeData'
 import { SECTION_ACCENTS } from '../constants/sectionConfig'
 import { containerVariants, itemVariants } from '../utils/motionVariants'
 import SearchField from '../components/SearchField'
 import AccentLine from '../components/AccentLine'
+import EmptyState from '../components/EmptyState'
+import { getScopeLabel } from '../../../shared/utils/tenantScope'
 
-export default function RoommateTab() {
+export default function RoommateTab({ lifeProfile }) {
   const accent = SECTION_ACCENTS.community
   const [query, setQuery] = useState('')
-  const people = roommateData.filter(r =>
+  const scoped = useMemo(() => getScopedToolsData(lifeProfile, { booksData, carpoolData, roommateData }), [lifeProfile])
+  const people = scoped.roommates.filter(r =>
     !query || r.zone.toLowerCase().includes(query.toLowerCase()) || r.faculty.toLowerCase().includes(query.toLowerCase())
   )
+  const scopeLabel = getScopeLabel(lifeProfile)
+  const noScopedData = scoped.roommates.length === 0
+
   return (
     <div className="space-y-4">
       <SearchField value={query} onChange={setQuery} placeholder="Caută zonă, facultate..." />
+      {people.length === 0 ? (
+        <EmptyState
+          icon={noScopedData ? Building2 : Users}
+          title={noScopedData ? 'Nu există colegi de cameră pentru facultatea ta' : 'Niciun coleg găsit'}
+          text={noScopedData
+            ? `Nu am găsit anunțuri pentru ${scopeLabel || 'facultatea ta'}. Poți adăuga propriul anunț.`
+            : 'Încearcă altă zonă sau facultate.'}
+          accent={accent}
+        />
+      ) : (
       <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {people.map(r => (
           <motion.div key={r.id} variants={itemVariants} className="premium-card p-5">
@@ -50,6 +67,7 @@ export default function RoommateTab() {
           </motion.div>
         ))}
       </motion.div>
+      )}
     </div>
   )
 }

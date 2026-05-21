@@ -7,31 +7,36 @@ import {
   ExternalLink,
   MapPin,
   Zap,
+  Building2,
 } from 'lucide-react'
 import { useNow } from '../../../shared/hooks/useNow'
-import { eventsData } from '../studentLifeData'
+import { eventsData, getScopedEvents } from '../studentLifeData'
 import { SECTION_ACCENTS, SECTION_META, EVENT_CATEGORIES } from '../constants/sectionConfig'
 import { containerVariants, itemVariants } from '../utils/motionVariants'
 import SectionHeader from '../components/SectionHeader'
 import SearchField from '../components/SearchField'
 import FilterPills from '../components/FilterPills'
 import EmptyState from '../components/EmptyState'
+import { getScopeLabel } from '../../../shared/utils/tenantScope'
 
 export default function EventsSection({ lifeProfile, going, goingOps }) {
   const accent = SECTION_ACCENTS.events
   const [category, setCategory] = useState('Toate')
   const [query, setQuery] = useState('')
   const now = useNow()
-  const universityId = lifeProfile?.universityId
+
+  const allScoped = useMemo(() => getScopedEvents(lifeProfile, eventsData), [lifeProfile])
 
   const events = useMemo(() => {
     const q = query.toLowerCase()
-    return eventsData
-      .filter(e => !universityId || e.university === 'all' || e.university === universityId)
+    return allScoped
       .filter(e => category === 'Toate' || e.category === category)
       .filter(e => !q || e.title.toLowerCase().includes(q) || e.location.toLowerCase().includes(q))
       .sort((a, b) => new Date(a.date) - new Date(b.date))
-  }, [category, query, universityId])
+  }, [category, allScoped, query])
+
+  const scopeLabel = getScopeLabel(lifeProfile)
+  const noScopedData = allScoped.length === 0
 
   return (
     <section className="space-y-5">
@@ -44,7 +49,14 @@ export default function EventsSection({ lifeProfile, going, goingOps }) {
       </div>
 
       {events.length === 0 ? (
-        <EmptyState icon={Calendar} title="Niciun eveniment găsit" text="Încearcă o altă categorie sau cuvânt cheie." accent={accent} />
+        <EmptyState
+          icon={noScopedData ? Building2 : Calendar}
+          title={noScopedData ? 'Nu există conținut pentru facultatea ta' : 'Niciun eveniment găsit'}
+          text={noScopedData
+            ? `Nu am găsit evenimente pentru ${scopeLabel || 'profilul tău academic'}. Revino curând sau contactează secretariatul.`
+            : 'Încearcă o altă categorie sau cuvânt cheie.'}
+          accent={accent}
+        />
       ) : (
         <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {events.map(ev => {
