@@ -4,13 +4,14 @@ import { MapPin, Sparkles, Lightbulb, Route, Users, LocateFixed, Building2, Acti
 import { useCrowdSocket } from '../../hooks/navigation/useCrowdSocket'
 import { useAuth } from '../../app/providers/AuthContext'
 import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import { askCampusAI, askRecoAI, askCampusCopilot, analyzePhoto, getSmartRecommendations } from '../../services/navigation/campusAI'
 import Button from '../ui/Button'
 import { courses } from '../../shared/data/courses'
 import { ROUTE_PROFILES, CAMPUS_CONFIG } from './data/campusConfig'
 import { formatDistance, fallbackRouteInfo, compactRoutePath, buildCampusWalkRoute, fetchOsrmRoute } from './utils/routeCalculations'
 import { bfsIndoor, openExternalMap, openExternalRoute } from './utils/mapHelpers'
-import { speak, buildIndoorCinematicSteps, buildOutdoorCinematicSteps, withDestinationQuestion } from './utils/navigationHelpers'
+import { buildIndoorCinematicSteps, buildOutdoorCinematicSteps, withDestinationQuestion } from './utils/navigationHelpers'
 import MapTab from './components/MapTab'
 import ChatTab from './components/ChatTab'
 import RecoTab from './components/RecoTab'
@@ -61,7 +62,6 @@ export default function CampusNavigator() {
     cinematicMode, setCinematicMode,
     cinematicStep, setCinematicStep,
     cinematicSteps, setCinematicSteps,
-    voiceEnabled, setVoiceEnabled,
   } = useCampusNavigatorState()
   const { attachmentFromDataUrl, openCamera, closeCamera, flipCamera } = useCampusNavigatorCamera({
     cameraStream,
@@ -117,7 +117,6 @@ export default function CampusNavigator() {
   useEffect(() => {
     return () => {
       cameraStream?.getTracks().forEach(track => track.stop())
-      window.speechSynthesis?.cancel()
     }
   }, [cameraStream])
 
@@ -262,19 +261,14 @@ export default function CampusNavigator() {
     setCinematicMode(false)
     setCinematicStep(0)
     setCinematicSteps([])
-    window.speechSynthesis?.cancel()
   }
 
   function goCinematicNext() {
-    const next = Math.min(cinematicStep + 1, cinematicSteps.length - 1)
-    speak(cinematicSteps[next]?.instruction, voiceEnabled)
-    setCinematicStep(next)
+    setCinematicStep(prev => Math.min(prev + 1, cinematicSteps.length - 1))
   }
 
   function goCinematicPrev() {
-    const p = Math.max(cinematicStep - 1, 0)
-    speak(cinematicSteps[p]?.instruction, voiceEnabled)
-    setCinematicStep(p)
+    setCinematicStep(prev => Math.max(prev - 1, 0))
   }
 
   async function startCinematicMode(copilotResult) {
@@ -337,7 +331,6 @@ export default function CampusNavigator() {
     setCinematicSteps(steps)
     setCinematicStep(0)
     setCinematicMode(true)
-    speak(steps[0].instruction, voiceEnabled)
   }
 
   function makeCopilotContext() {
@@ -634,8 +627,6 @@ export default function CampusNavigator() {
         cinematicMode={cinematicMode}
         cinematicStep={cinematicStep}
         cinematicSteps={cinematicSteps}
-        voiceEnabled={voiceEnabled}
-        setVoiceEnabled={setVoiceEnabled}
         onNext={goCinematicNext}
         onPrev={goCinematicPrev}
         onExit={exitCinematicMode}

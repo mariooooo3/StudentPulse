@@ -1,13 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, ChevronLeft, ChevronRight, CheckCircle, X, Volume2, VolumeX } from 'lucide-react'
-import { speak } from '../utils/navigationHelpers'
+import { Play, ChevronLeft, ChevronRight, CheckCircle, X } from 'lucide-react'
 
 export default function CinematicOverlay({
   cinematicMode,
   cinematicStep,
   cinematicSteps,
-  voiceEnabled,
-  setVoiceEnabled,
   onNext,
   onPrev,
   onExit,
@@ -52,18 +49,6 @@ export default function CinematicOverlay({
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => {
-                          const next = !voiceEnabled
-                          setVoiceEnabled(next)
-                          if (!next) window.speechSynthesis?.cancel()
-                          else speak(currentStep?.instruction, true)
-                        }}
-                        className="w-7 h-7 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] flex items-center justify-center text-slate-400 hover:text-white transition-colors"
-                        title={voiceEnabled ? 'Mute voice' : 'Enable voice'}
-                      >
-                        {voiceEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
-                      </button>
                       <button
                         onClick={onExit}
                         className="w-7 h-7 rounded-lg bg-white/[0.06] hover:bg-red-500/20 flex items-center justify-center text-slate-400 hover:text-red-400 transition-colors"

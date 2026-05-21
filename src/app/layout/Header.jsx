@@ -1,13 +1,9 @@
 import {
   ArrowRight,
   Bell,
-  BellRing,
-  CalendarCheck,
   CheckCheck,
   Compass,
-  GraduationCap,
   Menu,
-  MessageSquare,
   Search,
   Settings,
   Sparkles,
@@ -22,6 +18,7 @@ import { useNotifications } from '../../shared/hooks/useNotifications'
 import { useSocket } from '../../shared/hooks/useSocket'
 import { useToast } from '../../shared/components/Toast'
 import { getUniversityTheme } from '../../shared/utils/theme'
+import { useSettings } from '../providers/SettingsContext'
 import { VIEW_TITLES, NOTIFICATION_FILTERS } from './header.constants'
 import { getNotificationRoute, getNotificationIcon, timeAgo } from './header.utils'
 
@@ -39,19 +36,16 @@ export default function Header({
   onMenuClick,
   onSearchOpen,
   onNavigate,
+  onSettingsOpen,
 }) {
   const { title, sub } = VIEW_TITLES[currentView] || VIEW_TITLES.dashboard
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifFilter, setNotifFilter] = useState('all')
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const [settingsHovered, setSettingsHovered] = useState(false)
-  const [settings, setSettings] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('sc_settings') || '{}') }
-    catch { return {} }
-  })
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications(session?.userId)
   const { connected } = useSocket()
   const toast = useToast()
+  const { settings } = useSettings()
   const seenNotificationIds = useRef(new Set())
   const initializedNotifications = useRef(false)
 
@@ -74,6 +68,7 @@ export default function Header({
     }
     const live = newest.find(n => !n.read)
     if (!live) return
+    if (settings?.appNotifications === false) return
     toast({
       type: live.type === 'warning' ? 'error' : live.type || 'info',
       title: live.title || 'Notificare noua',
@@ -81,12 +76,6 @@ export default function Header({
       duration: 4500,
     })
   }, [notifications, toast])
-
-  function updateSetting(key, value) {
-    const next = { ...settings, [key]: value }
-    setSettings(next)
-    localStorage.setItem('sc_settings', JSON.stringify(next))
-  }
 
   function openNotification(notification) {
     markRead(notification.id)
@@ -359,86 +348,19 @@ export default function Header({
       </div>
 
       {/* Settings */}
-      <div className="relative">
-        <button
-          onClick={() => setSettingsOpen(v => !v)}
-          onMouseEnter={() => setSettingsHovered(true)}
-          onMouseLeave={() => setSettingsHovered(false)}
-          className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.07] transition-all duration-200 active:scale-[0.95]"
-          style={{ transform: settingsHovered ? 'rotate(30deg)' : 'rotate(0deg)', transition: 'transform 300ms ease, background 150ms' }}
-        >
-          <Settings size={14} className="text-slate-500" strokeWidth={1.75} />
-        </button>
-
-        <AnimatePresence>
-          {settingsOpen && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setSettingsOpen(false)} />
-              <motion.div
-                className="absolute right-0 top-10 w-80 max-w-[calc(100vw-2rem)] z-50"
-                {...dropdownAnim}
-              >
-                <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.1] to-white/[0.03]">
-                  <div className="rounded-[calc(1rem-1px)] bg-[#0c1120] border border-white/[0.05] shadow-[0_24px_48px_-12px_rgba(0,0,0,0.8)] overflow-hidden">
-                    <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
-                      <p className="text-[13px] font-bold text-white">Setari rapide</p>
-                      <button
-                        onClick={() => setSettingsOpen(false)}
-                        className="text-slate-600 hover:text-slate-300 transition-colors"
-                      >
-                        <X size={14} strokeWidth={1.75} />
-                      </button>
-                    </div>
-                    <div className="p-4 space-y-3">
-                      {[
-                        ['compactMode',    'Mod compact',     'Afiseaza listele mai dens.'],
-                        ['voiceGuidance',  'Ghidare vocala',  'Pastreaza vocea activata pentru tururi.'],
-                        ['emailDigest',    'Digest email',    'Grupeaza notificarile academice zilnic.'],
-                      ].map(([key, label, text]) => (
-                        <button
-                          key={key}
-                          onClick={() => updateSetting(key, !settings[key])}
-                          className="w-full flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-3 text-left hover:bg-white/[0.05] transition-all duration-150"
-                        >
-                          <span>
-                            <span className="block text-[13px] font-semibold text-slate-200">{label}</span>
-                            <span className="block text-[11px] text-slate-600 mt-0.5">{text}</span>
-                          </span>
-                          {/* Toggle */}
-                          <span
-                            className="relative h-5 w-9 rounded-full border transition-all duration-200 shrink-0"
-                            style={{
-                              background: settings[key] ? theme.accentSoft : 'rgba(255,255,255,0.04)',
-                              borderColor: settings[key] ? theme.accentBorder : 'rgba(255,255,255,0.08)',
-                            }}
-                          >
-                            <span
-                              className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform duration-200 shadow-sm"
-                              style={{ transform: settings[key] ? 'translateX(17px)' : 'translateX(2px)' }}
-                            />
-                          </span>
-                        </button>
-                      ))}
-
-                      <div className="gradient-separator" />
-
-                      <button
-                        onClick={() => {
-                          onModeChange(platformMode === 'academic' ? 'life' : 'academic')
-                          setSettingsOpen(false)
-                        }}
-                        className="btn-primary w-full text-sm"
-                      >
-                        Comuta in modul {platformMode === 'academic' ? 'Viata' : 'Academic'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
-      </div>
+      <button
+        onClick={onSettingsOpen}
+        onMouseEnter={() => setSettingsHovered(true)}
+        onMouseLeave={() => setSettingsHovered(false)}
+        title="Deschide setarile"
+        className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.07] transition-all duration-200 active:scale-[0.95]"
+        style={{
+          transform: settingsHovered ? 'rotate(30deg)' : 'rotate(0deg)',
+          transition: 'transform 300ms ease, background 150ms',
+        }}
+      >
+        <Settings size={14} className="text-slate-500" strokeWidth={1.75} />
+      </button>
 
       {/* Mobile mode switcher — bottom bar */}
       <div className="fixed inset-x-3 bottom-3 z-[60] flex gap-1 rounded-2xl border border-white/[0.08] bg-[#070b14]/95 p-1 shadow-2xl backdrop-blur-xl sm:hidden">

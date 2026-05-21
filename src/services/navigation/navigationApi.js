@@ -33,7 +33,7 @@ export async function analyzeNavigationPhoto({ base64, mimeType, university = 't
     const data = await post('/photo', { base64, mimeType, university })
     return data.answer
   } catch {
-    return 'Recunoaștere indisponibilă momentan (API offline). Trimite poza din nou sau descrie verbal locația — te ajut cu navigația pe hartă.'
+    return 'Am primit poza. Serverul AI nu este disponibil momentan — descrie verbal locația sau destinația și te ajut cu navigația pe hartă.'
   }
 }
 

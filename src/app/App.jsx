@@ -1,8 +1,10 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from './providers/AuthContext'
+import { SettingsProvider, useSettings } from './providers/SettingsContext'
 import { AUTH_STATE, PROFILE_STAGE } from '../shared/config/constants'
 import Sidebar from './layout/Sidebar'
 import Header from './layout/Header'
+import SettingsPanel from './layout/SettingsPanel'
 import { Loader2 } from 'lucide-react'
 import { PageSkeleton } from '../shared/components/Skeleton'
 import { getUniversityTheme } from '../shared/utils/theme'
@@ -41,7 +43,9 @@ function AppShell() {
   const { platformMode, currentViewByMode, navigate, changeMode } = useAppNavigation(DEFAULT_VIEW_BY_MODE)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [settingsPanelOpen, setSettingsPanelOpen] = useState(false)
   const { count: onlineCount } = useOnlineCount()
+  const { settings } = useSettings()
 
   useEffect(() => {
     function onKey(e) {
@@ -54,7 +58,7 @@ function AppShell() {
   useEffect(() => {
     if (authState === AUTH_STATE.UNAUTHENTICATED) setShowAuth(false)
   }, [authState])
-  const theme = getUniversityTheme(session?.university)
+  const theme = getUniversityTheme(session?.university, settings?.customAccentColor || null)
   const currentView = currentViewByMode[platformMode]
 
   useEffect(() => {
@@ -140,6 +144,7 @@ function AppShell() {
           onMenuClick={() => setSidebarOpen(true)}
           onSearchOpen={() => setSearchOpen(true)}
           onNavigate={handleNotificationNavigate}
+          onSettingsOpen={() => setSettingsPanelOpen(true)}
         />
         <main className="flex-1 overflow-auto flex flex-col">
           <Suspense fallback={<PageLoader />}>
@@ -159,6 +164,12 @@ function AppShell() {
           </Suspense>
         </main>
       </div>
+
+      <SettingsPanel
+        open={settingsPanelOpen}
+        onClose={() => setSettingsPanelOpen(false)}
+        session={session}
+      />
 
       {searchOpen && (
         <GlobalSearch
@@ -187,7 +198,9 @@ export default function App() {
     <AuthProvider>
       <OnlineCountProvider>
         <ToastProvider>
-          <AppShell />
+          <SettingsProvider>
+            <AppShell />
+          </SettingsProvider>
         </ToastProvider>
       </OnlineCountProvider>
     </AuthProvider>

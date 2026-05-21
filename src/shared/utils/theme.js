@@ -1,3 +1,9 @@
+let _accentOverride = null
+
+export function setGlobalAccentOverride(color) {
+  _accentOverride = color || null
+}
+
 function hexToRgb(hex) {
   const value = hex?.replace('#', '')
   if (!value || value.length !== 6) return null
@@ -16,8 +22,8 @@ export function alpha(hex, opacity = 1) {
   return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`
 }
 
-export function getUniversityTheme(university) {
-  const accent = university?.color || '#6366f1'
+export function getUniversityTheme(university, overrideAccent = null) {
+  const accent = overrideAccent || _accentOverride || university?.color || '#6366f1'
   return {
     accent,
     accentSoft: alpha(accent, 0.12),
