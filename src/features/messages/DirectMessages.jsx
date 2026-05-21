@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { Search, Users, Compass, AlertTriangle, ShieldCheck } from 'lucide-react'
 import { useOnlineCount } from '../../shared/hooks/useOnlineCount'
 import { createUserId } from '../../shared/services/auth.service'
@@ -44,6 +44,7 @@ export default function DirectMessages({ session, profile }) {
   const [tab, setTab] = useState('dm') // 'dm' | 'channels'
   const [mobileView, setMobileView] = useState('list') // 'list' | 'chat'
   const [threadRemovedWarning, setThreadRemovedWarning] = useState(false)
+  const portalReqId = useRef(0)
   const { report: reportOnlineCount } = useOnlineCount()
   const { notifications } = useNotifications(currentUserId)
 
@@ -90,48 +91,40 @@ export default function DirectMessages({ session, profile }) {
     return unsub
   }, [eligibleUsers])
 
-  useEffect(() => {
-    async function refresh() {
-      try {
-        const threads = await listPortalThreadsForUser(currentUserId)
-        setPortalThreads(threads)
-        setActivePortal(prev => prev ? threads.find(thread => thread.id === prev.id) || null : null)
-      } catch {}
-    }
-    refresh()
-    window.addEventListener('sc:portal-messages', refresh)
-    return () => window.removeEventListener('sc:portal-messages', refresh)
-  }, [currentUserId])
-
-  useEffect(() => {
-    const unsub = socketService.subscribe(`portal:${currentUserId}`, async () => {
+  const refreshPortal = useCallback(async (checkDeleted = false) => {
+    const id = ++portalReqId.current
+    try {
       const threads = await listPortalThreadsForUser(currentUserId)
+      if (id !== portalReqId.current) return
       setPortalThreads(threads)
       setActivePortal(prev => {
         if (!prev) return prev
-        const stillExists = threads.find(thread => thread.id === prev.id)
-        if (!stillExists) {
-          // Thread-ul a fost șters — întoarcem la listă
+        const stillExists = threads.find(t => t.id === prev.id)
+        if (checkDeleted && !stillExists) {
           setTimeout(() => window.dispatchEvent(new CustomEvent('sc:thread-removed')), 0)
           return null
         }
-        return stillExists
+        return stillExists || (checkDeleted ? null : prev)
       })
-    })
-    return unsub
+    } catch {}
   }, [currentUserId])
 
   useEffect(() => {
+    refreshPortal()
+    window.addEventListener('sc:portal-messages', refreshPortal)
+    return () => window.removeEventListener('sc:portal-messages', refreshPortal)
+  }, [refreshPortal])
+
+  useEffect(() => {
+    const unsub = socketService.subscribe(`portal:${currentUserId}`, () => refreshPortal(true))
+    return unsub
+  }, [currentUserId, refreshPortal])
+
+  useEffect(() => {
     if (!notifications.length) return
-    async function refreshFromNotification() {
-      const hasPortalUpdate = notifications.some(item => item.action?.startsWith('portal.') || item.meta?.threadId)
-      if (!hasPortalUpdate) return
-      const threads = await listPortalThreadsForUser(currentUserId)
-      setPortalThreads(threads)
-      setActivePortal(prev => prev ? threads.find(thread => thread.id === prev.id) || null : prev)
-    }
-    refreshFromNotification()
-  }, [notifications, currentUserId])
+    const hasPortalUpdate = notifications.some(item => item.action?.startsWith('portal.') || item.meta?.threadId)
+    if (hasPortalUpdate) refreshPortal()
+  }, [notifications, refreshPortal])
 
   const contacts = onlineUsers.filter(u =>
     (u.name || '').toLowerCase().includes(search.toLowerCase())

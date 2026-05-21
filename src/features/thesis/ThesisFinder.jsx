@@ -281,7 +281,9 @@ export default function ThesisFinder({ profile, session }) {
 
   useEffect(() => {
     async function refresh() {
-      setMyRequests(await getThesisRequestsForUser(session?.userId))
+      try {
+        setMyRequests(await getThesisRequestsForUser(session?.userId))
+      } catch {}
     }
     refresh()
     window.addEventListener('sc:thesis-requests', refresh)
