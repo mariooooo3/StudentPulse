@@ -1,16 +1,17 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Check, ChevronRight } from 'lucide-react'
-import { carpoolData } from '../studentLifeData'
+import { booksData, carpoolData, getScopedToolsData, roommateData } from '../studentLifeData'
 import { SECTION_ACCENTS } from '../constants/sectionConfig'
 import { containerVariants, itemVariants } from '../utils/motionVariants'
 import SearchField from '../components/SearchField'
 import AccentLine from '../components/AccentLine'
 
-export default function CarpoolTab() {
+export default function CarpoolTab({ lifeProfile }) {
   const accent = SECTION_ACCENTS.tools
   const [query, setQuery] = useState('')
-  const rides = carpoolData.filter(r =>
+  const scoped = getScopedToolsData(lifeProfile, { booksData, carpoolData, roommateData })
+  const rides = scoped.rides.filter(r =>
     !query || r.from.toLowerCase().includes(query.toLowerCase()) || r.to.toLowerCase().includes(query.toLowerCase())
   )
   return (

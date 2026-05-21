@@ -193,12 +193,65 @@ export default function LandingPage({ onStart }) {
             transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
             className="relative mb-12"
           >
-            {/* Outer glow */}
+            {/* ── Radar sweep ───────────────────────────────────── */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 7, repeat: Infinity, ease: 'linear' }}
+              className="absolute pointer-events-none"
+              style={{
+                top: '50%', left: '50%',
+                width: 210, height: 210,
+                marginTop: -105, marginLeft: -105,
+                borderRadius: '50%',
+                background: 'conic-gradient(from 270deg, transparent 55%, rgba(99,102,241,0.55) 78%, rgba(139,92,246,0.12) 100%)',
+              }}
+            />
+
+            {/* ── Sonar ping rings ──────────────────────────────── */}
+            {[0, 1.0, 2.0].map((delay) => (
+              <motion.div
+                key={delay}
+                animate={{ scale: [1, 2.4], opacity: [0.45, 0] }}
+                transition={{ duration: 2.6, repeat: Infinity, ease: 'easeOut', delay }}
+                className="absolute pointer-events-none rounded-[1.75rem] border border-indigo-500/40"
+                style={{ top: '50%', left: '50%', width: 133, height: 133, marginTop: -66.5, marginLeft: -66.5 }}
+              />
+            ))}
+
+            {/* ── Orbiting feature dots ─────────────────────────── */}
+            {[
+              { color: '#10b981', start: 0,   dur: 11, dir: 1  },
+              { color: '#f59e0b', start: 90,  dur: 15, dir: -1 },
+              { color: '#f43f5e', start: 180, dur: 9,  dir: 1  },
+              { color: '#3b82f6', start: 270, dur: 13, dir: -1 },
+            ].map(({ color, start, dur, dir }, i) => (
+              <motion.div
+                key={i}
+                animate={{ rotate: [start, start + dir * 360] }}
+                transition={{ duration: dur, repeat: Infinity, ease: 'linear' }}
+                className="absolute pointer-events-none"
+                style={{ top: '50%', left: '50%', width: 0, height: 0 }}
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    width: 9, height: 9,
+                    borderRadius: '50%',
+                    top: -88, left: -4.5,
+                    background: color,
+                    boxShadow: `0 0 14px ${color}cc, 0 0 5px ${color}`,
+                  }}
+                />
+              </motion.div>
+            ))}
+
+            {/* ── Outer glow ────────────────────────────────────── */}
             <div
-              className="absolute inset-[-12px] rounded-[2rem] blur-2xl animate-glow-pulse-fast"
+              className="absolute inset-[-12px] rounded-[2rem] blur-2xl animate-glow-pulse-fast pointer-events-none"
               style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.65), rgba(139,92,246,0.3), transparent 70%)' }}
             />
-            {/* Bezel */}
+
+            {/* ── Bezel ─────────────────────────────────────────── */}
             <div className="relative p-[2.5px] rounded-[1.75rem] bg-gradient-to-b from-white/35 to-white/[0.03]">
               <div
                 className="w-32 h-32 rounded-[calc(1.75rem-2.5px)] flex items-center justify-center"
@@ -207,7 +260,13 @@ export default function LandingPage({ onStart }) {
                   boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -2px 0 rgba(0,0,0,0.25), 0 8px 32px rgba(99,102,241,0.5)',
                 }}
               >
-                <Compass size={56} className="text-white drop-shadow-lg" strokeWidth={1.5} />
+                {/* Needle-settle: overshoot, damp, lock — like a real compass finding north */}
+                <motion.div
+                  animate={{ rotate: [0, 22, -14, 8, -4, 1, 0] }}
+                  transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut', repeatDelay: 4.5 }}
+                >
+                  <Compass size={56} className="text-white drop-shadow-lg" strokeWidth={1.5} />
+                </motion.div>
               </div>
             </div>
           </motion.div>

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useNotifications } from '../../shared/hooks/useNotifications'
 import { useToast } from '../../shared/components/Toast'
 import { createThesisRequest } from '../../shared/services/professorPortal.service'
+import { getTenantScope } from '../../shared/utils/tenantScope.js'
 
 export default function BookingModal({ professor, onClose, session }) {
   const [step, setStep] = useState(1)
@@ -47,6 +48,7 @@ export default function BookingModal({ professor, onClose, session }) {
           email: session?.email,
           name: session?.email?.split('@')[0]?.split('.').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ') || 'Student',
           facultyName: session?.detectedFaculty?.name || 'Facultatea de Matematica-Informatica',
+          ...getTenantScope(null, session),
         },
         form,
         attachedFile,

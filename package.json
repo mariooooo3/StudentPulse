@@ -10,6 +10,7 @@
     "build": "vite build",
     "smoke": "node scripts/smoke-check.mjs",
     "test:api": "node scripts/api-behavior-test.mjs",
+    "test:scope": "node --experimental-specifier-resolution=node scripts/scope-personalization-test.mjs",
     "fix:encoding": "node scripts/fix-encoding.mjs",
     "preview": "vite preview",
     "start": "node server/index.js"

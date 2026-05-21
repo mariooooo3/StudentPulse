@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { DAYS, HOURS } from '../../../shared/data/mockData'
 import { socketService } from '../../../shared/services/socket.service'
 import { createRecoveryRequest, getRecoveryRequestsForUser } from '../../../shared/services/professorPortal.service'
+import { getTenantScope } from '../../../shared/utils/tenantScope.js'
 import { staggerContainer, staggerItem } from '../schedule.constants'
 import clsx from 'clsx'
 
@@ -311,12 +312,13 @@ export function RecoveryGrid({ recoverySlots, onNotify, session }) {
               slot: pendingModal.slot,
               subject: pendingModal.subject,
               reason,
-              student: {
-                userId:      session?.userId,
-                email:       session?.email,
-                name:        studentNameFromSession(session),
-                facultyName: session?.detectedFaculty?.name || 'Facultatea de Matematica-Informatica',
-              },
+                student: {
+                  userId:      session?.userId,
+                  email:       session?.email,
+                  name:        studentNameFromSession(session),
+                  facultyName: session?.detectedFaculty?.name || 'Facultatea de Matematica-Informatica',
+                  ...getTenantScope(null, session),
+                },
             })
             await refreshRequests()
             onNotify?.({

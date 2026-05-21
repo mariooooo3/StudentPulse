@@ -369,16 +369,16 @@ function GroupSessionsTab({ sessions }) {
 }
 
 /* ─── Root export ─── */
-export default function SkillSwap({ profile }) {
-  const sessions = getGroupSessions(profile)
-  const [users, setUsers] = useState(() => getSkillSwapUsers(profile))
+export default function SkillSwap({ profile, session }) {
+  const sessions = getGroupSessions(profile, session)
+  const [users, setUsers] = useState(() => getSkillSwapUsers(profile, session))
   const [matchLoading, setMatchLoading] = useState(true)
 
   // Cheie stabilă care se schimbă doar când profilul relevant se modifică
   const profileKey = `${profile?.faculty}-${profile?.year}-${(profile?.interests || []).join(',')}`
 
   useEffect(() => {
-    const pool = getSkillSwapUsers(profile)
+    const pool = getSkillSwapUsers(profile, session)
     const skills = JSON.parse(localStorage.getItem('sc_swap_skills') || '[]')
     const wants = JSON.parse(localStorage.getItem('sc_swap_wants') || '[]')
     const userProfile = {
@@ -391,7 +391,7 @@ export default function SkillSwap({ profile }) {
     findSmartMatches(userProfile, pool)
       .then(sorted => setUsers(sorted))
       .finally(() => setMatchLoading(false))
-  }, [profileKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [profileKey, profile, session]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [tab, setTab] = useState(0)
 

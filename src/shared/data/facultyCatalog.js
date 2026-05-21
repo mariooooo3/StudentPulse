@@ -6,7 +6,8 @@ import {
   GROUP_SESSIONS_BY_TYPE,
   THESIS_DOMAINS_BY_TYPE,
   SUBJECT_FILTERS_BY_TYPE,
-} from './domainPersonalization'
+} from './domainPersonalization.js'
+import { getTenantScope } from '../utils/tenantScope.js'
 
 const FACULTY_CODE_KEY = {
   BIO: 'BIOLOGY',
@@ -30,8 +31,12 @@ const FACULTY_CODE_KEY = {
   ARH: 'ARCHITECTURE',
 }
 
-export function getFacultyKey(profile) {
+export function getFacultyKey(profile, session = null) {
+  const { universityId } = getTenantScope(profile, session)
+  if (!profile?.facultyCode && !profile?.facultyType) return null
   const base = FACULTY_CODE_KEY[profile?.facultyCode] || profile?.facultyType || 'CS'
+  if (universityId === 'tuiasi' && ['FII', 'FMIM'].includes(profile?.facultyCode)) return null
+  if (universityId === 'uaic' && profile?.facultyCode === 'AC') return null
   if (base === 'ENGINEERING_CS') {
     if (profile?.specialization === 'IS') return 'ENGINEERING_CS_IS'
     if (profile?.specialization === 'CTI') return 'ENGINEERING_CS_CTI'
@@ -286,6 +291,7 @@ const DEFAULT_DASHBOARD = {
 }
 
 function byKey(collection, key, fallback = 'CS') {
+  if (!key) return null
   const scienceFallback = ['BIOLOGY', 'CHEMISTRY', 'PHYSICS', 'MATHEMATICS'].includes(key) ? 'SCIENCES' : fallback
   return OVERRIDES[key]?.[collection] || collectionFallback(collection, key) || collectionFallback(collection, scienceFallback)
 }
@@ -303,35 +309,37 @@ function collectionFallback(collection, key) {
   return maps[collection]?.[key]
 }
 
-export function getDashboardData(profile) {
-  const key = getFacultyKey(profile)
+export function getDashboardData(profile, session = null) {
+  const key = getFacultyKey(profile, session)
+  if (!key) return { ...DEFAULT_DASHBOARD, upcoming: [], alerts: [] }
   return { ...DEFAULT_DASHBOARD, ...(OVERRIDES[key]?.dashboard || {}) }
 }
 
-export function getScheduleData(profile) {
-  return byKey('schedule', getFacultyKey(profile))
+export function getScheduleData(profile, session = null) {
+  return byKey('schedule', getFacultyKey(profile, session)) || { schedule: [], recoverySlots: {}, swapRequests: [] }
 }
 
-export function getProfessors(profile) {
-  return byKey('professors', getFacultyKey(profile)) || []
+export function getProfessors(profile, session = null) {
+  return byKey('professors', getFacultyKey(profile, session)) || []
 }
 
-export function getThesisDomains(profile) {
-  return byKey('domains', getFacultyKey(profile)) || ['Toate']
+export function getThesisDomains(profile, session = null) {
+  return byKey('domains', getFacultyKey(profile, session)) || ['Toate']
 }
 
-export function getTutors(profile) {
-  return byKey('tutors', getFacultyKey(profile)) || []
+export function getTutors(profile, session = null) {
+  return byKey('tutors', getFacultyKey(profile, session)) || []
 }
 
-export function getSubjectFilters(profile) {
-  return byKey('subjects', getFacultyKey(profile)) || ['Toate']
+export function getSubjectFilters(profile, session = null) {
+  const subjects = byKey('subjects', getFacultyKey(profile, session)) || []
+  return subjects.length ? subjects : ['Toate']
 }
 
-export function getSkillSwapUsers(profile) {
-  return byKey('skillSwap', getFacultyKey(profile)) || []
+export function getSkillSwapUsers(profile, session = null) {
+  return byKey('skillSwap', getFacultyKey(profile, session)) || []
 }
 
-export function getGroupSessions(profile) {
-  return byKey('groupSessions', getFacultyKey(profile)) || []
+export function getGroupSessions(profile, session = null) {
+  return byKey('groupSessions', getFacultyKey(profile, session)) || []
 }

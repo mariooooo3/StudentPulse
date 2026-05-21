@@ -90,9 +90,9 @@ function scheduleSectionLabel(items, now) {
 export default function Dashboard({ profile, session, onNavigate }) {
   const displayName = nameFromEmail(session?.email) || profile?.name || 'Student'
   const firstName = displayName.split(' ')[0]
-  const dashboard = getDashboardData(profile)
+  const dashboard = getDashboardData(profile, session)
   const now = useNow()
-  const scheduleData = getScheduleData(profile)
+  const scheduleData = getScheduleData(profile, session)
   const schedule = Array.isArray(scheduleData) ? scheduleData : scheduleData?.schedule || []
   const allUpcoming = getUpcomingScheduleItems(schedule, now, Math.max(schedule.length, 1))
   const upcoming = allUpcoming.slice(0, 4)

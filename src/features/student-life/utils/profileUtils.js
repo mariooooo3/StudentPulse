@@ -23,6 +23,8 @@ export function buildLifeProfile(profile, session) {
     careerKey,
     year: parseStudyYear(profile?.year),
     city: normalizeCity(profile?.university?.city || session?.university?.city),
+    universityId: profile?.university?.id || session?.university?.id || '',
+    facultyCode: profile?.facultyCode || session?.detectedFaculty?.code || '',
     interests: interests.length ? interests : ['coding', 'coffee', 'study'],
     experience: profile?.experience ? 'projects' : 'projects',
     gpa: 'above',
