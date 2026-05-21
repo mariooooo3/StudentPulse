@@ -22,58 +22,13 @@ import { useNotifications } from '../../shared/hooks/useNotifications'
 import { useSocket } from '../../shared/hooks/useSocket'
 import { useToast } from '../../shared/components/Toast'
 import { getUniversityTheme } from '../../shared/utils/theme'
-
-const VIEW_TITLES = {
-  dashboard:  { title: 'Dashboard',                  sub: 'Bun venit înapoi' },
-  navigator:  { title: 'Campus Navigator',            sub: 'Găsește orice loc în campus' },
-  schedule:   { title: 'Schedule Hub',                sub: 'Orarul tău academic complet' },
-  thesis:     { title: 'Thesis Finder',               sub: 'Găsește îndrumătorul potrivit' },
-  tutoring:   { title: 'Peer Tutoring',               sub: 'Învață de la colegi, ajută colegii' },
-  messages:   { title: 'Mesaje',                      sub: 'Comunicare academică directă' },
-  pulse:      { title: 'Campus Pulse',                sub: 'Semnale live din viata de campus' },
-  discounts:  { title: 'Reduceri & Beneficii',        sub: 'Oferte studențești și beneficii locale' },
-  career:     { title: 'Carieră & Internship-uri',    sub: 'Oportunități personalizate pe facultate' },
-  community:  { title: 'Comunitate',                  sub: 'Grupuri, mentori și evenimente studențești' },
-  citylife:   { title: 'Viața în Oraș',               sub: 'Transport, locuire, siguranță și ghid urban' },
-}
+import { VIEW_TITLES, NOTIFICATION_FILTERS } from './header.constants'
+import { getNotificationRoute, getNotificationIcon, timeAgo } from './header.utils'
 
 const MODES = [
   { id: 'academic', label: 'Academic', icon: Compass },
   { id: 'life',     label: 'Viață',    icon: Sparkles },
 ]
-
-const NOTIFICATION_FILTERS = [
-  { id: 'all',    label: 'Toate' },
-  { id: 'unread', label: 'Necitite' },
-]
-
-function getNotificationRoute(notification) {
-  const action = notification?.action || ''
-  if (action.startsWith('thesis.')) return { mode: 'academic', view: 'thesis' }
-  if (action.startsWith('schedule.') || action.startsWith('recovery.')) return { mode: 'academic', view: 'schedule' }
-  if (action.includes('message')) return { mode: 'academic', view: 'messages' }
-  return { mode: 'academic', view: 'dashboard' }
-}
-
-function getNotificationIcon(notification) {
-  const action = notification?.action || ''
-  if (action.startsWith('thesis.')) return GraduationCap
-  if (action.startsWith('schedule.') || action.startsWith('recovery.')) return CalendarCheck
-  if (action.includes('message')) return MessageSquare
-  return BellRing
-}
-
-function timeAgo(value) {
-  const date = value ? new Date(value) : null
-  if (!date || Number.isNaN(date.getTime())) return 'acum'
-  const diff = Math.max(0, Date.now() - date.getTime())
-  const minutes = Math.floor(diff / 60000)
-  if (minutes < 1) return 'acum'
-  if (minutes < 60) return `${minutes} min`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours} h`
-  return `${Math.floor(hours / 24)} zile`
-}
 
 export default function Header({
   platformMode = 'academic',
@@ -507,3 +462,4 @@ export default function Header({
     </header>
   )
 }
+
