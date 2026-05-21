@@ -36,8 +36,14 @@ const NAVIGATION_ACTIONS = [
   { match: ['thesis', 'licenta'], view: 'thesis', mode: 'academic' },
   { match: ['tutoring', 'tutor'], view: 'tutoring', mode: 'academic' },
   { match: ['messages', 'mesaje'], view: 'messages', mode: 'academic' },
-  { match: ['city', 'oras'], view: 'citylife', mode: 'life' },
-  { match: ['student life', 'discount'], view: 'discounts', mode: 'life' },
+  { match: ['city', 'oras', 'adaptare'], view: 'citylife', mode: 'life' },
+  { match: ['cariera', 'career', 'job', 'internship', 'cv', 'angajare'], view: 'career', mode: 'life' },
+  { match: ['comunitate', 'community', 'grupuri', 'grup', 'activitati'], view: 'community', mode: 'life' },
+  { match: ['evenimente', 'events', 'calendar', 'event'], view: 'events', mode: 'life' },
+  { match: ['wellness', 'sanatate', 'pomodoro', 'focus', 'meditatie', 'sport'], view: 'wellness', mode: 'life' },
+  { match: ['tools', 'unelte', 'buget', 'budget', 'carpool', 'masina', 'carti', 'colegi', 'roommate'], view: 'tools', mode: 'life' },
+  { match: ['pulse', 'campus pulse', 'activitate campus', 'check-in'], view: 'pulse', mode: 'life' },
+  { match: ['student life', 'viata', 'viata studenteasca', 'discount', 'reduceri', 'oferte'], view: 'discounts', mode: 'life' },
 ]
 
 const PROFESSOR_NAVIGATION_ACTIONS = [

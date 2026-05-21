@@ -24,9 +24,12 @@ export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
   const [query, setQuery] = useState('')
   const now = useNow()
 
+  const universityId = lifeProfile?.universityId
+
   const groups = useMemo(() => {
     const q = query.toLowerCase()
     return studentLifeData.community.groups
+      .filter((group) => !universityId || group.university === 'all' || group.university === universityId)
       .filter((group) => type === 'Toate' || group.type === type)
       .filter((group) => !q || [group.name, group.type, group.description, ...group.interests].some((f) => f.toLowerCase().includes(q)))
       .map((group) => {
@@ -34,7 +37,7 @@ export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
         return { ...group, shared, event: eventTiming(group.id, now), score: shared.length * 15 + group.members }
       })
       .sort((a, b) => b.score - a.score)
-  }, [lifeProfile.interests, now, query, type])
+  }, [lifeProfile.interests, now, query, type, universityId])
 
   return (
     <section className="space-y-5">

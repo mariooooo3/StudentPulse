@@ -17,19 +17,21 @@ import SearchField from '../components/SearchField'
 import FilterPills from '../components/FilterPills'
 import EmptyState from '../components/EmptyState'
 
-export default function EventsSection({ going, goingOps }) {
+export default function EventsSection({ lifeProfile, going, goingOps }) {
   const accent = SECTION_ACCENTS.events
   const [category, setCategory] = useState('Toate')
   const [query, setQuery] = useState('')
   const now = useNow()
+  const universityId = lifeProfile?.universityId
 
   const events = useMemo(() => {
     const q = query.toLowerCase()
     return eventsData
+      .filter(e => !universityId || e.university === 'all' || e.university === universityId)
       .filter(e => category === 'Toate' || e.category === category)
       .filter(e => !q || e.title.toLowerCase().includes(q) || e.location.toLowerCase().includes(q))
       .sort((a, b) => new Date(a.date) - new Date(b.date))
-  }, [category, query])
+  }, [category, query, universityId])
 
   return (
     <section className="space-y-5">
