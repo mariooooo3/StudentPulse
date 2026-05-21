@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { getScheduleData } from '../../shared/data/facultyCatalog'
 import { useNotifications } from '../../shared/hooks/useNotifications'
 import { TABS } from './schedule.constants'
-import { WeeklyView, AllGroupsView, RecoveryGrid, SlotSwapView } from './components/ScheduleHubParts'
+import { WeeklyView, AllGroupsView, RecoveryGrid, SlotSwapView, ExamMapView, GradeCalculatorView } from './components/ScheduleHubParts'
 import clsx from 'clsx'
 
 export default function ScheduleHub({ profile, session }) {
@@ -12,8 +12,8 @@ export default function ScheduleHub({ profile, session }) {
   const [week, setWeek] = useState(0)
   const { pushNotification } = useNotifications(session?.userId)
 
-  const facultyData = getScheduleData(profile, session) || { schedule: [], recoverySlots: [], swapRequests: [] }
-  const { schedule, recoverySlots, swapRequests } = facultyData
+  const facultyData = getScheduleData(profile, session) || { schedule: [], recoverySlots: [], swapRequests: [], exams: [] }
+  const { schedule, recoverySlots, swapRequests, exams = [] } = facultyData
 
   const weekLabel = week === 0 ? 'Săptămâna curentă' : week > 0 ? `+${week} săpt.` : `${week} săpt.`
 
@@ -35,8 +35,8 @@ export default function ScheduleHub({ profile, session }) {
 
           <div className="gradient-separator hidden sm:block h-8 w-px" />
 
-          {/* Week navigator */}
-          <div className="flex items-center gap-2">
+          {/* Week navigator — ascuns pe tab-urile Sesiune/Medie */}
+          <div className={clsx('flex items-center gap-2', tab >= 4 && 'invisible')}>
             <motion.button
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.95 }}
@@ -113,6 +113,16 @@ export default function ScheduleHub({ profile, session }) {
                 userId={session?.userId}
                 onNotify={pushNotification}
               />
+            </motion.div>
+          )}
+          {tab === 4 && (
+            <motion.div key="sesiune" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+              <ExamMapView exams={exams} />
+            </motion.div>
+          )}
+          {tab === 5 && (
+            <motion.div key="medie" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+              <GradeCalculatorView exams={exams} session={session} />
             </motion.div>
           )}
         </AnimatePresence>

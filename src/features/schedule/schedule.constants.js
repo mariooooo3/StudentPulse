@@ -1,10 +1,12 @@
-import { CalendarDays, Users, RefreshCw, Repeat2 } from 'lucide-react'
+import { CalendarDays, Users, RefreshCw, Repeat2, CalendarClock, GraduationCap } from 'lucide-react'
 
 export const TABS = [
   { label: 'Orarul Meu', icon: CalendarDays },
   { label: 'Toate Grupele', icon: Users },
   { label: 'Recuperări', icon: RefreshCw },
   { label: 'Slot Swap', icon: Repeat2 },
+  { label: 'Sesiune', icon: CalendarClock },
+  { label: 'Medie', icon: GraduationCap },
 ]
 
 export const staggerContainer = {

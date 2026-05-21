@@ -54,6 +54,12 @@ const scienceColors = [
   'bg-cyan-500/80 border-cyan-400',
 ]
 
+const ACCENT_COLORS = ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#f43f5e', '#06b6d4']
+const CREDITS_BY_TYPE = { Curs: 5, Laborator: 4, Seminar: 3, Practică: 4 }
+const EXAM_TYPE_MAP = { Curs: 'Examen', Laborator: 'Colocviu', Seminar: 'Verificare', Practică: 'Colocviu' }
+const EXAM_TIMES = ['08:00', '10:00', '12:00', '14:00']
+const SESSION_START = new Date('2026-06-02')
+
 function makeSchedule(courses) {
   const schedule = courses.map((c, i) => ({
     id: i + 1,
@@ -67,6 +73,7 @@ function makeSchedule(courses) {
     professor: c.professor,
     group: c.group || 'A1',
     color: scienceColors[i % scienceColors.length],
+    credits: CREDITS_BY_TYPE[c.type] || 4,
   }))
 
   const recoverySubjects = courses.slice(0, 3)
@@ -90,7 +97,24 @@ function makeSchedule(courses) {
     isMatch: i !== 1,
   }))
 
-  return { schedule, recoverySlots, swapRequests }
+  const exams = courses.map((c, i) => {
+    const d = new Date(SESSION_START)
+    d.setDate(SESSION_START.getDate() + i * 2)
+    return {
+      id: i + 1,
+      name: c.name,
+      short: c.short,
+      type: EXAM_TYPE_MAP[c.type] || 'Examen',
+      date: d,
+      time: EXAM_TIMES[i % EXAM_TIMES.length],
+      room: c.room,
+      professor: c.professor,
+      credits: CREDITS_BY_TYPE[c.type] || 4,
+      accent: ACCENT_COLORS[i % ACCENT_COLORS.length],
+    }
+  })
+
+  return { schedule, recoverySlots, swapRequests, exams }
 }
 
 const OVERRIDES = {
