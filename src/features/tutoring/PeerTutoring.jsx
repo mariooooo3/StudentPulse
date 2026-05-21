@@ -214,9 +214,9 @@ function TutorCard({ t }) {
   )
 }
 
-export default function PeerTutoring({ profile }) {
-  const tutors = getTutors(profile)
-  const SUBJECTS = getSubjectFilters(profile)
+export default function PeerTutoring({ profile, session }) {
+  const tutors = getTutors(profile, session)
+  const SUBJECTS = getSubjectFilters(profile, session)
 
   const [tab, setTab] = useState(0)
   const [search, setSearch] = useState('')
@@ -366,7 +366,7 @@ export default function PeerTutoring({ profile }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 80, damping: 18 }}
           >
-            <SkillSwap profile={profile} />
+            <SkillSwap profile={profile} session={session} />
           </motion.div>
         )}
       </div>

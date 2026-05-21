@@ -5,6 +5,7 @@ import { getProfessors, getThesisDomains } from '../../shared/data/facultyCatalo
 import BookingModal from './BookingModal'
 import clsx from 'clsx'
 import { DEMO_PROFESSOR, getThesisRequestsForUser } from '../../shared/services/professorPortal.service'
+import { getTenantScope } from '../../shared/utils/tenantScope.js'
 
 const DEMO_THESIS_PROFESSOR = {
   id: DEMO_PROFESSOR.id,
@@ -258,11 +259,13 @@ function ProfessorCard({ p, onBook }) {
 
 /* ── Main component ──────────────────────────────────────── */
 export default function ThesisFinder({ profile, session }) {
-  const baseProfessors = getProfessors(profile)
-  const professors = baseProfessors.some(p => p.id === DEMO_THESIS_PROFESSOR.id)
+  const baseProfessors = getProfessors(profile, session)
+  const { universityId, facultyCode } = getTenantScope(profile, session)
+  const canUseDemoProfessor = universityId === 'tuiasi' && facultyCode === 'AC'
+  const professors = (!canUseDemoProfessor || baseProfessors.some(p => p.id === DEMO_THESIS_PROFESSOR.id))
     ? baseProfessors
     : [DEMO_THESIS_PROFESSOR, ...baseProfessors]
-  const DOMAINS = getThesisDomains(profile)
+  const DOMAINS = getThesisDomains(profile, session)
 
   const [search, setSearch] = useState('')
   const [domain, setDomain] = useState('Toate')

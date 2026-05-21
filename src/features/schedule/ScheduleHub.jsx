@@ -12,7 +12,7 @@ export default function ScheduleHub({ profile, session }) {
   const [week, setWeek] = useState(0)
   const { pushNotification } = useNotifications(session?.userId)
 
-  const facultyData = getScheduleData(profile) || { schedule: [], recoverySlots: [], swapRequests: [] }
+  const facultyData = getScheduleData(profile, session) || { schedule: [], recoverySlots: [], swapRequests: [] }
   const { schedule, recoverySlots, swapRequests } = facultyData
 
   const weekLabel = week === 0 ? 'Săptămâna curentă' : week > 0 ? `+${week} săpt.` : `${week} săpt.`

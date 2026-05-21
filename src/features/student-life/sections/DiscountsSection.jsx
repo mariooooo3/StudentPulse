@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import { useNow } from '../../../shared/hooks/useNow'
 import { dateInDays, daysUntil, rollingDays } from '../../../shared/utils/dateTime'
-import { studentLifeData } from '../studentLifeData'
+import { getScopedDiscountOffers, studentLifeData } from '../studentLifeData'
 import { SECTION_ACCENTS, SECTION_META } from '../constants/sectionConfig'
 import { containerVariants, itemVariants } from '../utils/motionVariants'
 import { offerScore } from '../utils/scoringUtils'
@@ -28,7 +28,7 @@ export default function DiscountsSection({ lifeProfile, saved, savedOps }) {
 
   const offers = useMemo(() => {
     const q = query.toLowerCase()
-    return studentLifeData.discounts.offers
+    return getScopedDiscountOffers(lifeProfile, studentLifeData)
       .filter((offer) => category === 'Toate' || offer.category === category)
       .filter((offer) => !q || [offer.brand, offer.category, offer.description].some((f) => f.toLowerCase().includes(q)))
       .map((offer) => {

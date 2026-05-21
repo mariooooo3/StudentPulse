@@ -33,7 +33,7 @@ export default function StudentLifeHub({ activeSection = 'discounts', profile, s
       {activeSection === 'community' && <CommunitySection lifeProfile={lifeProfile} joined={joined} joinedOps={joinedOps} />}
       {activeSection === 'events'    && <EventsSection    lifeProfile={lifeProfile} going={going} goingOps={goingOps} />}
       {activeSection === 'wellness'  && <WellnessSection />}
-      {activeSection === 'tools'     && <ToolsSection />}
+      {activeSection === 'tools'     && <ToolsSection lifeProfile={lifeProfile} />}
     </motion.div>
   )
 }

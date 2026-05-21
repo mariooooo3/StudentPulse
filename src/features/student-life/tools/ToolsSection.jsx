@@ -9,7 +9,7 @@ import BooksTab from './BooksTab'
 import CarpoolTab from './CarpoolTab'
 import RoommateTab from './RoommateTab'
 
-export default function ToolsSection() {
+export default function ToolsSection({ lifeProfile }) {
   const accent = SECTION_ACCENTS.tools
   const [toolTab, setToolTab] = useState('Budget')
   const activeTool = TOOLS_TABS.find(t => t.id === toolTab) || TOOLS_TABS[0]
@@ -89,9 +89,9 @@ export default function ToolsSection() {
           transition={{ type: 'spring', stiffness: 80, damping: 18 }}
         >
           {toolTab === 'Budget'       && <BudgetTab />}
-          {toolTab === 'Carti'        && <BooksTab />}
-          {toolTab === 'Carpool'      && <CarpoolTab />}
-          {toolTab === 'Colegi camera' && <RoommateTab />}
+          {toolTab === 'Carti'        && <BooksTab lifeProfile={lifeProfile} />}
+          {toolTab === 'Carpool'      && <CarpoolTab lifeProfile={lifeProfile} />}
+          {toolTab === 'Colegi camera' && <RoommateTab lifeProfile={lifeProfile} />}
         </motion.div>
       </AnimatePresence>
     </section>

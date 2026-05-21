@@ -153,7 +153,7 @@ function AppShell() {
               {platformMode === 'academic' && currentView === 'navigator' && <CampusNavigator />}
               {platformMode === 'academic' && currentView === 'schedule'  && <ScheduleHub profile={profile} session={session} />}
               {platformMode === 'academic' && currentView === 'thesis'    && <ThesisFinder profile={profile} session={session} />}
-              {platformMode === 'academic' && currentView === 'tutoring'  && <PeerTutoring profile={profile} />}
+              {platformMode === 'academic' && currentView === 'tutoring'  && <PeerTutoring profile={profile} session={session} />}
               {platformMode === 'academic' && currentView === 'messages'  && <DirectMessages session={session} profile={profile} />}
 
               {platformMode === 'life' && ['pulse', 'discounts', 'career', 'community', 'events', 'wellness', 'tools'].includes(currentView) && (
