@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MapPin, Sparkles, Lightbulb, Route, Users, LocateFixed, Building2, Activity } from 'lucide-react'
 import { useCrowdSocket } from '../../hooks/navigation/useCrowdSocket'
@@ -17,6 +17,8 @@ import RecoTab from './components/RecoTab'
 import IndoorTab from './components/IndoorTab'
 import CinematicOverlay from './components/CinematicOverlay'
 import CameraModal from './components/CameraModal'
+import { useCampusNavigatorState } from './hooks/useCampusNavigatorState'
+import { useCampusNavigatorCamera } from './hooks/useCampusNavigatorCamera'
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -26,45 +28,61 @@ L.Icon.Default.mergeOptions({
 })
 
 export default function CampusNavigator() {
-  const [selectedBuilding, setSelectedBuilding] = useState(null)
-  const [activeTab, setActiveTab] = useState('map')
-  const [chatMessages, setChatMessages] = useState([
-    { role: 'model', text: 'Salut! Sunt asistentul tău de navigare. Cum te pot ajuta?' }
-  ])
-  const [chatInput, setChatInput] = useState('')
-  const [chatAttachment, setChatAttachment] = useState(null)
-  const [chatLoading, setChatLoading] = useState(false)
-  const [lastPhotoContext, setLastPhotoContext] = useState(null)
-  const [pulseData, setPulseData] = useState(null)
-  const [pulseLoading, setPulseLoading] = useState(false)
-  const [pulseLoaded, setPulseLoaded] = useState(false)
-  const [cameraOpen, setCameraOpen] = useState(false)
-  const [cameraStream, setCameraStream] = useState(null)
-  const [cameraFacing, setCameraFacing] = useState('environment')
-  const chatHistory = useRef([])
-  const recoHistory = useRef([])
-  const [recoMessages, setRecoMessages] = useState([])
-  const [recoInput, setRecoInput] = useState('')
-  const [recoLoading, setRecoLoading] = useState(false)
-  const [fromRoom, setFromRoom] = useState('')
-  const [toRoom, setToRoom] = useState('')
-  const [indoorPath, setIndoorPath] = useState(null)
-
-  const [showCrowd, setShowCrowd] = useState(false)
-  const [showPOI, setShowPOI] = useState(false)
-  const [routeFrom, setRouteFrom] = useState('')
-  const [routeTo, setRouteTo] = useState('')
-  const [routeMode, setRouteMode] = useState('foot')
-  const [routePath, setRoutePath] = useState(null)
-  const [routeLoading, setRouteLoading] = useState(false)
-  const [routeInfo, setRouteInfo] = useState(null)
-
+  const {
+    selectedBuilding, setSelectedBuilding,
+    activeTab, setActiveTab,
+    chatMessages, setChatMessages,
+    chatInput, setChatInput,
+    chatAttachment, setChatAttachment,
+    chatLoading, setChatLoading,
+    lastPhotoContext, setLastPhotoContext,
+    pulseData, setPulseData,
+    pulseLoading, setPulseLoading,
+    pulseLoaded, setPulseLoaded,
+    cameraOpen, setCameraOpen,
+    cameraStream, setCameraStream,
+    cameraFacing, setCameraFacing,
+    chatHistory,
+    recoHistory,
+    recoMessages, setRecoMessages,
+    recoInput, setRecoInput,
+    recoLoading, setRecoLoading,
+    fromRoom, setFromRoom,
+    toRoom, setToRoom,
+    indoorPath, setIndoorPath,
+    showCrowd, setShowCrowd,
+    showPOI, setShowPOI,
+    routeFrom, setRouteFrom,
+    routeTo, setRouteTo,
+    routeMode, setRouteMode,
+    routePath, setRoutePath,
+    routeLoading, setRouteLoading,
+    routeInfo, setRouteInfo,
+    cinematicMode, setCinematicMode,
+    cinematicStep, setCinematicStep,
+    cinematicSteps, setCinematicSteps,
+    voiceEnabled, setVoiceEnabled,
+  } = useCampusNavigatorState()
+  const { attachmentFromDataUrl, openCamera, closeCamera, flipCamera } = useCampusNavigatorCamera({
+    cameraStream,
+    cameraFacing,
+    setCameraOpen,
+    setCameraStream,
+    setCameraFacing,
+  })
   const { profile, session } = useAuth()
   const firstName = profile?.name?.split(' ')[0] ?? 'Student'
   const universityId = session?.university?.id || 'tuiasi'
   const campus = CAMPUS_CONFIG[universityId] || CAMPUS_CONFIG.tuiasi
-  const { center: campusCenter, buildings, pois: POIS, indRooms: IND_ROOMS, indGraph: IND_GRAPH,
-          outdoorRouteIds: OUTDOOR_ROUTE_IDS, aiDestinations: AI_COMPASS_DESTINATIONS } = campus
+  const {
+    center: campusCenter,
+    buildings,
+    pois: POIS,
+    indRooms: IND_ROOMS,
+    indGraph: IND_GRAPH,
+    outdoorRouteIds: OUTDOOR_ROUTE_IDS,
+    aiDestinations: AI_COMPASS_DESTINATIONS,
+  } = campus
   const heatmapHotspots = useMemo(() => [
     ...buildings.map(building => building.coords),
     ...POIS.map(poi => [poi.lat, poi.lng]),
@@ -111,7 +129,7 @@ export default function CampusNavigator() {
       setPulseData(result)
       setPulseLoaded(true)
     } catch {
-      setPulseData({ briefing: 'Nu am putut genera recomandări acum.', cards: [] })
+      setPulseData({ briefing: 'Nu am putut genera recomandari acum.', cards: [] })
     }
     setPulseLoading(false)
   }
@@ -131,7 +149,7 @@ export default function CampusNavigator() {
       ]
       setRecoMessages(prev => [...prev, { role: 'model', text: response }])
     } catch {
-      setRecoMessages(prev => [...prev, { role: 'model', text: 'Momentan nu pot răspunde. Încearcă din nou.' }])
+      setRecoMessages(prev => [...prev, { role: 'model', text: 'Momentan nu pot raspunde. Incearca din nou.' }])
     }
     setRecoLoading(false)
   }
@@ -142,11 +160,6 @@ export default function CampusNavigator() {
     const mapped = OUTDOOR_ROUTE_IDS[raw.toLowerCase()] || raw
     return buildings.some(building => String(building.id) === String(mapped)) ? String(mapped) : fallback
   }
-
-  const [cinematicMode, setCinematicMode] = useState(false)
-  const [cinematicStep, setCinematicStep] = useState(0)
-  const [cinematicSteps, setCinematicSteps] = useState([])
-  const [voiceEnabled, setVoiceEnabled] = useState(true)
 
   async function calculateOutdoorRoute(fromValue, toValue, mode = routeMode) {
     const from = buildings.find(b => String(b.id) === String(fromValue))
@@ -410,44 +423,7 @@ export default function CampusNavigator() {
     submitAiCompass(option.query, null)
   }
 
-  function attachmentFromDataUrl(dataUrl, mimeType = 'image/jpeg') {
-    return {
-      preview: dataUrl,
-      base64: dataUrl.split(',')[1],
-      mimeType,
-    }
-  }
-
-  async function openCamera(facing = 'environment') {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } },
-      })
-      setCameraFacing(facing)
-      setCameraStream(stream)
-      setCameraOpen(true)
-    } catch {
-      alert('Accesul la cameră a fost refuzat sau camera nu este disponibilă.')
-    }
-  }
-
-  function closeCamera() {
-    cameraStream?.getTracks().forEach(t => t.stop())
-    setCameraStream(null)
-    setCameraOpen(false)
-  }
-
-  async function flipCamera() {
-    cameraStream?.getTracks().forEach(t => t.stop())
-    const next = cameraFacing === 'environment' ? 'user' : 'environment'
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: next, width: { ideal: 1280 }, height: { ideal: 720 } },
-      })
-      setCameraFacing(next)
-      setCameraStream(stream)
-    } catch { /* keep existing */ }
-  }
+  
 
   function startLostMode() {
     setActiveTab('chat')
@@ -679,3 +655,5 @@ export default function CampusNavigator() {
     </div>
   )
 }
+
+
