@@ -1,0 +1,157 @@
+import { useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
+import clsx from 'clsx'
+import {
+  Award,
+  Bot,
+  Briefcase,
+  Check,
+} from 'lucide-react'
+import { useNow } from '../../../shared/hooks/useNow'
+import { rollingDays } from '../../../shared/utils/dateTime'
+import { studentLifeData } from '../studentLifeData'
+import { SECTION_ACCENTS, SECTION_META, JOB_TYPES } from '../constants/sectionConfig'
+import { containerVariants, itemVariants } from '../utils/motionVariants'
+import { jobMatch } from '../utils/scoringUtils'
+import { normalizeCity } from '../utils/profileUtils'
+import SectionHeader from '../components/SectionHeader'
+import SearchField from '../components/SearchField'
+import FilterPills from '../components/FilterPills'
+import AccentLine from '../components/AccentLine'
+import EmptyState from '../components/EmptyState'
+import CVAnalysisPanel from './CVAnalysisPanel'
+
+export default function CareerSection({ lifeProfile, applied, appliedOps }) {
+  const accent = SECTION_ACCENTS.career
+  const [type, setType] = useState('Toate')
+  const [query, setQuery] = useState('')
+  const [cvAnalysis, setCvAnalysis] = useState(null)
+  const now = useNow()
+  const allJobs = studentLifeData.career[lifeProfile.careerKey] || studentLifeData.career.CS
+
+  const cvAdjMap = useMemo(() => {
+    if (!cvAnalysis?.jobAdjustments?.length) return {}
+    return Object.fromEntries(cvAnalysis.jobAdjustments.map(a => [a.jobId, a]))
+  }, [cvAnalysis])
+
+  const jobs = useMemo(() => {
+    const q = query.toLowerCase()
+    return allJobs
+      .filter((job) => type === 'Toate' || job.type === type)
+      .filter((job) => !q || [job.role, job.company, ...job.tags].some((f) => f.toLowerCase().includes(q)))
+      .map((job) => {
+        const cities = job.cities.map(normalizeCity)
+        const warnings = []
+        if (lifeProfile.year < job.minYear) warnings.push(`Anul ${job.minYear}+`)
+        if (!job.remote && !cities.includes('all') && !cities.includes(lifeProfile.city)) warnings.push(job.cities[0])
+        const deadlineDays = rollingDays(job.id, 3, 21, now)
+        const baseScore = jobMatch(job, lifeProfile)
+        const adj = cvAdjMap[job.id]
+        const match = adj ? Math.min(99, Math.max(8, baseScore + adj.adjustment)) : baseScore
+        return { ...job, deadlineDays, match, cvReason: adj?.reason || null, warnings }
+      })
+      .filter((job) => job.match >= 20)
+      .sort((a, b) => b.match - a.match)
+  }, [allJobs, lifeProfile, now, query, type, cvAdjMap])
+
+  return (
+    <section className="space-y-5">
+      <SectionHeader section="career" accent={accent} meta={SECTION_META.career} />
+
+      <CVAnalysisPanel allJobs={allJobs} onAnalysis={setCvAnalysis} cvAnalysis={cvAnalysis} />
+
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-[13px] text-slate-500">
+        <Award size={14} className="text-slate-400 shrink-0" strokeWidth={1.75} />
+        <span><b className="text-slate-300 font-semibold">{lifeProfile.facultyName}</b> · Anul {lifeProfile.year} · {lifeProfile.city}</span>
+        {cvAnalysis && (
+          <span className="ml-auto flex items-center gap-1 text-blue-400 text-[11px] font-semibold">
+            <Bot size={11} /> Potrivire bazată pe CV
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
+        <SearchField value={query} onChange={setQuery} placeholder="Caută poziții, companii, skill-uri..." />
+        <FilterPills items={JOB_TYPES} value={type} onChange={setType} accent={accent} />
+        <span className="shrink-0 font-mono text-xs font-semibold text-slate-500">{jobs.length} poziții</span>
+      </div>
+
+      {jobs.length === 0 ? (
+        <EmptyState icon={Briefcase} title="Nicio poziție găsită" text="Încearcă un alt cuvânt cheie sau tip." accent={accent} />
+      ) : (
+        <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-4">
+          {jobs.map((job) => (
+            <motion.article
+              key={job.id}
+              variants={itemVariants}
+              className="premium-card grid grid-cols-1 gap-5 p-5 lg:grid-cols-[1fr_auto] lg:items-center"
+            >
+              <AccentLine color={accent.color} />
+              <div className="flex gap-4">
+                <div
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-xs font-bold text-white shadow-lg"
+                  style={{ background: job.color }}
+                >
+                  {job.initials}
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-white">{job.role}</h3>
+                  <p className="text-sm text-slate-500">{job.company}</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    <span className="tag">{job.remote ? 'Remote' : `Fizic · ${job.cities[0]}`}</span>
+                    <span className={clsx('tag', job.paid && 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300')}>
+                      {job.paid ? 'Plătit' : 'Neplătit'}
+                    </span>
+                    <span className="tag">{job.type}</span>
+                    <span className="tag border-sky-500/30 bg-sky-500/10 text-sky-300">
+                      Aplică în {job.deadlineDays} zile
+                    </span>
+                    {job.warnings.map((w) => (
+                      <span key={w} className="tag border-amber-500/30 bg-amber-500/10 text-amber-300">{w}</span>
+                    ))}
+                    {job.cvReason && (
+                      <span className="tag border-blue-500/30 bg-blue-500/10 text-blue-300 flex items-center gap-1">
+                        <Bot size={10} strokeWidth={1.75} />{job.cvReason}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {job.tags.map((t) => (
+                      <span key={t} className="rounded-lg bg-white/[0.04] px-2 py-1 text-[11px] font-medium text-slate-500">{t}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-3 lg:flex-col lg:items-end">
+                <span className={clsx(
+                  'rounded-full border px-3 py-1 text-xs font-black',
+                  job.match >= 80
+                    ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
+                    : 'border-amber-400/30 bg-amber-400/10 text-amber-300',
+                )}>
+                  {job.match}% potrivire
+                </span>
+                <button
+                  onClick={() => {
+                    if (job.url) window.open(job.url, '_blank', 'noopener,noreferrer')
+                    appliedOps.add(job.id)
+                  }}
+                  disabled={applied.has(job.id)}
+                  className={clsx(
+                    'inline-flex h-10 min-w-28 items-center justify-center gap-2 rounded-xl px-4 text-[13px] font-bold transition-all active:scale-[0.97] disabled:cursor-default',
+                    applied.has(job.id)
+                      ? 'bg-emerald-500/12 border border-emerald-500/25 text-emerald-300'
+                      : 'btn-primary',
+                  )}
+                >
+                  {applied.has(job.id) && <Check size={14} />}
+                  {applied.has(job.id) ? 'Aplicat' : job.url ? 'Aplică →' : 'Aplică'}
+                </button>
+              </div>
+            </motion.article>
+          ))}
+        </motion.div>
+      )}
+    </section>
+  )
+}
