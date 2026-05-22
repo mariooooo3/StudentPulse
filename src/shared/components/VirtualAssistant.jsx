@@ -36,14 +36,16 @@ const NAVIGATION_ACTIONS = [
   { match: ['thesis', 'licenta'], view: 'thesis', mode: 'academic' },
   { match: ['tutoring', 'tutor'], view: 'tutoring', mode: 'academic' },
   { match: ['messages', 'mesaje'], view: 'messages', mode: 'academic' },
-  { match: ['city', 'oras', 'adaptare'], view: 'citylife', mode: 'life' },
+  { match: ['academic', 'modul academic', 'sectiunea academica', 'dashboard', 'acasa', 'home'], view: 'dashboard', mode: 'academic' },
+  { match: ['city', 'oras', 'adaptare', 'adaptez', 'city adaptation'], view: 'citylife', mode: 'life' },
   { match: ['cariera', 'career', 'job', 'internship', 'cv', 'angajare'], view: 'career', mode: 'life' },
   { match: ['comunitate', 'community', 'grupuri', 'grup', 'activitati'], view: 'community', mode: 'life' },
   { match: ['evenimente', 'events', 'calendar', 'event'], view: 'events', mode: 'life' },
   { match: ['wellness', 'sanatate', 'pomodoro', 'focus', 'meditatie', 'sport'], view: 'wellness', mode: 'life' },
   { match: ['tools', 'unelte', 'buget', 'budget', 'carpool', 'masina', 'carti', 'colegi', 'roommate'], view: 'tools', mode: 'life' },
   { match: ['pulse', 'campus pulse', 'activitate campus', 'check-in'], view: 'pulse', mode: 'life' },
-  { match: ['student life', 'viata', 'viata studenteasca', 'discount', 'reduceri', 'oferte'], view: 'discounts', mode: 'life' },
+  { match: ['student life', 'viata studenteasca', 'viata de student', 'discount', 'reduceri', 'oferte', 'beneficii'], view: 'discounts', mode: 'life' },
+  { match: ['viata', 'modul viata', 'modul life', 'sectiunea life'], view: 'discounts', mode: 'life' },
 ]
 
 const PROFESSOR_NAVIGATION_ACTIONS = [
@@ -58,7 +60,7 @@ function initialAssistantMessage(role) {
   if (role === 'professor') {
     return 'Salut, sunt asistentul pentru portalul profesorului. Te pot ajuta cu cereri de licenta, recuperari, mesaje, notificari live si profilul academic.'
   }
-  return 'Salut, sunt asistentul StudentCompass. Te pot ajuta cu modulele studentului, mesaje, orar, cereri de licenta, navigare in campus si intrebari de cont.'
+  return 'Salut, sunt asistentul StudentCompass. Pot naviga direct: spune "academic", "orar", "harta", "student life", "cariera", "city" sau orice modul. Te pot ajuta si cu cont, cereri de licenta si viata studenteasca.'
 }
 
 function findNavigationAction(label, role) {

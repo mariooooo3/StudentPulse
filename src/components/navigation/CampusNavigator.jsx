@@ -124,7 +124,7 @@ export default function CampusNavigator() {
     setPulseLoading(true)
     try {
       const h = new Date().getHours()
-      const result = await getSmartRecommendations({ hour: h, totalUsers, schedule: courses.slice(0, 4) })
+      const result = await getSmartRecommendations({ hour: h, totalUsers, schedule: courses.slice(0, 4), university: universityId })
       setPulseData(result)
       setPulseLoaded(true)
     } catch {
@@ -140,7 +140,7 @@ export default function CampusNavigator() {
     setRecoInput('')
     setRecoLoading(true)
     try {
-      const response = await askRecoAI(q, recoHistory.current)
+      const response = await askRecoAI(q, recoHistory.current, universityId)
       recoHistory.current = [
         ...recoHistory.current,
         { role: 'user', content: q },
@@ -358,7 +358,15 @@ export default function CampusNavigator() {
     try {
       if (attachment) {
         if (!hasTypedMessage) {
-          const photoAnswer = await analyzePhoto(attachment.base64, attachment.mimeType, universityId)
+          const coords = await new Promise(resolve => {
+            if (!navigator.geolocation) return resolve(null)
+            navigator.geolocation.getCurrentPosition(
+              p => resolve([p.coords.latitude, p.coords.longitude]),
+              () => resolve(null),
+              { timeout: 3000, maximumAge: 30000 }
+            )
+          })
+          const photoAnswer = await analyzePhoto(attachment.base64, attachment.mimeType, universityId, coords)
           const answer = withDestinationQuestion(photoAnswer)
           setLastPhotoContext({ image: attachment, visualAnswer: photoAnswer })
           chatHistory.current = [
@@ -396,7 +404,7 @@ export default function CampusNavigator() {
           ]
           setChatMessages((prev) => [...prev, { role: 'model', text: response.answer, copilot: response }])
         } else {
-          const response = await askCampusAI(userMsg, chatHistory.current)
+          const response = await askCampusAI(userMsg, chatHistory.current, universityId)
           chatHistory.current = [
             ...chatHistory.current,
             { role: 'user', content: userMsg },

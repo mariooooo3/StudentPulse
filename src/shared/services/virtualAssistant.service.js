@@ -107,8 +107,8 @@ export function localVirtualAssistantAnswer(message, context = {}) {
       }
     }
     return {
-      answer: 'Universitatea Tehnica "Gheorghe Asachi" din Iasi are campusul principal pe Bd. Prof. Dimitrie Mangeron. Facultatea de Automatica si Calculatoare include CTI in Corp C si IS/DAIA in Corp A. Harta include si ETTI, IEEIA, MEC, Constructii, Rectoratul, Biblioteca, Cantina si caminele din Tudor.',
-      suggestions: ['Deschide Campus Navigator', 'Unde este Corp C?', 'Unde este ETTI?'],
+      answer: `Campus Navigator include harta campusului tau, trasee outdoor, rute indoor intre sali, recunoastere din poza si prezentari ghidate. Spune "harta" sau "navigator" sa te duc acolo.`,
+      suggestions: ['Deschide Campus Navigator', 'Cum functioneaza recunoasterea din poza?'],
     }
   }
 

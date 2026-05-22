@@ -95,8 +95,62 @@ REGULI DE RASPUNS
 6. NU inventa. Daca nu ?tii sigur: "Nu am date exacte despre asta."
 7. Maxim 4-5 propozi?ii. Fii specific.`
 
+function makeUmfSystemPrompt(universityName, city, address, extraFaculties, nearbyHospital) {
+  return `Ești Campus AI, asistentul inteligent al studenților de la ${universityName} din ${city} (${address}).
+Raspunzi ÎNTOTDEAUNA în română, concis și practic. Ești prietenos dar la obiect — nu filozofa, nu da raspunsuri vagi.
+
+---------------------------------------
+CORP PRINCIPAL – PARTER
+---------------------------------------
+Secretariat (L-V 09:00-13:00), Amfiteatre Medicină, Laboratoare Anatomie.
+
+---------------------------------------
+ETAJE SUPERIOARE
+---------------------------------------
+ETAJ 1: Laboratoare Fiziologie, Farmacologie/Microbiologie
+ETAJ 2: Laboratoare Biochimie, Săli Clinice
+ETAJ 3: Laborator Simulare Clinică, Decanat
+ETAJ 4: Sală Conferințe
+SCARA: la capătul coridorului principal.
+
+---------------------------------------
+FACULTĂȚI & SERVICII
+---------------------------------------
+- Facultatea de Medicină – în Corp Principal
+- Facultatea de Medicină Dentară – corp separat sau etaj dedicat${extraFaculties}
+- Facultatea de Farmacie – corp separat sau etaj dedicat
+- Biblioteca universitară: L-V 09:00-20:00, S 09:00-14:00
+- Cantina studențească: L-V 11:00-19:00
+- Centru de Simulare Clinică – manechine medicale, echipamente de monitoring
+- Cămine studențești – în campus sau apropiat
+- ${nearbyHospital} – clinică universitară pentru stagii
+
+---------------------------------------
+REGULI DE RASPUNS
+---------------------------------------
+1. Sala (ex: "unde e Laboratorul de Anatomie"): spune ETAJUL și cum se ajunge.
+2. Traseu: pași clari și concreți.
+3. Orar (secretariat, cantina, biblioteca): ore exacte dacă știi.
+4. Mâncare: Cantina ${universityName} (L-V 11:00-19:00).
+5. Dacă NU e despre campus: "Nu am informații despre asta, dar te pot ajuta să navighezi campusul ${universityName}."
+6. NU inventa. Dacă nu știi sigur: "Nu am date exacte despre asta."
+7. Maxim 4-5 propoziții. Fii specific.`
+}
+
+export const UMF_IASI_SYSTEM_PROMPT    = makeUmfSystemPrompt('UMF „Grigore T. Popa" Iași',   'Iași',        'Str. Universității 16',  '\n- Facultatea de Bioinginerie Medicală – corp separat', 'Spitalul Sf. Spiridon')
+export const UMF_BUC_SYSTEM_PROMPT     = makeUmfSystemPrompt('UMF „Carol Davila" București',  'București',   'Str. Dionisie Lupu 37',  '',                                                      'Spitalul Universitar de Urgență')
+export const UMF_TGM_SYSTEM_PROMPT     = makeUmfSystemPrompt('UMFST „G.E. Palade" Tg. Mureș','Târgu Mureș', 'Str. Gh. Marinescu 38',  '\n- Facultatea de Inginerie și Informatică Medicală',    'Spitalul Clinic Județean Mureș')
+export const UMF_CRAIOVA_SYSTEM_PROMPT = makeUmfSystemPrompt('UMF Craiova',                   'Craiova',     'Str. Petru Rareș 2-4',   '',                                                      'Spitalul Clinic Județean de Urgență Craiova')
+
 export function getSystemPrompt(university) {
-  return university === 'uaic' ? UAIC_SYSTEM_PROMPT : TUIASI_SYSTEM_PROMPT
+  switch (university) {
+    case 'uaic':        return UAIC_SYSTEM_PROMPT
+    case 'umf-iasi':    return UMF_IASI_SYSTEM_PROMPT
+    case 'umf-buc':     return UMF_BUC_SYSTEM_PROMPT
+    case 'umf-tgm':     return UMF_TGM_SYSTEM_PROMPT
+    case 'umf-craiova': return UMF_CRAIOVA_SYSTEM_PROMPT
+    default:            return TUIASI_SYSTEM_PROMPT
+  }
 }
 
 // Keep SYSTEM_PROMPT as alias for backward compat
@@ -125,16 +179,50 @@ export const COPILOT_JSON_SCHEMA = `{
   }
 }`
 
-export const KNOWN_INDOOR_ROOMS_TUIASI = ['secretariat-ac', 'amf-ac0-1', 'lab-a0-1', 'sala-ac0-2', 'lab-c1-1', 'lab-c1-2', 'lab-c2-1', 'birou-c2-5', 'lab-a3-1', 'sala-a3-2', 'sala-conf']
-export const KNOWN_INDOOR_ROOMS_UAIC   = ['secretariat-fii', 'amf-otelea', 'lab-info-0', 'sala-info-0', 'lab-info-1a', 'lab-info-1b', 'lab-info-2a', 'birou-prof', 'lab-info-3a', 'decanat-fii', 'sala-conf-fii']
-export const KNOWN_INDOOR_ROOMS = [...KNOWN_INDOOR_ROOMS_TUIASI, ...KNOWN_INDOOR_ROOMS_UAIC]
+export const KNOWN_INDOOR_ROOMS_TUIASI      = ['secretariat-ac', 'amf-ac0-1', 'lab-a0-1', 'sala-ac0-2', 'lab-c1-1', 'lab-c1-2', 'lab-c2-1', 'birou-c2-5', 'lab-a3-1', 'sala-a3-2', 'sala-conf']
+export const KNOWN_INDOOR_ROOMS_UAIC        = ['secretariat-fii', 'amf-otelea', 'lab-info-0', 'sala-info-0', 'lab-info-1a', 'lab-info-1b', 'lab-info-2a', 'birou-prof', 'lab-info-3a', 'decanat-fii', 'sala-conf-fii']
+export const KNOWN_INDOOR_ROOMS_UMF_IASI    = ['secretariat-umf', 'amf-med-0', 'lab-anatomie', 'sala-med-0', 'lab-fiziopatol', 'lab-farmacol', 'lab-biochimie', 'sala-clinica', 'lab-simulare', 'decanat-med', 'sala-conf-umf']
+export const KNOWN_INDOOR_ROOMS_UMF_BUC     = ['secretariat-umfb', 'amf-carol-0', 'lab-anat-buc', 'sala-med-buc', 'lab-fizio-buc', 'lab-farm-buc', 'lab-biochimic', 'sala-clin-buc', 'lab-sim-buc', 'decanat-buc', 'sala-conf-buc']
+export const KNOWN_INDOOR_ROOMS_UMF_TGM     = ['secretariat-tgm', 'amf-med-tgm', 'lab-anat-tgm', 'sala-tgm-0', 'lab-fizio-tgm', 'lab-micro-tgm', 'lab-bioc-tgm', 'sala-clin-tgm', 'lab-sim-tgm', 'decanat-tgm', 'sala-conf-tgm']
+export const KNOWN_INDOOR_ROOMS_UMF_CRAIOVA = ['secretariat-cv', 'amf-med-cv', 'lab-anat-cv', 'sala-cv-0', 'lab-fizio-cv', 'lab-farm-cv', 'lab-bioc-cv', 'sala-clin-cv', 'lab-sim-cv', 'decanat-cv', 'sala-conf-cv']
+export const KNOWN_INDOOR_ROOMS = [
+  ...KNOWN_INDOOR_ROOMS_TUIASI, ...KNOWN_INDOOR_ROOMS_UAIC,
+  ...KNOWN_INDOOR_ROOMS_UMF_IASI, ...KNOWN_INDOOR_ROOMS_UMF_BUC,
+  ...KNOWN_INDOOR_ROOMS_UMF_TGM, ...KNOWN_INDOOR_ROOMS_UMF_CRAIOVA,
+]
 
-export const KNOWN_BUILDINGS_TUIASI = ['corp-c', 'corp-a', 'library', 'canteen', 'secretariat', 'etti', 'ieeia', 'mec', 'ci', 'icpm', 'arh', 'cmmi', 'hgim', 'sim', 'dima']
-export const KNOWN_BUILDINGS_UAIC   = ['rectorat-uaic', 'fii', 'matematica', 'fizica', 'chimie', 'biologie', 'drept', 'litere', 'filosofie', 'psihologie', 'feaa', 'geografie', 'bcu', 'secretariat-fii', 'camine-codrescu', 'canteen-uaic']
-export const KNOWN_BUILDINGS = [...KNOWN_BUILDINGS_TUIASI, ...KNOWN_BUILDINGS_UAIC]
+export const KNOWN_BUILDINGS_TUIASI      = ['corp-c', 'corp-a', 'library', 'canteen', 'secretariat', 'etti', 'ieeia', 'mec', 'ci', 'icpm', 'arh', 'cmmi', 'hgim', 'sim', 'dima']
+export const KNOWN_BUILDINGS_UAIC        = ['rectorat-uaic', 'fii', 'matematica', 'fizica', 'chimie', 'biologie', 'drept', 'litere', 'filosofie', 'psihologie', 'feaa', 'geografie', 'bcu', 'secretariat-fii', 'camine-codrescu', 'canteen-uaic']
+export const KNOWN_BUILDINGS_UMF_IASI    = ['principal', 'dentara', 'farmacie', 'bioing', 'biblioteca', 'simulare', 'camin', 'spiridon', 'jct-central']
+export const KNOWN_BUILDINGS_UMF_BUC     = ['principal', 'farmacie', 'biblioteca', 'simulare', 'camin', 'jct-central']
+export const KNOWN_BUILDINGS_UMF_TGM     = ['principal', 'dentara', 'farmacie', 'inginerie', 'biblioteca', 'spital', 'camin', 'jct-central']
+export const KNOWN_BUILDINGS_UMF_CRAIOVA = ['principal', 'dentara', 'farmacie', 'biblioteca', 'simulare', 'camin', 'spital', 'jct-central']
+export const KNOWN_BUILDINGS = [
+  ...KNOWN_BUILDINGS_TUIASI, ...KNOWN_BUILDINGS_UAIC,
+  ...KNOWN_BUILDINGS_UMF_IASI, ...KNOWN_BUILDINGS_UMF_BUC,
+  ...KNOWN_BUILDINGS_UMF_TGM, ...KNOWN_BUILDINGS_UMF_CRAIOVA,
+]
 
-export function knownRooms(university)    { return university === 'uaic' ? KNOWN_INDOOR_ROOMS_UAIC   : KNOWN_INDOOR_ROOMS_TUIASI }
-export function knownBuildings(university) { return university === 'uaic' ? KNOWN_BUILDINGS_UAIC       : KNOWN_BUILDINGS_TUIASI }
+export function knownRooms(university) {
+  switch (university) {
+    case 'uaic':        return KNOWN_INDOOR_ROOMS_UAIC
+    case 'umf-iasi':    return KNOWN_INDOOR_ROOMS_UMF_IASI
+    case 'umf-buc':     return KNOWN_INDOOR_ROOMS_UMF_BUC
+    case 'umf-tgm':     return KNOWN_INDOOR_ROOMS_UMF_TGM
+    case 'umf-craiova': return KNOWN_INDOOR_ROOMS_UMF_CRAIOVA
+    default:            return KNOWN_INDOOR_ROOMS_TUIASI
+  }
+}
+export function knownBuildings(university) {
+  switch (university) {
+    case 'uaic':        return KNOWN_BUILDINGS_UAIC
+    case 'umf-iasi':    return KNOWN_BUILDINGS_UMF_IASI
+    case 'umf-buc':     return KNOWN_BUILDINGS_UMF_BUC
+    case 'umf-tgm':     return KNOWN_BUILDINGS_UMF_TGM
+    case 'umf-craiova': return KNOWN_BUILDINGS_UMF_CRAIOVA
+    default:            return KNOWN_BUILDINGS_TUIASI
+  }
+}
 
 export function safeJson(raw, fallback) {
   try {
@@ -236,6 +324,34 @@ export function inferIndoorRoom(university, ...texts) {
     if (normalized.includes('decanat')) return 'decanat-fii'
     if ((normalized.includes('lab') || normalized.includes('laborator')) && normalized.includes('info')) return 'lab-info-1a'
     if (normalized.includes('birouri') || normalized.includes('profesori')) return 'birou-prof'
+  } else if (university === 'umf-iasi') {
+    if (normalized.includes('secretariat')) return 'secretariat-umf'
+    if (normalized.includes('anatomie')) return 'lab-anatomie'
+    if (normalized.includes('decanat')) return 'decanat-med'
+    if (normalized.includes('amfiteatru') || normalized.includes('amf')) return 'amf-med-0'
+    if (normalized.includes('simulare')) return 'lab-simulare'
+    if (normalized.includes('biochimie')) return 'lab-biochimie'
+  } else if (university === 'umf-buc') {
+    if (normalized.includes('secretariat')) return 'secretariat-umfb'
+    if (normalized.includes('anatomie')) return 'lab-anat-buc'
+    if (normalized.includes('decanat')) return 'decanat-buc'
+    if (normalized.includes('amfiteatru') || normalized.includes('carol')) return 'amf-carol-0'
+    if (normalized.includes('simulare')) return 'lab-sim-buc'
+    if (normalized.includes('biochimie')) return 'lab-biochimic'
+  } else if (university === 'umf-tgm') {
+    if (normalized.includes('secretariat')) return 'secretariat-tgm'
+    if (normalized.includes('anatomie')) return 'lab-anat-tgm'
+    if (normalized.includes('decanat')) return 'decanat-tgm'
+    if (normalized.includes('amfiteatru') || normalized.includes('amf')) return 'amf-med-tgm'
+    if (normalized.includes('simulare')) return 'lab-sim-tgm'
+    if (normalized.includes('biochimie')) return 'lab-bioc-tgm'
+  } else if (university === 'umf-craiova') {
+    if (normalized.includes('secretariat')) return 'secretariat-cv'
+    if (normalized.includes('anatomie')) return 'lab-anat-cv'
+    if (normalized.includes('decanat')) return 'decanat-cv'
+    if (normalized.includes('amfiteatru') || normalized.includes('amf')) return 'amf-med-cv'
+    if (normalized.includes('simulare')) return 'lab-sim-cv'
+    if (normalized.includes('biochimie')) return 'lab-bioc-cv'
   } else {
     if (normalized.includes('c 210') || normalized.includes('c210') || normalized.includes('lab c2')) return 'lab-c2-1'
     if (normalized.includes('c 308') || normalized.includes('c308') || normalized.includes('a3') || normalized.includes('daia')) return 'lab-a3-1'
@@ -264,6 +380,16 @@ export function inferOutdoorBuilding(university, ...texts) {
     if (normalized.includes('geografie') || normalized.includes('geologie')) return 'geografie'
     if (normalized.includes('camine') || normalized.includes('codrescu')) return 'camine-codrescu'
     if (normalized.includes('secretariat')) return 'secretariat-fii'
+  } else if (university.startsWith('umf-')) {
+    if (normalized.includes('biblioteca')) return 'biblioteca'
+    if (normalized.includes('camin')) return 'camin'
+    if (normalized.includes('dentara') || normalized.includes('stomatologie') || normalized.includes('dental')) return 'dentara'
+    if (normalized.includes('farmacie') || normalized.includes('farmacologie')) return 'farmacie'
+    if (normalized.includes('simulare') || normalized.includes('centru de simulare')) return 'simulare'
+    if (normalized.includes('spiridon') || normalized.includes('spital') || normalized.includes('clinica') || normalized.includes('clinică')) return university === 'umf-iasi' ? 'spiridon' : 'spital'
+    if (normalized.includes('inginerie') || normalized.includes('informatica medicala')) return 'inginerie'
+    if (normalized.includes('bioinginerie')) return 'bioing'
+    if (normalized.includes('medicina') || normalized.includes('medicin') || normalized.includes('principal') || normalized.includes('secretariat') || normalized.includes('rectorat')) return 'principal'
   } else {
     if (normalized.includes('biblioteca')) return 'library'
     if (normalized.includes('cantina')) return 'canteen'
@@ -295,7 +421,9 @@ export function withImageOnlyPrompt(payload, visualAnswer, message, university =
     const cleanVisionAnswer = normalizeVisibleLocationText(String(visualAnswer || '').trim(), inferred)
     const exampleDest = university === 'uaic'
       ? 'Lab Info 1-1, Secretariat FII, BCU sau Cantina.'
-      : 'C210, Secretariat, Biblioteca sau Cantina.'
+      : university.startsWith('umf-')
+        ? 'Lab. Anatomie, Secretariat, Biblioteca sau Centru Simulare.'
+        : 'C210, Secretariat, Biblioteca sau Cantina.'
     payload.answer = inferred
       ? `${cleanVisionAnswer || `Recunosc zona: pare sa fie ${inferred.label}.`} Unde vrei sa ajungi de aici?`
       : `Am analizat poza. Unde vrei sa ajungi? De exemplu: ${exampleDest}`
