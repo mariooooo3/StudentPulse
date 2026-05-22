@@ -538,7 +538,7 @@ export default function CampusNavigator() {
       </button>
       </div>
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="sync">
         {activeTab === 'map' && (
           <MapTab
             buildings={buildings}

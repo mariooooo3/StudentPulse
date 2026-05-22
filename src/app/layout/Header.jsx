@@ -41,7 +41,6 @@ export default function Header({
   const { title, sub } = VIEW_TITLES[currentView] || VIEW_TITLES.dashboard
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifFilter, setNotifFilter] = useState('all')
-  const [settingsHovered, setSettingsHovered] = useState(false)
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications(session?.userId)
   const { connected } = useSocket()
   const toast = useToast()
@@ -350,14 +349,8 @@ export default function Header({
       {/* Settings */}
       <button
         onClick={onSettingsOpen}
-        onMouseEnter={() => setSettingsHovered(true)}
-        onMouseLeave={() => setSettingsHovered(false)}
         title="Deschide setarile"
-        className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.07] transition-all duration-200 active:scale-[0.95]"
-        style={{
-          transform: settingsHovered ? 'rotate(30deg)' : 'rotate(0deg)',
-          transition: 'transform 300ms ease, background 150ms',
-        }}
+        className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.07] transition-all duration-300 active:scale-[0.95] hover:rotate-[30deg]"
       >
         <Settings size={14} className="text-slate-500" strokeWidth={1.75} />
       </button>

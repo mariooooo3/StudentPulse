@@ -1,9 +1,10 @@
+import { memo } from 'react'
 import { motion } from 'framer-motion'
 import { Route } from 'lucide-react'
 import Button from '../../ui/Button'
 import { bfsIndoor, indoorPathPoints, FLOOR_Y } from '../utils/mapHelpers'
 
-export default function IndoorTab({
+function IndoorTab({
   campus,
   IND_ROOMS,
   IND_GRAPH,
@@ -204,3 +205,5 @@ export default function IndoorTab({
     </motion.div>
   )
 }
+
+export default memo(IndoorTab)

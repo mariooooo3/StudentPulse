@@ -1,7 +1,8 @@
+import { memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Play, ChevronLeft, ChevronRight, CheckCircle, X } from 'lucide-react'
 
-export default function CinematicOverlay({
+function CinematicOverlay({
   cinematicMode,
   cinematicStep,
   cinematicSteps,
@@ -123,3 +124,5 @@ export default function CinematicOverlay({
     </AnimatePresence>
   )
 }
+
+export default memo(CinematicOverlay)
