@@ -71,7 +71,11 @@ export function dijkstraWalkPath(nodes, edges, startId, endId) {
 
   if (startId !== endId && !previous[endId]) return null
   const path = [endId]
-  while (path[0] !== startId) path.unshift(previous[path[0]])
+  while (path[0] !== startId) {
+    const prev = previous[path[0]]
+    if (prev == null) return null
+    path.unshift(prev)
+  }
   return path
 }
 

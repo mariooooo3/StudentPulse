@@ -435,7 +435,7 @@ export default function CampusNavigator() {
   return (
     <div className="space-y-5 overflow-auto p-4 sm:p-6">
       <motion.div className="hidden" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl font-bold text-white">Navigator Campus</h1>
+        <h1 className="text-2xl font-bold text-white">Campus Navigator</h1>
         <p className="text-slate-400 mt-1">Hartă, AI chat și recunoaștere vizuală.</p>
       </motion.div>
 
@@ -457,7 +457,7 @@ export default function CampusNavigator() {
               {campus.name}
             </div>
             <h1 className="text-[2rem] font-bold leading-none tracking-tight text-white sm:text-[2.35rem]">
-              Navigator Campus
+              Campus Navigator
             </h1>
             <p className="mt-3 max-w-[56ch] text-[13px] font-medium leading-relaxed text-slate-500">
               Harta campusului, trasee pietonale, AI Compass si plan interior pentru sali. Salut, {firstName}.

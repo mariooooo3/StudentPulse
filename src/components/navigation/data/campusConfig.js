@@ -20,13 +20,6 @@ export const ROUTE_PROFILES = {
     fallbackSpeedKmh: 40,
     speedKmh: 40,
   },
-  driving: {
-    label: 'Cu masina',
-    osrmProfile: 'driving',
-    durationLabel: 'cu masina',
-    fallbackSpeedKmh: 40,
-    speedKmh: 40,
-  },
 }
 
 // ─── TUIASI – Bd. Prof. Dimitrie Mangeron 67, Iași ───────────────────────────
@@ -120,57 +113,77 @@ export const TUIASI_ROUTE_IDS = {
 }
 
 export const TUIASI_WALK_NODES = [
-  { id: 'constructii', coords: [47.152241, 27.589035] },
-  { id: 'arh', coords: [47.152718, 27.589454] },
-  { id: 'library', coords: [47.157030, 27.590140] },
-  { id: 'corp-a', coords: [47.154232, 27.593145] },
-  { id: 'ieeia', coords: [47.153401, 27.596641] },
-  { id: 'ac', coords: [47.153886, 27.593992] },
-  { id: 'cmmi', coords: [47.153802, 27.596924] },
-  { id: 'sim', coords: [47.154814, 27.597532] },
-  { id: 'mec', coords: [47.154029, 27.597939] },
-  { id: 'icpm', coords: [47.155607, 27.603028] },
-  { id: 'dima', coords: [47.153434, 27.595632] },
-  { id: 'rectorat', coords: [47.154639, 27.599747] },
-  { id: 'hgim', coords: [47.155052, 27.599888] },
-  { id: 'tudor-entry', coords: [47.154600, 27.603500] },
-  { id: 'mall', coords: [47.155289, 27.605741] },
-  { id: 'dorms-north', coords: [47.155650, 27.607450] },
-  { id: 'dorms-center', coords: [47.154950, 27.609450] },
-  { id: 'canteen', coords: [47.154484, 27.609974] },
-  { id: 'dorms-south', coords: [47.153900, 27.610600] },
-  { id: 'copou-hub', coords: [47.175000, 27.572000] },
-  { id: 'etti', coords: [47.174798, 27.571092] },
+  { id: 'constructii',    coords: [47.152241, 27.589035] },
+  { id: 'arh',            coords: [47.152718, 27.589454] },
+  { id: 'library',        coords: [47.157030, 27.590140] },
+  { id: 'corp-a',         coords: [47.154232, 27.593145] },
+  { id: 'ieeia',          coords: [47.153401, 27.596641] },
+  { id: 'ac',             coords: [47.153886, 27.593992] },
+  { id: 'cmmi',           coords: [47.153802, 27.596924] },
+  { id: 'sim',            coords: [47.154814, 27.597532] },
+  { id: 'mec',            coords: [47.154029, 27.597939] },
+  { id: 'icpm',           coords: [47.155607, 27.603028] },
+  { id: 'dima',           coords: [47.153434, 27.595632] },
+  { id: 'rectorat',       coords: [47.154639, 27.599747] },
+  { id: 'hgim',           coords: [47.155052, 27.599888] },
+  { id: 'tudor-entry',    coords: [47.154600, 27.603500] },
+  { id: 'mall',           coords: [47.155289, 27.605741] },
+  { id: 'dorms-north',    coords: [47.155650, 27.607450] },
+  { id: 'dorms-center',   coords: [47.154950, 27.609450] },
+  { id: 'canteen',        coords: [47.154484, 27.609974] },
+  { id: 'dorms-south',    coords: [47.153900, 27.610600] },
+  { id: 'copou-hub',      coords: [47.175000, 27.572000] },
+  { id: 'etti',           coords: [47.174798, 27.571092] },
+  // Noduri de jonctiune pe drumurile reale ale campusului
+  { id: 'bd-mangeron-s',  coords: [47.152850, 27.591300] }, // Bd. Mangeron sud, lângă Constructii/Arh
+  { id: 'bd-mangeron-mid',coords: [47.153750, 27.591900] }, // Bd. Mangeron intrare principala campus
+  { id: 'bd-mangeron-n',  coords: [47.155600, 27.591100] }, // Bd. Mangeron nord, spre Biblioteca
+  { id: 'campus-jct-w',   coords: [47.153800, 27.594800] }, // Jonctiune vest campus (AC → est)
+  { id: 'campus-jct-e',   coords: [47.154150, 27.598100] }, // Jonctiune est campus
 ]
 
 export const TUIASI_WALK_EDGES = [
-  ['constructii', 'arh'],
-  ['arh', 'corp-a'],
-  ['constructii', 'ieeia'],
-  ['library', 'corp-a'],
-  ['corp-a', 'ac'],
-  ['ieeia', 'ac'],
-  ['ac', 'dima'],
-  ['ac', 'cmmi'],
-  ['dima', 'cmmi'],
-  ['cmmi', 'sim'],
-  ['sim', 'mec'],
-  ['mec', 'icpm'],
-  ['mec', 'rectorat'],
-  ['sim', 'rectorat'],
-  ['dima', 'rectorat'],
-  ['rectorat', 'hgim'],
-  ['rectorat', 'tudor-entry'],
-  ['hgim', 'tudor-entry'],
-  ['icpm', 'tudor-entry'],
-  ['tudor-entry', 'mall'],
-  ['mall', 'dorms-north'],
-  ['mall', 'dorms-center'],
-  ['dorms-center', 'canteen'],
-  ['canteen', 'dorms-south'],
-  ['dorms-center', 'dorms-south'],
-  ['library', 'copou-hub'],
-  ['copou-hub', 'etti'],
+  // Bd. Mangeron – coloana vertebrala nord-sud
+  ['constructii',    'bd-mangeron-s'],
+  ['arh',            'bd-mangeron-s'],
+  ['bd-mangeron-s',  'bd-mangeron-mid'],
+  ['bd-mangeron-mid','bd-mangeron-n'],
+  ['bd-mangeron-n',  'library'],
+
+  // Intrari in campus de pe Bd. Mangeron
+  ['bd-mangeron-mid','corp-a'],
+  ['bd-mangeron-mid','ac'],
+  ['corp-a',         'ac'],
+
+  // Drumul principal est-vest prin campus
+  ['ac',             'campus-jct-w'],
+  ['campus-jct-w',   'dima'],
+  ['campus-jct-w',   'ieeia'],
+  ['campus-jct-w',   'cmmi'],
+  ['dima',           'ieeia'],
+  ['ieeia',          'cmmi'],
+  ['cmmi',           'campus-jct-e'],
+  ['campus-jct-e',   'sim'],
+  ['campus-jct-e',   'mec'],
+  ['campus-jct-e',   'rectorat'],
+  ['sim',            'mec'],
+  ['mec',            'icpm'],
+  ['rectorat',       'hgim'],
+  ['rectorat',       'tudor-entry'],
+  ['hgim',           'tudor-entry'],
+  ['icpm',           'tudor-entry'],
+
+  // Campus Tudor Vladimirescu
+  ['tudor-entry',    'mall'],
+  ['mall',           'dorms-north'],
+  ['mall',           'dorms-center'],
+  ['dorms-center',   'canteen'],
+  ['canteen',        'dorms-south'],
+  ['dorms-center',   'dorms-south'],
+
+  // Spre ETTI / Copou
+  ['library',        'copou-hub'],
+  ['copou-hub',      'etti'],
 ]
 
 export const TUIASI_AI_DESTINATIONS = [
