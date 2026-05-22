@@ -55,7 +55,7 @@ export function buildIndoorCinematicSteps(nodePath, indRooms) {
 export function buildOutdoorCinematicSteps(pathData, actions, fromBuilding, toBuilding) {
   const steps = []
   steps.push({
-    instruction: `Starting from ${fromBuilding?.name || 'your current location'}`,
+    instruction: `Pornești din ${fromBuilding?.name || 'locația ta actuală'}`,
     icon: '📍',
     pathSlice: pathData.slice(0, Math.max(1, Math.floor(pathData.length * 0.05))),
   })
@@ -66,7 +66,7 @@ export function buildOutdoorCinematicSteps(pathData, actions, fromBuilding, toBu
     steps.push({ instruction: action, icon: '🚶', pathSlice: pathData.slice(0, idx) })
   })
   steps.push({
-    instruction: `You've arrived!\n${toBuilding?.name || 'Destination'}`,
+    instruction: `Ai ajuns!\n${toBuilding?.name || 'Destinație'}`,
     icon: '✅',
     pathSlice: pathData,
     isFinal: true,

@@ -19,7 +19,9 @@ export function useCampusNavigatorCamera({
       setCameraFacing(facing)
       setCameraStream(stream)
       setCameraOpen(true)
-    } catch {}
+    } catch (err) {
+      console.warn('[Camera] Nu s-a putut accesa camera:', err?.message || err)
+    }
   }
 
   function closeCamera() {
@@ -39,7 +41,9 @@ export function useCampusNavigatorCamera({
       setCameraFacing(next)
       setCameraStream(stream)
       setCameraOpen(true)
-    } catch {}
+    } catch (err) {
+      console.warn('[Camera] Nu s-a putut schimba camera:', err?.message || err)
+    }
   }
 
   return { attachmentFromDataUrl, openCamera, closeCamera, flipCamera }

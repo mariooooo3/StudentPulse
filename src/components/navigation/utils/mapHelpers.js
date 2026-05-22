@@ -51,7 +51,10 @@ export function indoorPathPoints(nodePath, indRooms) {
     const id = nodePath[i]
     const room = indRooms.find(r => r.id === id)
     const cx = room ? room.cx : STAIR_X
-    const cy = room ? FLOOR_Y[room.floor] : FLOOR_Y[parseInt(id.split('_')[1])]
+    const floorIdx = room ? room.floor : parseInt(id.split('_')[1], 10)
+    const cy = (Number.isFinite(floorIdx) && floorIdx >= 0 && floorIdx < FLOOR_Y.length)
+      ? FLOOR_Y[floorIdx]
+      : FLOOR_Y[0]
     if (i === 0 && room) pts.push([room.cx, room.ry + room.rh / 2])
     pts.push([cx, cy])
     if (i === nodePath.length - 1 && room) pts.push([room.cx, room.ry + room.rh / 2])
