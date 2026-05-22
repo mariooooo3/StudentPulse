@@ -295,6 +295,88 @@ export const UNIVERSITIES = [
     ],
   },
 
+  // ── UMF Iași (Grigore T. Popa) ────────────────────────────────────────────
+  {
+    id: 'umf-iasi',
+    name: 'Universitatea de Medicină și Farmacie „Grigore T. Popa" Iași',
+    shortName: 'UMF Iași',
+    city: 'Iași',
+    country: 'Romania',
+    emailDomain: 'student.umfiasi.ro',
+    adminDomain: 'umfiasi.ro',
+    color: '#dc2626',
+    avatar: 'UMF',
+    established: 1879,
+    faculties: [
+      { code: 'MED',   name: 'Facultatea de Medicină',                                 type: 'MEDICINE',    years: Y6_MED,  emailPrefix: 'med'  },
+      { code: 'DENT',  name: 'Facultatea de Medicină Dentară',                         type: 'MEDICINE',    years: Y6_DENT, emailPrefix: 'dent' },
+      { code: 'FARM',  name: 'Facultatea de Farmacie',                                 type: 'PHARMACY',    years: Y5,      emailPrefix: 'farm' },
+      { code: 'BMFD',  name: 'Facultatea de Bioinginerie Medicală',                    type: 'MEDICINE',    years: Y4,      emailPrefix: 'bm'   },
+      { code: 'NURS',  name: 'Facultatea de Nursing',                                  type: 'MEDICINE',    years: Y3,      emailPrefix: 'nurs' },
+    ],
+  },
+
+  // ── UMF București (Carol Davila) ───────────────────────────────────────────
+  {
+    id: 'umf-buc',
+    name: 'Universitatea de Medicină și Farmacie „Carol Davila" București',
+    shortName: 'UMF București',
+    city: 'București',
+    country: 'Romania',
+    emailDomain: 'student.umfcd.ro',
+    adminDomain: 'umfcd.ro',
+    color: '#b91c1c',
+    avatar: 'UMFB',
+    established: 1857,
+    faculties: [
+      { code: 'MED',   name: 'Facultatea de Medicină',                                 type: 'MEDICINE',    years: Y6_MED,  emailPrefix: 'med'  },
+      { code: 'DENT',  name: 'Facultatea de Medicină Dentară',                         type: 'MEDICINE',    years: Y6_DENT, emailPrefix: 'dent' },
+      { code: 'FARM',  name: 'Facultatea de Farmacie',                                 type: 'PHARMACY',    years: Y5,      emailPrefix: 'farm' },
+      { code: 'MOAM',  name: 'Facultatea de Moașe și Asistență Medicală',              type: 'MEDICINE',    years: Y4,      emailPrefix: 'moam' },
+    ],
+  },
+
+  // ── UMF Târgu Mureș (George Emil Palade) ──────────────────────────────────
+  {
+    id: 'umf-tgm',
+    name: 'Universitatea de Medicină, Farmacie, Știință și Tehnologie „George Emil Palade" Târgu Mureș',
+    shortName: 'UMF Târgu Mureș',
+    city: 'Târgu Mureș',
+    country: 'Romania',
+    emailDomain: 'student.umfst.ro',
+    adminDomain: 'umfst.ro',
+    color: '#991b1b',
+    avatar: 'UMFT',
+    established: 1945,
+    faculties: [
+      { code: 'MED',   name: 'Facultatea de Medicină',                                 type: 'MEDICINE',    years: Y6_MED,  emailPrefix: 'med'  },
+      { code: 'DENT',  name: 'Facultatea de Medicină Dentară',                         type: 'MEDICINE',    years: Y6_DENT, emailPrefix: 'dent' },
+      { code: 'FARM',  name: 'Facultatea de Farmacie',                                 type: 'PHARMACY',    years: Y5,      emailPrefix: 'farm' },
+      { code: 'ING',   name: 'Facultatea de Inginerie și Tehnologia Informației',      type: 'ENGINEERING', years: Y4,      emailPrefix: 'ing'  },
+      { code: 'ECON',  name: 'Facultatea de Economie și Drept',                        type: 'ECONOMICS',   years: Y3,      emailPrefix: 'econ' },
+    ],
+  },
+
+  // ── UMF Craiova ────────────────────────────────────────────────────────────
+  {
+    id: 'umf-craiova',
+    name: 'Universitatea de Medicină și Farmacie din Craiova',
+    shortName: 'UMF Craiova',
+    city: 'Craiova',
+    country: 'Romania',
+    emailDomain: 'student.umfcv.ro',
+    adminDomain: 'umfcv.ro',
+    color: '#c2410c',
+    avatar: 'UMFC',
+    established: 1970,
+    faculties: [
+      { code: 'MED',   name: 'Facultatea de Medicină',                                 type: 'MEDICINE',    years: Y6_MED,  emailPrefix: 'med'  },
+      { code: 'DENT',  name: 'Facultatea de Medicină Dentară',                         type: 'MEDICINE',    years: Y6_DENT, emailPrefix: 'dent' },
+      { code: 'FARM',  name: 'Facultatea de Farmacie',                                 type: 'PHARMACY',    years: Y5,      emailPrefix: 'farm' },
+      { code: 'NURS',  name: 'Facultatea de Nursing',                                  type: 'MEDICINE',    years: Y3,      emailPrefix: 'nurs' },
+    ],
+  },
+
   // ── UVT Timișoara ──────────────────────────────────────────────────────────
   {
     id: 'uvt',
