@@ -340,7 +340,7 @@ export function getDashboardData(profile, session = null) {
 }
 
 export function getScheduleData(profile, session = null) {
-  return byKey('schedule', getFacultyKey(profile, session)) || { schedule: [], recoverySlots: {}, swapRequests: [] }
+  return byKey('schedule', getFacultyKey(profile, session)) || { schedule: [], recoverySlots: {}, swapRequests: [], exams: [] }
 }
 
 export function getProfessors(profile, session = null) {
