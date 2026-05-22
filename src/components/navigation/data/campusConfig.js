@@ -348,6 +348,407 @@ export const UAIC_WALK_EDGES = [
   ['corp-a', 'psihologie'],
 ]
 
+// ─── UMF Iași (Grigore T. Popa) ──────────────────────────────────────────────
+export const UMF_IASI_CENTER = [47.168500, 27.582000]
+
+export const UMF_IASI_BUILDINGS = [
+  { id: 1,  name: 'Corp Principal – Str. Universității 16',      distance: '0m',    time: '-',      type: 'Admin',    coords: [47.168500, 27.582000] },
+  { id: 2,  name: 'Facultatea de Medicină',                      distance: '0m',    time: '-',      type: 'Cursuri',  coords: [47.168500, 27.582000] },
+  { id: 3,  name: 'Facultatea de Medicină Dentară',              distance: '120m',  time: '2 min',  type: 'Cursuri',  coords: [47.167500, 27.581800] },
+  { id: 4,  name: 'Facultatea de Farmacie',                      distance: '150m',  time: '2 min',  type: 'Cursuri',  coords: [47.168200, 27.583200] },
+  { id: 5,  name: 'Facultatea de Bioinginerie Medicală',         distance: '200m',  time: '3 min',  type: 'Cursuri',  coords: [47.169000, 27.583000] },
+  { id: 6,  name: 'Biblioteca UMF',                             distance: '80m',   time: '1 min',  type: 'Studiu',   coords: [47.169200, 27.581500] },
+  { id: 7,  name: 'Centrul de Simulare Clinică',                distance: '180m',  time: '3 min',  type: 'Cursuri',  coords: [47.167800, 27.582500] },
+  { id: 8,  name: 'Secretariat General',                        distance: '30m',   time: '1 min',  type: 'Admin',    coords: [47.168600, 27.582100] },
+  { id: 9,  name: 'Cămin Studențesc UMF',                       distance: '350m',  time: '5 min',  type: 'Camin',    coords: [47.170000, 27.583500] },
+  { id: 10, name: 'Spitalul Sf. Spiridon (clinică UMF)',        distance: '600m',  time: '8 min',  type: 'Clinică',  coords: [47.167000, 27.585000] },
+]
+
+export const UMF_IASI_POIS = [
+  { id: 1, name: 'Cantina UMF',           type: 'Cantina',    lat: 47.168300, lng: 27.582300, short: 'CAN', color: '#ea580c', desc: 'Cantina studențească UMF, meniu zilnic accesibil.', rating: 4.1, hours: 'L-V: 11:00-19:00' },
+  { id: 2, name: 'Cafenea Campus',         type: 'Cafenea',    lat: 47.168700, lng: 27.581800, short: 'CAF', color: '#92400e', desc: 'Cafenea în holul corpului principal.', rating: 4.3, hours: 'L-V: 08:00-18:00' },
+  { id: 3, name: 'Farmacie Universității', type: 'Farmacie',   lat: 47.168100, lng: 27.582600, short: 'RX',  color: '#22c55e', desc: 'Farmacie didactică UMF, studenți Farmacie au stagii aici.', rating: 4.5, hours: 'L-V: 08:00-18:00' },
+  { id: 4, name: 'ATM BRD campus',         type: 'ATM',        lat: 47.168500, lng: 27.581900, short: 'ATM', color: '#1d4ed8', desc: 'Bancomat la intrarea principală.', rating: null, hours: '24/7' },
+  { id: 5, name: 'Copisterie UMF',         type: 'Copisterie', lat: 47.168400, lng: 27.582400, short: 'PRN', color: '#475569', desc: 'Printare și copiere cursuri medicale.', rating: 4.2, hours: 'L-V: 08:00-17:00' },
+]
+
+export const UMF_IASI_IND_ROOMS = [
+  { id: 'secretariat-umf',  label: 'Secretariat',       floor: 0, rx: 40,  ry: 412, rw: 110, rh: 35, cx: 95  },
+  { id: 'amf-med-0',        label: 'Amf. Medicină 1',   floor: 0, rx: 170, ry: 412, rw: 100, rh: 35, cx: 220 },
+  { id: 'lab-anatomie',     label: 'Lab. Anatomie',     floor: 0, rx: 290, ry: 412, rw: 80,  rh: 35, cx: 330 },
+  { id: 'sala-med-0',       label: 'Sala M0-2',         floor: 0, rx: 390, ry: 412, rw: 80,  rh: 35, cx: 430 },
+  { id: 'lab-fiziopatol',   label: 'Lab. Fiziopatol.',  floor: 1, rx: 40,  ry: 309, rw: 90,  rh: 35, cx: 85  },
+  { id: 'lab-farmacol',     label: 'Lab. Farmacologie', floor: 1, rx: 300, ry: 309, rw: 90,  rh: 35, cx: 345 },
+  { id: 'lab-biochimie',    label: 'Lab. Biochimie',    floor: 2, rx: 150, ry: 221, rw: 90,  rh: 35, cx: 195 },
+  { id: 'sala-clinica',     label: 'Sală Clinică',      floor: 2, rx: 270, ry: 221, rw: 80,  rh: 35, cx: 310 },
+  { id: 'lab-simulare',     label: 'Lab. Simulare',     floor: 3, rx: 40,  ry: 133, rw: 100, rh: 35, cx: 90  },
+  { id: 'decanat-med',      label: 'Decanat Medicină',  floor: 3, rx: 300, ry: 133, rw: 80,  rh: 35, cx: 340 },
+  { id: 'sala-conf-umf',    label: 'Sală Conferințe',   floor: 4, rx: 80,  ry: 40,  rw: 200, rh: 40, cx: 180 },
+]
+
+export const UMF_IASI_IND_GRAPH = {
+  'secretariat-umf': ['amf-med-0', 'lab-anatomie', 'sala-med-0', 'stairs_0'],
+  'amf-med-0':       ['secretariat-umf', 'lab-anatomie', 'stairs_0'],
+  'lab-anatomie':    ['secretariat-umf', 'amf-med-0', 'sala-med-0', 'stairs_0'],
+  'sala-med-0':      ['secretariat-umf', 'lab-anatomie', 'stairs_0'],
+  stairs_0:          ['secretariat-umf', 'amf-med-0', 'lab-anatomie', 'sala-med-0', 'stairs_1'],
+  'lab-fiziopatol':  ['lab-farmacol', 'stairs_1'],
+  'lab-farmacol':    ['lab-fiziopatol', 'stairs_1'],
+  stairs_1:          ['lab-fiziopatol', 'lab-farmacol', 'stairs_0', 'stairs_2'],
+  'lab-biochimie':   ['sala-clinica', 'stairs_2'],
+  'sala-clinica':    ['lab-biochimie', 'stairs_2'],
+  stairs_2:          ['lab-biochimie', 'sala-clinica', 'stairs_1', 'stairs_3'],
+  'lab-simulare':    ['decanat-med', 'stairs_3'],
+  'decanat-med':     ['lab-simulare', 'stairs_3'],
+  stairs_3:          ['lab-simulare', 'decanat-med', 'stairs_2', 'stairs_4'],
+  'sala-conf-umf':   ['stairs_4'],
+  stairs_4:          ['sala-conf-umf', 'stairs_3'],
+}
+
+export const UMF_IASI_ROUTE_IDS = {
+  principal: '1', secretariat: '8',
+  medicina: '2',
+  dentara: '3', stomatologie: '3',
+  farmacie: '4',
+  bioinginerie: '5',
+  biblioteca: '6',
+  simulare: '7',
+  camin: '9',
+  spiridon: '10', spital: '10',
+}
+
+export const UMF_IASI_WALK_NODES = [
+  { id: 'principal',   coords: [47.168500, 27.582000] },
+  { id: 'dentara',     coords: [47.167500, 27.581800] },
+  { id: 'farmacie',    coords: [47.168200, 27.583200] },
+  { id: 'bioing',      coords: [47.169000, 27.583000] },
+  { id: 'biblioteca',  coords: [47.169200, 27.581500] },
+  { id: 'simulare',    coords: [47.167800, 27.582500] },
+  { id: 'camin',       coords: [47.170000, 27.583500] },
+  { id: 'spiridon',    coords: [47.167000, 27.585000] },
+  { id: 'jct-central', coords: [47.168400, 27.582300] },
+]
+
+export const UMF_IASI_WALK_EDGES = [
+  ['principal',   'jct-central'],
+  ['jct-central', 'dentara'],
+  ['jct-central', 'farmacie'],
+  ['jct-central', 'simulare'],
+  ['farmacie',    'bioing'],
+  ['bioing',      'camin'],
+  ['biblioteca',  'principal'],
+  ['biblioteca',  'bioing'],
+  ['simulare',    'spiridon'],
+]
+
+export const UMF_IASI_AI_DESTINATIONS = [
+  { label: 'Secretariat',    query: 'Unde este secretariatul UMF Iași?',           type: 'Admin'    },
+  { label: 'Decanat Med.',   query: 'Cum ajung la decanatul Facultății de Medicină?', type: 'Admin' },
+  { label: 'Lab. Anatomie',  query: 'Unde este laboratorul de anatomie?',           type: 'Sală'     },
+  { label: 'Biblioteca',     query: 'Cum ajung la biblioteca UMF?',                 type: 'Studiu'   },
+  { label: 'Farmacie',       query: 'Cum ajung la Facultatea de Farmacie?',         type: 'Facultate'},
+  { label: 'Dentară',        query: 'Cum ajung la Facultatea de Medicină Dentară?', type: 'Facultate'},
+  { label: 'Simulare',       query: 'Unde este Centrul de Simulare Clinică?',       type: 'Cursuri'  },
+  { label: 'Cămin',          query: 'Cum ajung la căminul UMF?',                   type: 'Cămin'    },
+  { label: 'Sf. Spiridon',   query: 'Cum ajung la Spitalul Sf. Spiridon?',         type: 'Clinică'  },
+  { label: 'Cantina',        query: 'Unde pot mânca pe campusul UMF Iași?',        type: 'Campus'   },
+]
+
+// ─── UMF București (Carol Davila) ─────────────────────────────────────────────
+export const UMF_BUC_CENTER = [44.447800, 26.092800]
+
+export const UMF_BUC_BUILDINGS = [
+  { id: 1,  name: 'Corp Principal – Str. Dionisie Lupu 37',     distance: '0m',    time: '-',      type: 'Admin',    coords: [44.447800, 26.092800] },
+  { id: 2,  name: 'Facultatea de Medicină',                     distance: '0m',    time: '-',      type: 'Cursuri',  coords: [44.447800, 26.092800] },
+  { id: 3,  name: 'Facultatea de Medicină Dentară – Calea Plevnei', distance: '900m', time: '12 min', type: 'Cursuri', coords: [44.440600, 26.086400] },
+  { id: 4,  name: 'Facultatea de Farmacie',                     distance: '200m',  time: '3 min',  type: 'Cursuri',  coords: [44.448500, 26.091500] },
+  { id: 5,  name: 'Biblioteca Centrală UMF',                    distance: '100m',  time: '2 min',  type: 'Studiu',   coords: [44.448200, 26.093200] },
+  { id: 6,  name: 'Centrul de Simulare și Formare',             distance: '150m',  time: '2 min',  type: 'Cursuri',  coords: [44.447200, 26.093500] },
+  { id: 7,  name: 'Secretariat General',                        distance: '30m',   time: '1 min',  type: 'Admin',    coords: [44.447900, 26.092900] },
+  { id: 8,  name: 'Spitalul Universitar de Urgență',            distance: '2.1km', time: '28 min', type: 'Clinică',  coords: [44.436000, 26.083000] },
+  { id: 9,  name: 'Spitalul Colentina (clinică UMF)',           distance: '3.5km', time: '-',      type: 'Clinică',  coords: [44.462000, 26.117000] },
+  { id: 10, name: 'Cămine Studențești – Str. Iconiei',          distance: '400m',  time: '5 min',  type: 'Camin',    coords: [44.450000, 26.095000] },
+]
+
+export const UMF_BUC_POIS = [
+  { id: 1, name: 'Cantina Carol Davila',    type: 'Cantina',    lat: 44.447600, lng: 26.092600, short: 'CAN', color: '#ea580c', desc: 'Cantina studențească UMF Carol Davila.', rating: 4.0, hours: 'L-V: 11:00-19:00' },
+  { id: 2, name: 'Cafenea Campus',          type: 'Cafenea',    lat: 44.448000, lng: 26.093000, short: 'CAF', color: '#92400e', desc: 'Cafenea în holul corpului principal.', rating: 4.2, hours: 'L-V: 08:00-18:00' },
+  { id: 3, name: 'Farmacie Didactică',      type: 'Farmacie',   lat: 44.448300, lng: 26.091700, short: 'RX',  color: '#22c55e', desc: 'Farmacie didactică – stagii pentru studenți la Farmacie.', rating: 4.6, hours: 'L-V: 08:00-18:00' },
+  { id: 4, name: 'ATM campus',              type: 'ATM',        lat: 44.447800, lng: 26.092500, short: 'ATM', color: '#1d4ed8', desc: 'Bancomat la intrarea principală.', rating: null, hours: '24/7' },
+  { id: 5, name: 'Copisterie Dionisie Lupu',type: 'Copisterie', lat: 44.447500, lng: 26.092000, short: 'PRN', color: '#475569', desc: 'Printare cursuri și materiale medicale.', rating: 4.3, hours: 'L-V: 08:00-17:00' },
+]
+
+export const UMF_BUC_IND_ROOMS = [
+  { id: 'secretariat-umfb', label: 'Secretariat',       floor: 0, rx: 40,  ry: 412, rw: 110, rh: 35, cx: 95  },
+  { id: 'amf-carol-0',      label: 'Amf. Carol I',      floor: 0, rx: 170, ry: 412, rw: 100, rh: 35, cx: 220 },
+  { id: 'lab-anat-buc',     label: 'Lab. Anatomie',     floor: 0, rx: 290, ry: 412, rw: 80,  rh: 35, cx: 330 },
+  { id: 'sala-med-buc',     label: 'Sala M0-1',         floor: 0, rx: 390, ry: 412, rw: 80,  rh: 35, cx: 430 },
+  { id: 'lab-fizio-buc',    label: 'Lab. Fiziologie',   floor: 1, rx: 40,  ry: 309, rw: 90,  rh: 35, cx: 85  },
+  { id: 'lab-farm-buc',     label: 'Lab. Farmacologie', floor: 1, rx: 300, ry: 309, rw: 90,  rh: 35, cx: 345 },
+  { id: 'lab-biochimic',    label: 'Lab. Biochimie',    floor: 2, rx: 150, ry: 221, rw: 90,  rh: 35, cx: 195 },
+  { id: 'sala-clin-buc',    label: 'Sală Clinică',      floor: 2, rx: 270, ry: 221, rw: 80,  rh: 35, cx: 310 },
+  { id: 'lab-sim-buc',      label: 'Lab. Simulare',     floor: 3, rx: 40,  ry: 133, rw: 100, rh: 35, cx: 90  },
+  { id: 'decanat-buc',      label: 'Decanat',           floor: 3, rx: 300, ry: 133, rw: 80,  rh: 35, cx: 340 },
+  { id: 'sala-conf-buc',    label: 'Sală Conferințe',   floor: 4, rx: 80,  ry: 40,  rw: 200, rh: 40, cx: 180 },
+]
+
+export const UMF_BUC_IND_GRAPH = {
+  'secretariat-umfb': ['amf-carol-0', 'lab-anat-buc', 'sala-med-buc', 'stairs_0'],
+  'amf-carol-0':      ['secretariat-umfb', 'lab-anat-buc', 'stairs_0'],
+  'lab-anat-buc':     ['secretariat-umfb', 'amf-carol-0', 'sala-med-buc', 'stairs_0'],
+  'sala-med-buc':     ['secretariat-umfb', 'lab-anat-buc', 'stairs_0'],
+  stairs_0:           ['secretariat-umfb', 'amf-carol-0', 'lab-anat-buc', 'sala-med-buc', 'stairs_1'],
+  'lab-fizio-buc':    ['lab-farm-buc', 'stairs_1'],
+  'lab-farm-buc':     ['lab-fizio-buc', 'stairs_1'],
+  stairs_1:           ['lab-fizio-buc', 'lab-farm-buc', 'stairs_0', 'stairs_2'],
+  'lab-biochimic':    ['sala-clin-buc', 'stairs_2'],
+  'sala-clin-buc':    ['lab-biochimic', 'stairs_2'],
+  stairs_2:           ['lab-biochimic', 'sala-clin-buc', 'stairs_1', 'stairs_3'],
+  'lab-sim-buc':      ['decanat-buc', 'stairs_3'],
+  'decanat-buc':      ['lab-sim-buc', 'stairs_3'],
+  stairs_3:           ['lab-sim-buc', 'decanat-buc', 'stairs_2', 'stairs_4'],
+  'sala-conf-buc':    ['stairs_4'],
+  stairs_4:           ['sala-conf-buc', 'stairs_3'],
+}
+
+export const UMF_BUC_ROUTE_IDS = {
+  principal: '1', secretariat: '7',
+  medicina: '2',
+  dentara: '3', stomatologie: '3',
+  farmacie: '4',
+  biblioteca: '5',
+  simulare: '6',
+  camin: '10',
+  spital: '8', universitar: '8',
+  colentina: '9',
+}
+
+export const UMF_BUC_WALK_NODES = [
+  { id: 'principal',   coords: [44.447800, 26.092800] },
+  { id: 'farmacie',    coords: [44.448500, 26.091500] },
+  { id: 'biblioteca',  coords: [44.448200, 26.093200] },
+  { id: 'simulare',    coords: [44.447200, 26.093500] },
+  { id: 'camin',       coords: [44.450000, 26.095000] },
+  { id: 'jct-central', coords: [44.447900, 26.092900] },
+]
+
+export const UMF_BUC_WALK_EDGES = [
+  ['principal',   'jct-central'],
+  ['jct-central', 'farmacie'],
+  ['jct-central', 'simulare'],
+  ['jct-central', 'biblioteca'],
+  ['biblioteca',  'camin'],
+  ['farmacie',    'biblioteca'],
+]
+
+export const UMF_BUC_AI_DESTINATIONS = [
+  { label: 'Secretariat',   query: 'Unde este secretariatul UMF Carol Davila?',        type: 'Admin'    },
+  { label: 'Decanat',       query: 'Cum ajung la decanatul Facultății de Medicină?',   type: 'Admin'    },
+  { label: 'Lab. Anatomie', query: 'Unde este laboratorul de anatomie?',               type: 'Sală'     },
+  { label: 'Biblioteca',    query: 'Cum ajung la biblioteca UMF Carol Davila?',        type: 'Studiu'   },
+  { label: 'Farmacie',      query: 'Cum ajung la Facultatea de Farmacie?',             type: 'Facultate'},
+  { label: 'Simulare',      query: 'Unde este Centrul de Simulare și Formare?',        type: 'Cursuri'  },
+  { label: 'Cămin',         query: 'Cum ajung la căminele de pe Str. Iconiei?',        type: 'Cămin'    },
+  { label: 'Cantina',       query: 'Unde pot mânca pe campusul Carol Davila?',         type: 'Campus'   },
+]
+
+// ─── UMF Târgu Mureș (George Emil Palade) ────────────────────────────────────
+export const UMF_TGM_CENTER = [46.538800, 24.559200]
+
+export const UMF_TGM_BUILDINGS = [
+  { id: 1,  name: 'Corp Principal – Str. Gh. Marinescu 38',     distance: '0m',    time: '-',      type: 'Admin',    coords: [46.538800, 24.559200] },
+  { id: 2,  name: 'Facultatea de Medicină',                     distance: '0m',    time: '-',      type: 'Cursuri',  coords: [46.538800, 24.559200] },
+  { id: 3,  name: 'Facultatea de Medicină Dentară',             distance: '100m',  time: '2 min',  type: 'Cursuri',  coords: [46.538200, 24.559800] },
+  { id: 4,  name: 'Facultatea de Farmacie',                     distance: '150m',  time: '2 min',  type: 'Cursuri',  coords: [46.539400, 24.558500] },
+  { id: 5,  name: 'Facultatea de Inginerie și IT',              distance: '300m',  time: '4 min',  type: 'Cursuri',  coords: [46.540000, 24.560000] },
+  { id: 6,  name: 'Biblioteca Universității',                   distance: '120m',  time: '2 min',  type: 'Studiu',   coords: [46.539200, 24.559800] },
+  { id: 7,  name: 'Spitalul Clinic Județean Mureș',             distance: '200m',  time: '3 min',  type: 'Clinică',  coords: [46.540000, 24.557000] },
+  { id: 8,  name: 'Secretariat',                                distance: '30m',   time: '1 min',  type: 'Admin',    coords: [46.538900, 24.559300] },
+  { id: 9,  name: 'Cămin Studențesc',                           distance: '400m',  time: '5 min',  type: 'Camin',    coords: [46.537500, 24.561000] },
+]
+
+export const UMF_TGM_POIS = [
+  { id: 1, name: 'Cantina UMF Târgu Mureș', type: 'Cantina',    lat: 46.538600, lng: 24.559000, short: 'CAN', color: '#ea580c', desc: 'Cantina studențească UMFST.', rating: 4.0, hours: 'L-V: 11:00-19:00' },
+  { id: 2, name: 'Cafenea Campus',           type: 'Cafenea',    lat: 46.538800, lng: 24.559400, short: 'CAF', color: '#92400e', desc: 'Cafenea în corpul principal.', rating: 4.1, hours: 'L-V: 08:00-18:00' },
+  { id: 3, name: 'Farmacie Campus',          type: 'Farmacie',   lat: 46.539100, lng: 24.558700, short: 'RX',  color: '#22c55e', desc: 'Farmacie didactică UMFST.', rating: 4.4, hours: 'L-V: 08:00-18:00' },
+  { id: 4, name: 'ATM campus',               type: 'ATM',        lat: 46.538700, lng: 24.559100, short: 'ATM', color: '#1d4ed8', desc: 'Bancomat la intrare.', rating: null, hours: '24/7' },
+]
+
+export const UMF_TGM_IND_ROOMS = [
+  { id: 'secretariat-tgm', label: 'Secretariat',       floor: 0, rx: 40,  ry: 412, rw: 110, rh: 35, cx: 95  },
+  { id: 'amf-med-tgm',     label: 'Amf. Medicină 1',   floor: 0, rx: 170, ry: 412, rw: 100, rh: 35, cx: 220 },
+  { id: 'lab-anat-tgm',    label: 'Lab. Anatomie',     floor: 0, rx: 290, ry: 412, rw: 80,  rh: 35, cx: 330 },
+  { id: 'sala-tgm-0',      label: 'Sala M0-1',         floor: 0, rx: 390, ry: 412, rw: 80,  rh: 35, cx: 430 },
+  { id: 'lab-fizio-tgm',   label: 'Lab. Fiziologie',   floor: 1, rx: 40,  ry: 309, rw: 90,  rh: 35, cx: 85  },
+  { id: 'lab-micro-tgm',   label: 'Lab. Microbiologie',floor: 1, rx: 300, ry: 309, rw: 90,  rh: 35, cx: 345 },
+  { id: 'lab-bioc-tgm',    label: 'Lab. Biochimie',    floor: 2, rx: 150, ry: 221, rw: 90,  rh: 35, cx: 195 },
+  { id: 'sala-clin-tgm',   label: 'Sală Clinică',      floor: 2, rx: 270, ry: 221, rw: 80,  rh: 35, cx: 310 },
+  { id: 'lab-sim-tgm',     label: 'Lab. Simulare',     floor: 3, rx: 40,  ry: 133, rw: 100, rh: 35, cx: 90  },
+  { id: 'decanat-tgm',     label: 'Decanat',           floor: 3, rx: 300, ry: 133, rw: 80,  rh: 35, cx: 340 },
+  { id: 'sala-conf-tgm',   label: 'Sală Conferințe',   floor: 4, rx: 80,  ry: 40,  rw: 200, rh: 40, cx: 180 },
+]
+
+export const UMF_TGM_IND_GRAPH = {
+  'secretariat-tgm': ['amf-med-tgm', 'lab-anat-tgm', 'sala-tgm-0', 'stairs_0'],
+  'amf-med-tgm':     ['secretariat-tgm', 'lab-anat-tgm', 'stairs_0'],
+  'lab-anat-tgm':    ['secretariat-tgm', 'amf-med-tgm', 'sala-tgm-0', 'stairs_0'],
+  'sala-tgm-0':      ['secretariat-tgm', 'lab-anat-tgm', 'stairs_0'],
+  stairs_0:          ['secretariat-tgm', 'amf-med-tgm', 'lab-anat-tgm', 'sala-tgm-0', 'stairs_1'],
+  'lab-fizio-tgm':   ['lab-micro-tgm', 'stairs_1'],
+  'lab-micro-tgm':   ['lab-fizio-tgm', 'stairs_1'],
+  stairs_1:          ['lab-fizio-tgm', 'lab-micro-tgm', 'stairs_0', 'stairs_2'],
+  'lab-bioc-tgm':    ['sala-clin-tgm', 'stairs_2'],
+  'sala-clin-tgm':   ['lab-bioc-tgm', 'stairs_2'],
+  stairs_2:          ['lab-bioc-tgm', 'sala-clin-tgm', 'stairs_1', 'stairs_3'],
+  'lab-sim-tgm':     ['decanat-tgm', 'stairs_3'],
+  'decanat-tgm':     ['lab-sim-tgm', 'stairs_3'],
+  stairs_3:          ['lab-sim-tgm', 'decanat-tgm', 'stairs_2', 'stairs_4'],
+  'sala-conf-tgm':   ['stairs_4'],
+  stairs_4:          ['sala-conf-tgm', 'stairs_3'],
+}
+
+export const UMF_TGM_ROUTE_IDS = {
+  principal: '1', secretariat: '8',
+  medicina: '2',
+  dentara: '3',
+  farmacie: '4',
+  inginerie: '5',
+  biblioteca: '6',
+  spital: '7', judetean: '7',
+  camin: '9',
+}
+
+export const UMF_TGM_WALK_NODES = [
+  { id: 'principal',   coords: [46.538800, 24.559200] },
+  { id: 'dentara',     coords: [46.538200, 24.559800] },
+  { id: 'farmacie',    coords: [46.539400, 24.558500] },
+  { id: 'inginerie',   coords: [46.540000, 24.560000] },
+  { id: 'biblioteca',  coords: [46.539200, 24.559800] },
+  { id: 'spital',      coords: [46.540000, 24.557000] },
+  { id: 'camin',       coords: [46.537500, 24.561000] },
+  { id: 'jct-central', coords: [46.538900, 24.559400] },
+]
+
+export const UMF_TGM_WALK_EDGES = [
+  ['principal',   'jct-central'],
+  ['jct-central', 'dentara'],
+  ['jct-central', 'farmacie'],
+  ['jct-central', 'biblioteca'],
+  ['farmacie',    'spital'],
+  ['biblioteca',  'inginerie'],
+  ['dentara',     'camin'],
+]
+
+export const UMF_TGM_AI_DESTINATIONS = [
+  { label: 'Secretariat',   query: 'Unde este secretariatul UMFST Târgu Mureș?',      type: 'Admin'    },
+  { label: 'Decanat',       query: 'Cum ajung la decanatul Facultății de Medicină?',   type: 'Admin'    },
+  { label: 'Lab. Anatomie', query: 'Unde este laboratorul de anatomie?',               type: 'Sală'     },
+  { label: 'Biblioteca',    query: 'Cum ajung la biblioteca universității?',           type: 'Studiu'   },
+  { label: 'Farmacie',      query: 'Cum ajung la Facultatea de Farmacie?',             type: 'Facultate'},
+  { label: 'Spital Județ.', query: 'Cum ajung la Spitalul Clinic Județean Mureș?',    type: 'Clinică'  },
+  { label: 'Cămin',         query: 'Cum ajung la căminul studențesc?',                type: 'Cămin'    },
+  { label: 'Cantina',       query: 'Unde pot mânca pe campusul UMFST?',               type: 'Campus'   },
+]
+
+// ─── UMF Craiova ──────────────────────────────────────────────────────────────
+export const UMF_CRAIOVA_CENTER = [44.330100, 23.796300]
+
+export const UMF_CRAIOVA_BUILDINGS = [
+  { id: 1,  name: 'Corp Principal – Str. Petru Rareș 2-4',      distance: '0m',    time: '-',      type: 'Admin',    coords: [44.330100, 23.796300] },
+  { id: 2,  name: 'Facultatea de Medicină',                     distance: '0m',    time: '-',      type: 'Cursuri',  coords: [44.330100, 23.796300] },
+  { id: 3,  name: 'Facultatea de Medicină Dentară',             distance: '100m',  time: '2 min',  type: 'Cursuri',  coords: [44.329500, 23.796800] },
+  { id: 4,  name: 'Facultatea de Farmacie',                     distance: '150m',  time: '2 min',  type: 'Cursuri',  coords: [44.330600, 23.795500] },
+  { id: 5,  name: 'Biblioteca UMF Craiova',                     distance: '80m',   time: '1 min',  type: 'Studiu',   coords: [44.330500, 23.796800] },
+  { id: 6,  name: 'Spitalul Clinic Județean de Urgență Craiova',distance: '400m',  time: '5 min',  type: 'Clinică',  coords: [44.326600, 23.797000] },
+  { id: 7,  name: 'Secretariat General',                        distance: '30m',   time: '1 min',  type: 'Admin',    coords: [44.330200, 23.796400] },
+  { id: 8,  name: 'Centru de Simulare Medicală',                distance: '200m',  time: '3 min',  type: 'Cursuri',  coords: [44.330800, 23.797200] },
+  { id: 9,  name: 'Cămine Studențești',                         distance: '350m',  time: '5 min',  type: 'Camin',    coords: [44.331500, 23.797500] },
+]
+
+export const UMF_CRAIOVA_POIS = [
+  { id: 1, name: 'Cantina UMF Craiova',  type: 'Cantina',    lat: 44.330000, lng: 23.796200, short: 'CAN', color: '#ea580c', desc: 'Cantina studențească UMF Craiova.', rating: 3.9, hours: 'L-V: 11:00-19:00' },
+  { id: 2, name: 'Cafenea Campus',        type: 'Cafenea',    lat: 44.330200, lng: 23.796500, short: 'CAF', color: '#92400e', desc: 'Cafenea în holul corpului principal.', rating: 4.0, hours: 'L-V: 08:00-18:00' },
+  { id: 3, name: 'Farmacie Didactică',    type: 'Farmacie',   lat: 44.330500, lng: 23.795700, short: 'RX',  color: '#22c55e', desc: 'Farmacie didactică pentru studenți.', rating: 4.3, hours: 'L-V: 08:00-18:00' },
+  { id: 4, name: 'ATM campus',            type: 'ATM',        lat: 44.330100, lng: 23.796100, short: 'ATM', color: '#1d4ed8', desc: 'Bancomat la intrarea principală.', rating: null, hours: '24/7' },
+]
+
+export const UMF_CRAIOVA_IND_ROOMS = [
+  { id: 'secretariat-cv',  label: 'Secretariat',       floor: 0, rx: 40,  ry: 412, rw: 110, rh: 35, cx: 95  },
+  { id: 'amf-med-cv',      label: 'Amf. Medicină 1',   floor: 0, rx: 170, ry: 412, rw: 100, rh: 35, cx: 220 },
+  { id: 'lab-anat-cv',     label: 'Lab. Anatomie',     floor: 0, rx: 290, ry: 412, rw: 80,  rh: 35, cx: 330 },
+  { id: 'sala-cv-0',       label: 'Sala M0-1',         floor: 0, rx: 390, ry: 412, rw: 80,  rh: 35, cx: 430 },
+  { id: 'lab-fizio-cv',    label: 'Lab. Fiziologie',   floor: 1, rx: 40,  ry: 309, rw: 90,  rh: 35, cx: 85  },
+  { id: 'lab-farm-cv',     label: 'Lab. Farmacologie', floor: 1, rx: 300, ry: 309, rw: 90,  rh: 35, cx: 345 },
+  { id: 'lab-bioc-cv',     label: 'Lab. Biochimie',    floor: 2, rx: 150, ry: 221, rw: 90,  rh: 35, cx: 195 },
+  { id: 'sala-clin-cv',    label: 'Sală Clinică',      floor: 2, rx: 270, ry: 221, rw: 80,  rh: 35, cx: 310 },
+  { id: 'lab-sim-cv',      label: 'Lab. Simulare',     floor: 3, rx: 40,  ry: 133, rw: 100, rh: 35, cx: 90  },
+  { id: 'decanat-cv',      label: 'Decanat',           floor: 3, rx: 300, ry: 133, rw: 80,  rh: 35, cx: 340 },
+  { id: 'sala-conf-cv',    label: 'Sală Conferințe',   floor: 4, rx: 80,  ry: 40,  rw: 200, rh: 40, cx: 180 },
+]
+
+export const UMF_CRAIOVA_IND_GRAPH = {
+  'secretariat-cv': ['amf-med-cv', 'lab-anat-cv', 'sala-cv-0', 'stairs_0'],
+  'amf-med-cv':     ['secretariat-cv', 'lab-anat-cv', 'stairs_0'],
+  'lab-anat-cv':    ['secretariat-cv', 'amf-med-cv', 'sala-cv-0', 'stairs_0'],
+  'sala-cv-0':      ['secretariat-cv', 'lab-anat-cv', 'stairs_0'],
+  stairs_0:         ['secretariat-cv', 'amf-med-cv', 'lab-anat-cv', 'sala-cv-0', 'stairs_1'],
+  'lab-fizio-cv':   ['lab-farm-cv', 'stairs_1'],
+  'lab-farm-cv':    ['lab-fizio-cv', 'stairs_1'],
+  stairs_1:         ['lab-fizio-cv', 'lab-farm-cv', 'stairs_0', 'stairs_2'],
+  'lab-bioc-cv':    ['sala-clin-cv', 'stairs_2'],
+  'sala-clin-cv':   ['lab-bioc-cv', 'stairs_2'],
+  stairs_2:         ['lab-bioc-cv', 'sala-clin-cv', 'stairs_1', 'stairs_3'],
+  'lab-sim-cv':     ['decanat-cv', 'stairs_3'],
+  'decanat-cv':     ['lab-sim-cv', 'stairs_3'],
+  stairs_3:         ['lab-sim-cv', 'decanat-cv', 'stairs_2', 'stairs_4'],
+  'sala-conf-cv':   ['stairs_4'],
+  stairs_4:         ['sala-conf-cv', 'stairs_3'],
+}
+
+export const UMF_CRAIOVA_ROUTE_IDS = {
+  principal: '1', secretariat: '7',
+  medicina: '2',
+  dentara: '3',
+  farmacie: '4',
+  biblioteca: '5',
+  spital: '6', judetean: '6',
+  simulare: '8',
+  camin: '9',
+}
+
+export const UMF_CRAIOVA_WALK_NODES = [
+  { id: 'principal',   coords: [44.330100, 23.796300] },
+  { id: 'dentara',     coords: [44.329500, 23.796800] },
+  { id: 'farmacie',    coords: [44.330600, 23.795500] },
+  { id: 'biblioteca',  coords: [44.330500, 23.796800] },
+  { id: 'simulare',    coords: [44.330800, 23.797200] },
+  { id: 'camin',       coords: [44.331500, 23.797500] },
+  { id: 'spital',      coords: [44.326600, 23.797000] },
+  { id: 'jct-central', coords: [44.330200, 23.796500] },
+]
+
+export const UMF_CRAIOVA_WALK_EDGES = [
+  ['principal',   'jct-central'],
+  ['jct-central', 'dentara'],
+  ['jct-central', 'farmacie'],
+  ['jct-central', 'biblioteca'],
+  ['jct-central', 'simulare'],
+  ['simulare',    'camin'],
+  ['dentara',     'spital'],
+]
+
+export const UMF_CRAIOVA_AI_DESTINATIONS = [
+  { label: 'Secretariat',   query: 'Unde este secretariatul UMF Craiova?',             type: 'Admin'    },
+  { label: 'Decanat',       query: 'Cum ajung la decanatul Facultății de Medicină?',   type: 'Admin'    },
+  { label: 'Lab. Anatomie', query: 'Unde este laboratorul de anatomie?',               type: 'Sală'     },
+  { label: 'Biblioteca',    query: 'Cum ajung la biblioteca UMF Craiova?',             type: 'Studiu'   },
+  { label: 'Farmacie',      query: 'Cum ajung la Facultatea de Farmacie?',             type: 'Facultate'},
+  { label: 'Spital județ.', query: 'Cum ajung la Spitalul Clinic Județean Craiova?',  type: 'Clinică'  },
+  { label: 'Simulare',      query: 'Unde este Centrul de Simulare Medicală?',          type: 'Cursuri'  },
+  { label: 'Cămin',         query: 'Cum ajung la căminele studențești?',               type: 'Cămin'    },
+  { label: 'Cantina',       query: 'Unde pot mânca pe campusul UMF Craiova?',          type: 'Campus'   },
+]
+
 // ─── Campus config – keyed by university ID ───────────────────────────────────
 export const CAMPUS_CONFIG = {
   tuiasi: {
@@ -379,5 +780,65 @@ export const CAMPUS_CONFIG = {
     greeting:        'Salut! Sunt asistentul tău de navigare pentru campusul UAIC. Cum te pot ajuta?',
     indoorLabel:     'Navigare interioară – Facultatea de Informatică FII',
     indoorDefault:   'secretariat-fii',
+  },
+  'umf-iasi': {
+    center:          UMF_IASI_CENTER,
+    buildings:       UMF_IASI_BUILDINGS,
+    pois:            UMF_IASI_POIS,
+    indRooms:        UMF_IASI_IND_ROOMS,
+    indGraph:        UMF_IASI_IND_GRAPH,
+    outdoorRouteIds: UMF_IASI_ROUTE_IDS,
+    walkNodes:       UMF_IASI_WALK_NODES,
+    walkEdges:       UMF_IASI_WALK_EDGES,
+    aiDestinations:  UMF_IASI_AI_DESTINATIONS,
+    name:            'UMF „Grigore T. Popa" Iași',
+    greeting:        'Salut! Sunt asistentul tău de navigare pentru campusul UMF Iași. Cum te pot ajuta?',
+    indoorLabel:     'Navigare interioară – Corp Principal UMF',
+    indoorDefault:   'secretariat-umf',
+  },
+  'umf-buc': {
+    center:          UMF_BUC_CENTER,
+    buildings:       UMF_BUC_BUILDINGS,
+    pois:            UMF_BUC_POIS,
+    indRooms:        UMF_BUC_IND_ROOMS,
+    indGraph:        UMF_BUC_IND_GRAPH,
+    outdoorRouteIds: UMF_BUC_ROUTE_IDS,
+    walkNodes:       UMF_BUC_WALK_NODES,
+    walkEdges:       UMF_BUC_WALK_EDGES,
+    aiDestinations:  UMF_BUC_AI_DESTINATIONS,
+    name:            'UMF „Carol Davila" București',
+    greeting:        'Salut! Sunt asistentul tău de navigare pentru campusul UMF Carol Davila. Cum te pot ajuta?',
+    indoorLabel:     'Navigare interioară – Corp Principal Carol Davila',
+    indoorDefault:   'secretariat-umfb',
+  },
+  'umf-tgm': {
+    center:          UMF_TGM_CENTER,
+    buildings:       UMF_TGM_BUILDINGS,
+    pois:            UMF_TGM_POIS,
+    indRooms:        UMF_TGM_IND_ROOMS,
+    indGraph:        UMF_TGM_IND_GRAPH,
+    outdoorRouteIds: UMF_TGM_ROUTE_IDS,
+    walkNodes:       UMF_TGM_WALK_NODES,
+    walkEdges:       UMF_TGM_WALK_EDGES,
+    aiDestinations:  UMF_TGM_AI_DESTINATIONS,
+    name:            'UMF „G.E. Palade" Târgu Mureș',
+    greeting:        'Salut! Sunt asistentul tău de navigare pentru campusul UMFST Târgu Mureș. Cum te pot ajuta?',
+    indoorLabel:     'Navigare interioară – Corp Principal UMFST',
+    indoorDefault:   'secretariat-tgm',
+  },
+  'umf-craiova': {
+    center:          UMF_CRAIOVA_CENTER,
+    buildings:       UMF_CRAIOVA_BUILDINGS,
+    pois:            UMF_CRAIOVA_POIS,
+    indRooms:        UMF_CRAIOVA_IND_ROOMS,
+    indGraph:        UMF_CRAIOVA_IND_GRAPH,
+    outdoorRouteIds: UMF_CRAIOVA_ROUTE_IDS,
+    walkNodes:       UMF_CRAIOVA_WALK_NODES,
+    walkEdges:       UMF_CRAIOVA_WALK_EDGES,
+    aiDestinations:  UMF_CRAIOVA_AI_DESTINATIONS,
+    name:            'UMF Craiova',
+    greeting:        'Salut! Sunt asistentul tău de navigare pentru campusul UMF Craiova. Cum te pot ajuta?',
+    indoorLabel:     'Navigare interioară – Corp Principal UMF Craiova',
+    indoorDefault:   'secretariat-cv',
   },
 }
