@@ -45,14 +45,14 @@ export function localVirtualAssistantAnswer(message, context = {}) {
     return {
       answer: context?.role === 'professor'
         ? 'Contul de profesor pastreaza profilul academic, cursurile publicate, orele de consultatii, cererile de licenta, cererile de recuperare si conversatiile cu studentii.'
-        : 'Contul de student foloseste emailul institutional, universitatea detectata, facultatea detectata si profilul din onboarding. Pentru demo, codul este 0000. Daca onboarding-ul apare din nou, completeaza-l o data si profilul ramane salvat local.',
+        : 'Contul de student foloseste emailul institutional, universitatea detectata, facultatea detectata si profilul din onboarding. Autentificarea foloseste un cod de 6 cifre din Google Authenticator. Daca onboarding-ul apare din nou, completeaza-l o data si profilul ramane salvat local.',
       suggestions: ['Cum functioneaza notificarile?', 'Unde sunt mesajele?', 'Cum schimb sectiunea?'],
     }
   }
 
   if (q.includes('parola') || q.includes('cod') || q.includes('login') || q.includes('logare') || q.includes('sign in')) {
     return {
-      answer: 'Pentru demo, autentificarea foloseste un email de tip institutional si codul 0000. Demo-ul de profesor foloseste mihai.ciobanu@academic.tuiasi.ro cu acelasi cod.',
+      answer: 'Autentificarea foloseste un email institutional si un cod de 6 cifre din Google Authenticator sau Authy. Codul se schimba la fiecare 30 de secunde.',
       suggestions: ['Ce poate face un student?', 'Ce poate face un profesor?'],
     }
   }
