@@ -11,9 +11,9 @@ async function post(endpoint, body) {
   return response.json()
 }
 
-export async function askNavigationAssistant(message, history = []) {
+export async function askNavigationAssistant(message, history = [], university = 'tuiasi') {
   try {
-    const data = await post('/assistant', { message, history })
+    const data = await post('/assistant', { message, history, university })
     return data.answer
   } catch {
     return localAssistantAnswer(message)
@@ -28,27 +28,27 @@ export async function askNavigationCopilot({ message, image, history = [], conte
   }
 }
 
-export async function analyzeNavigationPhoto({ base64, mimeType, university = 'tuiasi' }) {
+export async function analyzeNavigationPhoto({ base64, mimeType, university = 'tuiasi', coords = null }) {
   try {
-    const data = await post('/photo', { base64, mimeType, university })
+    const data = await post('/photo', { base64, mimeType, university, coords })
     return data.answer
   } catch {
     return 'Am primit poza. Serverul AI nu este disponibil momentan — descrie verbal locația sau destinația și te ajut cu navigația pe hartă.'
   }
 }
 
-export async function askRecoAssistant(message, history = []) {
+export async function askRecoAssistant(message, history = [], university = 'tuiasi') {
   try {
-    const data = await post('/reco-assistant', { message, history })
+    const data = await post('/assistant', { message, history, university })
     return data.answer
   } catch {
     return localRecoAnswer(message)
   }
 }
 
-export async function getNavigationRecommendations(scheduleItems = []) {
+export async function getNavigationRecommendations(scheduleItems = [], university = 'tuiasi') {
   try {
-    return await post('/recommendations', scheduleItems)
+    return await post('/recommendations', { ...scheduleItems, university })
   } catch {
     return {
       briefing: 'Recomandare locala: evita intervalele aglomerate si pleaca cu 8 minute inainte de urmatorul curs.',
@@ -69,33 +69,33 @@ function localRecoAnswer(message) {
   const n = message.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
 
   if (n.includes('mananc') || n.includes('mancar') || n.includes('cantina') || n.includes('restaurant') || n.includes('pranz')) {
-    return 'Pentru AC TUIASI, cea mai sigura recomandare este Cantina TUIASI din Campus Tudor Vladimirescu, Aleea Prof. Vasile Petrescu nr. 29. Programul oficial este L-V 11:00-19:00. Evita varful 12:00-13:30 si verifica harta pentru Google Maps sau Waze.'
+    return 'Cantina universitatii este optiunea cea mai accesibila pentru pranz. Programul obisnuit este L-V 11:00-19:00. Evita varful 12:00-13:30 si verifica harta din Campus Navigator pentru Google Maps sau Waze.'
   }
   if (n.includes('studiu') || n.includes('studiat') || n.includes('sala') || n.includes('biblioteca')) {
-    return 'Pentru studiu ai Biblioteca Gh. Asachi, biblioteca Facultatii AC si salile/laboratoarele libere din Corp C. In sesiune, foloseste Focus Forest din Focus pentru sesiuni fara schimbat tabul.'
+    return 'Pentru studiu ai biblioteca universitatii si salile/laboratoarele disponibile intre cursuri. In sesiune, foloseste Focus Forest din Focus pentru sesiuni concentrate.'
   }
   if (n.includes('secretariat') || n.includes('acte') || n.includes('adeverinta') || n.includes('deschis')) {
-    return 'Secretariatul AC este in Facultatea de Automatica si Calculatoare, Str. Prof. dr. doc. Dimitrie Mangeron nr. 27. Pentru program exact si acte, verifica pagina oficiala AC sau intreaba secretariatul inainte sa mergi.'
+    return 'Secretariatul are program L-V 09:00-13:00. Pentru acte si adeverinte, verifica pagina oficiala a facultatii sau suna inainte sa mergi.'
   }
   if (n.includes('cafea') || n.includes('cafenea') || n.includes('coffee')) {
-    return 'Pentru cafea si pauze rapide langa AC, verifica zonele din jurul Corp A/Corp C si Iulius Mall. In harta ai butoane Google Maps si Waze pentru reperele apropiate.'
+    return 'Verifica holul corpului principal sau zonele din jurul campusului pentru cafenele si automate de cafea. In harta ai butoane Google Maps si Waze pentru reperele apropiate.'
   }
-  if (n.includes('transport') || n.includes('ctp') || n.includes('tramvai') || n.includes('abonament')) {
-    return 'Pentru transport in Iasi, verifica CTP Iasi si abonamentele pentru studenti. Din Campus Tudor spre Mangeron ai conexiuni rapide si poti folosi Google Maps sau Waze din harta aplicatiei.'
+  if (n.includes('transport') || n.includes('tramvai') || n.includes('abonament') || n.includes('autobuz')) {
+    return 'Pentru transport urban verifica aplicatia operatorului local de transport sau Google Maps pentru rute si abonamente studenti.'
   }
   if (n.includes('reducere') || n.includes('discount') || n.includes('github') || n.includes('microsoft') || n.includes('jetbrains')) {
-    return 'In Student Life pastrez doar beneficii stabile: CTP Iasi, GitHub Student Pack, Microsoft 365 Education, JetBrains Student, Notion Student, Cantina/Campus TUIASI si CCOC. Linkurile nesigure au fost eliminate.'
+    return 'Beneficii stabile pentru studenti: GitHub Student Pack, Microsoft 365 Education, JetBrains Student, Notion Student. Gasesti linkuri in sectiunea Student Life.'
   }
-  if (n.includes('eveniment') || n.includes('comunitate') || n.includes('voluntar') || n.includes('club') || n.includes('lsac')) {
-    return 'Pentru AC TUIASI, cele mai relevante comunitati sunt LSAC Iasi, CCOC TUIASI, grupurile de practica AC, grupurile de studiu si proiectele tehnice intre studenti.'
+  if (n.includes('eveniment') || n.includes('comunitate') || n.includes('voluntar') || n.includes('club')) {
+    return 'Comunitatile studentesti si ligile din facultate organizeaza hackathoane, workshop-uri si proiecte. Verifica avizierul facultatii si grupurile oficiale.'
   }
   if (n.includes('wifi') || n.includes('internet') || n.includes('eduroam')) {
-    return 'Pentru internet foloseste reteaua academica disponibila in TUIASI si contul institutional. Daca nu merge, verifica instructiunile DICD/TUIASI sau cere suport IT.'
+    return 'Foloseste reteaua eduroam disponibila in cladirile universitatii cu contul institutional. Pentru probleme de conectare, contacteaza suportul IT al universitatii.'
   }
   if (n.includes('cazare') || n.includes('camin') || n.includes('chirie')) {
-    return 'Caminele TUIASI sunt in Campus Tudor Vladimirescu. In Campus Navigator ai grupari de camine si butoane Google Maps/Waze pentru orientare.'
+    return 'Caminele universitare sunt in campus sau in apropierea facultatii. In Campus Navigator ai locatiile caminelor cu butoane Google Maps/Waze.'
   }
-  return 'Te pot ajuta cu viata de student la AC TUIASI: cantina, camine, transport, reduceri stabile, practica, comunitati, evenimente, locuri de studiu si Focus Forest.'
+  return 'Te pot ajuta cu viata de student: cantina, camine, transport, reduceri stabile, comunitati, evenimente si locuri de studiu.'
 }
 
 function localAssistantAnswer(message) {
@@ -154,6 +154,51 @@ function localCopilotAnswer(message, image, university = 'tuiasi') {
       detectedLocation: { type: hasImage ? 'outdoor' : 'unknown', label: hasImage ? 'Campus UAIC – Bd. Carol I' : 'Fara poza', building: hasImage ? 'FII UAIC' : null, room: null, confidence: hasImage ? 0.68 : 0 },
       destination: { type: 'unknown', label: null, room: null, buildingId: null },
       actions: [hasImage ? 'Tell me your destination: Secretariat FII, Lab Info, BCU Library or Cantina.' : 'Type your destination, e.g. Secretariat FII or BCU.', 'If you are in a corridor, send a photo of the room door or floor sign.'],
+      routeSuggestion: { type: 'none', from: null, to: null },
+    }
+  }
+
+  if (university.startsWith('umf-')) {
+    const UMF_SECRETARIAT = { 'umf-iasi': 'secretariat-umf', 'umf-buc': 'secretariat-umfb', 'umf-tgm': 'secretariat-tgm', 'umf-craiova': 'secretariat-cv' }
+    const UMF_AMF = { 'umf-iasi': 'amf-med-0', 'umf-buc': 'amf-carol-0', 'umf-tgm': 'amf-med-tgm', 'umf-craiova': 'amf-med-cv' }
+    const UMF_ANAT = { 'umf-iasi': 'lab-anatomie', 'umf-buc': 'lab-anat-buc', 'umf-tgm': 'lab-anat-tgm', 'umf-craiova': 'lab-anat-cv' }
+    const UMF_DECANAT = { 'umf-iasi': 'decanat-med', 'umf-buc': 'decanat-buc', 'umf-tgm': 'decanat-tgm', 'umf-craiova': 'decanat-cv' }
+    const defaultSecretariat = UMF_SECRETARIAT[university] || 'secretariat-umf'
+
+    const wantsSecretariat = normalized.includes('secretariat')
+    const wantsAnatomie = normalized.includes('anatomie')
+    const wantsDecanat = normalized.includes('decanat')
+    const wantsAmf = normalized.includes('amfiteatru') || normalized.includes('amf')
+    const to = wantsDecanat ? UMF_DECANAT[university] : wantsAnatomie ? UMF_ANAT[university] : wantsAmf ? UMF_AMF[university] : wantsSecretariat ? defaultSecretariat : null
+
+    if (to) {
+      return {
+        answer: hasImage
+          ? `Am preluat poza. Te pozitionez in corpul principal si pot trasa ruta interioara spre ${to}.`
+          : `Pot trasa ruta interioara spre ${to}.`,
+        detectedLocation: { type: 'indoor', label: 'Corp Principal', building: university.toUpperCase(), room: defaultSecretariat, confidence: hasImage ? 0.72 : 0.58 },
+        destination: { type: 'indoor', label: to, room: to, buildingId: null },
+        actions: ['Check the floor indicator near the stairs.', 'Follow the route marked on the indoor map.', 'Ask at the secretariat if you cannot find the room.'],
+        routeSuggestion: { type: 'indoor', from: defaultSecretariat, to },
+      }
+    }
+
+    if (normalized.includes('biblioteca') || normalized.includes('cantina') || normalized.includes('dentara') || normalized.includes('farmacie') || normalized.includes('camin')) {
+      const to = normalized.includes('biblioteca') ? 'biblioteca' : normalized.includes('cantina') ? 'principal' : normalized.includes('dentara') ? 'dentara' : normalized.includes('farmacie') ? 'farmacie' : 'camin'
+      return {
+        answer: 'Am gasit destinatia si pot porni ghidarea pe harta campusului.',
+        detectedLocation: { type: 'outdoor', label: hasImage ? 'Corp Principal' : 'Campus', building: hasImage ? university.toUpperCase() : null, room: null, confidence: hasImage ? 0.68 : 0.5 },
+        destination: { type: 'outdoor', label: to, room: null, buildingId: to },
+        actions: ['Head towards the main campus path.', 'Avoid crowded areas during class breaks.', 'Open the map for the full route.'],
+        routeSuggestion: { type: 'outdoor', from: 'principal', to },
+      }
+    }
+
+    return {
+      answer: hasImage ? 'Recunosc zona: poza pare sa fie din campusul universitatii. Unde vrei sa ajungi de aici?' : localAssistantAnswer(message),
+      detectedLocation: { type: hasImage ? 'outdoor' : 'unknown', label: hasImage ? 'Campus' : 'Fara poza', building: hasImage ? university.toUpperCase() : null, room: null, confidence: hasImage ? 0.68 : 0 },
+      destination: { type: 'unknown', label: null, room: null, buildingId: null },
+      actions: [hasImage ? 'Tell me your destination: Secretariat, Lab Anatomie, Biblioteca or Cantina.' : 'Type your destination, e.g. Secretariat or Biblioteca.', 'If you are in a corridor, send a photo of the room door or floor sign.'],
       routeSuggestion: { type: 'none', from: null, to: null },
     }
   }

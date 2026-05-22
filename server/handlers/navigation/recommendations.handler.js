@@ -1,8 +1,9 @@
-import { TEXT_MODEL, SYSTEM_PROMPT } from '../navigation.constants.js'
+import { TEXT_MODEL, getSystemPrompt } from '../navigation.constants.js'
 import { grokChat, readJson, sendJson } from '../navigation.http.js'
 
 async function handleRecommendations(req, res) {
   const body = await readJson(req)
+  const university = String(body.university || 'tuiasi').toLowerCase()
   const hour = Number.isFinite(Number(body.hour)) ? Number(body.hour) : new Date().getHours()
   const totalUsers = Number.isFinite(Number(body.totalUsers)) ? Number(body.totalUsers) : 0
   const crowdLevel = totalUsers === 0 ? 'necunoscut' : totalUsers < 80 ? 'scazut' : totalUsers < 160 ? 'moderat' : 'ridicat'
@@ -46,7 +47,7 @@ async function handleRecommendations(req, res) {
     const raw = await grokChat({
       model: TEXT_MODEL,
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: getSystemPrompt(university) },
         {
           role: 'user',
           content: `Ora curenta: ${hour}:00 (${timeSlot}). Trafic campus: ${crowdLevel} (${totalUsers} studenti activi).

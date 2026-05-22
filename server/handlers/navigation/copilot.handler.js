@@ -1,6 +1,13 @@
 import { TEXT_MODEL, VISION_MODEL, getSystemPrompt, COPILOT_JSON_SCHEMA, safeJson, normalizeCopilotPayload, inferIndoorRoom, inferOutdoorBuilding, withImageOnlyPrompt, applyVisualLocation, knownRooms, knownBuildings } from '../navigation.constants.js'
 import { grokChat, readJson, sendJson } from '../navigation.http.js'
-import { PHOTO_PROMPT_UAIC, PHOTO_PROMPT_TUIASI } from './prompts.js'
+import {
+  PHOTO_PROMPT_UAIC,
+  PHOTO_PROMPT_TUIASI,
+  PHOTO_PROMPT_UMF_IASI,
+  PHOTO_PROMPT_UMF_BUC,
+  PHOTO_PROMPT_UMF_TGM,
+  PHOTO_PROMPT_UMF_CRAIOVA,
+} from './prompts.js'
 import { asArray, asObject, asString } from '../navigation.validation.js'
 
 async function handleCopilot(req, res) {
@@ -13,8 +20,9 @@ async function handleCopilot(req, res) {
 
   const indoorRooms = knownRooms(university)
   const outdoorBuildings = knownBuildings(university)
-  const defaultStart = university === 'uaic' ? 'secretariat-fii' : 'secretariat-ac'
-  const outdoorDefaultStart = university === 'uaic' ? 'fii' : 'corp-c'
+  const UMF_DEFAULT_STARTS = { 'umf-iasi': 'secretariat-umf', 'umf-buc': 'secretariat-umfb', 'umf-tgm': 'secretariat-tgm', 'umf-craiova': 'secretariat-cv' }
+  const defaultStart = university === 'uaic' ? 'secretariat-fii' : (UMF_DEFAULT_STARTS[university] ?? 'secretariat-ac')
+  const outdoorDefaultStart = university === 'uaic' ? 'fii' : university.startsWith('umf-') ? 'principal' : 'corp-c'
   const sysPrompt = getSystemPrompt(university)
 
   if (image?.base64 && !visualAnswer) {
@@ -27,7 +35,7 @@ async function handleCopilot(req, res) {
             { type: 'image_url', image_url: { url: `data:${image.mimeType || 'image/jpeg'};base64,${image.base64}` } },
             {
               type: 'text',
-              text: `${university === 'uaic' ? PHOTO_PROMPT_UAIC : PHOTO_PROMPT_TUIASI}
+              text: `${{ uaic: PHOTO_PROMPT_UAIC, tuiasi: PHOTO_PROMPT_TUIASI, 'umf-iasi': PHOTO_PROMPT_UMF_IASI, 'umf-buc': PHOTO_PROMPT_UMF_BUC, 'umf-tgm': PHOTO_PROMPT_UMF_TGM, 'umf-craiova': PHOTO_PROMPT_UMF_CRAIOVA }[university] ?? PHOTO_PROMPT_TUIASI}
 
 Dacă poți identifica o locație interioară (coridor, sală, panou de etaj, ușă cu număr), menționează etajul sau sala.
 Dacă poza e neclară sau nu conține indicii suficiente, spune explicit că nu poți identifica locația în loc să ghicești.
@@ -44,14 +52,14 @@ Dacă există un mesaj de la student care indică o destinație, ține cont de e
 Analiza vizuala preliminara: ${visualAnswer || 'Nu exista poza atasata.'}
 
 Context cunoscut:
-- Campus: ${context.campus || (university === 'uaic' ? 'UAIC Iași' : 'TUIASI Gheorghe Asachi')}
+- Campus: ${context.campus || university.toUpperCase()}
 - Universitate: ${university.toUpperCase()}
 - Sali indoor disponibile: ${JSON.stringify(indoorRooms)}
 - Cladiri outdoor disponibile: ${JSON.stringify(outdoorBuildings)}
 - Orar apropiat: ${JSON.stringify(context.schedule || [])}
 - Ora curenta: ${context.currentTime || new Date().toISOString()}
 
-Comporta-te ca AI Compass pentru StudentCompass. Foloseste analiza vizuala preliminara ca sursa principala pentru locatie. Daca exista poza si nu exista destinatie in mesaj, recunoaste zona si intreaba explicit unde vrea studentul sa ajunga. Daca utilizatorul cere C210, C308, C112, secretariat sau alta sala cunoscuta, propune ruta indoor. Daca cere biblioteca, cantina, Corp A, Corp C sau oricare facultate TUIASI listata in cladirile outdoor, propune ruta outdoor.
+Comporta-te ca AI Compass pentru StudentCompass. Foloseste analiza vizuala preliminara ca sursa principala pentru locatie. Daca exista poza si nu exista destinatie in mesaj, recunoaste zona si intreaba explicit unde vrea studentul sa ajunga. Daca utilizatorul cere o sala cunoscuta din lista de sali indoor, propune ruta indoor. Daca cere o cladire cunoscuta din lista de cladiri outdoor, propune ruta outdoor.
 
 Raspunde strict cu JSON valid in schema:
 ${COPILOT_JSON_SCHEMA}
