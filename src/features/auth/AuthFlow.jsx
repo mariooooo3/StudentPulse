@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Compass, Mail, ArrowRight, Check, Loader2, Shield, ChevronLeft, Zap, GraduationCap } from 'lucide-react'
+import { Compass, Mail, ArrowRight, Check, Loader2, Shield, ChevronLeft, GraduationCap } from 'lucide-react'
 import { UNIVERSITIES } from '../../shared/config/universities'
 import { useAuth } from '../../app/providers/AuthContext'
 import { createUserId, getUserProfile } from '../../shared/services/auth.service'
@@ -131,12 +131,6 @@ function EmailStep({ university, email, setEmail, accessCode, setAccessCode, err
         {loading ? 'Se trimite...' : 'Continuă'}
       </button>
 
-      <button
-        onClick={onDemoSkip}
-        className="w-full flex items-center justify-center gap-2 text-[12px] text-slate-700 hover:text-slate-400 text-center transition-colors py-1"
-      >
-        <Zap size={12} strokeWidth={2} /> Skip pentru demo
-      </button>
     </div>
   )
 }
