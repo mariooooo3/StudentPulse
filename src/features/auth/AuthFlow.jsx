@@ -1,265 +1,20 @@
 import { useState } from 'react'
 import { Compass, Mail, ArrowRight, Check, Loader2, Shield, ChevronLeft, GraduationCap } from 'lucide-react'
 import { UNIVERSITIES } from '../../shared/config/universities'
+import UniversityGrid from './components/UniversityGrid'
+import VerifyingStep from './components/VerifyingStep'
+import ConfirmedStep from './components/ConfirmedStep'
+import ProfessorLogin from './components/ProfessorLogin'
+import EmailStep from './components/EmailStep'
 import { useAuth } from '../../app/providers/AuthContext'
 import { createUserId, getUserProfile } from '../../shared/services/auth.service'
 import { DEMO_PROFESSOR } from '../../shared/services/professorPortal.service'
+import { STEP, STEP_LABELS } from './auth.constants'
+import { buildUniversityEmail, verifyTotpCode } from './auth.utils'
 import clsx from 'clsx'
 
-const STEP = { SELECT_UNI: 0, ENTER_EMAIL: 1, VERIFYING: 2, CONFIRMED: 3 }
 const TUIASI = UNIVERSITIES.find(u => u.id === 'tuiasi')
 const AC_FACULTY = TUIASI?.faculties.find(f => f.code === 'AC')
-
-function UniversityGrid({ onSelect }) {
-  const [search, setSearch] = useState('')
-  const filtered = UNIVERSITIES.filter(u =>
-    u.name.toLowerCase().includes(search.toLowerCase()) ||
-    u.city.toLowerCase().includes(search.toLowerCase()) ||
-    u.shortName.toLowerCase().includes(search.toLowerCase())
-  )
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2.5 focus-within:border-white/[0.14] transition-colors">
-        <Mail size={13} className="text-slate-600 shrink-0" strokeWidth={1.75} />
-        <input
-          autoFocus
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Caută universitatea ta..."
-          className="bg-transparent text-[13px] text-slate-300 placeholder-slate-700 outline-none flex-1 font-medium"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
-        {filtered.map(u => (
-          <button
-            key={u.id}
-            onClick={() => onSelect(u)}
-            className="flex items-center gap-3 px-3 py-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] hover:border-white/[0.1] text-left transition-all duration-150 group"
-          >
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0"
-              style={{ background: u.color + '22', border: `1.5px solid ${u.color}40` }}
-            >
-              <span style={{ color: u.color }}>{u.avatar}</span>
-            </div>
-            <div className="min-w-0">
-              <p className="text-[12px] font-semibold text-slate-300 group-hover:text-white truncate transition-colors">{u.shortName}</p>
-              <p className="text-[10px] text-slate-600 truncate">{u.city}</p>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function EmailStep({ university, email, setEmail, accessCode, setAccessCode, error, onSubmit, onDemoSkip, loading }) {
-  return (
-    <div className="space-y-4">
-      <div
-        className="flex items-center gap-3 px-4 py-3 rounded-xl border"
-        style={{ background: university.color + '10', borderColor: university.color + '30' }}
-      >
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold"
-          style={{ background: university.color + '25', color: university.color }}>
-          {university.avatar}
-        </div>
-        <div>
-          <p className="text-[13px] font-semibold text-slate-200">{university.shortName}</p>
-          <p className="text-[11px] text-slate-500">{university.city}</p>
-        </div>
-        <Shield size={13} className="ml-auto text-slate-700" strokeWidth={1.75} />
-      </div>
-
-      <div>
-        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block mb-2">
-          Email instituțional
-        </label>
-        <div className="flex items-center bg-white/[0.03] border border-white/[0.07] rounded-xl overflow-hidden focus-within:border-white/[0.15] transition-colors">
-          <Mail size={13} className="text-slate-600 ml-4 shrink-0" strokeWidth={1.75} />
-          <input
-            autoFocus
-            type="text"
-            value={email}
-            onChange={e => setEmail(e.target.value.replace(/@.*/, ''))}
-            onKeyDown={e => e.key === 'Enter' && onSubmit()}
-            placeholder="prenume.nume"
-            className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none font-medium"
-          />
-          <span className="pr-4 text-[12px] text-slate-600 shrink-0 font-mono">@{university.emailDomain}</span>
-        </div>
-        <p className="text-[11px] text-slate-700 mt-1.5 pl-1">
-          Folosim email-ul instituțional pentru a detecta automat facultatea ta.
-        </p>
-      </div>
-
-      <div>
-        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block mb-2">
-          Cod institutional
-        </label>
-        <div className="flex items-center bg-white/[0.03] border border-white/[0.07] rounded-xl overflow-hidden focus-within:border-white/[0.15] transition-colors">
-          <Shield size={13} className="text-slate-600 ml-4 shrink-0" strokeWidth={1.75} />
-          <input
-            type="password"
-            inputMode="numeric"
-            maxLength={6}
-            value={accessCode}
-            onChange={e => setAccessCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            onKeyDown={e => e.key === 'Enter' && onSubmit()}
-            placeholder="000000"
-            className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none tracking-[0.35em] font-mono"
-          />
-        </div>
-        <p className="text-[11px] text-slate-700 mt-1.5 pl-1">
-          Cod de 6 cifre din aplicația de autentificare (Google Authenticator, Authy).
-        </p>
-        {error && <p className="text-[11px] text-red-400 mt-1.5 pl-1">{error}</p>}
-      </div>
-
-      <button
-        onClick={onSubmit}
-        disabled={!email.trim() || accessCode.length !== 6 || loading}
-        className={clsx(
-          'w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-[13px] transition-all duration-200',
-          email.trim() && accessCode.length === 6 && !loading
-            ? 'bg-indigo-600 hover:bg-indigo-500 text-white active:scale-[0.98] shadow-[0_0_0_1px_rgba(99,102,241,0.3)]'
-            : 'bg-white/[0.03] text-slate-600 cursor-not-allowed border border-white/[0.06]',
-        )}
-      >
-        {loading ? <Loader2 size={15} className="animate-spin" /> : <ArrowRight size={15} />}
-        {loading ? 'Se trimite...' : 'Continuă'}
-      </button>
-
-    </div>
-  )
-}
-
-function ProfessorLogin({ email, setEmail, accessCode, setAccessCode, error, onSubmit, loading }) {
-  return (
-    <div className="space-y-4">
-      <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
-        <p className="text-[13px] font-semibold text-amber-200">{DEMO_PROFESSOR.name}</p>
-        <p className="text-[11px] text-amber-200/70 mt-0.5">{DEMO_PROFESSOR.facultyName} – TUIASI</p>
-      </div>
-
-      <div>
-        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block mb-2">Email profesor</label>
-        <div className="flex items-center bg-white/[0.03] border border-white/[0.07] rounded-xl overflow-hidden focus-within:border-white/[0.15] transition-colors">
-          <Mail size={13} className="text-slate-600 ml-4 shrink-0" strokeWidth={1.75} />
-          <input
-            autoFocus
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && onSubmit()}
-            className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none font-medium"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block mb-2">Cod cont facultate</label>
-        <div className="flex items-center bg-white/[0.03] border border-white/[0.07] rounded-xl overflow-hidden focus-within:border-white/[0.15] transition-colors">
-          <Shield size={13} className="text-slate-600 ml-4 shrink-0" strokeWidth={1.75} />
-          <input
-            type="password"
-            inputMode="numeric"
-            maxLength={6}
-            value={accessCode}
-            onChange={e => setAccessCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            onKeyDown={e => e.key === 'Enter' && onSubmit()}
-            placeholder="000000"
-            className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none tracking-[0.35em] font-mono"
-          />
-        </div>
-        <p className="text-[11px] text-slate-700 mt-1.5 pl-1">
-          Cod de 6 cifre din Google Authenticator pentru <span className="text-slate-500 font-mono">{DEMO_PROFESSOR.email}</span>
-        </p>
-        {error && <p className="text-[11px] text-red-400 mt-1.5 pl-1">{error}</p>}
-      </div>
-
-      <button
-        onClick={onSubmit}
-        disabled={!email.trim() || accessCode.length !== 6 || loading}
-        className={clsx(
-          'w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-[13px] transition-all duration-200',
-          email.trim() && accessCode.length === 6 && !loading
-            ? 'bg-amber-600 hover:bg-amber-500 text-white active:scale-[0.98]'
-            : 'bg-white/[0.03] text-slate-600 cursor-not-allowed border border-white/[0.06]',
-        )}
-      >
-        {loading ? <Loader2 size={15} className="animate-spin" /> : <ArrowRight size={15} />}
-        Intra in portalul profesorului
-      </button>
-    </div>
-  )
-}
-
-function VerifyingStep({ email, university }) {
-  return (
-    <div className="text-center py-6 space-y-6">
-      <div className="relative w-16 h-16 mx-auto">
-        <div className="absolute inset-0 rounded-full border border-indigo-500/20 animate-ping" />
-        <div className="relative w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center">
-          <Loader2 size={24} className="text-indigo-400 animate-spin" strokeWidth={1.75} />
-        </div>
-      </div>
-      <div>
-        <p className="text-[15px] font-bold text-white mb-1">Se verifică identitatea...</p>
-        <p className="text-[12px] text-slate-500 font-mono">
-          {email}@{university.emailDomain}
-        </p>
-      </div>
-      <div className="space-y-2.5 text-left bg-white/[0.03] border border-white/[0.05] rounded-xl p-4">
-        {[
-          { label: 'Validare email instituțional', done: true },
-          { label: 'Detectare facultate din baza de date', done: true },
-          { label: 'Creare profil personalizat', done: false },
-        ].map((s, i) => (
-          <div key={i} className="flex items-center gap-3 text-[13px]">
-            {s.done
-              ? <Check size={13} className="text-emerald-400 shrink-0" strokeWidth={2} />
-              : <Loader2 size={13} className="text-indigo-400 animate-spin shrink-0" strokeWidth={1.75} />}
-            <span className={s.done ? 'text-slate-400' : 'text-slate-600'}>{s.label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function ConfirmedStep({ university, detectedFaculty, onContinue, isReturning }) {
-  return (
-    <div className="text-center space-y-5">
-      <div className="w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center mx-auto">
-        <Check size={24} className="text-emerald-400" strokeWidth={2} />
-      </div>
-      <div>
-        <p className="text-[17px] font-bold text-white mb-3">
-          {isReturning ? 'Bun venit înapoi!' : 'Bun venit la StudentCompass!'}
-        </p>
-        <div
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-[12px] font-semibold"
-          style={{ background: university.color + '12', borderColor: university.color + '35', color: university.color }}
-        >
-          <span>{university.shortName}</span>
-        </div>
-      </div>
-      <p className="text-[13px] text-slate-500 leading-relaxed">
-        {isReturning
-          ? 'Am găsit profilul tău. Totul e gata — poți intra direct în cont.'
-          : 'Am detectat profilul tău universitar. Urmează câteva întrebări rapide ca să personalizăm experiența în funcție de facultatea și nevoile tale.'}
-      </p>
-      <button
-        onClick={onContinue}
-        className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-[13px] transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_0_1px_rgba(99,102,241,0.3)]"
-      >
-        {isReturning ? 'Intră în cont' : 'Începe setup-ul profilului'} <ArrowRight size={15} />
-      </button>
-    </div>
-  )
-}
 
 export default function AuthFlow() {
   const { login } = useAuth()
@@ -279,12 +34,7 @@ export default function AuthFlow() {
   async function handleEmailSubmit() {
     setAccessCodeError(''); setLoading(true)
     try {
-      const res = await fetch('/api/auth/verify-totp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: accessCode }),
-      })
-      const { valid } = await res.json()
+      const valid = await verifyTotpCode(accessCode)
       if (!valid) { setAccessCodeError('Cod invalid sau expirat. Verifică aplicația de autentificare.'); setLoading(false); return }
     } catch {
       setAccessCodeError('Eroare de conexiune. Încearcă din nou.'); setLoading(false); return
@@ -292,7 +42,7 @@ export default function AuthFlow() {
     setStep(STEP.VERIFYING)
     await new Promise(r => setTimeout(r, 2600))
     setDetectedFaculty(null)
-    const fullEmail = email ? `${email}@${university.emailDomain}` : `student@${university.emailDomain}`
+    const fullEmail = buildUniversityEmail(email, university.emailDomain)
     setIsReturning(!!getUserProfile(fullEmail))
     setLoading(false); setStep(STEP.CONFIRMED)
   }
@@ -301,7 +51,7 @@ export default function AuthFlow() {
     setAccessCodeError(''); setLoading(true); setStep(STEP.VERIFYING)
     await new Promise(r => setTimeout(r, 2600))
     setDetectedFaculty(null)
-    const fullEmail = email ? `${email}@${university.emailDomain}` : `student@${university.emailDomain}`
+    const fullEmail = buildUniversityEmail(email, university.emailDomain)
     setIsReturning(!!getUserProfile(fullEmail))
     setLoading(false); setStep(STEP.CONFIRMED)
   }
@@ -310,7 +60,7 @@ export default function AuthFlow() {
     login({
       role: 'student',
       userId: createUserId('mock'),
-      email: email ? `${email}@${university.emailDomain}` : `student@${university.emailDomain}`,
+      email: buildUniversityEmail(email, university.emailDomain),
       university, detectedFaculty, isNewUser: true,
     })
   }
@@ -322,12 +72,7 @@ export default function AuthFlow() {
     }
     setAccessCodeError(''); setLoading(true)
     try {
-      const res = await fetch('/api/auth/verify-totp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: accessCode }),
-      })
-      const { valid } = await res.json()
+      const valid = await verifyTotpCode(accessCode)
       if (!valid) { setAccessCodeError('Cod invalid sau expirat. Verifică aplicația de autentificare.'); setLoading(false); return }
     } catch {
       setAccessCodeError('Eroare de conexiune. Încearcă din nou.'); setLoading(false); return
@@ -351,8 +96,6 @@ export default function AuthFlow() {
     })
   }
 
-  const STEP_LABELS = ['Universitate', 'Email', 'Verificare', 'Confirmat']
-
   return (
     <div className="min-h-screen bg-[#050810] flex items-center justify-center p-6 relative overflow-hidden">
 
@@ -374,11 +117,9 @@ export default function AuthFlow() {
         {/* Logo */}
         <div className="text-center mb-10">
           <div className="relative w-fit mx-auto mb-5">
-            {/* Outer glow */}
-            <div
-              className="absolute inset-[-8px] rounded-[1.5rem] blur-xl opacity-60 animate-glow-pulse"
-              style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.6), transparent 70%)' }}
-            />
+            {/* Logo waves */}
+            <div className="logo-wave" />
+            <div className="logo-wave logo-wave-delay" />
             <div className="relative p-[2px] rounded-[1.4rem] bg-gradient-to-b from-white/25 to-white/[0.03]">
               <div
                 className="w-16 h-16 rounded-[calc(1.4rem-2px)] flex items-center justify-center"
@@ -504,12 +245,11 @@ export default function AuthFlow() {
             {role === 'student' && step === STEP.ENTER_EMAIL && (
               <EmailStep university={university} email={email} setEmail={setEmail}
                 accessCode={accessCode} setAccessCode={setAccessCode}
-                error={accessCodeError} onSubmit={handleEmailSubmit}
-                onDemoSkip={handleDemoSkip} loading={loading} />
+                error={accessCodeError} onSubmit={handleEmailSubmit} loading={loading} />
             )}
             {role === 'student' && step === STEP.VERIFYING && <VerifyingStep email={email} university={university} />}
             {role === 'student' && step === STEP.CONFIRMED && (
-              <ConfirmedStep university={university} detectedFaculty={detectedFaculty} onContinue={handleContinue} isReturning={isReturning} />
+              <ConfirmedStep university={university} onContinue={handleContinue} isReturning={isReturning} />
             )}
           </div>
         </div>
@@ -521,3 +261,8 @@ export default function AuthFlow() {
     </div>
   )
 }
+
+
+
+
+
