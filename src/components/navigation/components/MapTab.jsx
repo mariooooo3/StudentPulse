@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { memo, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, Route, ArrowRight, Loader2, Navigation as NavIcon, Wifi, WifiOff, Users, LocateFixed, X } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
@@ -8,7 +8,7 @@ import Badge from '../../ui/Badge'
 import { makePOIIcon, makeLabel, openExternalMap, openExternalRoute } from '../utils/mapHelpers'
 import { FlyTo, FitRoute } from './MapHelpers'
 
-export default function MapTab({
+function MapTab({
   buildings,
   POIS,
   campusCenter,
@@ -393,3 +393,5 @@ export default function MapTab({
     </motion.div>
   )
 }
+
+export default memo(MapTab)
