@@ -2,7 +2,7 @@ export const DEMO_PROFESSOR = {
   id: 'prof-mihai-ciobanu',
   name: 'Prof. dr. ing. Mihai Ciobanu',
   email: 'mihai.ciobanu@academic.tuiasi.ro',
-  password: '0000',
+  password: null,
   universityId: 'tuiasi',
   universityName: 'Gheorghe Asachi',
   facultyCode: 'AC',

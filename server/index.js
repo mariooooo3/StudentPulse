@@ -15,6 +15,7 @@ import { createSessionHandler } from './handlers/session.js'
 import { createNavigationRequestHandler } from './handlers/navigation.js'
 import { createPortalRequestHandler } from './handlers/portal.js'
 import { createPortalRepository } from './db/portalRepository.js'
+import { createAuthHandler } from './handlers/auth.js'
 
 const PORT = Number(process.env.PORT || 3001)
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -78,8 +79,12 @@ const handlers = {
 
 const handleNavigation = createNavigationRequestHandler()
 const handlePortal = createPortalRequestHandler(repository, notifications, pubsub)
+const handleAuth = createAuthHandler()
 
 const httpServer = createServer(async (req, res) => {
+  if (req.url?.startsWith('/api/auth')) {
+    return handleAuth(req, res)
+  }
   if (req.url?.startsWith('/api/navigation') || req.url?.startsWith('/api/career') || req.url?.startsWith('/api/ai')) {
     return handleNavigation(req, res)
   }

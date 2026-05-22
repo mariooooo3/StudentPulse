@@ -103,26 +103,26 @@ function EmailStep({ university, email, setEmail, accessCode, setAccessCode, err
           <input
             type="password"
             inputMode="numeric"
-            maxLength={4}
+            maxLength={6}
             value={accessCode}
-            onChange={e => setAccessCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
+            onChange={e => setAccessCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
             onKeyDown={e => e.key === 'Enter' && onSubmit()}
-            placeholder="0000"
+            placeholder="000000"
             className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none tracking-[0.35em] font-mono"
           />
         </div>
         <p className="text-[11px] text-slate-700 mt-1.5 pl-1">
-          Cod emis de universitate la crearea contului. Pentru demo: <span className="text-slate-500 font-mono">0000</span>.
+          Cod de 6 cifre din aplicația de autentificare (Google Authenticator, Authy).
         </p>
         {error && <p className="text-[11px] text-red-400 mt-1.5 pl-1">{error}</p>}
       </div>
 
       <button
         onClick={onSubmit}
-        disabled={!email.trim() || accessCode.length !== 4 || loading}
+        disabled={!email.trim() || accessCode.length !== 6 || loading}
         className={clsx(
           'w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-[13px] transition-all duration-200',
-          email.trim() && accessCode.length === 4 && !loading
+          email.trim() && accessCode.length === 6 && !loading
             ? 'bg-indigo-600 hover:bg-indigo-500 text-white active:scale-[0.98] shadow-[0_0_0_1px_rgba(99,102,241,0.3)]'
             : 'bg-white/[0.03] text-slate-600 cursor-not-allowed border border-white/[0.06]',
         )}
@@ -171,26 +171,26 @@ function ProfessorLogin({ email, setEmail, accessCode, setAccessCode, error, onS
           <input
             type="password"
             inputMode="numeric"
-            maxLength={4}
+            maxLength={6}
             value={accessCode}
-            onChange={e => setAccessCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
+            onChange={e => setAccessCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
             onKeyDown={e => e.key === 'Enter' && onSubmit()}
-            placeholder="0000"
+            placeholder="000000"
             className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none tracking-[0.35em] font-mono"
           />
         </div>
         <p className="text-[11px] text-slate-700 mt-1.5 pl-1">
-          Demo: <span className="text-slate-500 font-mono">{DEMO_PROFESSOR.email}</span> / <span className="text-slate-500 font-mono">0000</span>
+          Cod de 6 cifre din Google Authenticator pentru <span className="text-slate-500 font-mono">{DEMO_PROFESSOR.email}</span>
         </p>
         {error && <p className="text-[11px] text-red-400 mt-1.5 pl-1">{error}</p>}
       </div>
 
       <button
         onClick={onSubmit}
-        disabled={!email.trim() || accessCode.length !== 4 || loading}
+        disabled={!email.trim() || accessCode.length !== 6 || loading}
         className={clsx(
           'w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-[13px] transition-all duration-200',
-          email.trim() && accessCode.length === 4 && !loading
+          email.trim() && accessCode.length === 6 && !loading
             ? 'bg-amber-600 hover:bg-amber-500 text-white active:scale-[0.98]'
             : 'bg-white/[0.03] text-slate-600 cursor-not-allowed border border-white/[0.06]',
         )}
@@ -283,8 +283,19 @@ export default function AuthFlow() {
   function selectUniversity(u) { setUniversity(u); setStep(STEP.ENTER_EMAIL) }
 
   async function handleEmailSubmit() {
-    if (accessCode !== '0000') { setAccessCodeError('Cod institutional invalid. Pentru demo foloseste 0000.'); return }
-    setAccessCodeError(''); setLoading(true); setStep(STEP.VERIFYING)
+    setAccessCodeError(''); setLoading(true)
+    try {
+      const res = await fetch('/api/auth/verify-totp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: accessCode }),
+      })
+      const { valid } = await res.json()
+      if (!valid) { setAccessCodeError('Cod invalid sau expirat. Verifică aplicația de autentificare.'); setLoading(false); return }
+    } catch {
+      setAccessCodeError('Eroare de conexiune. Încearcă din nou.'); setLoading(false); return
+    }
+    setStep(STEP.VERIFYING)
     await new Promise(r => setTimeout(r, 2600))
     setDetectedFaculty(null)
     const fullEmail = email ? `${email}@${university.emailDomain}` : `student@${university.emailDomain}`
@@ -293,7 +304,7 @@ export default function AuthFlow() {
   }
 
   async function handleDemoSkip() {
-    setAccessCode('0000'); setAccessCodeError(''); setLoading(true); setStep(STEP.VERIFYING)
+    setAccessCodeError(''); setLoading(true); setStep(STEP.VERIFYING)
     await new Promise(r => setTimeout(r, 2600))
     setDetectedFaculty(null)
     const fullEmail = email ? `${email}@${university.emailDomain}` : `student@${university.emailDomain}`
@@ -311,12 +322,22 @@ export default function AuthFlow() {
   }
 
   async function handleProfessorSubmit() {
-    if (professorEmail.trim().toLowerCase() !== DEMO_PROFESSOR.email || accessCode !== DEMO_PROFESSOR.password) {
-      setAccessCodeError('Cont profesor invalid. Pentru demo folosește mihai.ciobanu@academic.tuiasi.ro și codul 0000.')
+    if (professorEmail.trim().toLowerCase() !== DEMO_PROFESSOR.email) {
+      setAccessCodeError('Email profesor invalid.')
       return
     }
-    setAccessCodeError('')
-    setLoading(true)
+    setAccessCodeError(''); setLoading(true)
+    try {
+      const res = await fetch('/api/auth/verify-totp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: accessCode }),
+      })
+      const { valid } = await res.json()
+      if (!valid) { setAccessCodeError('Cod invalid sau expirat. Verifică aplicația de autentificare.'); setLoading(false); return }
+    } catch {
+      setAccessCodeError('Eroare de conexiune. Încearcă din nou.'); setLoading(false); return
+    }
     await new Promise(r => setTimeout(r, 900))
     setLoading(false)
     login({
@@ -400,7 +421,7 @@ export default function AuthFlow() {
                     setRole(id)
                     setAccessCodeError('')
                     setStep(STEP.SELECT_UNI)
-                    if (id === 'professor') setAccessCode('0000')
+                    if (id === 'professor') setAccessCode('')
                   }}
                   className={clsx(
                     'h-10 rounded-xl border text-[12px] font-bold flex items-center justify-center gap-2 transition-all',
