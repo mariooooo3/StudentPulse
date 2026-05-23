@@ -34,8 +34,8 @@ export default function GradeCalculatorView({ exams, session }) {
         <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-4">
           <GraduationCap size={24} className="text-indigo-400" strokeWidth={1.75} />
         </div>
-        <p className="text-white font-bold mb-1">Nicio materie detectatÄƒ</p>
-        <p className="text-slate-500 text-sm">Materiile apar automat din orarul tÄƒu.</p>
+        <p className="text-white font-bold mb-1">Nicio materie detectată</p>
+        <p className="text-slate-500 text-sm">Materiile apar automat din orarul tău.</p>
       </motion.div>
     )
   }
@@ -44,8 +44,8 @@ export default function GradeCalculatorView({ exams, session }) {
     <motion.div className="p-4 sm:p-6 space-y-5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-center">
-          <p className={`text-2xl font-black ${avgColor}`}>{average ? average.toFixed(2) : 'â€”'}</p>
-          <p className="text-[11px] text-slate-500 mt-1">Medie ponderatÄƒ</p>
+          <p className={`text-2xl font-black ${avgColor}`}>{average ? average.toFixed(2) : '—'}</p>
+          <p className="text-[11px] text-slate-500 mt-1">Medie ponderată</p>
         </div>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-center">
           <p className="text-2xl font-black text-white">
@@ -91,7 +91,7 @@ export default function GradeCalculatorView({ exams, session }) {
               <div className="w-0.5 self-stretch rounded-full shrink-0" style={{ background: s.accent }} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white truncate">{s.name}</p>
-                <p className="text-xs text-slate-500">{s.type} Â· {s.credits} ECTS</p>
+                <p className="text-xs text-slate-500">{s.type} · {s.credits} ECTS</p>
               </div>
               <input
                 type="number"
@@ -100,7 +100,7 @@ export default function GradeCalculatorView({ exams, session }) {
                 step="0.1"
                 value={grades[s.name] || ''}
                 onChange={e => updateGrade(s.name, e.target.value)}
-                placeholder="â€”"
+                placeholder="—"
                 className={`w-16 bg-white/[0.04] border border-white/[0.08] rounded-lg px-2 py-1.5 text-sm font-bold text-center outline-none focus:border-indigo-500/50 transition-colors placeholder-slate-600 ${inputCls}`}
               />
             </div>

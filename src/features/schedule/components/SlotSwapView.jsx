@@ -31,10 +31,10 @@ export default function SlotSwapView({ recoverySlots, swapRequests, userId, onNo
             <ArrowLeftRight size={14} className="text-violet-400" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-violet-300 mb-1">Swap automat â€” chiar È™i fÄƒrÄƒ locuri</p>
+            <p className="text-sm font-semibold text-violet-300 mb-1">Swap automat — chiar și fără locuri</p>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Propune un schimb cu un alt student. DacÄƒ cerinÈ›ele corespund, sistemul acceptÄƒ automat â€” fÄƒrÄƒ intervenÈ›ie manualÄƒ.
-              Ideal pentru cÃ¢nd slotul dorit e complet dar altcineva vrea exact ce oferi tu.
+              Propune un schimb cu un alt student. Dacă cerințele corespund, sistemul acceptă automat — fără intervenție manuală.
+              Ideal pentru când slotul dorit e complet dar altcineva vrea exact ce oferi tu.
             </p>
           </div>
         </div>
@@ -54,7 +54,7 @@ export default function SlotSwapView({ recoverySlots, swapRequests, userId, onNo
                 <Repeat2 size={20} className="text-slate-600" />
               </div>
               <p className="text-sm font-semibold text-slate-400">Niciun match disponibil</p>
-              <p className="text-xs text-slate-600 mt-1">Propune un swap mai jos pentru a gÄƒsi studenÈ›i compatibili.</p>
+              <p className="text-xs text-slate-600 mt-1">Propune un swap mai jos pentru a găsi studenți compatibili.</p>
             </div>
           )}
           {swapRequests.map(req => (
@@ -81,11 +81,11 @@ export default function SlotSwapView({ recoverySlots, swapRequests, userId, onNo
                     <p className="text-xs text-slate-500 mb-2">{req.offersSubject}</p>
                     <div className="flex flex-wrap items-center gap-2 text-xs">
                       <span className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-slate-300 font-mono">
-                        OferÄƒ: {DAYS[req.offersSlot.day - 1]} {req.offersSlot.start}:00 Â· Gr.{req.offersSlot.group}
+                        Oferă: {DAYS[req.offersSlot.day - 1]} {req.offersSlot.start}:00 · Gr.{req.offersSlot.group}
                       </span>
                       <ArrowLeftRight size={11} className="text-slate-600" />
                       <span className="px-2.5 py-1 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 font-mono">
-                        Vrea: {DAYS[req.wantsSlot.day - 1]} {req.wantsSlot.start}:00 Â· Gr.{req.wantsSlot.group}
+                        Vrea: {DAYS[req.wantsSlot.day - 1]} {req.wantsSlot.start}:00 · Gr.{req.wantsSlot.group}
                       </span>
                     </div>
                     {req.message && (
@@ -108,7 +108,7 @@ export default function SlotSwapView({ recoverySlots, swapRequests, userId, onNo
                       onClick={() => setMatchAccepted(p => ({ ...p, [req.id]: true }))}
                       className="btn-primary text-xs flex items-center gap-1.5"
                     >
-                      <Check size={13} /> AcceptÄƒ swap
+                      <Check size={13} /> Acceptă swap
                     </motion.button>
                   ) : (
                     <span className="text-xs text-slate-600 font-medium">Incompatibil</span>
@@ -127,9 +127,9 @@ export default function SlotSwapView({ recoverySlots, swapRequests, userId, onNo
             <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center mx-auto mb-4">
               <Check size={24} className="text-emerald-400" />
             </div>
-            <p className="font-bold text-white text-base mb-1">Cerere postatÄƒ!</p>
+            <p className="font-bold text-white text-base mb-1">Cerere postată!</p>
             <p className="text-sm text-slate-400 mb-5 max-w-xs mx-auto leading-relaxed">
-              DacÄƒ un alt student are cerere compatibilÄƒ, swapul se acceptÄƒ automat.
+              Dacă un alt student are cerere compatibilă, swapul se acceptă automat.
             </p>
             <button onClick={() => { setSubmitted(false); setSwapOffer(null); setSwapWant(null); setMessage('') }} className="btn-secondary text-xs">
               Propune alt swap
@@ -140,7 +140,7 @@ export default function SlotSwapView({ recoverySlots, swapRequests, userId, onNo
             <div>
               <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-3">
                 <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-indigo-600/30 text-indigo-400 text-[9px] font-bold mr-1.5">1</span>
-                Alege ora pe care o oferi (a ta actualÄƒ)
+                Alege ora pe care o oferi (a ta actuală)
               </p>
               <div className="grid gap-2">
                 {mySlots().map(({ subject, slot }) => (
@@ -158,7 +158,7 @@ export default function SlotSwapView({ recoverySlots, swapRequests, userId, onNo
                     <div>
                       <p className="text-xs font-semibold text-slate-200">{subject}</p>
                       <p className="text-[10px] text-slate-500 font-mono mt-0.5">
-                        {DAYS[slot.day - 1]} {slot.start}:00â€“{slot.end}:00 Â· {slot.room} Â· Gr.{slot.group}
+                        {DAYS[slot.day - 1]} {slot.start}:00–{slot.end}:00 · {slot.room} · Gr.{slot.group}
                       </p>
                     </div>
                   </motion.button>
@@ -172,7 +172,7 @@ export default function SlotSwapView({ recoverySlots, swapRequests, userId, onNo
                   <div className="gradient-separator mb-5" />
                   <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-3">
                     <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-violet-600/30 text-violet-400 text-[9px] font-bold mr-1.5">2</span>
-                    Alege ora pe care o vrei Ã®n schimb
+                    Alege ora pe care o vrei în schimb
                   </p>
                   <div className="grid gap-2 max-h-48 overflow-y-auto pr-1">
                     {otherSlots(swapOffer.subject).map(slot => {
@@ -191,7 +191,7 @@ export default function SlotSwapView({ recoverySlots, swapRequests, userId, onNo
                           <div className={clsx('w-3.5 h-3.5 rounded-full border-2 shrink-0 transition-all', swapWant === slot ? 'border-violet-500 bg-violet-500' : 'border-white/[0.2]')} />
                           <div className="flex-1">
                             <p className="text-[10px] text-slate-200 font-semibold font-mono">
-                              {DAYS[slot.day - 1]} {slot.start}:00â€“{slot.end}:00 Â· {slot.room} Â· Gr.{slot.group}
+                              {DAYS[slot.day - 1]} {slot.start}:00–{slot.end}:00 · {slot.room} · Gr.{slot.group}
                             </p>
                             <p className="text-[9px] text-slate-600 mt-0.5">{slot.professor}</p>
                           </div>
@@ -215,9 +215,9 @@ export default function SlotSwapView({ recoverySlots, swapRequests, userId, onNo
                   <div className="gradient-separator mb-5" />
                   <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-3">
                     <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-700 text-slate-400 text-[9px] font-bold mr-1.5">3</span>
-                    Mesaj opÈ›ional
+                    Mesaj opțional
                   </p>
-                  <textarea rows={2} value={message} onChange={e => setMessage(e.target.value)} className="input-base w-full resize-none" placeholder="Ex: MarÈ›ea nu pot, am practicÄƒ..." />
+                  <textarea rows={2} value={message} onChange={e => setMessage(e.target.value)} className="input-base w-full resize-none" placeholder="Ex: Marțea nu pot, am practică..." />
                   <motion.button
                     whileHover={{ y: -1 }}
                     whileTap={{ scale: 0.98 }}
@@ -241,7 +241,7 @@ export default function SlotSwapView({ recoverySlots, swapRequests, userId, onNo
                     }}
                     className="btn-primary w-full mt-3 flex items-center justify-center gap-2 text-sm"
                   >
-                    <Send size={14} /> PosteazÄƒ cererea de swap
+                    <Send size={14} /> Postează cererea de swap
                   </motion.button>
                 </motion.div>
               )}

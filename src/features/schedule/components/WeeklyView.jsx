@@ -8,7 +8,7 @@ export const COURSE_TYPE_BORDER = {
   'Curs': 'border-l-indigo-500',
   'Seminar': 'border-l-emerald-500',
   'Laborator': 'border-l-amber-500',
-  'PracticÄƒ': 'border-l-rose-500',
+  'Practică': 'border-l-rose-500',
 }
 
 export default function WeeklyView({ schedule }) {

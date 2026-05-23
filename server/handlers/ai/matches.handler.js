@@ -20,13 +20,13 @@ Răspunzi STRICT cu un array JSON de id-uri sortate descrescător după compatib
         content: `Sortează acești studenți după compatibilitate cu profilul meu:
 
 Profilul meu:
-- Skill-uri oferite: ${JSON.stringify(userProfile.skills || [])}
-- Skill-uri dorite: ${JSON.stringify(userProfile.wants || [])}
+- Ce predau: ${userProfile.teaches || 'necunoscut'}
+- Ce vreau să învăț: ${userProfile.learns || 'necunoscut'}
 - Interese: ${JSON.stringify(userProfile.interests || [])}
 - An: ${userProfile.year || 'necunoscut'}
 
 Studenți disponibili:
-${JSON.stringify(pool.map(p => ({ id: p.id, skills: p.skills || [], wants: p.wants || [], year: p.year })))}
+${JSON.stringify(pool.map(p => ({ id: p.id, teaches: p.teaches || '', learns: p.learns || '', year: p.year })))}
 
 Returnează DOAR array-ul JSON cu id-urile sortate.`,
       },

@@ -8,7 +8,7 @@ export default function ConfirmedStep({ university, onContinue, isReturning }) {
       </div>
       <div>
         <p className="text-[17px] font-bold text-white mb-3">
-          {isReturning ? 'Bun venit Ã®napoi!' : 'Bun venit la StudentCompass!'}
+          {isReturning ? 'Bun venit înapoi!' : 'Bun venit la StudentCompass!'}
         </p>
         <div
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-[12px] font-semibold"
@@ -19,14 +19,14 @@ export default function ConfirmedStep({ university, onContinue, isReturning }) {
       </div>
       <p className="text-[13px] text-slate-500 leading-relaxed">
         {isReturning
-          ? 'Am gÄƒsit profilul tÄƒu. Totul e gata â€” poÈ›i intra direct Ã®n cont.'
-          : 'Am detectat profilul tÄƒu universitar. UrmeazÄƒ cÃ¢teva Ã®ntrebÄƒri rapide ca sÄƒ personalizÄƒm experienÈ›a Ã®n funcÈ›ie de facultatea È™i nevoile tale.'}
+          ? 'Am găsit profilul tău. Totul e gata — poți intra direct în cont.'
+          : 'Am detectat profilul tău universitar. Urmează câteva întrebări rapide ca să personalizăm experiența în funcție de facultatea și nevoile tale.'}
       </p>
       <button
         onClick={onContinue}
         className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-[13px] transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_0_1px_rgba(99,102,241,0.3)]"
       >
-        {isReturning ? 'IntrÄƒ Ã®n cont' : 'ÃŽncepe setup-ul profilului'} <ArrowRight size={15} />
+        {isReturning ? 'Intră în cont' : 'Începe setup-ul profilului'} <ArrowRight size={15} />
       </button>
     </div>
   )

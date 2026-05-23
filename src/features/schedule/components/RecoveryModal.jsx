@@ -43,10 +43,10 @@ export default function RecoveryModal({ slot, subject, onClose, onConfirm }) {
               <div className="grid grid-cols-2 gap-2">
                 {[
                   ['Zi', DAYS[slot.day - 1]],
-                  ['Interval', `${slot.start}:00â€“${slot.end}:00`],
-                  ['SalÄƒ', slot.room],
+                  ['Interval', `${slot.start}:00–${slot.end}:00`],
+                  ['Sală', slot.room],
                   ['Profesor', slot.professor],
-                  ['Locuri rÄƒmase', `${slot.total - slot.enrolled}/${slot.total}`],
+                  ['Locuri rămase', `${slot.total - slot.enrolled}/${slot.total}`],
                 ].map(([k, v]) => (
                   <div key={k} className="bg-white/[0.03] rounded-xl p-3 border border-white/[0.05]">
                     <p className="text-[9px] font-semibold text-slate-600 uppercase tracking-wider mb-0.5">{k}</p>
@@ -56,7 +56,7 @@ export default function RecoveryModal({ slot, subject, onClose, onConfirm }) {
               </div>
 
               <div>
-                <label className="section-label block mb-2">Motivul recuperÄƒrii *</label>
+                <label className="section-label block mb-2">Motivul recuperării *</label>
                 <textarea
                   rows={3}
                   value={reason}
@@ -67,7 +67,7 @@ export default function RecoveryModal({ slot, subject, onClose, onConfirm }) {
               </div>
 
               <div className="flex gap-3 pt-1">
-                <button onClick={onClose} className="btn-secondary flex-1">AnuleazÄƒ</button>
+                <button onClick={onClose} className="btn-secondary flex-1">Anulează</button>
                 <button
                   onClick={() => onConfirm(reason)}
                   disabled={!reason.trim()}

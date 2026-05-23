@@ -20,17 +20,17 @@ export function useOnboardingFlow(session) {
 
   const STEPS = useMemo(() => {
     const defaultYears = [
-      { label: 'Anul 1', desc: 'Primul an de licenÈ›Äƒ' },
-      { label: 'Anul 2', desc: 'Al doilea an de licenÈ›Äƒ' },
-      { label: 'Anul 3', desc: 'Al treilea an de licenÈ›Äƒ' },
+      { label: 'Anul 1', desc: 'Primul an de licență' },
+      { label: 'Anul 2', desc: 'Al doilea an de licență' },
+      { label: 'Anul 3', desc: 'Al treilea an de licență' },
       { label: 'Master', desc: 'Studii postuniversitare' },
     ]
     const steps = [
       {
         id: 'faculty',
         emoji: 'ðŸŽ“',
-        question: 'La ce facultate eÈ™ti Ã®nscris?',
-        subtitle: university ? `FacultÄƒÈ›ile disponibile la ${university.shortName}` : 'SelecteazÄƒ sau cautÄƒ facultatea ta',
+        question: 'La ce facultate ești înscris?',
+        subtitle: university ? `Facultățile disponibile la ${university.shortName}` : 'Selectează sau caută facultatea ta',
         type: 'faculty',
       },
     ]
@@ -40,11 +40,11 @@ export function useOnboardingFlow(session) {
         id: 'specialization',
         emoji: 'ðŸ–¥ï¸',
         question: 'Ce specializare urmezi?',
-        subtitle: 'Fiecare specializare are materii, profesori È™i structurÄƒ diferite',
+        subtitle: 'Fiecare specializare are materii, profesori și structură diferite',
         type: 'cards',
         options: [
-          { label: 'CTI', desc: 'Calculatoare È™i Tehnologia InformaÈ›iei â€” Dep. Calculatoare (DC)' },
-          { label: 'IS', desc: 'InformaticÄƒ AplicatÄƒ / AutomaticÄƒ â€” Dep. AutomaticÄƒ È™i InformaticÄƒ AplicatÄƒ (DAIA)' },
+          { label: 'CTI', desc: 'Calculatoare și Tehnologia Informației — Dep. Calculatoare (DC)' },
+          { label: 'IS', desc: 'Informatică Aplicată / Automatică — Dep. Automatică și Informatică Aplicată (DAIA)' },
         ],
       })
     }
@@ -52,8 +52,8 @@ export function useOnboardingFlow(session) {
     steps.push({
       id: 'year',
       emoji: 'ðŸ“…',
-      question: 'ÃŽn ce an de studiu eÈ™ti?',
-      subtitle: 'Vom prioritiza informaÈ›iile relevante pentru anul tÄƒu',
+      question: 'În ce an de studiu ești?',
+      subtitle: 'Vom prioritiza informațiile relevante pentru anul tău',
       type: 'cards',
       options: faculty?.years || defaultYears,
     })
@@ -63,7 +63,7 @@ export function useOnboardingFlow(session) {
         id: 'interests',
         emoji: 'ðŸ’¡',
         question: facultyQ.interestsLabel,
-        subtitle: 'SelecteazÄƒ unul sau mai multe â€” personalizÄƒm tutorii È™i tema de licenÈ›Äƒ',
+        subtitle: 'Selectează unul sau mai multe — personalizăm tutorii și tema de licență',
         type: 'tags',
         options: facultyQ.interests,
       })
