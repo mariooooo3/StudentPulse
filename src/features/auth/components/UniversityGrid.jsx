@@ -18,7 +18,7 @@ export default function UniversityGrid({ onSelect }) {
           autoFocus
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="CautÄƒ universitatea ta..."
+          placeholder="Caută universitatea ta..."
           className="bg-transparent text-[13px] text-slate-300 placeholder-slate-700 outline-none flex-1 font-medium"
         />
       </div>

@@ -22,7 +22,7 @@ export default function OnboardingDoneScreen({ aiLoading, aiProfile, answers, un
           </div>
         </div>
 
-        <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">Profilul tÄƒu este gata!</h2>
+        <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">Profilul tău este gata!</h2>
 
         <AnimatePresence mode="wait">
           {aiLoading ? (
@@ -34,7 +34,7 @@ export default function OnboardingDoneScreen({ aiLoading, aiProfile, answers, un
               className="flex items-center justify-center gap-2 text-slate-400 text-sm mb-6"
             >
               <Loader2 size={14} className="animate-spin text-emerald-400" />
-              <span>Se genereazÄƒ profilul tÄƒu personalizat...</span>
+              <span>Se generează profilul tău personalizat...</span>
             </motion.div>
           ) : aiProfile ? (
             <motion.div
@@ -52,7 +52,7 @@ export default function OnboardingDoneScreen({ aiLoading, aiProfile, answers, un
               )}
               {aiProfile.urgentTasks?.length > 0 && (
                 <div className="text-left rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-3 space-y-1">
-                  <p className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider mb-1.5">Primii paÈ™i</p>
+                  <p className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider mb-1.5">Primii pași</p>
                   {aiProfile.urgentTasks.map((task, i) => (
                     <div key={i} className="flex items-start gap-2 text-xs text-slate-300">
                       <span className="text-amber-400 mt-0.5 shrink-0">â†’</span> {task}
@@ -63,7 +63,7 @@ export default function OnboardingDoneScreen({ aiLoading, aiProfile, answers, un
             </motion.div>
           ) : (
             <motion.p key="default" className="text-slate-400 mb-6 leading-relaxed text-sm">
-              StudentCompass a personalizat toate modulele Ã®n funcÈ›ie de facultatea, anul È™i interesele tale.
+              StudentCompass a personalizat toate modulele în funcție de facultatea, anul și interesele tale.
               De acum, nu te mai pierzi.
             </motion.p>
           )}
@@ -98,7 +98,7 @@ export default function OnboardingDoneScreen({ aiLoading, aiProfile, answers, un
           className="btn-primary w-full text-base py-3 gap-2"
         >
           <Sparkles size={16} />
-          IntrÄƒ Ã®n StudentCompass
+          Intră în StudentCompass
         </button>
       </motion.div>
     </div>

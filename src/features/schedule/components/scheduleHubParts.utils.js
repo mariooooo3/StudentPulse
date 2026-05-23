@@ -4,8 +4,8 @@ export const STATUS_BADGE = {
 }
 
 export const STATUS_LABEL = {
-  accepted: 'AprobatÄƒ',
-  rejected: 'RespinsÄƒ',
+  accepted: 'Aprobată',
+  rejected: 'Respinsă',
 }
 
 export function buildSortedCombos(recoverySlots) {

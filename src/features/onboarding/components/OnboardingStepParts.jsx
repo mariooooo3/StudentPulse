@@ -126,7 +126,7 @@ export function FacultyStep({ value, onChange, universityFaculties }) {
           onChange={e => setSearch(e.target.value)}
           autoFocus
           className="bg-transparent text-sm text-slate-200 placeholder-slate-600 outline-none flex-1"
-          placeholder="CautÄƒ facultatea ta..."
+          placeholder="Caută facultatea ta..."
         />
       </div>
       <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1 scrollbar-thin">
@@ -140,7 +140,7 @@ export function FacultyStep({ value, onChange, universityFaculties }) {
         ))}
         {filtered.length === 0 && (
           <p className="text-sm text-slate-600 text-center py-6">
-            Nicio facultate gÄƒsitÄƒ. ÃŽncearcÄƒ alÈ›i termeni.
+            Nicio facultate găsită. Încearcă alți termeni.
           </p>
         )}
       </div>

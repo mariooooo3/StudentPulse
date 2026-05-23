@@ -529,10 +529,10 @@ export const messages = [
 
 // ── Skill swap ────────────────────────────────────────────────────────────────
 export const skillSwapUsers = [
-  { id:1, name:'Radu Apostol', avatar:'RA', teaches:'Python Avansat',  learns:'React',         teachLevel:'Avansat',    learnLevel:'Beginner',   match:true,  online:true  },
+  { id:1, name:'Radu Apostol', avatar:'RA', teaches:'Python Avansat',  learns:'React',         teachLevel:'Avansat',    learnLevel:'Incepator',   match:true,  online:true  },
   { id:2, name:'Diana Lungu',  avatar:'DL', teaches:'Machine Learning',learns:'Java',          teachLevel:'Intermediar',learnLevel:'Intermediar',match:true,  online:false },
-  { id:3, name:'Vlad Manea',   avatar:'VM', teaches:'Docker & DevOps', learns:'Flutter',       teachLevel:'Avansat',    learnLevel:'Beginner',   match:false, online:true  },
-  { id:4, name:'Sabina Toma',  avatar:'ST', teaches:'UI/UX Design',    learns:'JavaScript',    teachLevel:'Intermediar',learnLevel:'Beginner',   match:true,  online:true  },
+  { id:3, name:'Vlad Manea',   avatar:'VM', teaches:'Docker & DevOps', learns:'Flutter',       teachLevel:'Avansat',    learnLevel:'Incepator',   match:false, online:true  },
+  { id:4, name:'Sabina Toma',  avatar:'ST', teaches:'UI/UX Design',    learns:'JavaScript',    teachLevel:'Intermediar',learnLevel:'Incepator',   match:true,  online:true  },
 ]
 
 export const groupSessions = [

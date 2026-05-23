@@ -11,7 +11,7 @@ import {
 import { CV_API_URL, extractTextFromPDF } from './cvUtils'
 import AccentLine from '../components/AccentLine'
 
-export default function CVAnalysisPanel({ allJobs, onAnalysis, cvAnalysis }) {
+export default function CVAnalysisPanel({ allJobs, onAnalysis, cvAnalysis, lifeProfile }) {
   const [cvText, setCvText] = useState('')
   const [loading, setLoading] = useState(false)
   const [extracting, setExtracting] = useState(false)
@@ -67,6 +67,7 @@ export default function CVAnalysisPanel({ allJobs, onAnalysis, cvAnalysis }) {
         body: JSON.stringify({
           cvText: cvText.trim(),
           jobs: allJobs.map(j => ({ id: j.id, role: j.role, company: j.company, tags: j.tags, type: j.type })),
+          facultyContext: lifeProfile ? `${lifeProfile.facultyName}, Anul ${lifeProfile.year}, ${lifeProfile.city}` : '',
         }),
       })
       if (!res.ok) {

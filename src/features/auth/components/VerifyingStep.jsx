@@ -11,7 +11,7 @@ export default function VerifyingStep({ email, university }) {
         </div>
       </div>
       <div>
-        <p className="text-[15px] font-bold text-white mb-1">Se verificÄƒ identitatea...</p>
+        <p className="text-[15px] font-bold text-white mb-1">Se verifică identitatea...</p>
         <p className="text-[12px] text-slate-500 font-mono">
           {email}@{university.emailDomain}
         </p>

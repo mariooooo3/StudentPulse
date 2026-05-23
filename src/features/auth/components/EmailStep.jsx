@@ -21,7 +21,7 @@ export default function EmailStep({ university, email, setEmail, accessCode, set
 
       <div>
         <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block mb-2">
-          Email instituÈ›ional
+          Email instituțional
         </label>
         <div className="flex items-center bg-white/[0.03] border border-white/[0.07] rounded-xl overflow-hidden focus-within:border-white/[0.15] transition-colors">
           <Mail size={13} className="text-slate-600 ml-4 shrink-0" strokeWidth={1.75} />
@@ -37,7 +37,7 @@ export default function EmailStep({ university, email, setEmail, accessCode, set
           <span className="pr-4 text-[12px] text-slate-600 shrink-0 font-mono">@{university.emailDomain}</span>
         </div>
         <p className="text-[11px] text-slate-700 mt-1.5 pl-1">
-          Folosim email-ul instituÈ›ional pentru a detecta automat facultatea ta.
+          Folosim email-ul instituțional pentru a detecta automat facultatea ta.
         </p>
       </div>
 
@@ -59,7 +59,7 @@ export default function EmailStep({ university, email, setEmail, accessCode, set
           />
         </div>
         <p className="text-[11px] text-slate-700 mt-1.5 pl-1">
-          Cod de 6 cifre din aplicaÈ›ia de autentificare (Google Authenticator, Authy).
+          Cod de 6 cifre din aplicația de autentificare (Google Authenticator, Authy).
         </p>
         {error && <p className="text-[11px] text-red-400 mt-1.5 pl-1">{error}</p>}
       </div>

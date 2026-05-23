@@ -61,7 +61,7 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
         const match = adj ? Math.min(99, Math.max(8, baseScore + adj.adjustment)) : baseScore
         return { ...job, deadlineDays, match, cvReason: adj?.reason || null, warnings }
       })
-      .filter((job) => job.match >= 20)
+      .filter((job) => cvAnalysis ? job.match >= 20 : job.baseMatch >= 1)
       .sort((a, b) => b.match - a.match)
   }, [allJobs, lifeProfile, now, query, type, cvAdjMap])
 
@@ -134,14 +134,21 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
                 </div>
               </div>
               <div className="flex items-center justify-between gap-3 lg:flex-col lg:items-end">
-                <span className={clsx(
-                  'rounded-full border px-3 py-1 text-xs font-black',
-                  job.match >= 80
-                    ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
-                    : 'border-amber-400/30 bg-amber-400/10 text-amber-300',
-                )}>
-                  {job.match}% potrivire
-                </span>
+                {cvAnalysis ? (
+                  <span className={clsx(
+                    'rounded-full border px-3 py-1 text-xs font-black',
+                    job.match >= 80
+                      ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
+                      : 'border-amber-400/30 bg-amber-400/10 text-amber-300',
+                  )}>
+                    {job.match}% potrivire
+                  </span>
+                ) : (
+                  <span className="rounded-full border border-slate-700 bg-white/[0.03] px-3 py-1 text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                    <Bot size={11} strokeWidth={1.75} />
+                    Adaugă CV
+                  </span>
+                )}
                 <button
                   onClick={() => {
                     if (job.url) window.open(job.url, '_blank', 'noopener,noreferrer')

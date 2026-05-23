@@ -11,7 +11,7 @@ export default function AllGroupsView({ schedule }) {
   schedule.forEach(c => {
     const grp = c.group || 'A1'
     if (!groupMap[grp]) groupMap[grp] = []
-    groupMap[grp].push({ name: c.short, day: DAYS[c.day - 1], time: `${c.start}:00â€“${c.end}:00`, room: c.room })
+    groupMap[grp].push({ name: c.short, day: DAYS[c.day - 1], time: `${c.start}:00–${c.end}:00`, room: c.room })
   })
   const ALL_GROUPS = Object.entries(groupMap).map(([group, courses]) => ({ group, courses }))
 
@@ -25,7 +25,7 @@ export default function AllGroupsView({ schedule }) {
       <input
         value={search}
         onChange={e => setSearch(e.target.value)}
-        placeholder="CautÄƒ materie sau grupÄƒ..."
+        placeholder="Caută materie sau grupă..."
         className="input-base w-full"
       />
 
@@ -34,8 +34,8 @@ export default function AllGroupsView({ schedule }) {
           <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-3">
             <Users size={20} className="text-slate-600" />
           </div>
-          <p className="text-sm font-semibold text-slate-400">Nicio grupÄƒ gÄƒsitÄƒ</p>
-          <p className="text-xs text-slate-600 mt-1">ÃŽncearcÄƒ alt termen de cÄƒutare.</p>
+          <p className="text-sm font-semibold text-slate-400">Nicio grupă găsită</p>
+          <p className="text-xs text-slate-600 mt-1">Încearcă alt termen de căutare.</p>
         </div>
       ) : (
         <motion.div className="grid gap-4 sm:grid-cols-2" variants={staggerContainer} initial="hidden" animate="show">
