@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { ChevronLeft, Bus, Clock, MapPin, CreditCard, ChevronDown, ChevronUp, Zap } from 'lucide-react'
+import { ChevronLeft, Bus, Clock, MapPin, CreditCard, ChevronDown, ChevronUp, Zap, Tag } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { transportLines } from '../../shared/data/cityData'
+import { transportData, DEFAULT_TRANSPORT } from '../../shared/data/cityData'
 
 const container = {
   hidden: {},
@@ -12,8 +12,12 @@ const itemVar = {
   show:   { opacity: 1, y: 0,  filter: 'blur(0px)', transition: { type: 'spring', stiffness: 90, damping: 20 } },
 }
 
-export default function StudentTransport({ onBack }) {
+export default function StudentTransport({ onBack, profile, onNavigate }) {
   const [expanded, setExpanded] = useState(null)
+
+  const universityId = profile?.university?.id || profile?.universityId || ''
+  const data = transportData[universityId] || DEFAULT_TRANSPORT
+  const lines = data.lines
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-5">
@@ -44,12 +48,12 @@ export default function StudentTransport({ onBack }) {
                 style={{ background: '#06b6d420', border: '1.5px solid #06b6d445' }}>
                 <Bus size={14} style={{ color: '#06b6d4' }} />
               </div>
-              <h2 className="text-lg font-bold text-white">Transport CTP Iași</h2>
+              <h2 className="text-lg font-bold text-white">Transport {data.operator}</h2>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5 ml-9">Linii utile pentru studenți</p>
+            <p className="text-xs text-slate-500 mt-0.5 ml-9">Rute recomandate pentru studenți · {data.city}</p>
           </div>
 
-          <span className="text-xs text-slate-500 shrink-0">{transportLines.length} linii</span>
+          <span className="text-xs text-slate-500 shrink-0">{lines.length} linii</span>
         </div>
       </motion.div>
 
@@ -65,29 +69,46 @@ export default function StudentTransport({ onBack }) {
           style={{ background: '#06b6d420', border: '1.5px solid #06b6d445' }}>
           <CreditCard size={16} style={{ color: '#06b6d4' }} />
         </div>
-        <div>
-          <div className="flex items-center gap-2">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm font-semibold" style={{ color: '#67e8f9' }}>Abonament Student</p>
             <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
               style={{ background: '#06b6d420', color: '#06b6d4' }}>
-              50% OFF
+              {data.studentPass.discount} OFF
             </span>
           </div>
           <p className="text-xs mt-1 leading-relaxed" style={{ color: '#a5f3fc80' }}>
-            50% reducere față de prețul normal. Necesită carnet de student vizat + adeverință.
-            Disponibil la casele CTP din centru.
+            {data.studentPass.price} · {data.studentPass.note}
           </p>
         </div>
+        {onNavigate && (
+          <button
+            onClick={() => {
+              sessionStorage.setItem('sc_discount_jump', 'Transport')
+              onNavigate('discounts', 'life')
+            }}
+            className="shrink-0 flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-all hover:opacity-80"
+            style={{ background: '#06b6d415', color: '#22d3ee', border: '1px solid #06b6d430' }}
+          >
+            <Tag size={10} />
+            Vezi reduceri
+          </button>
+        )}
       </motion.div>
 
       {/* Lines */}
+      {lines.length === 0 ? (
+        <div className="text-center py-10 text-slate-500 text-sm">
+          Date transport pentru {data.city} în curând.
+        </div>
+      ) : (
       <motion.div
         variants={container}
         initial="hidden"
         animate="show"
         className="space-y-2"
       >
-        {transportLines.map((line, i) => {
+        {lines.map((line, i) => {
           const isExp = expanded === i
           return (
             <motion.div key={i} variants={itemVar}>
@@ -190,6 +211,7 @@ export default function StudentTransport({ onBack }) {
           )
         })}
       </motion.div>
+      )}
     </div>
   )
 }

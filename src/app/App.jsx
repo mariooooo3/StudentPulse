@@ -159,7 +159,7 @@ function AppShell() {
               {platformMode === 'life' && ['pulse', 'discounts', 'career', 'community', 'events', 'wellness', 'tools'].includes(currentView) && (
                 <StudentLifeHub activeSection={currentView} profile={profile} session={session} />
               )}
-              {platformMode === 'life' && currentView === 'citylife' && <CityAdaptation profile={profile} session={session} />}
+              {platformMode === 'life' && currentView === 'citylife' && <CityAdaptation profile={profile} session={session} onNavigate={handleNavigate} />}
             </div>
           </Suspense>
         </main>

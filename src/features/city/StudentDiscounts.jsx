@@ -63,7 +63,7 @@ export default function StudentDiscounts({ onBack }) {
               <h2 className="text-lg font-bold text-white">Reduceri Studenți</h2>
             </div>
             <p className="text-xs text-slate-500 mt-0.5 ml-9">
-              {studentDiscounts.length} locuri partenere în Iași
+              {studentDiscounts.length} oferte în toată țara
             </p>
           </div>
 
@@ -122,7 +122,6 @@ export default function StudentDiscounts({ onBack }) {
         >
           {filtered.map((d) => {
             const catColor = CAT_COLORS[d.cat] || '#6366f1'
-            const discountNum = d.discount.split('%')[0]
             return (
               <motion.div key={d.id} variants={itemVar}>
                 <div className="group relative flex items-center gap-4 p-4 rounded-2xl border border-white/[0.07] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.11] transition-all duration-200 overflow-hidden">
@@ -134,13 +133,12 @@ export default function StudentDiscounts({ onBack }) {
 
                   {/* Discount badge */}
                   <div
-                    className="w-14 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 font-bold transition-transform duration-200 group-hover:scale-105"
+                    className="w-14 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 font-bold transition-transform duration-200 group-hover:scale-105 px-1 text-center"
                     style={{ background: catColor + '20', border: `1.5px solid ${catColor}40` }}
                   >
-                    <span className="text-lg leading-none font-bold" style={{ color: catColor }}>
-                      {discountNum}%
+                    <span className="text-[11px] leading-tight font-bold" style={{ color: catColor }}>
+                      {d.discount}
                     </span>
-                    <span className="text-[9px] text-slate-500 mt-0.5 font-normal">reducere</span>
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -152,8 +150,9 @@ export default function StudentDiscounts({ onBack }) {
                       {d.verified && <CheckCircle size={12} style={{ color: '#10b981' }} />}
                     </div>
                     <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{d.desc}</p>
-                    <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-600">
+                    <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-600 flex-wrap">
                       <MapPin size={9} /> {d.distance} · {d.address}
+                      {d.city && <span className="ml-1 px-1.5 py-0.5 rounded-full bg-white/[0.05] text-slate-500">{d.city}</span>}
                     </div>
                   </div>
 

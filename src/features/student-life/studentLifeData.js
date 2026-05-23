@@ -1,10 +1,19 @@
 export * from './studentLifeData.datasets.js'
 
+function normCity(v) {
+  return String(v || '')
+    .replace(/Iași/g, 'Iasi').replace(/iași/g, 'iasi')
+    .replace(/Timișoara/g, 'Timisoara').replace(/timișoara/g, 'timisoara')
+    .replace(/Târgu Mureș/g, 'Targu Mures').replace(/târgu mureș/g, 'targu mures')
+    .replace(/București/g, 'Bucuresti').replace(/bucurești/g, 'bucuresti')
+    .toLowerCase()
+}
+
 export function getScopedDiscountOffers(lifeProfile, studentLifeData) {
-  const city = String(lifeProfile?.city || '').toLowerCase()
+  const city = normCity(lifeProfile?.city || '')
   const universityId = String(lifeProfile?.universityId || '').toLowerCase()
   return (studentLifeData?.discounts?.offers || []).filter((offer) => {
-    const offerCity = String(offer.city || 'all').toLowerCase()
+    const offerCity = normCity(offer.city || 'all')
     const cityOk = offerCity === 'all' || offerCity === city
     const uaicOnly = /uaic/i.test(offer.brand) || /uaic/i.test(offer.description || '')
     const tuiasiOnly = /tuiasi/i.test(offer.brand) || /tuiasi/i.test(offer.description || '') || /campus\.tuiasi/i.test(offer.url || '')
