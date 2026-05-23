@@ -10,6 +10,9 @@ export function normalizeCity(value) {
     .replace('Iași', 'Iasi')
     .replace('Timișoara', 'Timisoara')
     .replace('Brașov', 'Brasov')
+    .replace('Târgu Mureș', 'Targu Mures')
+    .replace('București', 'Bucuresti')
+    .replace('Cluj-Napoca', 'Cluj-Napoca')
 }
 
 export function buildLifeProfile(profile, session) {

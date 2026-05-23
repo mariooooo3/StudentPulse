@@ -161,9 +161,9 @@ const OVERRIDES = {
     ],
     subjects: ['Toate', 'Biologie Celulară', 'Genetică Moleculară', 'Microbiologie', 'Ecologie Generală', 'Botanică', 'Zoologie'],
     skillSwap: [
-      { id: 1, name: 'Ioana Preda', avatar: 'IP', teaches: 'Microscopie & histologie', learns: 'Bioinformatică în R', teachLevel: 'Avansat', learnLevel: 'Beginner', match: true, online: true },
+      { id: 1, name: 'Ioana Preda', avatar: 'IP', teaches: 'Microscopie & histologie', learns: 'Bioinformatică în R', teachLevel: 'Avansat', learnLevel: 'Incepator', match: true, online: true },
       { id: 2, name: 'Radu Neagu', avatar: 'RN', teaches: 'Genetică moleculară', learns: 'Ecologie de teren', teachLevel: 'Avansat', learnLevel: 'Intermediar', match: true, online: true },
-      { id: 3, name: 'Mara Dobre', avatar: 'MD', teaches: 'Botanică sistematică', learns: 'PCR & laborator molecular', teachLevel: 'Intermediar', learnLevel: 'Beginner', match: false, online: false },
+      { id: 3, name: 'Mara Dobre', avatar: 'MD', teaches: 'Botanică sistematică', learns: 'PCR & laborator molecular', teachLevel: 'Intermediar', learnLevel: 'Incepator', match: false, online: false },
     ],
     groupSessions: [
       { id: 1, host: 'Ioana Preda', topic: 'Recapitulare microscopie: identificare țesuturi', date: 'Sâmbătă, 18 Mai', time: '10:00', spots: 3, totalSpots: 5, type: 'study', tags: ['Microscopie', 'Histologie', 'Laborator'] },

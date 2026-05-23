@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
 import {
@@ -25,6 +25,16 @@ export default function DiscountsSection({ lifeProfile, saved, savedOps }) {
   const [category, setCategory] = useState('Toate')
   const [query, setQuery] = useState('')
   const now = useNow()
+  const transportRef = useRef(null)
+
+  useEffect(() => {
+    const jump = sessionStorage.getItem('sc_discount_jump')
+    if (jump) {
+      sessionStorage.removeItem('sc_discount_jump')
+      setCategory(jump)
+      setTimeout(() => transportRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120)
+    }
+  }, [])
 
   const offers = useMemo(() => {
     const q = query.toLowerCase()
@@ -40,7 +50,7 @@ export default function DiscountsSection({ lifeProfile, saved, savedOps }) {
   }, [category, lifeProfile, now, query])
 
   return (
-    <section className="space-y-5">
+    <section className="space-y-5" ref={transportRef}>
       <SectionHeader section="discounts" accent={accent} meta={SECTION_META.discounts} />
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
@@ -88,7 +98,10 @@ export default function DiscountsSection({ lifeProfile, saved, savedOps }) {
               <p className="mt-4 min-h-12 text-sm leading-relaxed text-slate-400">{offer.description}</p>
               <div className="mt-4 flex items-end justify-between gap-2">
                 <div>
-                  <span className="text-2xl font-black text-white">-{offer.discount}%</span>
+                  {offer.discount === 100
+                    ? <span className="text-2xl font-black text-emerald-400">GRATUIT</span>
+                    : <span className="text-2xl font-black text-white">-{offer.discount}%</span>
+                  }
                   <p className="mt-1 flex items-center gap-1 font-mono text-[11px] text-slate-500">
                     <Clock size={11} /> Expiră în {offer.expiryDays} {offer.expiryDays === 1 ? 'zi' : 'zile'}
                   </p>
@@ -100,7 +113,7 @@ export default function DiscountsSection({ lifeProfile, saved, savedOps }) {
                       className="inline-flex h-9 items-center gap-1.5 rounded-xl border px-3 text-xs font-bold transition-all active:scale-[0.97]"
                       style={{ background: accent.bg, borderColor: accent.border, color: accent.color }}
                     >
-                      Accesează <ExternalLink size={11} />
+                      Site oficial <ExternalLink size={11} />
                     </button>
                   )}
                   <button
