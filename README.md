@@ -4,12 +4,13 @@
 
 StudentCompass is a student platform for Romanian universities. It brings together academic planning, campus navigation, professor workflows, peer support, realtime communication, student-life utilities, and AI assistance in one web app.
 
-The project was built for **FiiPractic Hackathon 2026** as a full product prototype: student app, professor portal, backend APIs, realtime WebSocket flows, local persistence, AI-powered guidance, and a polished responsive interface.
+The platform supports multiple universities with full tenant-scope personalization: content, professors, schedules, tutors, discounts, events, and community data are filtered automatically to the student's university and faculty. Student app, professor portal, backend APIs, realtime WebSocket flows, local persistence, and AI-powered guidance are all included.
 
 ---
 
 ## Table of Contents
 
+- [Multi-University Support](#multi-university-support)
 - [What It Does](#what-it-does)
 - [Main Modules](#main-modules)
 - [Student Features](#student-features)
@@ -25,6 +26,23 @@ The project was built for **FiiPractic Hackathon 2026** as a full product protot
 - [Demo Accounts](#demo-accounts)
 - [Production Build](#production-build)
 - [Team](#team)
+
+---
+
+## Multi-University Support
+
+StudentCompass is built around a tenant-scope model. Every piece of content is tied to a `universityId:facultyCode` scope derived from the student's login.
+
+Scoped content includes:
+
+- thesis professors and domain options;
+- schedule and recovery data;
+- tutors, subjects, and skill-swap listings;
+- student-life discounts, community groups, events, and tools;
+- campus navigation maps and building configs;
+- onboarding questions and domain personalization.
+
+To add a new university or faculty, see [`docs/TENANT_SCOPE.md`](docs/TENANT_SCOPE.md).
 
 ---
 
@@ -567,11 +585,11 @@ GROQ_API_KEY=your_key_here
 
 ## Notes
 
-- This is a hackathon prototype, but many workflows use real local persistence.
-- SQLite is initialized automatically.
-- Some datasets are static demo data and can later be migrated to database-backed endpoints.
-- If the AI API is unavailable, several assistants still provide local fallback behavior.
-- If WebSocket is unavailable, some notification flows continue with browser-local fallback behavior.
+- SQLite is initialized automatically on first run.
+- Static demo datasets can be migrated to database-backed endpoints as the platform grows.
+- If the AI API is unavailable, assistants fall back to built-in local knowledge.
+- If WebSocket is unavailable, notification flows continue with browser-local fallback behavior.
+- Tenant scope is enforced client-side; server-side enforcement should be added before exposing real user data.
 
 ---
 
