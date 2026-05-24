@@ -30,7 +30,8 @@ import clsx from 'clsx'
 import { useState } from 'react'
 import { useAuth } from '../providers/AuthContext'
 import { getUniversityTheme } from '../../shared/utils/theme'
-import { useStreaks } from '../../shared/hooks/useStreaks'
+import { useStreaksContext } from '../providers/StreaksContext'
+import SCLogo from '../../components/ui/SCLogo'
 
 const NAV_BY_MODE = {
   academic: [
@@ -218,7 +219,7 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
 export default function Sidebar({ platformMode = 'academic', currentView, onNavigate, profile, session, open, onClose, onlineCount = 0 }) {
   const { logout } = useAuth()
   const [showProfile, setShowProfile] = useState(false)
-  const { focusStreak, pulseStreak } = useStreaks(session?.userId)
+  const { focusStreak, pulseStreak } = useStreaksContext()
   const university = session?.university
   const theme = getUniversityTheme(university)
   const nav = NAV_BY_MODE[platformMode] || NAV_BY_MODE.academic
@@ -239,17 +240,7 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
       {/* Brand */}
       <div className="px-5 pt-6 pb-4">
         <div className="flex items-center gap-3">
-          <div className="p-[1.5px] rounded-[0.85rem] bg-gradient-to-b from-white/15 to-white/[0.03]">
-            <div
-              className="w-9 h-9 rounded-[0.75rem] flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]"
-              style={{
-                background: `linear-gradient(140deg, ${theme.accent}ee, ${theme.accentStrong || theme.accent}aa)`,
-                boxShadow: `inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 8px ${theme.accent}30`,
-              }}
-            >
-              <ModeIcon size={16} className="text-white" strokeWidth={2} />
-            </div>
-          </div>
+          <SCLogo accent={theme.accent} accentStrong={theme.accentStrong} size="sm" />
           <div className="flex-1 min-w-0">
             <p className="font-bold text-white text-[13px] leading-tight tracking-tight">{modeCopy.name}</p>
             <p className="text-[11px] text-slate-600 font-medium">{modeCopy.subtitle}</p>
@@ -348,58 +339,79 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
         <div className="gradient-separator" />
       </div>
 
+      {/* Streak card */}
+      {(focusStreak > 0 || pulseStreak > 0) && <div className="mx-3 mb-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-600 mb-2">Streaks zilnice</p>
+        <div className="flex items-center gap-2">
+          <div className={clsx(
+            'flex-1 flex items-center gap-2 rounded-lg border px-2.5 py-1.5 transition-colors duration-300',
+            focusStreak > 0 ? 'border-orange-400/20 bg-orange-400/10' : 'border-white/[0.04] bg-white/[0.02]',
+          )}>
+            <Flame size={13} className={focusStreak > 0 ? 'text-orange-300 shrink-0' : 'text-slate-700 shrink-0'} />
+            <div className="min-w-0">
+              <p className={clsx('font-mono text-[15px] font-black leading-none', focusStreak > 0 ? 'text-orange-200' : 'text-slate-700')}>{focusStreak}</p>
+              <p className={clsx('text-[9px] font-semibold mt-0.5', focusStreak > 0 ? 'text-orange-400/70' : 'text-slate-700')}>Focus</p>
+            </div>
+          </div>
+          <div className={clsx(
+            'flex-1 flex items-center gap-2 rounded-lg border px-2.5 py-1.5 transition-colors duration-300',
+            pulseStreak > 0 ? 'border-cyan-400/20 bg-cyan-400/10' : 'border-white/[0.04] bg-white/[0.02]',
+          )}>
+            <Zap size={13} className={pulseStreak > 0 ? 'text-cyan-300 shrink-0' : 'text-slate-700 shrink-0'} />
+            <div className="min-w-0">
+              <p className={clsx('font-mono text-[15px] font-black leading-none', pulseStreak > 0 ? 'text-cyan-200' : 'text-slate-700')}>{pulseStreak}</p>
+              <p className={clsx('text-[9px] font-semibold mt-0.5', pulseStreak > 0 ? 'text-cyan-400/70' : 'text-slate-700')}>Pulse</p>
+            </div>
+          </div>
+        </div>
+      </div>}
+
       {/* User card */}
       <div className="p-3 pt-2">
-        <div
-          className="rounded-xl p-3"
-          style={{
-            background: 'rgba(255,255,255,0.025)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), 0 2px 8px rgba(0,0,0,0.3)',
-          }}
-        >
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => setShowProfile(true)}
-              className="relative w-8 h-8 rounded-[0.6rem] flex items-center justify-center text-white text-[11px] font-bold shrink-0 hover:opacity-80 transition-opacity group"
-              style={{
-                background: `linear-gradient(140deg, ${theme.accent}dd, ${theme.accentStrong || theme.accent}88)`,
-                boxShadow: `0 2px 8px ${theme.accent}30, inset 0 1px 0 rgba(255,255,255,0.15)`,
-              }}
-              title="Editează profilul"
-            >
-              {initials}
-              <span className="absolute inset-0 rounded-[0.6rem] flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Edit3 size={10} className="text-white" />
-              </span>
-            </button>
+        {/* Bezel wrapper */}
+        <div className="p-[1px] rounded-[0.85rem]"
+          style={{ background: `linear-gradient(to bottom, ${theme.accent}28, rgba(255,255,255,0.03))` }}>
+          <div
+            className="rounded-[calc(0.85rem-1px)] p-3 relative overflow-hidden"
+            style={{
+              background: `linear-gradient(135deg, ${theme.accent}08, rgba(6,10,20,0.95))`,
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+            }}
+          >
+            {/* Subtle glow behind avatar */}
+            <div
+              className="pointer-events-none absolute -left-2 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full blur-xl opacity-20"
+              style={{ background: theme.accent }}
+            />
+            <div className="relative flex items-center gap-2.5">
+              <button
+                onClick={() => setShowProfile(true)}
+                className="relative w-8 h-8 rounded-[0.6rem] flex items-center justify-center text-white text-[11px] font-bold shrink-0 hover:opacity-80 transition-opacity group"
+                style={{
+                  background: `linear-gradient(140deg, ${theme.accent}dd, ${theme.accentStrong || theme.accent}88)`,
+                  boxShadow: `0 2px 8px ${theme.accent}40, inset 0 1px 0 rgba(255,255,255,0.18)`,
+                }}
+                title="Editează profilul"
+              >
+                {initials}
+                <span className="absolute inset-0 rounded-[0.6rem] flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Edit3 size={10} className="text-white" />
+                </span>
+              </button>
 
-            <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-semibold text-slate-200 truncate leading-tight">{displayName}</p>
-              <p className="text-[11px] text-slate-600 truncate mt-0.5">{facultyLabel}</p>
-              {(focusStreak > 0 || pulseStreak > 0) && (
-                <div className="flex items-center gap-2 mt-1">
-                  {focusStreak > 0 && (
-                    <span className="inline-flex items-center gap-0.5 font-mono text-[10px] font-bold text-orange-300/80">
-                      <Flame size={9} /> {focusStreak}
-                    </span>
-                  )}
-                  {pulseStreak > 0 && (
-                    <span className="inline-flex items-center gap-0.5 font-mono text-[10px] font-bold text-cyan-300/80">
-                      <Zap size={9} /> {pulseStreak}
-                    </span>
-                  )}
-                </div>
-              )}
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-semibold text-slate-200 truncate leading-tight">{displayName}</p>
+                <p className="text-[11px] text-slate-600 truncate mt-0.5">{facultyLabel}</p>
+              </div>
+
+              <button
+                onClick={logout}
+                title="Deconectare"
+                className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-slate-700 hover:text-red-400 hover:bg-red-400/[0.08] transition-[color,background-color] duration-200"
+              >
+                <LogOut size={13} strokeWidth={1.75} />
+              </button>
             </div>
-
-            <button
-              onClick={logout}
-              title="Deconectare"
-              className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-slate-700 hover:text-red-400 hover:bg-red-400/[0.08] transition-all duration-200"
-            >
-              <LogOut size={13} strokeWidth={1.75} />
-            </button>
           </div>
         </div>
       </div>

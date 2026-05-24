@@ -3,12 +3,10 @@ import clsx from 'clsx'
 import { Flame, Pause, Play, RotateCcw } from 'lucide-react'
 import { SECTION_ACCENTS } from '../constants/sectionConfig'
 import AccentLine from '../components/AccentLine'
-import { useAuth } from '../../../app/providers/AuthContext'
-import { useStreaks } from '../../../shared/hooks/useStreaks'
+import { useStreaksContext } from '../../../app/providers/StreaksContext'
 
 export default function PomodoroTimer() {
-  const { session } = useAuth()
-  const { focusStreak, incrementFocus } = useStreaks(session?.userId)
+  const { focusStreak, incrementFocus } = useStreaksContext()
   const accent = SECTION_ACCENTS.wellness
   const [mode, setMode] = useState('work')
   const [timeLeft, setTimeLeft] = useState(25 * 60)
@@ -89,15 +87,26 @@ export default function PomodoroTimer() {
 
       {/* Timer ring */}
       <div className="relative w-36 h-36 mx-auto mb-6">
+        {/* Glow behind the progress arc */}
+        {running && (
+          <div
+            className="absolute inset-2 rounded-full blur-xl opacity-20 animate-glow-pulse"
+            style={{ background: accent.color }}
+          />
+        )}
         <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="7" />
+          <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
+          {/* Track shadow */}
+          <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="6"
+            style={{ filter: 'blur(1px)' }} />
           <circle
             cx="50" cy="50" r="45" fill="none"
-            stroke={accent.color} strokeWidth="7"
+            stroke={accent.color} strokeWidth="6"
             strokeDasharray={circumference}
             strokeDashoffset={circumference * (1 - progress)}
             strokeLinecap="round"
             className="transition-all duration-1000"
+            style={{ filter: `drop-shadow(0 0 6px ${accent.color}80)` }}
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -123,13 +132,20 @@ export default function PomodoroTimer() {
         </button>
       </div>
 
-      <div className="flex items-center justify-center gap-3 mt-4">
-        <p className="font-mono text-xs text-slate-600">{sessions} sesiuni completate azi</p>
-        {focusStreak > 0 && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-orange-400/20 bg-orange-400/10 px-2 py-0.5 font-mono text-[10px] font-bold text-orange-300">
-            <Flame size={10} /> {focusStreak} zile
-          </span>
-        )}
+      <p className="font-mono text-xs text-slate-600 mt-4">{sessions} sesiuni completate azi</p>
+      <div className={clsx(
+        'mt-3 flex items-center justify-center gap-2 rounded-xl border px-3 py-2 transition-colors duration-300',
+        focusStreak > 0
+          ? 'border-orange-400/20 bg-orange-400/10'
+          : 'border-white/[0.05] bg-white/[0.02]',
+      )}>
+        <Flame size={15} className={focusStreak > 0 ? 'text-orange-300' : 'text-slate-700'} />
+        <span className={clsx('font-mono text-sm font-black', focusStreak > 0 ? 'text-orange-200' : 'text-slate-600')}>
+          {focusStreak}
+        </span>
+        <span className={clsx('text-[11px] font-semibold', focusStreak > 0 ? 'text-orange-400/80' : 'text-slate-700')}>
+          {focusStreak === 0 ? 'Pornește prima sesiune!' : focusStreak === 1 ? 'zi la rând' : 'zile la rând'}
+        </span>
       </div>
     </div>
   )
