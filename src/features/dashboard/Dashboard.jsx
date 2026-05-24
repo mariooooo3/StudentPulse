@@ -8,6 +8,7 @@ import { getDashboardData, getScheduleData } from '../../shared/data/facultyCata
 import { getUniversityTheme } from '../../shared/utils/theme'
 import { formatLiveDate, getNextScheduleItem, getUpcomingScheduleItems } from '../../shared/utils/dateTime'
 import { useNow } from '../../shared/hooks/useNow'
+import SCLogo from '../../components/ui/SCLogo'
 
 const MODULES = [
   {
@@ -60,12 +61,12 @@ function nameFromEmail(email) {
 
 const containerVariants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.07 } },
+  show: { transition: { staggerChildren: 0.055 } },
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 18, filter: 'blur(4px)' },
-  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { type: 'spring', stiffness: 90, damping: 20 } },
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 140, damping: 24 } },
 }
 
 function isSameCalendarDay(a, b) {
@@ -148,12 +149,15 @@ export default function Dashboard({ profile, session, onNavigate }) {
 
             {/* Left */}
             <div>
-              <div
-                className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold tracking-widest uppercase mb-5"
-                style={{ background: theme.accentSoft, borderColor: theme.accentBorder, color: theme.accent }}
-              >
-                <Sparkles size={9} strokeWidth={2.5} />
-                Personalizat pentru tine
+              <div className="flex items-center gap-3 mb-5">
+                <SCLogo accent={theme.accent} accentStrong={theme.accentStrong} size="md" />
+                <div
+                  className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold tracking-widest uppercase"
+                  style={{ background: theme.accentSoft, borderColor: theme.accentBorder, color: theme.accent }}
+                >
+                  <Sparkles size={9} strokeWidth={2.5} />
+                  Personalizat pentru tine
+                </div>
               </div>
               <p className="text-slate-500 text-[13px] font-medium">{greeting},</p>
               <h2

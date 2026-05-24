@@ -55,6 +55,7 @@ export default {
         shimmer: { from: { backgroundPosition: '-200% center' }, to: { backgroundPosition: '200% center' } },
         float: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-10px)' } },
         glowPulse: { '0%, 100%': { opacity: '0.15' }, '50%': { opacity: '0.38' } },
+        glowPulseFast: { '0%, 100%': { opacity: '0.15' }, '50%': { opacity: '0.48' } },
       },
       boxShadow: {
         'glow-indigo': '0 0 20px rgba(99,102,241,0.35), 0 0 60px rgba(99,102,241,0.12)',

@@ -5,19 +5,32 @@ export default function SectionHeader({ section, accent, meta, children }) {
   const Icon = meta?.icon || Sparkles
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', stiffness: 80, damping: 18 }}
+      transition={{ type: 'spring', stiffness: 130, damping: 22 }}
       className="relative overflow-hidden rounded-2xl border p-5 dot-grid"
-      style={{ borderColor: accent.border, background: `linear-gradient(135deg, ${accent.bg}, rgba(8,14,28,0.85))` }}
+      style={{ borderColor: accent.border, background: `linear-gradient(135deg, ${accent.bg}, rgba(8,14,28,0.88))` }}
     >
-      <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full blur-3xl opacity-30"
+      {/* Top accent line */}
+      <div
+        className="pointer-events-none absolute top-0 inset-x-0 h-px"
+        style={{ background: `linear-gradient(90deg, transparent, ${accent.color}80, transparent)` }}
+      />
+      {/* Glow orb */}
+      <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full blur-3xl opacity-25"
+           style={{ background: accent.color }} />
+      {/* Second subtle orb bottom-left */}
+      <div className="pointer-events-none absolute -left-8 -bottom-8 h-32 w-32 rounded-full blur-2xl opacity-10"
            style={{ background: accent.color }} />
       <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
-               style={{ background: accent.bg, border: `1px solid ${accent.border}` }}>
-            <Icon size={22} style={{ color: accent.color }} strokeWidth={1.7} />
+          {/* Icon with bezel */}
+          <div className="p-[1.5px] rounded-2xl shrink-0"
+               style={{ background: `linear-gradient(to bottom, ${accent.color}40, ${accent.color}10)` }}>
+            <div className="flex h-11 w-11 items-center justify-center rounded-[calc(1rem-1.5px)]"
+                 style={{ background: `linear-gradient(140deg, ${accent.bg}, rgba(8,14,28,0.9))`, border: `1px solid ${accent.border}` }}>
+              <Icon size={20} style={{ color: accent.color }} strokeWidth={1.75} />
+            </div>
           </div>
           <div>
             <p className="section-label mb-1.5" style={{ color: accent.color + 'aa' }}>{meta?.kicker}</p>

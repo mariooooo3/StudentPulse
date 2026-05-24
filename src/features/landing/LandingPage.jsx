@@ -1,6 +1,7 @@
 import { Compass, Map, Calendar, BookOpen, Users, ArrowRight, Sparkles, Shield, MessageSquare, GraduationCap, Zap, ChevronRight, Heart, Briefcase, Bell, Bot, ClipboardCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { UNIVERSITIES } from '../../shared/config/universities'
+import SCLogo from '../../components/ui/SCLogo'
 
 const FEATURES = [
   {
@@ -91,8 +92,8 @@ const containerVariants = {
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20, filter: 'blur(6px)' },
-  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { type: 'spring', stiffness: 80, damping: 18 } },
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 20 } },
 }
 
 export default function LandingPage({ onStart }) {
@@ -135,17 +136,7 @@ export default function LandingPage({ onStart }) {
       {/* ── Header ────────────────────────────────────────── */}
       <header className="relative z-10 flex items-center justify-between px-6 sm:px-12 py-5 max-w-6xl mx-auto w-full">
         <div className="flex items-center gap-2.5">
-          <div className="p-[1.5px] rounded-[0.85rem] bg-gradient-to-b from-white/30 to-white/[0.04]">
-            <div
-              className="w-9 h-9 rounded-[calc(0.85rem-1.5px)] flex items-center justify-center"
-              style={{
-                background: 'linear-gradient(140deg, #6366f1, #7c3aed)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.15), 0 4px 12px rgba(99,102,241,0.4)',
-              }}
-            >
-              <Compass size={17} className="text-white" strokeWidth={2} />
-            </div>
-          </div>
+          <SCLogo accent="#6366f1" accentStrong="#7c3aed" size="sm" />
           <div>
             <span className="font-bold text-white text-[14px] tracking-tight leading-none block">StudentCompass</span>
             <span className="text-[10px] text-slate-600 font-medium leading-none">Platforma Studențească</span>
@@ -211,9 +202,9 @@ export default function LandingPage({ onStart }) {
             {[0, 1.0, 2.0].map((delay) => (
               <motion.div
                 key={delay}
-                animate={{ scale: [1, 2.4], opacity: [0.45, 0] }}
-                transition={{ duration: 2.6, repeat: Infinity, ease: 'easeOut', delay }}
-                className="absolute pointer-events-none rounded-[1.75rem] border border-indigo-500/40"
+                animate={{ scale: [1, 2.4], opacity: [0, 0.2, 0] }}
+                transition={{ duration: 3.0, repeat: Infinity, ease: 'linear', delay }}
+                className="absolute pointer-events-none rounded-[1.75rem] border border-indigo-500/30"
                 style={{ top: '50%', left: '50%', width: 133, height: 133, marginTop: -66.5, marginLeft: -66.5 }}
               />
             ))}
@@ -376,7 +367,7 @@ export default function LandingPage({ onStart }) {
               variants={itemVariants}
               className={`group relative p-5 text-left rounded-2xl border border-white/[0.05] bg-white/[0.015]
                 hover:border-white/[0.11] hover:bg-white/[0.04]
-                transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
+                transition-[border-color,background-color] duration-200
                 overflow-hidden cursor-default
                 ${span || ''} ${size === 'large' ? 'min-h-[140px]' : ''}`}
             >
