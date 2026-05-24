@@ -12,10 +12,10 @@ const itemVar = {
   show:   { opacity: 1, y: 0,  filter: 'blur(0px)', transition: { type: 'spring', stiffness: 90, damping: 20 } },
 }
 
-export default function StudentTransport({ onBack, profile, onNavigate }) {
+export default function StudentTransport({ onBack, profile, session, onNavigate }) {
   const [expanded, setExpanded] = useState(null)
 
-  const universityId = profile?.university?.id || profile?.universityId || ''
+  const universityId = profile?.university?.id || profile?.universityId || session?.university?.id || ''
   const data = transportData[universityId] || DEFAULT_TRANSPORT
   const lines = data.lines
 

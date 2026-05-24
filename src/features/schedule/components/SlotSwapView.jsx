@@ -105,7 +105,25 @@ export default function SlotSwapView({ recoverySlots, swapRequests, userId, onNo
                     <motion.button
                       whileHover={{ y: -1 }}
                       whileTap={{ scale: 0.97 }}
-                      onClick={() => setMatchAccepted(p => ({ ...p, [req.id]: true }))}
+                      onClick={() => {
+                        setMatchAccepted(p => ({ ...p, [req.id]: true }))
+                        const acceptRequest = {
+                          userId,
+                          course: req.offersSubject,
+                          offerSlot: `${DAYS[req.wantsSlot.day - 1]} ${req.wantsSlot.start}:00 Gr.${req.wantsSlot.group}`,
+                          needSlot: `${DAYS[req.offersSlot.day - 1]} ${req.offersSlot.start}:00 Gr.${req.offersSlot.group}`,
+                          matchId: req.id,
+                          message: `Acceptat match cu ${req.name}`,
+                        }
+                        socketService.submitSwap(acceptRequest).catch(() => {})
+                        onNotify?.({
+                          title: 'Swap acceptat',
+                          body: `${req.offersSubject} — schimb confirmat cu ${req.name}.`,
+                          type: 'success',
+                          action: 'schedule.swap.accepted',
+                          meta: { matchId: req.id },
+                        })
+                      }}
                       className="btn-primary text-xs flex items-center gap-1.5"
                     >
                       <Check size={13} /> Acceptă swap

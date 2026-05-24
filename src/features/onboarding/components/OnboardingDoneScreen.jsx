@@ -55,7 +55,7 @@ export default function OnboardingDoneScreen({ aiLoading, aiProfile, answers, un
                   <p className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider mb-1.5">Primii pași</p>
                   {aiProfile.urgentTasks.map((task, i) => (
                     <div key={i} className="flex items-start gap-2 text-xs text-slate-300">
-                      <span className="text-amber-400 mt-0.5 shrink-0">â†’</span> {task}
+                      <span className="text-amber-400 mt-0.5 shrink-0">→</span> {task}
                     </div>
                   ))}
                 </div>

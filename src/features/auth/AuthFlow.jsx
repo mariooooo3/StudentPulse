@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Compass, Mail, ArrowRight, Check, Loader2, Shield, ChevronLeft, GraduationCap } from 'lucide-react'
 import { UNIVERSITIES } from '../../shared/config/universities'
 import UniversityGrid from './components/UniversityGrid'
@@ -18,6 +18,7 @@ const AC_FACULTY = TUIASI?.faculties.find(f => f.code === 'AC')
 
 export default function AuthFlow() {
   const { login } = useAuth()
+  const submitIdRef = useRef(0)
   const [role, setRole] = useState('student')
   const [step, setStep] = useState(STEP.SELECT_UNI)
   const [university, setUniversity] = useState(null)
@@ -33,6 +34,7 @@ export default function AuthFlow() {
 
   async function handleEmailSubmit() {
     setAccessCodeError(''); setLoading(true)
+    const opId = ++submitIdRef.current
     try {
       const valid = await verifyTotpCode(accessCode)
       if (!valid) { setAccessCodeError('Cod invalid sau expirat. Verifică aplicația de autentificare.'); setLoading(false); return }
@@ -41,18 +43,11 @@ export default function AuthFlow() {
     }
     setStep(STEP.VERIFYING)
     await new Promise(r => setTimeout(r, 2600))
+    if (opId !== submitIdRef.current) return   // utilizatorul a apăsat înapoi
     setDetectedFaculty(null)
     const fullEmail = buildUniversityEmail(email, university.emailDomain)
-    setIsReturning(!!getUserProfile(fullEmail))
-    setLoading(false); setStep(STEP.CONFIRMED)
-  }
-
-  async function handleDemoSkip() {
-    setAccessCodeError(''); setLoading(true); setStep(STEP.VERIFYING)
-    await new Promise(r => setTimeout(r, 2600))
-    setDetectedFaculty(null)
-    const fullEmail = buildUniversityEmail(email, university.emailDomain)
-    setIsReturning(!!getUserProfile(fullEmail))
+    const returning = !!getUserProfile(fullEmail)
+    setIsReturning(returning)
     setLoading(false); setStep(STEP.CONFIRMED)
   }
 
@@ -61,7 +56,7 @@ export default function AuthFlow() {
       role: 'student',
       userId: createUserId('mock'),
       email: buildUniversityEmail(email, university.emailDomain),
-      university, detectedFaculty, isNewUser: true,
+      university, detectedFaculty, isNewUser: !isReturning,
     })
   }
 
@@ -174,9 +169,9 @@ export default function AuthFlow() {
             {/* Step indicator */}
             {role === 'student' && (
               <div className="flex items-center gap-2 mb-6">
-                {step > STEP.SELECT_UNI && (
+                {step === STEP.ENTER_EMAIL && (
                   <button
-                    onClick={() => setStep(s => s - 1)}
+                    onClick={() => { submitIdRef.current++; setStep(STEP.SELECT_UNI) }}
                     className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.08] hover:border-white/[0.12] transition-all mr-1"
                   >
                     <ChevronLeft size={13} className="text-slate-500" strokeWidth={1.75} />

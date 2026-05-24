@@ -166,7 +166,7 @@ export default function Header({
           Caută în StudentCompass...
         </span>
         <kbd className="text-[10px] text-slate-700 border border-white/[0.07] rounded-md px-1.5 py-0.5 font-mono shrink-0">
-          ⌘K
+          {typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? '⌘K' : 'Ctrl+K'}
         </kbd>
       </button>
 

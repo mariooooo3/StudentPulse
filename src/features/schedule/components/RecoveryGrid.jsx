@@ -82,7 +82,7 @@ export default function RecoveryGrid({ recoverySlots, onNotify, session }) {
       <motion.div variants={staggerItem} className="premium-card p-4 border-indigo-500/20 bg-indigo-500/[0.04]">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-400">
           <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-indigo-600/40 border border-indigo-400" />Ora ta curentă</div>
-          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-emerald-900/40 border border-emerald-700/50" />Locuri disponibile <span className="text-slate-600">(click â†’ recuperare)</span></div>
+          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-emerald-900/40 border border-emerald-700/50" />Locuri disponibile <span className="text-slate-600">(click → recuperare)</span></div>
           <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-amber-900/40 border border-amber-700/50" />Aproape plin <span className="text-slate-600">(1–2 loc.)</span></div>
           <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-rose-900/40 border border-rose-700/50" />Complet</div>
         </div>

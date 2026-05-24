@@ -28,7 +28,7 @@ export function useOnboardingFlow(session) {
     const steps = [
       {
         id: 'faculty',
-        emoji: 'ðŸŽ“',
+        emoji: '🎓',
         question: 'La ce facultate ești înscris?',
         subtitle: university ? `Facultățile disponibile la ${university.shortName}` : 'Selectează sau caută facultatea ta',
         type: 'faculty',
@@ -38,7 +38,7 @@ export function useOnboardingFlow(session) {
     if (faculty?.code === 'AC') {
       steps.push({
         id: 'specialization',
-        emoji: 'ðŸ–¥ï¸',
+        emoji: '🖥️',
         question: 'Ce specializare urmezi?',
         subtitle: 'Fiecare specializare are materii, profesori și structură diferite',
         type: 'cards',
@@ -51,7 +51,7 @@ export function useOnboardingFlow(session) {
 
     steps.push({
       id: 'year',
-      emoji: 'ðŸ“…',
+      emoji: '📅',
       question: 'În ce an de studiu ești?',
       subtitle: 'Vom prioritiza informațiile relevante pentru anul tău',
       type: 'cards',
@@ -61,14 +61,14 @@ export function useOnboardingFlow(session) {
     if (facultyQ) {
       steps.push({
         id: 'interests',
-        emoji: 'ðŸ’¡',
+        emoji: '💡',
         question: facultyQ.interestsLabel,
         subtitle: 'Selectează unul sau mai multe — personalizăm tutorii și tema de licență',
         type: 'tags',
         options: facultyQ.interests,
       })
-      steps.push({ id: 'specific', emoji: 'ðŸ”', ...facultyQ.specific })
-      steps.push({ id: 'experience', emoji: 'â­', ...facultyQ.experience })
+      steps.push({ id: 'specific', emoji: '🔍', ...facultyQ.specific })
+      steps.push({ id: 'experience', emoji: '⭐', ...facultyQ.experience })
     }
 
     return [...steps, ...BASE_AFTER.map(q => ({ ...q }))]
