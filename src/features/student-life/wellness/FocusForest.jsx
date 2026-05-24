@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
-import { RotateCcw, Sparkles, Sprout, X } from 'lucide-react'
+import { Flame, RotateCcw, Sparkles, Sprout, X } from 'lucide-react'
 import { PI_DECIMALS } from '../../../shared/data/piDigits'
 import { SECS_PER_DIGIT } from '../constants/sectionConfig'
+import { useAuth } from '../../../app/providers/AuthContext'
+import { useStreaks } from '../../../shared/hooks/useStreaks'
 
 export default function FocusForest() {
+  const { session } = useAuth()
+  const { focusStreak, incrementFocus } = useStreaks(session?.userId)
   const [mode, setMode] = useState('timer')
   const [minutes, setMinutes] = useState(25)
   const [elapsed, setElapsed] = useState(0)
@@ -54,6 +58,7 @@ export default function FocusForest() {
             localStorage.setItem('sc_focus_trees', String(saved))
             return saved
           })
+          incrementFocus()
           return targetSeconds
         }
         return next
@@ -242,7 +247,7 @@ export default function FocusForest() {
             <p className="text-xs font-semibold leading-relaxed text-slate-400">
               O cifra noua apare la fiecare <span className="font-bold text-teal-200">{SECS_PER_DIGIT}s</span>. Daca schimbi tabul sau pierzi focusul ferestrei, sesiunea se opreste.
             </p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className={clsx('grid gap-2', focusStreak > 0 ? 'grid-cols-3' : 'grid-cols-2')}>
               <div className="rounded-xl bg-black/20 p-3">
                 <p className="section-label">Record</p>
                 <p className="mt-1 font-mono text-xl font-black text-white">{bestDigits}</p>
@@ -251,6 +256,14 @@ export default function FocusForest() {
                 <p className="section-label">Sesiuni</p>
                 <p className="mt-1 font-mono text-xl font-black text-white">{completed}</p>
               </div>
+              {focusStreak > 0 && (
+                <div className="rounded-xl bg-orange-400/10 border border-orange-400/20 p-3">
+                  <p className="section-label text-orange-300/60">Streak</p>
+                  <p className="mt-1 font-mono text-xl font-black text-orange-300 flex items-center gap-1">
+                    <Flame size={14} /> {focusStreak}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

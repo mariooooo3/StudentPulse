@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
-import { Pause, Play, RotateCcw } from 'lucide-react'
+import { Flame, Pause, Play, RotateCcw } from 'lucide-react'
 import { SECTION_ACCENTS } from '../constants/sectionConfig'
 import AccentLine from '../components/AccentLine'
+import { useAuth } from '../../../app/providers/AuthContext'
+import { useStreaks } from '../../../shared/hooks/useStreaks'
 
 export default function PomodoroTimer() {
+  const { session } = useAuth()
+  const { focusStreak, incrementFocus } = useStreaks(session?.userId)
   const accent = SECTION_ACCENTS.wellness
   const [mode, setMode] = useState('work')
   const [timeLeft, setTimeLeft] = useState(25 * 60)
@@ -22,7 +26,7 @@ export default function PomodoroTimer() {
           if (t <= 1) {
             setRunning(false)
             clearInterval(intervalRef.current)
-            if (mode === 'work') setSessions(s => s + 1)
+            if (mode === 'work') { setSessions(s => s + 1); incrementFocus() }
             return 0
           }
           return t - 1
@@ -119,7 +123,14 @@ export default function PomodoroTimer() {
         </button>
       </div>
 
-      <p className="font-mono text-xs text-slate-600 mt-4">{sessions} sesiuni completate azi</p>
+      <div className="flex items-center justify-center gap-3 mt-4">
+        <p className="font-mono text-xs text-slate-600">{sessions} sesiuni completate azi</p>
+        {focusStreak > 0 && (
+          <span className="inline-flex items-center gap-1 rounded-full border border-orange-400/20 bg-orange-400/10 px-2 py-0.5 font-mono text-[10px] font-bold text-orange-300">
+            <Flame size={10} /> {focusStreak} zile
+          </span>
+        )}
+      </div>
     </div>
   )
 }
