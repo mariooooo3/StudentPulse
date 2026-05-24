@@ -3,6 +3,7 @@ import {
   Briefcase,
   Calendar,
   Compass,
+  Flame,
   Heart,
   Home,
   LogOut,
@@ -23,11 +24,13 @@ import {
   Github,
   Linkedin,
   Hash,
+  Zap,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useState } from 'react'
 import { useAuth } from '../providers/AuthContext'
 import { getUniversityTheme } from '../../shared/utils/theme'
+import { useStreaks } from '../../shared/hooks/useStreaks'
 
 const NAV_BY_MODE = {
   academic: [
@@ -215,6 +218,7 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
 export default function Sidebar({ platformMode = 'academic', currentView, onNavigate, profile, session, open, onClose, onlineCount = 0 }) {
   const { logout } = useAuth()
   const [showProfile, setShowProfile] = useState(false)
+  const { focusStreak, pulseStreak } = useStreaks(session?.userId)
   const university = session?.university
   const theme = getUniversityTheme(university)
   const nav = NAV_BY_MODE[platformMode] || NAV_BY_MODE.academic
@@ -373,6 +377,20 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
             <div className="min-w-0 flex-1">
               <p className="text-[13px] font-semibold text-slate-200 truncate leading-tight">{displayName}</p>
               <p className="text-[11px] text-slate-600 truncate mt-0.5">{facultyLabel}</p>
+              {(focusStreak > 0 || pulseStreak > 0) && (
+                <div className="flex items-center gap-2 mt-1">
+                  {focusStreak > 0 && (
+                    <span className="inline-flex items-center gap-0.5 font-mono text-[10px] font-bold text-orange-300/80">
+                      <Flame size={9} /> {focusStreak}
+                    </span>
+                  )}
+                  {pulseStreak > 0 && (
+                    <span className="inline-flex items-center gap-0.5 font-mono text-[10px] font-bold text-cyan-300/80">
+                      <Zap size={9} /> {pulseStreak}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             <button

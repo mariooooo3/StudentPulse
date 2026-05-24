@@ -10,9 +10,12 @@ import {
   Plus,
   Radio,
   Send,
+  Zap,
 } from 'lucide-react'
 import { useNow } from '../../../shared/hooks/useNow'
 import { socketService } from '../../../shared/services/socket.service'
+import { useAuth } from '../../../app/providers/AuthContext'
+import { useStreaks } from '../../../shared/hooks/useStreaks'
 import { PULSE_TYPES, PULSE_LOCATIONS, PULSE_TONES, PULSE_LOCAL_KEY } from './pulseConstants'
 import { pulseTypeMeta, minutesUntil, readLocalPulseEvents, writeLocalPulseEvents } from './pulseUtils'
 import { SECTION_ACCENTS, SECTION_META } from '../constants/sectionConfig'
@@ -24,6 +27,8 @@ import EmptyState from '../components/EmptyState'
 export default function PulseSection({ lifeProfile }) {
   const now = useNow()
   const accent = SECTION_ACCENTS.pulse
+  const { session } = useAuth()
+  const { pulseStreak, incrementPulse } = useStreaks(session?.userId)
   const [events, setEvents] = useState([])
   const [channel, setChannel] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -94,6 +99,7 @@ export default function PulseSection({ lifeProfile }) {
         setChannel(response.channel)
         setForm(current => ({ ...current, note: '' }))
         setError('')
+        incrementPulse()
       })
       .catch(() => {
         const createdAt = new Date()
@@ -260,7 +266,14 @@ export default function PulseSection({ lifeProfile }) {
                   <Plus size={16} style={{ color: accent.color }} />
                 </span>
                 <div>
-                  <p className="text-sm font-bold text-white">Adauga semnal live</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-white">Adauga semnal live</p>
+                    {pulseStreak > 0 && (
+                      <span className="inline-flex items-center gap-0.5 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-cyan-300">
+                        <Zap size={9} /> {pulseStreak}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-slate-500">{localMode ? 'Merge local acum.' : 'Apare instant.'}</p>
                 </div>
               </div>

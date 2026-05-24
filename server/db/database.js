@@ -111,6 +111,14 @@ function migrate() {
       submitted_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS streaks (
+      user_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      count INTEGER NOT NULL DEFAULT 1,
+      last_date TEXT NOT NULL,
+      PRIMARY KEY (user_id, type)
+    );
+
     CREATE INDEX IF NOT EXISTS idx_notifications_user_time ON notifications(user_id, timestamp DESC);
     CREATE INDEX IF NOT EXISTS idx_direct_messages_channel_time ON direct_messages(channel, timestamp);
     CREATE INDEX IF NOT EXISTS idx_portal_messages_thread_time ON portal_messages(thread_id, timestamp);
