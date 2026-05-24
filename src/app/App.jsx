@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from './providers/AuthContext'
+import { StreaksProvider } from './providers/StreaksContext'
 import { SettingsProvider, useSettings } from './providers/SettingsContext'
 import { AUTH_STATE, PROFILE_STAGE } from '../shared/config/constants'
 import Sidebar from './layout/Sidebar'
@@ -196,13 +197,15 @@ function AppShell() {
 export default function App() {
   return (
     <AuthProvider>
-      <OnlineCountProvider>
-        <ToastProvider>
-          <SettingsProvider>
-            <AppShell />
-          </SettingsProvider>
-        </ToastProvider>
-      </OnlineCountProvider>
+      <StreaksProvider>
+        <OnlineCountProvider>
+          <ToastProvider>
+            <SettingsProvider>
+              <AppShell />
+            </SettingsProvider>
+          </ToastProvider>
+        </OnlineCountProvider>
+      </StreaksProvider>
     </AuthProvider>
   )
 }
