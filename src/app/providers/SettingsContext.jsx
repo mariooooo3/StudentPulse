@@ -69,7 +69,7 @@ export function SettingsProvider({ children }) {
     const s = loadSettings(userEmail)
     setSettings(s)
     applyAllEffects(s)
-  }, [storageKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userEmail])
 
   function updateSetting(key, value) {
     const next = { ...settings, [key]: value }
