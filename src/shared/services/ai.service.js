@@ -53,15 +53,20 @@ export async function rankTipsForUser(tips, _userProfile) {
 
 // ── City Adaptation Assistant ──────────────────────────────────────────────────
 export async function askCityAssistant(question, userProfile, history = []) {
+  const city = userProfile?.university?.city || 'orașul tău'
   try {
     return await post('/city-assistant', { question, userProfile, history })
   } catch {
-    const city = userProfile?.university?.city || 'orașul tău'
     return {
       answer: `Ca student nou în ${city}, primul pas este să mergi la secretariat cu dosarul complet în prima săptămână.`,
       suggestedNext: ['Deschide cont bancar', 'Obține abonament transport'],
     }
   }
+}
+
+export async function* streamCityAssistant(question, userProfile, history = []) {
+  const { readSSEStream } = await import('../utils/streamSSE.js')
+  yield* readSSEStream('/api/ai/city-assistant', { question, userProfile, history })
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────

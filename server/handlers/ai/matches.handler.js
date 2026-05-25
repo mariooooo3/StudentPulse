@@ -37,6 +37,7 @@ Returnează JSON cu forma: {"ids": ["id1", "id2", ...]} — array-ul cu id-urile
       },
     ],
     max_tokens: 200,
+    temperature: 0.2,
     response_format: { type: 'json_object' },
   })
 

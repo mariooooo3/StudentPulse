@@ -35,6 +35,7 @@ ${JSON.stringify(answers, null, 2)}`,
       },
     ],
     max_tokens: 600,
+    temperature: 0.7,
     response_format: { type: 'json_object' },
   })
 

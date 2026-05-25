@@ -14,7 +14,7 @@ import {
   X,
 } from 'lucide-react'
 import clsx from 'clsx'
-import { askVirtualAssistant, defaultSuggestions } from '../services/virtualAssistant.service'
+import { streamVirtualAssistant, localVirtualAssistantAnswer, defaultSuggestions } from '../services/virtualAssistant.service'
 
 const VIEW_LABELS = {
   dashboard: 'Dashboard',
@@ -264,20 +264,59 @@ export default function VirtualAssistant({
     }
 
     setLoading(true)
+    setMessages(prev => [...prev, { role: 'assistant', text: '', streaming: true }])
 
-    const response = await askVirtualAssistant({
-      message: text,
-      context,
-      history: nextMessages.slice(-8).map(item => ({
-        role: item.role === 'assistant' ? 'assistant' : 'user',
-        content: item.text,
-      })),
-    })
-
-    setMessages(prev => [...prev, { role: 'assistant', text: response.answer }])
-    setSuggestions(response.suggestions?.length ? response.suggestions : defaultSuggestions(context))
-    setLoading(false)
-    if (!open) setUnread(value => value + 1)
+    try {
+      for await (const event of streamVirtualAssistant({
+        message: text,
+        context,
+        history: nextMessages.slice(-8).map(item => ({
+          role: item.role === 'assistant' ? 'assistant' : 'user',
+          content: item.text,
+        })),
+      })) {
+        if (event.t === 'c') {
+          setLoading(false)
+          setMessages(prev => {
+            const msgs = [...prev]
+            const last = msgs[msgs.length - 1]
+            if (last?.streaming) msgs[msgs.length - 1] = { ...last, text: last.text + event.v }
+            return msgs
+          })
+        } else if (event.t === 'd') {
+          setMessages(prev => {
+            const msgs = [...prev]
+            const last = msgs[msgs.length - 1]
+            if (last?.streaming) msgs[msgs.length - 1] = { ...last, streaming: false }
+            return msgs
+          })
+          setSuggestions(event.meta?.suggestions?.length ? event.meta.suggestions : defaultSuggestions(context))
+          setLoading(false)
+          if (!open) setUnread(value => value + 1)
+        } else if (event.t === 'e') {
+          setMessages(prev => {
+            const msgs = [...prev]
+            const last = msgs[msgs.length - 1]
+            if (last?.streaming) msgs[msgs.length - 1] = { ...last, streaming: false, text: event.msg || localVirtualAssistantAnswer(text, context).answer }
+            return msgs
+          })
+          setSuggestions(defaultSuggestions(context))
+          setLoading(false)
+          if (!open) setUnread(value => value + 1)
+        }
+      }
+    } catch {
+      const fallback = localVirtualAssistantAnswer(text, context)
+      setMessages(prev => {
+        const msgs = [...prev]
+        const last = msgs[msgs.length - 1]
+        if (last?.streaming) msgs[msgs.length - 1] = { ...last, streaming: false, text: fallback.answer }
+        return msgs
+      })
+      setSuggestions(fallback.suggestions || defaultSuggestions(context))
+      setLoading(false)
+      if (!open) setUnread(value => value + 1)
+    }
   }
 
   function handleSubmit(event) {

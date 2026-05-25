@@ -52,6 +52,7 @@ ${cvText.slice(0, 4000)}`,
       },
     ],
     max_tokens: 1200,
+    temperature: 0.2,
     response_format: { type: 'json_object' },
   })
 

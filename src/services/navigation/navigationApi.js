@@ -13,11 +13,21 @@ async function post(endpoint, body) {
 
 export async function askNavigationAssistant(message, history = [], university = 'tuiasi') {
   try {
-    const data = await post('/assistant', { message, history, university })
-    return data.answer
+    const { readSSEStream } = await import('../../shared/utils/streamSSE.js')
+    let text = ''
+    for await (const event of readSSEStream(`${API_URL}/assistant`, { message, history, university })) {
+      if (event.t === 'c') text += event.v
+      else if (event.t === 'e') text = event.msg || text
+    }
+    return text || localAssistantAnswer(message)
   } catch {
     return localAssistantAnswer(message)
   }
+}
+
+export async function* streamNavigationAssistant(message, history = [], university = 'tuiasi') {
+  const { readSSEStream } = await import('../../shared/utils/streamSSE.js')
+  yield* readSSEStream(`${API_URL}/assistant`, { message, history, university })
 }
 
 export async function askNavigationCopilot({ message, image, history = [], context = {} }) {

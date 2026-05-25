@@ -1,6 +1,9 @@
 import { TEXT_MODEL, getSystemPrompt } from '../navigation.constants.js'
 import { grokChat, readJson, sendJson } from '../navigation.http.js'
 
+const recoCache = new Map()
+const CACHE_TTL_MS = 5 * 60 * 1000
+
 async function handleRecommendations(req, res) {
   const body = await readJson(req)
   const university = String(body.university || 'tuiasi').toLowerCase()
@@ -8,6 +11,13 @@ async function handleRecommendations(req, res) {
   const totalUsers = Number.isFinite(Number(body.totalUsers)) ? Number(body.totalUsers) : 0
   const crowdLevel = totalUsers === 0 ? 'necunoscut' : totalUsers < 80 ? 'scazut' : totalUsers < 160 ? 'moderat' : 'ridicat'
   const timeSlot = hour < 10 ? 'dimineata' : hour < 13 ? 'la pranz' : hour < 17 ? 'dupa-amiaza' : 'seara'
+
+  const cacheKey = `${university}:${hour}:${crowdLevel}`
+  const cached = recoCache.get(cacheKey)
+  if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
+    sendJson(res, 200, cached.data)
+    return
+  }
 
   const fallback = {
     briefing: `Campusul este ${crowdLevel}, iar tu esti in intervalul ${timeSlot}.`,
@@ -79,15 +89,15 @@ Reguli pentru diversitate:
         },
       ],
       max_tokens: 600,
+      temperature: 0.7,
       response_format: { type: 'json_object' },
     })
 
     const parsed = JSON.parse(raw)
     if (!parsed || !Array.isArray(parsed.cards)) throw new Error('Invalid recommendations payload')
-    sendJson(res, 200, {
-      briefing: parsed.briefing || fallback.briefing,
-      cards: parsed.cards.slice(0, 4),
-    })
+    const result = { briefing: parsed.briefing || fallback.briefing, cards: parsed.cards.slice(0, 4) }
+    recoCache.set(cacheKey, { ts: Date.now(), data: result })
+    sendJson(res, 200, result)
   } catch {
     sendJson(res, 200, fallback)
   }
