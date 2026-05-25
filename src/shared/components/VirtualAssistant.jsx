@@ -17,17 +17,18 @@ import clsx from 'clsx'
 import { streamVirtualAssistant, localVirtualAssistantAnswer, defaultSuggestions } from '../services/virtualAssistant.service'
 
 const VIEW_LABELS = {
-  dashboard: 'Dashboard',
-  navigator: 'Campus Navigator',
-  schedule: 'Schedule Hub',
-  thesis: 'Thesis Finder',
-  tutoring: 'Peer Tutoring',
-  messages: 'Messages',
-  discounts: 'Student Life',
-  career: 'Career',
-  community: 'Community',
-  citylife: 'City Adaptation',
-  professor: 'Professor Portal',
+  dashboard:  'Dashboard',
+  navigator:  'Campus Navigator',
+  schedule:   'Schedule Hub',
+  thesis:     'Thesis Finder',
+  tutoring:   'Peer Tutoring',
+  messages:   'Messages',
+  discounts:  'Student Life',
+  career:     'Career',
+  community:  'Community',
+  citylife:   'City Adaptation',
+  challenges: 'Provocări',
+  professor:  'Professor Portal',
 }
 
 const NAVIGATION_ACTIONS = [
@@ -44,6 +45,7 @@ const NAVIGATION_ACTIONS = [
   { match: ['wellness', 'sanatate', 'pomodoro', 'focus', 'meditatie', 'sport'], view: 'wellness', mode: 'life' },
   { match: ['tools', 'unelte', 'buget', 'budget', 'carpool', 'masina', 'carti', 'colegi', 'roommate'], view: 'tools', mode: 'life' },
   { match: ['pulse', 'campus pulse', 'activitate campus', 'check-in'], view: 'pulse', mode: 'life' },
+  { match: ['provocari', 'challenges', 'provocare', 'task', 'taskuri', 'misiuni', 'quest', 'daily challenge', 'puncte'], view: 'challenges', mode: 'life' },
   { match: ['student life', 'viata studenteasca', 'viata de student', 'discount', 'reduceri', 'oferte', 'beneficii'], view: 'discounts', mode: 'life' },
   { match: ['viata', 'modul viata', 'modul life', 'sectiunea life'], view: 'discounts', mode: 'life' },
 ]

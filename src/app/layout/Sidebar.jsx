@@ -13,6 +13,7 @@ import {
   Radio,
   Sparkles,
   Tag,
+  Trophy,
   Users,
   Wrench,
   X,
@@ -43,6 +44,7 @@ const NAV_BY_MODE = {
     { id: 'messages', label: 'Mesaje', icon: MessageSquare },
   ],
   life: [
+    { id: 'challenges', label: 'Provocări', icon: Trophy },
     { id: 'pulse', label: 'Campus Pulse', icon: Radio },
     { id: 'discounts', label: 'Reduceri & Beneficii', icon: Tag },
     { id: 'career', label: 'Carieră & Internship-uri', icon: Briefcase },

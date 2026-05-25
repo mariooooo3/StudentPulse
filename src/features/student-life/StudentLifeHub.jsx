@@ -10,6 +10,7 @@ import CommunitySection from './sections/CommunitySection'
 import EventsSection from './sections/EventsSection'
 import WellnessSection from './wellness/WellnessSection'
 import ToolsSection from './tools/ToolsSection'
+import ChallengesSection from './challenges/ChallengesSection'
 
 export default function StudentLifeHub({ activeSection = 'discounts', profile, session }) {
   const [saved,  savedOps]  = useStoredSet('sc_saved_v2')
@@ -27,13 +28,14 @@ export default function StudentLifeHub({ activeSection = 'discounts', profile, s
       transition={{ type: 'spring', stiffness: 80, damping: 18 }}
       className="space-y-6 p-4 sm:p-6"
     >
-      {activeSection === 'pulse'     && <PulseSection     lifeProfile={lifeProfile} />}
-      {activeSection === 'discounts' && <DiscountsSection lifeProfile={lifeProfile} saved={saved} savedOps={savedOps} />}
-      {activeSection === 'career'    && <CareerSection    lifeProfile={lifeProfile} applied={applied} appliedOps={appliedOps} />}
-      {activeSection === 'community' && <CommunitySection lifeProfile={lifeProfile} joined={joined} joinedOps={joinedOps} />}
-      {activeSection === 'events'    && <EventsSection    lifeProfile={lifeProfile} going={going} goingOps={goingOps} />}
-      {activeSection === 'wellness'  && <WellnessSection />}
-      {activeSection === 'tools'     && <ToolsSection lifeProfile={lifeProfile} />}
+      {activeSection === 'pulse'       && <PulseSection      lifeProfile={lifeProfile} />}
+      {activeSection === 'discounts'   && <DiscountsSection  lifeProfile={lifeProfile} saved={saved} savedOps={savedOps} />}
+      {activeSection === 'career'      && <CareerSection     lifeProfile={lifeProfile} applied={applied} appliedOps={appliedOps} />}
+      {activeSection === 'community'   && <CommunitySection  lifeProfile={lifeProfile} joined={joined} joinedOps={joinedOps} />}
+      {activeSection === 'events'      && <EventsSection     lifeProfile={lifeProfile} going={going} goingOps={goingOps} />}
+      {activeSection === 'wellness'    && <WellnessSection />}
+      {activeSection === 'tools'       && <ToolsSection      lifeProfile={lifeProfile} />}
+      {activeSection === 'challenges'  && <ChallengesSection />}
     </motion.div>
   )
 }

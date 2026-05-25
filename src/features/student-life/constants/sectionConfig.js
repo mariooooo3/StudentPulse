@@ -16,17 +16,19 @@ import {
   Apple,
   Smartphone,
   HandHeart,
+  Trophy,
 } from 'lucide-react'
 import { booksData, carpoolData, roommateData } from '../studentLifeData'
 
 export const SECTION_ACCENTS = {
-  pulse:     { color: '#06b6d4', bg: 'rgba(6,182,212,0.12)',  border: 'rgba(6,182,212,0.2)'  },
-  discounts: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.2)' },
-  career:    { color: '#3b82f6', bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.2)' },
-  community: { color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.2)' },
-  events:    { color: '#f43f5e', bg: 'rgba(244,63,94,0.12)',  border: 'rgba(244,63,94,0.2)'  },
-  wellness:  { color: '#10b981', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.2)' },
-  tools:     { color: '#6366f1', bg: 'rgba(99,102,241,0.12)', border: 'rgba(99,102,241,0.2)' },
+  pulse:      { color: '#06b6d4', bg: 'rgba(6,182,212,0.12)',  border: 'rgba(6,182,212,0.2)'  },
+  discounts:  { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.2)' },
+  career:     { color: '#3b82f6', bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.2)' },
+  community:  { color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.2)' },
+  events:     { color: '#f43f5e', bg: 'rgba(244,63,94,0.12)',  border: 'rgba(244,63,94,0.2)'  },
+  wellness:   { color: '#10b981', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.2)' },
+  tools:      { color: '#6366f1', bg: 'rgba(99,102,241,0.12)', border: 'rgba(99,102,241,0.2)' },
+  challenges: { color: '#f97316', bg: 'rgba(249,115,22,0.12)', border: 'rgba(249,115,22,0.2)' },
 }
 
 export const SECTION_META = {
@@ -78,6 +80,13 @@ export const SECTION_META = {
     kicker: 'Tools Practice',
     title: 'Tot ce-ți trebuie ca student.',
     description: 'Budget tracker, schimb de cărți, carpool și găsit colegi de cameră.',
+  },
+  challenges: {
+    icon: Trophy,
+    label: 'Provocări',
+    kicker: 'Daily · Weekly · Monthly',
+    title: 'Provocări noi în fiecare zi, verificate de AI.',
+    description: 'Completează provocări zilnice, săptămânale și lunare. Dovezile sunt evaluate automat de AI — punctele contează pentru concurs.',
   },
 }
 

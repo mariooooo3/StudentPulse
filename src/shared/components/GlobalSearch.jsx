@@ -9,6 +9,7 @@ import {
   Tag,
   Briefcase,
   MapPin,
+  Trophy,
   X,
   ArrowRight,
   GraduationCap,
@@ -26,10 +27,11 @@ const MODULES = [
   { id: 'thesis',     label: 'Thesis Finder',            icon: BookOpen,      mode: 'academic', path: 'Academic' },
   { id: 'tutoring',   label: 'Peer Tutoring',            icon: Users,         mode: 'academic', path: 'Academic' },
   { id: 'messages',   label: 'Mesaje',                   icon: MessageSquare, mode: 'academic', path: 'Academic' },
-  { id: 'pulse',      label: 'Campus Pulse',             icon: Radio,         mode: 'life',     path: 'Student Life' },
-  { id: 'discounts',  label: 'Reduceri & Beneficii',      icon: Tag,           mode: 'life',     path: 'Student Life' },
-  { id: 'career',     label: 'Carieră & Internship-uri', icon: Briefcase,     mode: 'life',     path: 'Student Life' },
-  { id: 'citylife',   label: 'Viața în Oraș',            icon: MapPin,        mode: 'life',     path: 'Student Life' },
+  { id: 'pulse',       label: 'Campus Pulse',             icon: Radio,         mode: 'life',     path: 'Student Life' },
+  { id: 'discounts',   label: 'Reduceri & Beneficii',     icon: Tag,           mode: 'life',     path: 'Student Life' },
+  { id: 'career',      label: 'Carieră & Internship-uri', icon: Briefcase,     mode: 'life',     path: 'Student Life' },
+  { id: 'citylife',    label: 'Viața în Oraș',            icon: MapPin,        mode: 'life',     path: 'Student Life' },
+  { id: 'challenges',  label: 'Provocări',                icon: Trophy,        mode: 'life',     path: 'Student Life' },
 ]
 
 const RECENT_SEARCHES_KEY = 'sc_recent_searches'
