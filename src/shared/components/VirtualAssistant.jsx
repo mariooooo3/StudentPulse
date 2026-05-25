@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Bot,
+  Check,
   ChevronRight,
   Compass,
+  Copy,
   CornerDownLeft,
   HelpCircle,
   Maximize2,
@@ -47,6 +49,34 @@ const NAVIGATION_ACTIONS = [
   { match: ['student life', 'viata studenteasca', 'viata de student', 'discount', 'reduceri', 'oferte', 'beneficii'], view: 'discounts', mode: 'life' },
   { match: ['viata', 'modul viata', 'modul life', 'sectiunea life'], view: 'discounts', mode: 'life' },
 ]
+
+const SLASH_COMMANDS_STUDENT = [
+  { cmd: '/harta',      label: 'Hartă campus',       icon: '🗺️', view: 'navigator',  mode: 'academic' },
+  { cmd: '/orar',       label: 'Orar',               icon: '📅', view: 'schedule',   mode: 'academic' },
+  { cmd: '/licenta',    label: 'Thesis Finder',      icon: '🎓', view: 'thesis',     mode: 'academic' },
+  { cmd: '/tutoring',   label: 'Peer Tutoring',      icon: '🧑‍🏫', view: 'tutoring',  mode: 'academic' },
+  { cmd: '/mesaje',     label: 'Mesaje',             icon: '💬', view: 'messages',   mode: 'academic' },
+  { cmd: '/dashboard',  label: 'Dashboard',          icon: '🏠', view: 'dashboard',  mode: 'academic' },
+  { cmd: '/viata',      label: 'Student Life',       icon: '✨', view: 'discounts',  mode: 'life' },
+  { cmd: '/cariera',    label: 'Carieră & CV',       icon: '💼', view: 'career',     mode: 'life' },
+  { cmd: '/wellness',   label: 'Wellness & Focus',   icon: '🌿', view: 'wellness',   mode: 'life' },
+  { cmd: '/oras',       label: 'City Adaptation',    icon: '🏙️', view: 'citylife',   mode: 'life' },
+  { cmd: '/comunitate', label: 'Comunitate',         icon: '👥', view: 'community',  mode: 'life' },
+  { cmd: '/evenimente', label: 'Evenimente',         icon: '📆', view: 'events',     mode: 'life' },
+  { cmd: '/tools',      label: 'Tools & Buget',      icon: '🛠️', view: 'tools',      mode: 'life' },
+]
+
+const SLASH_COMMANDS_PROFESSOR = [
+  { cmd: '/licente',    label: 'Cereri licență',     icon: '🎓', view: 'thesis',     mode: 'professor' },
+  { cmd: '/recuperari', label: 'Recuperări',         icon: '📋', view: 'recovery',   mode: 'professor' },
+  { cmd: '/mesaje',     label: 'Mesaje studenți',    icon: '💬', view: 'messages',   mode: 'professor' },
+  { cmd: '/profil',     label: 'Profil academic',    icon: '👤', view: 'profile',    mode: 'professor' },
+  { cmd: '/dashboard',  label: 'Dashboard',          icon: '🏠', view: 'dashboard',  mode: 'professor' },
+]
+
+function getSlashCommands(role) {
+  return role === 'professor' ? SLASH_COMMANDS_PROFESSOR : SLASH_COMMANDS_STUDENT
+}
 
 const PROFESSOR_NAVIGATION_ACTIONS = [
   { match: ['licenta', 'licente', 'thesis', 'cereri licenta', 'cerere licenta', 'studenti acceptati'], view: 'thesis', mode: 'professor' },
@@ -121,6 +151,62 @@ function AssistantBubble({ onClick, unread, brand }) {
   )
 }
 
+function CodeBlock({ lang, code }) {
+  const [copied, setCopied] = useState(false)
+  function copy() {
+    navigator.clipboard.writeText(code).catch(() => {})
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+  return (
+    <div className="my-2 overflow-hidden rounded-lg border border-white/10 bg-[#0d1117]">
+      <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.04] px-3 py-1.5">
+        <span className="font-mono text-[10px] text-slate-400">{lang || 'code'}</span>
+        <button
+          onClick={copy}
+          className="flex items-center gap-1 rounded px-2 py-0.5 text-[10px] text-slate-400 transition hover:bg-white/10 hover:text-white"
+        >
+          {copied ? <Check size={10} className="text-green-400" /> : <Copy size={10} />}
+          <span>{copied ? 'Copiat!' : 'Copiază'}</span>
+        </button>
+      </div>
+      <pre className="overflow-x-auto p-3 font-mono text-[11px] leading-relaxed text-slate-200">
+        <code>{code}</code>
+      </pre>
+    </div>
+  )
+}
+
+function renderInline(text) {
+  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**'))
+      return <strong key={i} className="font-semibold text-white">{part.slice(2, -2)}</strong>
+    if (part.startsWith('`') && part.endsWith('`') && part.length > 2)
+      return <code key={i} className="rounded bg-white/10 px-1 py-0.5 font-mono text-[11px] text-violet-300">{part.slice(1, -1)}</code>
+    return part
+  })
+}
+
+function renderMessageContent(text) {
+  const segments = String(text || '').split(/(```[\s\S]*?```)/g)
+  return segments.map((seg, i) => {
+    const m = seg.match(/^```(\w*)\n?([\s\S]*?)```$/)
+    if (m) return <CodeBlock key={i} lang={m[1]} code={m[2].trimEnd()} />
+    // plain text: split on newlines and render inline formatting
+    return (
+      <span key={i}>
+        {seg.split('\n').map((line, j, arr) => (
+          <span key={j}>
+            {renderInline(line)}
+            {j < arr.length - 1 && <br />}
+          </span>
+        ))}
+      </span>
+    )
+  })
+}
+
 function Message({ item }) {
   const isUser = item.role === 'user'
   const now = new Date()
@@ -142,7 +228,7 @@ function Message({ item }) {
               : 'rounded-bl-sm border border-white/[0.06] bg-white/[0.06] text-slate-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]',
           )}
         >
-          {item.text}
+          {renderMessageContent(item.text)}
         </div>
         <span
           className={clsx(
@@ -246,6 +332,22 @@ export default function VirtualAssistant({
   async function sendMessage(raw) {
     const text = String(raw ?? input).trim()
     if (!text || loading) return
+
+    // ── Slash commands: navigate instantly, no AI call ──────────────────────
+    if (text.startsWith('/')) {
+      const cmds = getSlashCommands(context.role)
+      const matched = cmds.find(c => text.toLowerCase() === c.cmd || text.toLowerCase().startsWith(c.cmd + ' '))
+      if (matched && onNavigate) {
+        setMessages(prev => [
+          ...prev,
+          { role: 'user', text },
+          { role: 'assistant', text: `${matched.icon} Te duc la **${matched.label}** acum!` },
+        ])
+        setInput('')
+        onNavigate(matched.view, matched.mode)
+        return
+      }
+    }
 
     const navAction = findNavigationAction(text, context.role)
 
@@ -406,6 +508,32 @@ export default function VirtualAssistant({
                   <SuggestionButton key={label} label={label} onClick={sendMessage} />
                 ))}
               </div>
+
+              {/* Slash command picker */}
+              {input.startsWith('/') && (() => {
+                const cmds = getSlashCommands(context.role)
+                const filtered = cmds.filter(c => c.cmd.startsWith(input.toLowerCase().split(' ')[0]))
+                if (!filtered.length) return null
+                return (
+                  <div className="mb-2 overflow-hidden rounded-xl border border-white/[0.08] bg-[#0b1221] shadow-[0_-8px_32px_rgba(0,0,0,0.5)]">
+                    <div className="border-b border-white/[0.06] px-3 py-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">Navigare rapidă</span>
+                    </div>
+                    {filtered.map(c => (
+                      <button
+                        key={c.cmd}
+                        type="button"
+                        onMouseDown={e => { e.preventDefault(); sendMessage(c.cmd) }}
+                        className="flex w-full items-center gap-3 px-3 py-2 text-left transition-colors hover:bg-white/[0.05] active:bg-white/[0.08]"
+                      >
+                        <span className="text-base leading-none">{c.icon}</span>
+                        <span className="font-mono text-[12px] text-violet-400">{c.cmd}</span>
+                        <span className="text-[12px] text-slate-400">{c.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )
+              })()}
 
               {/* Input row */}
               <form onSubmit={handleSubmit} className="flex items-end gap-2">
