@@ -17,6 +17,7 @@ import { createPortalRequestHandler } from './handlers/portal.js'
 import { createPortalRepository } from './db/portalRepository.js'
 import { createAuthHandler } from './handlers/auth.js'
 import { createStreaksHandler } from './handlers/streaks.js'
+import { createChallengesHandler } from './handlers/challenges.js'
 
 const PORT = Number(process.env.PORT || 3001)
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -82,6 +83,7 @@ const handleNavigation = createNavigationRequestHandler()
 const handlePortal = createPortalRequestHandler(repository, notifications, pubsub)
 const handleAuth = createAuthHandler()
 const handleStreaks = createStreaksHandler()
+const handleChallenges = createChallengesHandler()
 
 const httpServer = createServer(async (req, res) => {
   if (req.url?.startsWith('/api/auth')) {
@@ -89,6 +91,9 @@ const httpServer = createServer(async (req, res) => {
   }
   if (req.url?.startsWith('/api/streaks')) {
     return handleStreaks(req, res)
+  }
+  if (req.url?.startsWith('/api/challenges')) {
+    return handleChallenges(req, res)
   }
   if (req.url?.startsWith('/api/navigation') || req.url?.startsWith('/api/career') || req.url?.startsWith('/api/ai')) {
     return handleNavigation(req, res)

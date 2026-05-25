@@ -119,9 +119,23 @@ function migrate() {
       PRIMARY KEY (user_id, type)
     );
 
+    CREATE TABLE IF NOT EXISTS challenge_completions (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      period_key TEXT NOT NULL,
+      challenge_id TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      proof_text TEXT,
+      ai_feedback TEXT,
+      points INTEGER NOT NULL DEFAULT 0,
+      submitted_at TEXT NOT NULL,
+      UNIQUE(user_id, period_key, challenge_id)
+    );
+
     CREATE INDEX IF NOT EXISTS idx_notifications_user_time ON notifications(user_id, timestamp DESC);
     CREATE INDEX IF NOT EXISTS idx_direct_messages_channel_time ON direct_messages(channel, timestamp);
     CREATE INDEX IF NOT EXISTS idx_portal_messages_thread_time ON portal_messages(thread_id, timestamp);
+    CREATE INDEX IF NOT EXISTS idx_challenge_completions_user ON challenge_completions(user_id);
   `)
 }
 

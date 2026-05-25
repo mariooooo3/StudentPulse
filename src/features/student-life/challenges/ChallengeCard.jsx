@@ -1,0 +1,170 @@
+import { motion } from 'framer-motion'
+import {
+  CheckCircle2,
+  XCircle,
+  ChevronRight,
+  Footprints,
+  Brain,
+  Droplets,
+  BookOpen,
+  GraduationCap,
+  Dumbbell,
+  MessageSquare,
+  NotebookPen,
+  Smartphone,
+  Users,
+  Briefcase,
+  Library,
+  Users2,
+  Trophy,
+  Calendar,
+  Zap,
+  Star,
+  ImageIcon,
+} from 'lucide-react'
+import clsx from 'clsx'
+
+const ICON_MAP = {
+  walking:  Footprints,
+  focus:    Brain,
+  water:    Droplets,
+  book:     BookOpen,
+  class:    GraduationCap,
+  stretch:  Dumbbell,
+  message:  MessageSquare,
+  notes:    NotebookPen,
+  digital:  Smartphone,
+  brain:    Brain,
+  tutoring: Users,
+  briefcase: Briefcase,
+  library:  Library,
+  group:    Users2,
+  workout:  Dumbbell,
+  event:    Calendar,
+  learn:    GraduationCap,
+  career:   Briefcase,
+  hackathon: Trophy,
+  streak:   Zap,
+}
+
+const CATEGORY_COLORS = {
+  sănătate:  { color: '#10b981', bg: 'rgba(16,185,129,0.12)',  border: 'rgba(16,185,129,0.2)' },
+  academic:  { color: '#6366f1', bg: 'rgba(99,102,241,0.12)', border: 'rgba(99,102,241,0.2)' },
+  social:    { color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.2)' },
+  wellbeing: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.2)' },
+  carieră:   { color: '#3b82f6', bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.2)' },
+  campus:    { color: '#f43f5e', bg: 'rgba(244,63,94,0.12)',  border: 'rgba(244,63,94,0.2)'  },
+}
+
+const STATUS_CONFIG = {
+  available: { label: 'Disponibilă', color: 'text-slate-500', bgClass: '' },
+  pending:   { label: 'În așteptare', color: 'text-amber-400', bgClass: 'border-amber-400/20 bg-amber-400/[0.07]' },
+  approved:  { label: 'Completată ✓', color: 'text-emerald-400', bgClass: 'border-emerald-400/20 bg-emerald-400/[0.07]' },
+  rejected:  { label: 'Respinsă', color: 'text-rose-400', bgClass: 'border-rose-400/20 bg-rose-400/[0.07]' },
+}
+
+export default function ChallengeCard({ challenge, onSubmit, index = 0 }) {
+  const Icon = ICON_MAP[challenge.icon] || Star
+  const accent = CATEGORY_COLORS[challenge.category] || CATEGORY_COLORS.academic
+  const statusCfg = STATUS_CONFIG[challenge.status] || STATUS_CONFIG.available
+  const isCompleted = challenge.status === 'approved'
+  const isRejected = challenge.status === 'rejected'
+  const canSubmit = challenge.status === 'available' || challenge.status === 'rejected'
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05, type: 'spring', stiffness: 120, damping: 20 }}
+      className={clsx(
+        'premium-card p-4 transition-all duration-200 overflow-hidden',
+        isCompleted && 'opacity-80',
+      )}
+    >
+      {/* Completed overlay line */}
+      {isCompleted && (
+        <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-2xl"
+             style={{ background: `linear-gradient(90deg, transparent, ${accent.color}80, transparent)` }} />
+      )}
+
+      <div className="flex items-start gap-3.5">
+        {/* Icon */}
+        <div className={clsx(
+          'mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all',
+          isCompleted ? 'opacity-60' : '',
+        )} style={{ background: accent.bg, border: `1px solid ${accent.border}` }}>
+          {isCompleted
+            ? <CheckCircle2 size={18} style={{ color: accent.color }} />
+            : <Icon size={17} style={{ color: accent.color }} strokeWidth={1.8} />
+          }
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className={clsx('text-sm font-bold leading-tight', isCompleted ? 'text-slate-400 line-through decoration-slate-600' : 'text-white')}>
+                {challenge.title}
+              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="inline-flex items-center gap-1 rounded-full border border-white/[0.07] bg-white/[0.03] px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                  {challenge.category}
+                </span>
+                <span className="font-mono text-[10px] font-bold" style={{ color: accent.color + 'bb' }}>
+                  +{challenge.points} pct
+                </span>
+              </div>
+            </div>
+
+            {/* Status badge */}
+            {challenge.status !== 'available' && (
+              <span className={clsx('shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold', statusCfg.bgClass, statusCfg.color)}>
+                {statusCfg.label}
+              </span>
+            )}
+          </div>
+
+          <p className="mt-2 text-xs text-slate-500 leading-relaxed">{challenge.description}</p>
+
+          {/* AI feedback on rejected */}
+          {isRejected && challenge.aiFeedback && (
+            <div className="mt-2.5 rounded-lg border border-amber-400/15 bg-amber-400/[0.06] px-3 py-2">
+              <p className="text-[11px] text-amber-300/80 leading-relaxed">{challenge.aiFeedback}</p>
+            </div>
+          )}
+
+          {/* Completed feedback */}
+          {isCompleted && challenge.aiFeedback && (
+            <div className="mt-2.5 rounded-lg border border-emerald-400/15 bg-emerald-400/[0.06] px-3 py-2">
+              <p className="text-[11px] text-emerald-300/80 leading-relaxed">{challenge.aiFeedback}</p>
+            </div>
+          )}
+
+          {/* Action button */}
+          {canSubmit && (
+            <button
+              onClick={() => onSubmit(challenge)}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[11px] font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{ background: accent.bg, border: `1px solid ${accent.border}`, color: accent.color }}
+            >
+              {isRejected ? (
+                <><XCircle size={11} /> Încearcă din nou</>
+              ) : challenge.verifyType === 'screenshot' ? (
+                <><ImageIcon size={11} /> Încarcă screenshot</>
+              ) : (
+                <><ChevronRight size={11} /> Trimite dovada</>
+              )}
+            </button>
+          )}
+
+          {isCompleted && (
+            <div className="mt-2.5 flex items-center gap-1.5 text-[11px] font-bold text-emerald-400/70">
+              <CheckCircle2 size={12} />
+              Completată · {challenge.earnedPoints} puncte câștigate
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  )
+}
