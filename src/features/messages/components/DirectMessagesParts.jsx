@@ -514,7 +514,7 @@ export function PortalThread({ thread, currentUserId, currentName }) {
   }
 
   const myMessages = localThread.messages.filter(item => item.senderRole === 'student')
-  const lastMyMessage = myMessages[myMessages.length - 1]
+  const lastMyMessage = myMessages.length > 0 ? myMessages[myMessages.length - 1] : null
   const typingCount = Object.keys(typingUsers).length
   const typingNames = Object.values(typingUsers).join(', ')
   const isTyping = typingCount > 0
@@ -540,7 +540,7 @@ export function PortalThread({ thread, currentUserId, currentName }) {
         )}
         {localThread.messages.map(msg => {
           const isMe = msg.senderRole === 'student'
-          const isSeen = isMe && contactSeenAt && msg.id === lastMyMessage?.id && new Date(contactSeenAt) >= new Date(msg.timestamp)
+          const isSeen = isMe && !!lastMyMessage && !!contactSeenAt && msg.id === lastMyMessage.id && new Date(contactSeenAt) >= new Date(msg.timestamp)
           return (
             <Bubble
               key={msg.id}

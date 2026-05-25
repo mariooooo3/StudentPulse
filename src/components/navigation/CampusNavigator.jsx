@@ -107,6 +107,9 @@ export default function CampusNavigator() {
     setIndoorPath(null)
     setChatMessages([{ role: 'model', text: campus.greeting }])
     chatHistory.current = []
+    recoHistory.current = []
+    setRecoMessages([])
+    setRecoInput('')
   }, [universityId])
 
   useEffect(() => {

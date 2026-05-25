@@ -25,8 +25,12 @@ export default function BudgetTab() {
 
   function updateBudget(cat, val) {
     const parsed = Number(val)
-    const num = val === '' ? null : isNaN(parsed) ? null : Math.max(0, parsed)
-    const next = { ...budget, [cat]: num }
+    const next = { ...budget }
+    if (val === '' || isNaN(parsed)) {
+      delete next[cat]
+    } else {
+      next[cat] = Math.max(0, parsed)
+    }
     setBudget(next)
     localStorage.setItem('sc_budget', JSON.stringify(next))
   }
