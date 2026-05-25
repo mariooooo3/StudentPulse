@@ -138,7 +138,7 @@ export default function LandingPage({ onStart }) {
         <div className="flex items-center gap-2.5">
           <SCLogo accent="#6366f1" accentStrong="#7c3aed" size="sm" />
           <div>
-            <span className="font-bold text-white text-[14px] tracking-tight leading-none block">StudentCompass</span>
+            <span className="font-bold text-white text-[14px] tracking-tight leading-none block">StudentPulse</span>
             <span className="text-[10px] text-slate-600 font-medium leading-none">Platforma Studențească</span>
           </div>
         </div>
@@ -265,7 +265,7 @@ export default function LandingPage({ onStart }) {
           {/* Heading */}
           <h1 className="text-[4rem] sm:text-[6rem] font-bold tracking-[-0.035em] leading-[0.92] mb-6">
             <span className="text-white">Student</span>
-            <span className="text-gradient-indigo">Compass</span>
+            <span className="text-gradient-indigo">Pulse</span>
           </h1>
 
           {/* Tagline */}
@@ -446,7 +446,7 @@ export default function LandingPage({ onStart }) {
         <div className="line-indigo mb-6 max-w-6xl mx-auto px-6" />
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-[11px] text-slate-800">
           <div className="flex items-center gap-3">
-            <span>StudentCompass</span>
+            <span>StudentPulse</span>
             <span className="opacity-40">·</span>
             <span>Pentru studenții din România</span>
             <span className="opacity-40">·</span>

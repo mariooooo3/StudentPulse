@@ -67,7 +67,7 @@ export default function OnboardingFlow({ onComplete, session }) {
           </div>
         </div>
         <div>
-          <p className="font-bold text-white text-[14px] tracking-tight">StudentCompass</p>
+          <p className="font-bold text-white text-[14px] tracking-tight">StudentPulse</p>
           <p className="text-xs text-slate-600">Setup profil · pas {step + 1} din {total}</p>
         </div>
       </motion.div>

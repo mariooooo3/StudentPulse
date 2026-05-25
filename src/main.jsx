@@ -26,7 +26,7 @@ function renderBootError(error) {
   root.innerHTML = `
     <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#050810;color:#e2e8f0;padding:24px;font-family:system-ui,sans-serif;">
       <div style="max-width:760px;width:100%;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:18px 20px;background:rgba(15,23,42,.55)">
-        <h1 style="margin:0 0 10px;font-size:18px;line-height:1.3;">StudentCompass failed to start</h1>
+        <h1 style="margin:0 0 10px;font-size:18px;line-height:1.3;">StudentPulse failed to start</h1>
         <p style="margin:0 0 10px;opacity:.9;">Open DevTools Console and share this error:</p>
         <pre style="margin:0;white-space:pre-wrap;word-break:break-word;opacity:.95;">${String(error?.stack || error?.message || error)}</pre>
       </div>

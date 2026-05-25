@@ -1,6 +1,6 @@
 {
-  "name": "StudentCompass",
-  "short_name": "StudentCompass",
+  "name": "StudentPulse",
+  "short_name": "StudentPulse",
   "description": "De la pierdut, la acasă — ghidul complet al studentului",
   "start_url": "/",
   "display": "standalone",

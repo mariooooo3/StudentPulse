@@ -127,7 +127,7 @@ export default function AuthFlow() {
               </div>
             </div>
           </div>
-          <h1 className="text-[24px] font-bold text-white tracking-tight">StudentCompass</h1>
+          <h1 className="text-[24px] font-bold text-white tracking-tight">StudentPulse</h1>
           <p className="text-slate-600 text-[12px] mt-1.5 font-medium">De la pierdut, la acasă.</p>
         </div>
 

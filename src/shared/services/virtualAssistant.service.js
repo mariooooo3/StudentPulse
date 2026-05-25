@@ -129,7 +129,7 @@ export function localVirtualAssistantAnswer(message, context = {}) {
   }
 
   return {
-    answer: `Te pot ajuta cu intrebari despre cont, navigarea prin StudentCompass, explicarea modulelor, cereri de licenta, orar, mesaje si viata studenteasca. ${currentGuide ? `Sectiunea curenta: ${currentGuide}` : profileLine(context)}`,
+    answer: `Te pot ajuta cu intrebari despre cont, navigarea prin StudentPulse, explicarea modulelor, cereri de licenta, orar, mesaje si viata studenteasca. ${currentGuide ? `Sectiunea curenta: ${currentGuide}` : profileLine(context)}`,
     suggestions: defaultSuggestions(context),
   }
 }

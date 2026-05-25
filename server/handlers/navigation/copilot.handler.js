@@ -59,7 +59,7 @@ Context cunoscut:
 - Orar apropiat: ${JSON.stringify(context.schedule || [])}
 - Ora curenta: ${context.currentTime || new Date().toISOString()}
 
-Comporta-te ca AI Compass pentru StudentCompass. Foloseste analiza vizuala preliminara ca sursa principala pentru locatie. Daca exista poza si nu exista destinatie in mesaj, recunoaste zona si intreaba explicit unde vrea studentul sa ajunga. Daca utilizatorul cere o sala cunoscuta din lista de sali indoor, propune ruta indoor. Daca cere o cladire cunoscuta din lista de cladiri outdoor, propune ruta outdoor.
+Comporta-te ca AI Compass pentru StudentPulse. Foloseste analiza vizuala preliminara ca sursa principala pentru locatie. Daca exista poza si nu exista destinatie in mesaj, recunoaste zona si intreaba explicit unde vrea studentul sa ajunga. Daca utilizatorul cere o sala cunoscuta din lista de sali indoor, propune ruta indoor. Daca cere o cladire cunoscuta din lista de cladiri outdoor, propune ruta outdoor.
 
 Raspunde strict cu JSON valid in schema:
 ${COPILOT_JSON_SCHEMA}

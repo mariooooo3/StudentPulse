@@ -31,6 +31,7 @@ export default function EmailStep({ university, email, setEmail, accessCode, set
             value={email}
             onChange={e => setEmail(e.target.value.replace(/@.*/, ''))}
             onKeyDown={e => e.key === 'Enter' && onSubmit()}
+            autoComplete="off"
             placeholder="prenume.nume"
             className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none font-medium"
           />
@@ -50,32 +51,33 @@ export default function EmailStep({ university, email, setEmail, accessCode, set
           <input
             type="password"
             inputMode="numeric"
-            maxLength={6}
+            maxLength={4}
             value={accessCode}
-            onChange={e => setAccessCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            onChange={e => setAccessCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
             onKeyDown={e => e.key === 'Enter' && onSubmit()}
-            placeholder="000000"
+            autoComplete="new-password"
+            placeholder=""
             className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none tracking-[0.35em] font-mono"
           />
         </div>
         <p className="text-[11px] text-slate-700 mt-1.5 pl-1">
-          Cod de 6 cifre din aplicația de autentificare (Google Authenticator, Authy).
+          Parola de acces instituțională.
         </p>
         {error && <p className="text-[11px] text-red-400 mt-1.5 pl-1">{error}</p>}
       </div>
 
       <button
         onClick={onSubmit}
-        disabled={!email.trim() || accessCode.length !== 6 || loading}
+        disabled={!email.trim() || accessCode.length !== 4 || loading}
         className={clsx(
           'w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-[13px] transition-all duration-200',
-          email.trim() && accessCode.length === 6 && !loading
+          email.trim() && accessCode.length === 4 && !loading
             ? 'bg-indigo-600 hover:bg-indigo-500 text-white active:scale-[0.98] shadow-[0_0_0_1px_rgba(99,102,241,0.3)]'
             : 'bg-white/[0.03] text-slate-600 cursor-not-allowed border border-white/[0.06]',
         )}
       >
         {loading ? <Loader2 size={15} className="animate-spin" /> : <ArrowRight size={15} />}
-        {loading ? 'Se trimite...' : 'Continua'}
+        {loading ? 'Se verifică...' : 'Continuă'}
       </button>
     </div>
   )

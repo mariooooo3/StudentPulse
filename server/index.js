@@ -19,7 +19,7 @@ import { createAuthHandler } from './handlers/auth.js'
 import { createStreaksHandler } from './handlers/streaks.js'
 import { createChallengesHandler } from './handlers/challenges.js'
 
-const PORT = Number(process.env.PORT || 3001)
+const PORT = Number(process.env.PORT || 3010)
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const DIST = resolve(__dirname, '..', 'dist')
 
@@ -105,7 +105,7 @@ const httpServer = createServer(async (req, res) => {
     serveStatic(req, res)
   } else {
     res.writeHead(200, { 'Content-Type': 'text/plain' })
-    res.end('StudentCompass API running')
+    res.end('StudentPulse API running')
   }
 })
 
@@ -117,7 +117,7 @@ createTCPServer(dispatch)
 const wsBridge = new WSBridge(pubsub, store, handlers, httpServer)
 
 httpServer.listen(PORT, () => {
-  console.log(`[StudentCompass] Server started on port ${PORT}`)
+  console.log(`[StudentPulse] Server started on port ${PORT}`)
 })
 
 setInterval(() => {
@@ -136,6 +136,6 @@ setInterval(() => {
 }, 1000)
 
 process.on('SIGINT', () => {
-  console.log('\n[StudentCompass] Shutting down...')
+  console.log('\n[StudentPulse] Shutting down...')
   process.exit(0)
 })

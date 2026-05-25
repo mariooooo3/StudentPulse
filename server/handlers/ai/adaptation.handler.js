@@ -40,7 +40,7 @@ ${JSON.stringify(answers, null, 2)}`,
   })
 
   const fallback = {
-    welcomeMessage: 'Bun venit în StudentCompass! Am personalizat platforma în funcție de profilul tău.',
+    welcomeMessage: 'Bun venit în StudentPulse! Am personalizat platforma în funcție de profilul tău.',
     urgentTasks: ['Mergi la secretariat cu dosarul', 'Obține carnetul de student', 'Configurează orarul'],
     tips: ['Explorează Campus Navigator pentru a te orienta rapid', 'Verifică orarul în Schedule Hub'],
     personalityTag: 'Student motivat',

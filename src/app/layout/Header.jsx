@@ -71,7 +71,7 @@ export default function Header({
     toast({
       type: live.type === 'warning' ? 'error' : live.type || 'info',
       title: live.title || 'Notificare noua',
-      message: live.body || live.text || 'Ai un update nou in StudentCompass.',
+      message: live.body || live.text || 'Ai un update nou in StudentPulse.',
       duration: 4500,
     })
   }, [notifications, toast])
@@ -163,7 +163,7 @@ export default function Header({
       >
         <Search size={13} className="text-slate-600 shrink-0 group-hover:text-slate-400 transition-colors" strokeWidth={1.75} />
         <span className="text-[13px] text-slate-700 group-hover:text-slate-500 font-medium flex-1 transition-colors">
-          Caută în StudentCompass...
+          Caută în StudentPulse...
         </span>
         <kbd className="text-[10px] text-slate-700 border border-white/[0.07] rounded-md px-1.5 py-0.5 font-mono shrink-0">
           {typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? '⌘K' : 'Ctrl+K'}

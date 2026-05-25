@@ -120,7 +120,7 @@ export default function SettingsPanel({ open, onClose, session }) {
             <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06] shrink-0">
               <div>
                 <h2 className="text-[15px] font-bold text-white tracking-tight">Setari</h2>
-                <p className="text-[11px] text-slate-600 mt-0.5">Personalizeaza StudentCompass</p>
+                <p className="text-[11px] text-slate-600 mt-0.5">Personalizeaza StudentPulse</p>
               </div>
               <button
                 onClick={onClose}
@@ -325,7 +325,7 @@ export default function SettingsPanel({ open, onClose, session }) {
                 <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[12px] text-slate-500 font-medium">Versiune</span>
-                    <span className="text-[12px] text-slate-300 font-semibold">StudentCompass v1.0</span>
+                    <span className="text-[12px] text-slate-300 font-semibold">StudentPulse v1.0</span>
                   </div>
                 </div>
               </section>

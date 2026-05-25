@@ -55,7 +55,7 @@ export function createNavigationApiServer(port = 3000) {
   })
 
   server.listen(port, () => {
-    console.log(`[StudentCompass] Navigation API started - HTTP:${port}`)
+    console.log(`[StudentPulse] Navigation API started - HTTP:${port}`)
   })
 
   return server

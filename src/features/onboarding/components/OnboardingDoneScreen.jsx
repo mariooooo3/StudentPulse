@@ -63,7 +63,7 @@ export default function OnboardingDoneScreen({ aiLoading, aiProfile, answers, un
             </motion.div>
           ) : (
             <motion.p key="default" className="text-slate-400 mb-6 leading-relaxed text-sm">
-              StudentCompass a personalizat toate modulele în funcție de facultatea, anul și interesele tale.
+              StudentPulse a personalizat toate modulele în funcție de facultatea, anul și interesele tale.
               De acum, nu te mai pierzi.
             </motion.p>
           )}
@@ -98,7 +98,7 @@ export default function OnboardingDoneScreen({ aiLoading, aiProfile, answers, un
           className="btn-primary w-full text-base py-3 gap-2"
         >
           <Sparkles size={16} />
-          Intră în StudentCompass
+          Intră în StudentPulse
         </button>
       </motion.div>
     </div>
