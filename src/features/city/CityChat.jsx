@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronLeft, Send, Bot, Loader2, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { askCityAssistant } from '../../shared/services/ai.service'
+import { streamCityAssistant } from '../../shared/services/ai.service'
 import clsx from 'clsx'
 
 const SUGGESTIONS = [
@@ -39,17 +39,41 @@ export default function CityChat({ profile, onBack }) {
     setInput('')
     setLoading(true)
 
+    setMessages(prev => [...prev, { role: 'assistant', content: '', streaming: true }])
+
     try {
-      const result = await askCityAssistant(question, profile, history)
-      setMessages(prev => [
-        ...prev,
-        { role: 'assistant', content: result.answer, suggestedNext: result.suggestedNext },
-      ])
+      for await (const event of streamCityAssistant(question, profile, history)) {
+        if (event.t === 'c') {
+          setLoading(false)
+          setMessages(prev => {
+            const msgs = [...prev]
+            const last = msgs[msgs.length - 1]
+            if (last?.streaming) msgs[msgs.length - 1] = { ...last, content: last.content + event.v }
+            return msgs
+          })
+        } else if (event.t === 'd') {
+          setMessages(prev => {
+            const msgs = [...prev]
+            const last = msgs[msgs.length - 1]
+            if (last?.streaming) msgs[msgs.length - 1] = { ...last, streaming: false, suggestedNext: event.meta?.suggestedNext || [] }
+            return msgs
+          })
+        } else if (event.t === 'e') {
+          setMessages(prev => {
+            const msgs = [...prev]
+            const last = msgs[msgs.length - 1]
+            if (last?.streaming) msgs[msgs.length - 1] = { ...last, streaming: false, content: event.msg || 'Momentan nu pot răspunde.' }
+            return msgs
+          })
+        }
+      }
     } catch {
-      setMessages(prev => [
-        ...prev,
-        { role: 'assistant', content: 'Momentan nu pot răspunde. Încearcă din nou.' },
-      ])
+      setMessages(prev => {
+        const msgs = [...prev]
+        const last = msgs[msgs.length - 1]
+        if (last?.streaming) msgs[msgs.length - 1] = { ...last, streaming: false, content: 'Momentan nu pot răspunde. Încearcă din nou.' }
+        return msgs
+      })
     } finally {
       setLoading(false)
     }

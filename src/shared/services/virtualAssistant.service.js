@@ -158,3 +158,8 @@ export async function askVirtualAssistant({ message, context, history }) {
     return localVirtualAssistantAnswer(message, context)
   }
 }
+
+export async function* streamVirtualAssistant({ message, context, history }) {
+  const { readSSEStream } = await import('../utils/streamSSE.js')
+  yield* readSSEStream(`${API_URL}/support-assistant`, { message, context, history })
+}

@@ -33,7 +33,7 @@ export function sendJson(res, statusCode, body) {
   res.end(statusCode === 204 ? '' : JSON.stringify(body))
 }
 
-export async function grokChat(payload) {
+async function callGroq(payload, attempt = 0) {
   const key = navigationKey()
   if (!key) {
     const error = new Error('Navigation AI key is not configured.')
@@ -50,6 +50,11 @@ export async function grokChat(payload) {
     body: JSON.stringify(payload),
   })
 
+  if (response.status === 429 && attempt < 2) {
+    await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
+    return callGroq(payload, attempt + 1)
+  }
+
   if (!response.ok) {
     const error = new Error(`Grok API failed with ${response.status}`)
     error.statusCode = response.status
@@ -57,6 +62,50 @@ export async function grokChat(payload) {
     throw error
   }
 
+  return response
+}
+
+export async function grokChat(payload) {
+  const response = await callGroq(payload)
   const data = await response.json()
   return data?.choices?.[0]?.message?.content || ''
+}
+
+export async function* grokStream(payload) {
+  const response = await callGroq({ ...payload, stream: true })
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop()
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue
+      const data = line.slice(6).trim()
+      if (data === '[DONE]') return
+      try {
+        const chunk = JSON.parse(data)?.choices?.[0]?.delta?.content
+        if (chunk) yield chunk
+      } catch {}
+    }
+  }
+}
+
+export function startSSE(res) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  })
+}
+
+export function sendSSE(res, event) {
+  res.write(`data: ${JSON.stringify(event)}\n\n`)
 }
