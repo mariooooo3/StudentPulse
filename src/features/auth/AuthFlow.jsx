@@ -37,7 +37,7 @@ export default function AuthFlow() {
     const opId = ++submitIdRef.current
     try {
       const valid = await verifyTotpCode(accessCode)
-      if (!valid) { setAccessCodeError('Cod invalid sau expirat. Verifică aplicația de autentificare.'); setLoading(false); return }
+      if (!valid) { setAccessCodeError('Cod incorect. Încearcă din nou.'); setLoading(false); return }
     } catch {
       setAccessCodeError('Eroare de conexiune. Încearcă din nou.'); setLoading(false); return
     }
@@ -68,7 +68,7 @@ export default function AuthFlow() {
     setAccessCodeError(''); setLoading(true)
     try {
       const valid = await verifyTotpCode(accessCode)
-      if (!valid) { setAccessCodeError('Cod invalid sau expirat. Verifică aplicația de autentificare.'); setLoading(false); return }
+      if (!valid) { setAccessCodeError('Cod incorect. Încearcă din nou.'); setLoading(false); return }
     } catch {
       setAccessCodeError('Eroare de conexiune. Încearcă din nou.'); setLoading(false); return
     }

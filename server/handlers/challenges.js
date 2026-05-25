@@ -114,7 +114,7 @@ const WEEKLY_POOL = [
     description: 'Mergi fizic la biblioteca campusului și studiază acolo cel puțin o oră.',
     category: 'campus', points: 150, icon: 'library',
     verifyType: 'screenshot',
-    screenshotHint: 'Fă o fotografie în interiorul bibliotecii (raft cu cărți, sală de lectură, intrare) cu data de azi vizibilă sau trimite-o direct ca dovadă.',
+    screenshotHint: 'Fă o fotografie în interiorul bibliotecii — raft cu cărți, sală de lectură sau intrare. Nu trebuie data vizibilă, poza singură e suficientă.',
   },
   {
     id: 'w4', title: 'Sesiune de studiu în grup',
@@ -180,17 +180,16 @@ const WEEKLY_POOL = [
   },
   {
     id: 'w13', title: 'Citește o lucrare sau articol academic',
-    description: 'Citește un articol complet dintr-o revistă academică sau o lucrare de cercetare relevantă domeniului tău.',
+    description: 'Citește un articol complet dintr-o revistă academică sau o lucrare de cercetare relevantă domeniului tău. Descrie titlul, ideea principală și ce ai reținut.',
     category: 'academic', points: 150, icon: 'book',
-    verifyType: 'screenshot',
-    screenshotHint: 'Fă un screenshot cu articolul deschis (Google Scholar, ResearchGate, IEEE, etc.) — să se vadă titlul, autorul și că este deschis/citit.',
+    verifyType: 'text',
   },
   {
-    id: 'w14', title: 'Mergi la sală sau sport de echipă',
-    description: 'Fă un antrenament la sală, un meci de sport de echipă sau o sesiune de sport organizată săptămâna aceasta.',
-    category: 'sănătate', points: 200, icon: 'workout',
+    id: 'w14', title: 'Donează sânge',
+    description: 'Donează sânge la centrul de transfuzie sau la o campanie organizată pe campus.',
+    category: 'social', points: 300, icon: 'users',
     verifyType: 'screenshot',
-    screenshotHint: 'Încarcă un screenshot din aplicația de fitness (Strava, Google Fit, Samsung Health etc.) sau o fotografie de la sală/teren cu activitatea din această săptămână.',
+    screenshotHint: 'Fă o poză cu adeverința/certificatul de donare sau cu confirmarea programării la centrul de transfuzie.',
   },
 ]
 
@@ -471,7 +470,7 @@ export function createChallengesHandler() {
       }
 
       const pointsMap = { daily: 50, weekly: 150, monthly: 500 }
-      const basePoints = pointsMap[challengeType] || 50
+      const basePoints = parsed.challengePoints || pointsMap[challengeType] || 50
 
       // Verify based on type
       let verifyResult

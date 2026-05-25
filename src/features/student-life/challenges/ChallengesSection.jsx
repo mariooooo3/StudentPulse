@@ -57,6 +57,7 @@ export default function ChallengesSection() {
       verifyType: submitting.verifyType || 'text',
       challengeTitle: submitting.title,
       challengeDescription: submitting.description,
+      challengePoints: submitting.points,
     })
     return result
   }
