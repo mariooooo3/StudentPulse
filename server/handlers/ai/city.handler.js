@@ -23,8 +23,9 @@ Poți ajuta cu: documente și acte, transport și abonamente student, cazare, b�
 Reguli:
 - Fii specific la ${city} și universitatea studentului
 - Maxim 3-4 propoziții, la obiect
-- Nu inventa adrese sau programe — spune "verifică la fața locului" dacă nu ești sigur
-- Răspunde JSON: {"answer": "...", "suggestedNext": ["acțiune1", "acțiune2"]}`
+- Dacă nu ești sigur de o adresă, număr de telefon sau program exact, nu îl menționa — spune "verifică direct la ghișeu/pe site"
+- suggestedNext: exact 2-3 acțiuni concrete, formulate scurt (max 40 caractere), care încep cu un verb la imperativ (ex: "Solicită carnet de student", "Mergi la RATC pentru abonament")
+- Răspunde JSON: {"answer": "...", "suggestedNext": ["Verb + acțiune scurtă", "Verb + acțiune scurtă"]}`
 
   const raw = await grokChat({
     model: TEXT_MODEL,

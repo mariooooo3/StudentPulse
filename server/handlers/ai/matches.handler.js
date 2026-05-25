@@ -12,8 +12,13 @@ async function handleSmartMatches(req, res) {
     messages: [
       {
         role: 'system',
-        content: `Ești un sistem de matching pentru studenți. Sortezi potențiali parteneri de skill-swap după compatibilitate cu profilul dat.
-Răspunzi STRICT cu un array JSON de id-uri sortate descrescător după compatibilitate, fără text suplimentar: ["id1", "id2", ...]`,
+        content: `Ești un sistem de matching pentru studenți care fac skill-swap (schimb de competențe). Sortezi potențiali parteneri după compatibilitate cu profilul dat.
+Răspunzi STRICT cu un array JSON de id-uri sortate descrescător după compatibilitate, fără text suplimentar: ["id1", "id2", ...]
+
+Criterii de compatibilitate (în ordine de importanță):
+1. Complementaritate directă (50%): studentul predă exact ce eu vreau să învăț SAU eu predau exact ce el vrea să învețe
+2. Interese comune (30%): overlap între listele de interese
+3. An de studiu apropiat (20%): diferență de maxim 1 an = bonus mic`,
       },
       {
         role: 'user',
@@ -26,17 +31,18 @@ Profilul meu:
 - An: ${userProfile.year || 'necunoscut'}
 
 Studenți disponibili:
-${JSON.stringify(pool.map(p => ({ id: p.id, teaches: p.teaches || '', learns: p.learns || '', year: p.year })))}
+${JSON.stringify(pool.map(p => ({ id: p.id, teaches: p.teaches || '', learns: p.learns || '', interests: p.interests || [], year: p.year })))}
 
-Returnează DOAR array-ul JSON cu id-urile sortate.`,
+Returnează JSON cu forma: {"ids": ["id1", "id2", ...]} — array-ul cu id-urile sortate descrescător după compatibilitate.`,
       },
     ],
     max_tokens: 200,
+    response_format: { type: 'json_object' },
   })
 
   try {
-    const match = String(raw || '').match(/\[[\s\S]*?\]/)
-    const sortedIds = match ? JSON.parse(match[0]) : []
+    const parsed = JSON.parse(String(raw || '{}'))
+    const sortedIds = Array.isArray(parsed.ids) ? parsed.ids : (() => { const m = String(raw || '').match(/\[[\s\S]*?\]/); return m ? JSON.parse(m[0]) : [] })()
     const idOrder = new Map(sortedIds.map((id, i) => [String(id), i]))
     const sorted = [...pool].sort((a, b) => {
       const ai = idOrder.has(String(a.id)) ? idOrder.get(String(a.id)) : pool.length

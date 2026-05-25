@@ -55,17 +55,27 @@ Orar student: ${JSON.stringify(body.schedule || [])}.
 
 Genereaza exact 4 recomandari smart si practice. Raspunde doar cu JSON valid in formatul:
 {
-  "briefing": "O propozitie scurta despre starea campusului acum.",
+  "briefing": "O propozitie specifica despre starea campusului ACUM (mentioneza traficul si ora).",
   "cards": [
     {
-      "id": "unic-id",
+      "id": "unic-id-kebab-case",
       "emoji": "emoji relevant",
-      "title": "Titlu scurt",
-      "desc": "Descriere practica, specifica.",
+      "title": "Titlu scurt (max 25 caractere)",
+      "desc": "Descriere practica si specifica contextului (ora, trafic, orar). Max 2 propozitii.",
       "urgency": "low|medium|high"
     }
   ]
-}`,
+}
+
+Reguli pentru urgency:
+- "high" = actionabil in urmatoarele 30 minute (ex: curs care incepe curand, cantina se inchide)
+- "medium" = relevant in urmatoarele 2 ore
+- "low" = sugestie flexibila, fara constrangere de timp
+
+Reguli pentru diversitate:
+- Cele 4 carduri trebuie sa fie din categorii diferite: navigare/traseu, mancare/cantina, studiu/biblioteca, social/activitate
+- Nu genera 2 carduri despre acelasi subiect
+- Daca studentul are curs in urmatoarea ora (din orar), primul card trebuie sa fie despre acel curs`,
         },
       ],
       max_tokens: 600,

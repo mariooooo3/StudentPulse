@@ -23,17 +23,23 @@ async function handleCVAnalysis(req, res) {
       {
         role: 'system',
         content: `Ești un consultant ATS specializat pentru studenți din România. Analizezi CV-uri, extragi skill-uri tehnice și soft, estimezi nivelul de experiență și calculezi ajustări de potrivire pentru fiecare job din lista dată.
-Răspunzi ÎNTOTDEAUNA în română. Răspunsul tău este STRICT un obiect JSON valid, fără markdown, fără text suplimentar.`,
+Răspunzi ÎNTOTDEAUNA în română. Răspunsul tău este STRICT un obiect JSON valid, fără markdown, fără text suplimentar.
+
+Reguli pentru câmpuri:
+- skills: 5-10 skill-uri extrase literal din CV. Cel puțin 2 tehnice (limbaje, tool-uri, tehnologii) și cel puțin 2 soft (ex: "comunicare", "lucru în echipă"). Nu include skill-uri inventate.
+- experienceLevel: alege STRICT unul din: "fara experienta" (niciun job/internship), "incepator" (1-2 internship-uri sau proiecte personale), "intermediar" (experiență plătită reală sau proiecte complexe), "avansat" (jobs full-time sau experiență extensivă).
+- summary: 1-2 propoziții obiective despre profilul candidatului bazate pe CV, nu pe potențial.
+- jobAdjustments: omite joburile cu adjustment 0. Motivul trebuie să menționeze skill-uri specifice din CV care se potrivesc sau lipsesc față de cerințele jobului.`,
       },
       {
         role: 'user',
         content: `Analizează CV-ul următor și returnează un JSON cu exact aceste câmpuri:
 {
-  "skills": ["skill1", "skill2", ...],           // max 10 skill-uri tehnice/soft extrase din CV
+  "skills": ["skill tehnic 1", "skill tehnic 2", "skill soft 1", "skill soft 2", ...],
   "experienceLevel": "fara experienta" | "incepator" | "intermediar" | "avansat",
-  "summary": "rezumat profesional 1-2 propoziții în română",
-  "jobAdjustments": [                             // DOAR pentru joburi cu adjustment diferit de 0
-    { "jobId": <number>, "adjustment": <-30 to +40>, "reason": "motiv scurt în română" }
+  "summary": "rezumat obiectiv 1-2 propoziții bazat pe CV",
+  "jobAdjustments": [
+    { "jobId": <number>, "adjustment": <-30 to +40>, "reason": "menționează skill-uri concrete din CV" }
   ]
 }
 

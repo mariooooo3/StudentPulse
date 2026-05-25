@@ -11,17 +11,23 @@ async function handleAdaptationProfile(req, res) {
       {
         role: 'system',
         content: `Ești un asistent de onboarding pentru studenți români. Primești răspunsurile unui chestionar și generezi un profil personalizat.
-Răspunzi ÎNTOTDEAUNA în română. Răspunsul tău este STRICT un obiect JSON valid, fără text suplimentar.`,
+Răspunzi ÎNTOTDEAUNA în română. Răspunsul tău este STRICT un obiect JSON valid, fără text suplimentar.
+
+Reguli stricte:
+- urgentTasks: exact 3 sarcini concrete, formulate ca "Verb + obiect" (ex: "Mergi la secretariat cu dosarul", "Activează cardul de transport"). Max 55 caractere per task. Bazează-le pe situația reală din răspunsuri.
+- tips: exact 2 sfaturi practice și specifice contextului studentului. Nu sfaturi generice.
+- personalityTag: alege UNUL din: "Student practic", "Vizual & colaborativ", "Teoretician metodic", "Social & activ", "Independent & autodidact", "Orientat spre carieră", "Echilibrat & organizat". Alege cel mai potrivit pe baza răspunsurilor.
+- recommendedModules: exact 3 module din: "Campus Navigator", "Schedule Hub", "Peer Tutoring", "Messages", "Student Life", "City Adaptation", "Thesis Finder". Alege pe cele mai relevante pentru profilul studentului.`,
       },
       {
         role: 'user',
         content: `Analizează răspunsurile și generează un profil JSON cu exact aceste câmpuri:
 {
-  "welcomeMessage": "mesaj personalizat de 1-2 propoziții care să reflecte situația reală a studentului",
-  "urgentTasks": ["task1", "task2", "task3"],
+  "welcomeMessage": "mesaj personalizat de 1-2 propoziții care să reflecte situația concretă a studentului (nu generic)",
+  "urgentTasks": ["Verb + obiect concret", "Verb + obiect concret", "Verb + obiect concret"],
   "tips": ["sfat specific situației 1", "sfat specific situației 2"],
-  "personalityTag": "etichetă scurtă (ex: Student practic, Vizual & colaborativ, etc.)",
-  "recommendedModules": ["modul1", "modul2", "modul3"]
+  "personalityTag": "unul din tag-urile enumerate",
+  "recommendedModules": ["Modul1", "Modul2", "Modul3"]
 }
 
 Răspunsuri onboarding:
