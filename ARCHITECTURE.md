@@ -2,7 +2,7 @@
 
 ## Intentie
 
-StudentCompass este organizat ca un demo modular. Scopul structurii este ca fiecare zona din pitch sa poata fi gasita rapid si modificata independent.
+StudentPulse este organizat ca un demo modular. Scopul structurii este ca fiecare zona din pitch sa poata fi gasita rapid si modificata independent.
 
 ## Frontend
 

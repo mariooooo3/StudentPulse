@@ -92,7 +92,7 @@ function initialAssistantMessage(role) {
   if (role === 'professor') {
     return 'Salut, sunt asistentul pentru portalul profesorului. Te pot ajuta cu cereri de licenta, recuperari, mesaje, notificari live si profilul academic.'
   }
-  return 'Salut, sunt asistentul StudentCompass. Pot naviga direct: spune "academic", "orar", "harta", "student life", "cariera", "city" sau orice modul. Te pot ajuta si cu cont, cereri de licenta si viata studenteasca.'
+  return 'Salut, sunt asistentul StudentPulse. Pot naviga direct: spune "academic", "orar", "harta", "student life", "cariera", "city" sau orice modul. Te pot ajuta si cu cont, cereri de licenta si viata studenteasca.'
 }
 
 function findNavigationAction(label, role) {
@@ -111,7 +111,7 @@ function assistantBrand(role) {
     }
   }
   return {
-    title: 'StudentCompass Assistant',
+    title: 'StudentPulse Assistant',
     subtitle: 'Account, modules, quick help',
     badge: 'Live help',
     footer: 'Context-aware help',

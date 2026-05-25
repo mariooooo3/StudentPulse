@@ -62,7 +62,7 @@ export class WSBridge {
     ws.on('close', () => this.#disconnect(ws))
     ws.on('error', () => this.#disconnect(ws))
 
-    ws.send(JSON.stringify({ type: 'CONNECTED', data: { server: 'StudentCompass-Redis' } }))
+    ws.send(JSON.stringify({ type: 'CONNECTED', data: { server: 'StudentPulse-Redis' } }))
   }
 
   #disconnect(ws) {

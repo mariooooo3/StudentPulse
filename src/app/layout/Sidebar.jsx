@@ -57,8 +57,8 @@ const NAV_BY_MODE = {
 }
 
 const MODE_COPY = {
-  academic: { name: 'StudentCompass', subtitle: 'Academic', label: 'Academic', icon: Compass },
-  life: { name: 'StudentCompass', subtitle: 'Viața Studențească', label: 'Viața Studențească', icon: Sparkles },
+  academic: { name: 'StudentPulse', subtitle: 'Academic', label: 'Academic', icon: Compass },
+  life: { name: 'StudentPulse', subtitle: 'Viața Studențească', label: 'Viața Studențească', icon: Sparkles },
 }
 
 const IT_FACULTY_TYPES = new Set(['CS', 'ENGINEERING_CS', 'MATH_CS'])

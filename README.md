@@ -1,8 +1,8 @@
-# StudentCompass
+# StudentPulse
 
 > From feeling lost to feeling at home.
 
-StudentCompass is a student platform for Romanian universities. It brings together academic planning, campus navigation, professor workflows, peer support, realtime communication, student-life utilities, and AI assistance in one web app.
+StudentPulse is a student platform for Romanian universities. It brings together academic planning, campus navigation, professor workflows, peer support, realtime communication, student-life utilities, and AI assistance in one web app.
 
 The platform supports multiple universities with full tenant-scope personalization: content, professors, schedules, tutors, discounts, events, and community data are filtered automatically to the student's university and faculty. Student app, professor portal, backend APIs, realtime WebSocket flows, local persistence, and AI-powered guidance are all included.
 
@@ -31,7 +31,7 @@ The platform supports multiple universities with full tenant-scope personalizati
 
 ## Multi-University Support
 
-StudentCompass is built around a tenant-scope model. Every piece of content is tied to a `universityId:facultyCode` scope derived from the student's login.
+StudentPulse is built around a tenant-scope model. Every piece of content is tied to a `universityId:facultyCode` scope derived from the student's login.
 
 Scoped content includes:
 
@@ -48,7 +48,7 @@ To add a new university or faculty, see [`docs/TENANT_SCOPE.md`](docs/TENANT_SCO
 
 ## What It Does
 
-StudentCompass helps a student handle the most common university workflows:
+StudentPulse helps a student handle the most common university workflows:
 
 - find buildings, rooms, services, and campus points of interest;
 - calculate outdoor and indoor routes;
@@ -60,7 +60,7 @@ StudentCompass helps a student handle the most common university workflows:
 - use focus, budgeting, books, carpool, housing, and city-adaptation tools;
 - receive realtime notifications for messages, professor decisions, thesis requests, and schedule events.
 
-The app supports both **student** and **professor** roles. Students use the main StudentCompass shell, while professors use a dedicated Professor Portal with their own dashboard, profile, request management, and messaging workspace.
+The app supports both **student** and **professor** roles. Students use the main StudentPulse shell, while professors use a dedicated Professor Portal with their own dashboard, profile, request management, and messaging workspace.
 
 ---
 
@@ -88,6 +88,7 @@ The app supports both **student** and **professor** roles. Students use the main
 | Evenimente | Campus events, RSVP state, saved event intent, and reminders |
 | Focus | Focus Forest, Pomodoro, study records, and mental-health support contacts |
 | Unelte Studentesti | Budget Tracker, Book Exchange, Carpool, and Roommate Finder |
+| Provocari | Daily, weekly, and monthly challenges with AI-verified text and screenshot proof |
 | Viata in Oras | Arrival assistant, housing, transport, discounts, safety zones, and local tips |
 
 ### Professor Portal
@@ -195,7 +196,7 @@ Editable academic profile fields:
 
 ## AI Features
 
-StudentCompass uses Groq-backed AI endpoints with local fallbacks where practical.
+StudentPulse uses Groq-backed AI endpoints with local fallbacks where practical.
 
 ### AI Compass
 
@@ -371,6 +372,14 @@ Student Life groups non-classroom workflows into a separate app mode.
 - Carpool.
 - Roommate Finder.
 
+### Challenges
+
+- Daily, weekly, and monthly challenges for students.
+- Categories: health, academic, social, wellbeing, career, campus.
+- Two verification modes: text description (AI-reviewed) and screenshot upload (AI Vision-reviewed).
+- Points system with leaderboard potential.
+- AI-powered proof verification — text proofs require specific details, screenshot proofs are analyzed visually.
+
 ### City Adaptation
 
 - Arrival checklist.
@@ -447,7 +456,7 @@ SQLite + in-memory realtime infrastructure
 ## Project Structure
 
 ```text
-studentcompass/
+studentpulse/
 |-- public/
 |   |-- manifest.json
 |   `-- sw.js
@@ -501,7 +510,7 @@ GROQ_API_KEY=your_key_here
 For development WebSocket URL, `.env.development` can contain:
 
 ```env
-VITE_WS_URL=ws://localhost:3001
+VITE_WS_URL=ws://localhost:3010
 ```
 
 ### Start Frontend and Backend
@@ -513,7 +522,7 @@ npm run dev:all
 This starts:
 
 - Vite frontend at `http://localhost:5173`
-- Node backend at `http://localhost:3001`
+- Node backend at `http://localhost:3010`
 - WebSocket server attached to the backend
 
 ### Frontend Only
@@ -535,13 +544,11 @@ npm run dev:server
 ### Student
 
 - Use a supported institutional-style email.
-- Access code: `0000`.
 - The demo shortcut can also fill the flow.
 
 ### Professor
 
 - Email: `mihai.ciobanu@academic.tuiasi.ro`
-- Access code: `0000`
 
 ---
 

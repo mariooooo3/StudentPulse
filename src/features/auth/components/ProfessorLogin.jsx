@@ -32,26 +32,26 @@ export default function ProfessorLogin({ email, setEmail, accessCode, setAccessC
           <input
             type="password"
             inputMode="numeric"
-            maxLength={6}
+            maxLength={4}
             value={accessCode}
-            onChange={e => setAccessCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            onChange={e => setAccessCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
             onKeyDown={e => e.key === 'Enter' && onSubmit()}
-            placeholder="000000"
+            placeholder=""
             className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none tracking-[0.35em] font-mono"
           />
         </div>
         <p className="text-[11px] text-slate-700 mt-1.5 pl-1">
-          Cod de 6 cifre din Google Authenticator pentru <span className="text-slate-500 font-mono">{DEMO_PROFESSOR.email}</span>
+          Parola de acces instituțională.
         </p>
         {error && <p className="text-[11px] text-red-400 mt-1.5 pl-1">{error}</p>}
       </div>
 
       <button
         onClick={onSubmit}
-        disabled={!email.trim() || accessCode.length !== 6 || loading}
+        disabled={!email.trim() || accessCode.length !== 4 || loading}
         className={clsx(
           'w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-[13px] transition-all duration-200',
-          email.trim() && accessCode.length === 6 && !loading
+          email.trim() && accessCode.length === 4 && !loading
             ? 'bg-amber-600 hover:bg-amber-500 text-white active:scale-[0.98]'
             : 'bg-white/[0.03] text-slate-600 cursor-not-allowed border border-white/[0.06]',
         )}

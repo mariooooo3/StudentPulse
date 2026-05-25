@@ -66,8 +66,7 @@ const DAILY_POOL = [
     id: 'd6', title: 'Stretching 10 minute',
     description: 'Fă 10 minute de stretching sau exerciții ușoare dimineața sau seara.',
     category: 'sănătate', points: 30, icon: 'stretch',
-    verifyType: 'screenshot',
-    screenshotHint: 'Încarcă un screenshot din Google Fit, Samsung Health sau orice aplicație de fitness care arată o activitate fizică de azi (yoga, stretching, exerciții ușoare).',
+    verifyType: 'text',
   },
   {
     id: 'd7', title: 'Contactează un coleg',
@@ -79,7 +78,8 @@ const DAILY_POOL = [
     id: 'd8', title: 'Organizează-ți notițele',
     description: 'Organizează sau rezumă notițele de la cursul de azi în maxim 30 de minute.',
     category: 'academic', points: 40, icon: 'notes',
-    verifyType: 'text',
+    verifyType: 'screenshot',
+    screenshotHint: 'Fă un screenshot sau o poză cu notițele organizate (Notion, Word, caiet, etc.) — să se vadă că sunt structurate și complete.',
   },
   {
     id: 'd9', title: 'Pauză digitală 1 oră',
@@ -106,7 +106,8 @@ const WEEKLY_POOL = [
     id: 'w2', title: 'Aplică la un internship',
     description: 'Aplică la un internship sau oportunitate de practică din secțiunea Carieră a aplicației.',
     category: 'carieră', points: 200, icon: 'briefcase',
-    verifyType: 'text',
+    verifyType: 'screenshot',
+    screenshotHint: 'Fă un screenshot cu confirmarea aplicației trimise (email de confirmare, pagina "Applied" de pe LinkedIn/site companie, etc.).',
   },
   {
     id: 'w3', title: 'Vizitează biblioteca',
@@ -119,7 +120,8 @@ const WEEKLY_POOL = [
     id: 'w4', title: 'Sesiune de studiu în grup',
     description: 'Organizează sau participă la o sesiune de studiu în grup cu minimum 2 colegi.',
     category: 'social', points: 150, icon: 'group',
-    verifyType: 'text',
+    verifyType: 'screenshot',
+    screenshotHint: 'Fă o poză la sesiunea de studiu cu colegii (birou, laptop-uri deschise, whiteboard) sau un screenshot dintr-un apel video de grup de studiu.',
   },
   {
     id: 'w5', title: 'Workout 45 minute',
@@ -134,6 +136,61 @@ const WEEKLY_POOL = [
     category: 'campus', points: 200, icon: 'event',
     verifyType: 'screenshot',
     screenshotHint: 'Fă o fotografie la eveniment (afișul, sala, certificat de participare) sau un screenshot cu confirmarea înregistrării/biletului.',
+  },
+  {
+    id: 'w7', title: 'Aleargă 5 km',
+    description: 'Aleargă 5 kilometri într-o singură sesiune — pe stradă, în parc sau pe bandă.',
+    category: 'sănătate', points: 200, icon: 'workout',
+    verifyType: 'screenshot',
+    screenshotHint: 'Încarcă un screenshot din Strava, Nike Run Club, Google Fit sau orice aplicație de alergare care arată distanța ≥ 5 km cu data din această săptămână vizibilă.',
+  },
+  {
+    id: 'w8', title: 'Curăță și organizează-ți spațiul de lucru',
+    description: 'Fă curat la birou sau în camera ta, organizează materialele de studiu și elimină distragerile din jur.',
+    category: 'wellbeing', points: 150, icon: 'notes',
+    verifyType: 'screenshot',
+    screenshotHint: 'Fă o poză cu biroul sau spațiul de lucru organizat — să se vadă că e curat și aranjat.',
+  },
+  {
+    id: 'w9', title: 'Actualizează-ți profilul LinkedIn',
+    description: 'Adaugă o experiență nouă, un proiect sau un skill la profilul tău LinkedIn și fă un screenshot cu profilul actualizat.',
+    category: 'carieră', points: 150, icon: 'briefcase',
+    verifyType: 'screenshot',
+    screenshotHint: 'Fă un screenshot cu profilul tău LinkedIn actualizat — să se vadă secțiunea adăugată (experiență, proiect sau skill) și numele tău.',
+  },
+  {
+    id: 'w10', title: 'Participă la un club studențesc',
+    description: 'Mergi la o întâlnire a unui club studențesc, asociații sau cerc academic de pe campus și fă o poză acolo.',
+    category: 'social', points: 150, icon: 'group',
+    verifyType: 'screenshot',
+    screenshotHint: 'Fă o fotografie la întâlnire (sală, oameni, prezentare sau afiș) sau un screenshot cu confirmarea înscrierii/grupului.',
+  },
+  {
+    id: 'w11', title: 'Fă voluntariat o oră',
+    description: 'Dedică cel puțin o oră unui act de voluntariat — la o organizație, eveniment sau activitate comunitară.',
+    category: 'social', points: 200, icon: 'users',
+    verifyType: 'screenshot',
+    screenshotHint: 'Fă o fotografie de la activitatea de voluntariat sau un screenshot cu confirmarea/badge-ul de participare de la organizație.',
+  },
+  {
+    id: 'w12', title: 'Fă un plan de studiu săptămânal',
+    description: 'Scrie un plan detaliat de studiu pentru săptămâna viitoare: materii, ore alocate și priorități.',
+    category: 'academic', points: 150, icon: 'notes',
+    verifyType: 'text',
+  },
+  {
+    id: 'w13', title: 'Citește o lucrare sau articol academic',
+    description: 'Citește un articol complet dintr-o revistă academică sau o lucrare de cercetare relevantă domeniului tău.',
+    category: 'academic', points: 150, icon: 'book',
+    verifyType: 'screenshot',
+    screenshotHint: 'Fă un screenshot cu articolul deschis (Google Scholar, ResearchGate, IEEE, etc.) — să se vadă titlul, autorul și că este deschis/citit.',
+  },
+  {
+    id: 'w14', title: 'Mergi la sală sau sport de echipă',
+    description: 'Fă un antrenament la sală, un meci de sport de echipă sau o sesiune de sport organizată săptămâna aceasta.',
+    category: 'sănătate', points: 200, icon: 'workout',
+    verifyType: 'screenshot',
+    screenshotHint: 'Încarcă un screenshot din aplicația de fitness (Strava, Google Fit, Samsung Health etc.) sau o fotografie de la sală/teren cu activitatea din această săptămână.',
   },
 ]
 
@@ -218,7 +275,7 @@ function getActiveChallenges() {
   const textTasks        = seededPick(textDailyPool, 2, seed ^ 0xdeadbeef)
   const daily = [screenshotTask, ...textTasks].map(c => ({ ...c, type: 'daily', periodKey: dailyKey }))
 
-  const weekly  = seededPick(WEEKLY_POOL,  2, dateSeed(weeklyKey)).map(c => ({ ...c, type: 'weekly',  periodKey: weeklyKey }))
+  const weekly  = seededPick(WEEKLY_POOL,  3, dateSeed(weeklyKey)).map(c => ({ ...c, type: 'weekly',  periodKey: weeklyKey }))
   const monthly = seededPick(MONTHLY_POOL, 1, dateSeed(monthlyKey)).map(c => ({ ...c, type: 'monthly', periodKey: monthlyKey }))
 
   return { daily, weekly, monthly }

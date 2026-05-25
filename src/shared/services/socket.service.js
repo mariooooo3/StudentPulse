@@ -1,6 +1,6 @@
 const WS_URL = import.meta.env.VITE_WS_URL || (() => {
   const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-  return `${proto}//${window.location.host}`
+  return `${proto}//${window.location.host}/socket`
 })()
 const MAX_RECONNECT_DELAY = 30_000
 const REQUEST_TIMEOUT = 5_000

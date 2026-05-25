@@ -8,7 +8,7 @@ export default function ConfirmedStep({ university, onContinue, isReturning }) {
       </div>
       <div>
         <p className="text-[17px] font-bold text-white mb-3">
-          {isReturning ? 'Bun venit înapoi!' : 'Bun venit la StudentCompass!'}
+          {isReturning ? 'Bun venit înapoi!' : 'Bun venit la StudentPulse!'}
         </p>
         <div
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-[12px] font-semibold"

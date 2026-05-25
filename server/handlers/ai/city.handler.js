@@ -28,7 +28,7 @@ async function handleCityAssistant(req, res) {
   const faculty = userProfile.faculty || userProfile.detectedFaculty || ''
   const year = userProfile.year || ''
 
-  const systemPrompt = `Ești asistentul de adaptare urbană pentru StudentCompass. Ajuți studenți noi să se adapteze la viața de student în ${city}, România.
+  const systemPrompt = `Ești asistentul de adaptare urbană pentru StudentPulse. Ajuți studenți noi să se adapteze la viața de student în ${city}, România.
 Răspunzi ÎNTOTDEAUNA în română, concis și practic. Fii empatic și util.
 
 Studentul: ${year ? year + ' la ' : ''}${faculty ? faculty + ', ' : ''}${universityName}, ${city}.

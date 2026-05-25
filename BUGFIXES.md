@@ -1,4 +1,4 @@
-# Bug Fixes — StudentCompass
+# Bug Fixes — StudentPulse
 
 Documentație pentru toate modificările aplicate în sesiunea de debugging.
 
