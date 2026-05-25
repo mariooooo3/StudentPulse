@@ -24,7 +24,7 @@ export async function submitChallenge({
   userId, challengeId, challengeType, periodKey,
   proofText, proofImageFile,
   verifyType,
-  challengeTitle, challengeDescription,
+  challengeTitle, challengeDescription, challengePoints,
 }) {
   let proofImage = null
   let proofImageMime = null
@@ -41,7 +41,7 @@ export async function submitChallenge({
       userId, challengeId, challengeType, periodKey,
       proofText, proofImage, proofImageMime,
       verifyType,
-      challengeTitle, challengeDescription,
+      challengeTitle, challengeDescription, challengePoints,
     }),
   })
 

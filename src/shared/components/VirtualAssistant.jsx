@@ -104,7 +104,7 @@ function findNavigationAction(label, role) {
 function assistantBrand(role) {
   if (role === 'professor') {
     return {
-      title: 'ProfessorCompass Assistant',
+      title: 'ProfessorPulse Assistant',
       subtitle: 'Cereri, mesaje, profil',
       badge: 'Professor help',
       footer: 'Professor-aware help',
