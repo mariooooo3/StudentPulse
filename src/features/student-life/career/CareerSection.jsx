@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 import {
   Award,
   Bot,
@@ -22,6 +23,7 @@ import EmptyState from '../components/EmptyState'
 import CVAnalysisPanel from './CVAnalysisPanel'
 
 export default function CareerSection({ lifeProfile, applied, appliedOps }) {
+  const { t } = useTranslation()
   const accent = SECTION_ACCENTS.career
   const [type, setType] = useState('Toate')
   const [query, setQuery] = useState('')
@@ -82,19 +84,19 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
         <span><b className="text-slate-300 font-semibold">{lifeProfile.facultyName}</b> · Anul {lifeProfile.year} · {lifeProfile.city}</span>
         {cvAnalysis && (
           <span className="ml-auto flex items-center gap-1 text-blue-400 text-[11px] font-semibold">
-            <Bot size={11} /> Potrivire bazată pe CV
+            <Bot size={11} /> {t('career.cvMatch')}
           </span>
         )}
       </div>
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-        <SearchField value={query} onChange={setQuery} placeholder="Caută poziții, companii, skill-uri..." />
+        <SearchField value={query} onChange={setQuery} placeholder={t('career.searchPlaceholder')} />
         <FilterPills items={JOB_TYPES} value={type} onChange={setType} accent={accent} />
-        <span className="shrink-0 font-mono text-xs font-semibold text-slate-500">{jobs.length} poziții</span>
+        <span className="shrink-0 font-mono text-xs font-semibold text-slate-500">{t('career.positions', { count: jobs.length })}</span>
       </div>
 
       {jobs.length === 0 ? (
-        <EmptyState icon={Briefcase} title="Nicio poziție găsită" text="Încearcă un alt cuvânt cheie sau tip." accent={accent} />
+        <EmptyState icon={Briefcase} title={t('career.notFound')} text={t('career.tryAnother')} accent={accent} />
       ) : (
         <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-4">
           {jobs.map((job) => (
@@ -121,7 +123,7 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
                     </span>
                     <span className="tag">{job.type}</span>
                     <span className="tag border-sky-500/30 bg-sky-500/10 text-sky-300">
-                      Aplică în {job.deadlineDays} zile
+                      {t('career.applyDays', { count: job.deadlineDays })}
                     </span>
                     {job.warnings.map((w) => (
                       <span key={w} className="tag border-amber-500/30 bg-amber-500/10 text-amber-300">{w}</span>
@@ -147,12 +149,12 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
                       ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
                       : 'border-amber-400/30 bg-amber-400/10 text-amber-300',
                   )}>
-                    {job.match}% potrivire
+                    {t('career.matchPercent', { percent: job.match })}
                   </span>
                 ) : (
                   <span className="rounded-full border border-slate-700 bg-white/[0.03] px-3 py-1 text-xs font-semibold text-slate-500 flex items-center gap-1.5">
                     <Bot size={11} strokeWidth={1.75} />
-                    Adaugă CV
+                    {t('career.addCV')}
                   </span>
                 )}
                 <button
@@ -169,7 +171,7 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
                   )}
                 >
                   {applied.has(job.id) && <Check size={14} />}
-                  {applied.has(job.id) ? 'Aplicat' : job.url ? 'Aplică →' : 'Aplică'}
+                  {applied.has(job.id) ? t('career.applied') : t('career.apply')}
                 </button>
               </div>
             </motion.article>

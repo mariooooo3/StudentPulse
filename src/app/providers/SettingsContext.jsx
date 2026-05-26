@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { setGlobalAccentOverride, alpha } from '../../shared/utils/theme'
 import { useAuth } from './AuthContext'
+import i18n from '../../i18n/index.js'
 
 const SettingsContext = createContext(null)
 
@@ -40,6 +41,9 @@ function applyEffect(key, value) {
     case 'colorTheme':
       document.documentElement.classList.toggle('sc-theme-light', value === 'light')
       break
+    case 'language':
+      i18n.changeLanguage(value || 'ro')
+      break
     default:
       break
   }
@@ -51,6 +55,7 @@ function applyAllEffects(settings) {
   applyEffect('reducedMotion', settings.reducedMotion)
   applyEffect('highContrast', settings.highContrast)
   applyEffect('colorTheme', settings.colorTheme)
+  applyEffect('language', settings.language)
 }
 
 export function SettingsProvider({ children }) {

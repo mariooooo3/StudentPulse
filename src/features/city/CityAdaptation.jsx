@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Bus, CheckSquare, Home, Shield, Lightbulb, MessageSquare } from 'lucide-react'
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 import StudentTransport from './StudentTransport'
 import ArrivalAssistant from './ArrivalAssistant'
 import StudentHousing from './StudentHousing'
@@ -9,17 +10,25 @@ import SafeZones from './SafeZones'
 import LocalTips from './LocalTips'
 import CityChat from './CityChat'
 
-const TABS = [
-  { id: 'transport', label: 'Transport',  icon: Bus,           desc: 'Linii, abonamente și rute' },
-  { id: 'arrival',   label: 'Checklist',  icon: CheckSquare,   desc: 'Ce trebuie făcut la sosire' },
-  { id: 'housing',   label: 'Cazare',     icon: Home,          desc: 'Cămine, chirii, coabitare' },
-  { id: 'safety',    label: 'Siguranță',  icon: Shield,        desc: 'Zone și contacte urgență' },
-  { id: 'tips',      label: 'Ponturi',    icon: Lightbulb,     desc: 'Sfaturi practice de la studenți' },
-  { id: 'chat',      label: 'AI Chat',    icon: MessageSquare, desc: 'Întreabă orice despre oraș' },
-]
+const TAB_ICONS = {
+  transport: Bus,
+  arrival:   CheckSquare,
+  housing:   Home,
+  safety:    Shield,
+  tips:      Lightbulb,
+  chat:      MessageSquare,
+}
 
 export default function CityAdaptation({ profile, session, onNavigate }) {
+  const { t } = useTranslation()
   const [active, setActive] = useState('transport')
+
+  const TABS = Object.keys(TAB_ICONS).map(id => ({
+    id,
+    icon: TAB_ICONS[id],
+    label: t(`city.tabs.${id}`),
+    desc: t(`city.tabs.${id}Desc`),
+  }))
   const current = TABS.find(t => t.id === active)
 
   return (

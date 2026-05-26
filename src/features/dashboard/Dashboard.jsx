@@ -4,38 +4,19 @@ import {
   BarChart3, Layers, Trophy, TrendingUp, Zap,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { getDashboardData, getScheduleData } from '../../shared/data/facultyCatalog'
 import { getUniversityTheme } from '../../shared/utils/theme'
 import { formatLiveDate, getNextScheduleItem, getUpcomingScheduleItems } from '../../shared/utils/dateTime'
 import { useNow } from '../../shared/hooks/useNow'
 import SPLogo from '../../components/ui/SPLogo'
 
-const MODULES = [
-  {
-    id: 'navigator', icon: Map, label: 'Campus Navigator',
-    desc: 'Hartă live, AI chat și recunoaștere vizuală a clădirilor.',
-    accent: '#6366f1', accentSoft: 'rgba(99,102,241,0.12)', span: 'md:col-span-2', tag: 'Live',
-  },
-  {
-    id: 'schedule', icon: Calendar, label: 'Schedule Hub',
-    desc: 'Orar personal, recuperări și transfer de grupă.',
-    accent: '#10b981', accentSoft: 'rgba(16,185,129,0.12)',
-  },
-  {
-    id: 'thesis', icon: BookOpen, label: 'Thesis Finder',
-    desc: 'Profesori disponibili cu locuri în timp real.',
-    accent: '#f59e0b', accentSoft: 'rgba(245,158,11,0.12)',
-  },
-  {
-    id: 'tutoring', icon: Users, label: 'Peer Tutoring',
-    desc: 'Sesiuni 1-la-1, grup și Skill Swap automat.',
-    accent: '#f43f5e', accentSoft: 'rgba(244,63,94,0.12)',
-  },
-  {
-    id: 'messages', icon: MessageSquare, label: 'Mesaje',
-    desc: 'Comunicare academică cu profesori și colegi.',
-    accent: '#3b82f6', accentSoft: 'rgba(59,130,246,0.12)',
-  },
+const MODULE_DEFS = [
+  { id: 'navigator', icon: Map,           accent: '#6366f1', accentSoft: 'rgba(99,102,241,0.12)', span: 'md:col-span-2', tag: 'Live' },
+  { id: 'schedule',  icon: Calendar,      accent: '#10b981', accentSoft: 'rgba(16,185,129,0.12)' },
+  { id: 'thesis',    icon: BookOpen,      accent: '#f59e0b', accentSoft: 'rgba(245,158,11,0.12)' },
+  { id: 'tutoring',  icon: Users,         accent: '#f43f5e', accentSoft: 'rgba(244,63,94,0.12)' },
+  { id: 'messages',  icon: MessageSquare, accent: '#3b82f6', accentSoft: 'rgba(59,130,246,0.12)' },
 ]
 
 const STAT_ACCENTS = [
@@ -47,10 +28,10 @@ const STAT_ACCENTS = [
 
 function getStatIcon(label) {
   const l = label.toLowerCase()
-  if (l.includes('curs')) return GraduationCap
+  if (l.includes('curs') || l.includes('class') || l.includes('corso') || l.includes('clase')) return GraduationCap
   if (l.includes('credit')) return Trophy
-  if (l.includes('medii') || l.includes('medie')) return BarChart3
-  if (l.includes('ore') || l.includes('orar')) return Clock
+  if (l.includes('medi') || l.includes('grade') || l.includes('voto') || l.includes('nota')) return BarChart3
+  if (l.includes('ore') || l.includes('orar') || l.includes('hour') || l.includes('ora')) return Clock
   return Layers
 }
 
@@ -73,22 +54,8 @@ function isSameCalendarDay(a, b) {
   return Boolean(a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate())
 }
 
-function relativeDayLabel(target, now) {
-  if (isSameCalendarDay(target, now)) return 'azi'
-  const tomorrow = new Date(now)
-  tomorrow.setDate(now.getDate() + 1)
-  if (isSameCalendarDay(target, tomorrow)) return 'maine'
-  return target.toLocaleDateString('ro-RO', { weekday: 'long' })
-}
-
-function scheduleSectionLabel(items, now) {
-  const first = items?.[0]
-  if (!first?.startDate) return 'Program'
-  const label = relativeDayLabel(first.startDate, now)
-  return label === 'azi' ? 'Azi — Program' : `${label.charAt(0).toUpperCase() + label.slice(1)} — Program`
-}
-
 export default function Dashboard({ profile, session, onNavigate }) {
+  const { t } = useTranslation()
   const displayName = nameFromEmail(session?.email) || profile?.name || 'Student'
   const firstName = displayName.split(' ')[0]
   const dashboard = getDashboardData(profile, session)
@@ -100,16 +67,40 @@ export default function Dashboard({ profile, session, onNavigate }) {
   const nextCourse = getNextScheduleItem(schedule, now)
   const theme = getUniversityTheme(session?.university)
 
+  const MODULES = MODULE_DEFS.map(m => ({
+    ...m,
+    label: t(`nav.${m.id}`),
+    desc: t(`dashboard.moduleDesc.${m.id}`),
+  }))
+
+  function relativeDayLabel(target) {
+    if (isSameCalendarDay(target, now)) return t('dashboard.today')
+    const tomorrow = new Date(now)
+    tomorrow.setDate(now.getDate() + 1)
+    if (isSameCalendarDay(target, tomorrow)) return t('dashboard.tomorrow')
+    return target.toLocaleDateString('ro-RO', { weekday: 'long' })
+  }
+
+  function scheduleSectionLabel(items) {
+    const first = items?.[0]
+    if (!first?.startDate) return t('dashboard.schedule')
+    const label = relativeDayLabel(first.startDate)
+    return label === t('dashboard.today')
+      ? t('dashboard.scheduleToday')
+      : `${label.charAt(0).toUpperCase() + label.slice(1)} — ${t('dashboard.schedule')}`
+  }
+
+  const noScheduleLabel = t('dashboard.noSchedule')
   const liveDashboard = {
     ...dashboard,
     nextCourse: nextCourse
       ? { in: nextCourse.in, label: `${nextCourse.name}`, room: nextCourse.room, startDate: nextCourse.startDate }
-      : { in: '-', label: 'Nicio oră programată', room: '' },
+      : { in: '-', label: noScheduleLabel, room: '' },
     upcoming: upcoming.length ? upcoming : dashboard.upcoming,
   }
-  const scheduleTitle = scheduleSectionLabel(liveDashboard.upcoming, now)
+  const scheduleTitle = scheduleSectionLabel(liveDashboard.upcoming)
   const h = now.getHours()
-  const greeting = h < 12 ? 'Bună dimineața' : h < 18 ? 'Bună ziua' : 'Bună seara'
+  const greeting = h < 12 ? t('dashboard.greetingMorning') : h < 18 ? t('dashboard.greetingAfternoon') : t('dashboard.greetingEvening')
 
   return (
     <div className="p-4 sm:p-6 space-y-6 overflow-auto">
@@ -135,10 +126,8 @@ export default function Dashboard({ profile, session, onNavigate }) {
           className="pointer-events-none absolute bottom-0 left-1/3 w-56 h-40 rounded-full blur-3xl"
           style={{ background: theme.accentStrong || theme.accent, opacity: 0.06 }}
         />
-        {/* Pattern */}
         <div className="pointer-events-none absolute inset-0 dot-grid opacity-25" />
 
-        {/* Top accent line */}
         <div
           className="absolute top-0 inset-x-0 h-px"
           style={{ background: `linear-gradient(90deg, transparent, ${theme.accent}60, transparent)` }}
@@ -156,7 +145,7 @@ export default function Dashboard({ profile, session, onNavigate }) {
                   style={{ background: theme.accentSoft, borderColor: theme.accentBorder, color: theme.accent }}
                 >
                   <Sparkles size={9} strokeWidth={2.5} />
-                  Personalizat pentru tine
+                  {t('dashboard.personalized')}
                 </div>
               </div>
               <p className="text-slate-500 text-[13px] font-medium">{greeting},</p>
@@ -182,7 +171,7 @@ export default function Dashboard({ profile, session, onNavigate }) {
             </div>
 
             {/* Next course card */}
-            {liveDashboard.nextCourse.label !== 'Nicio oră programată' && (
+            {liveDashboard.nextCourse.label !== noScheduleLabel && (
               <motion.div
                 initial={{ opacity: 0, x: 12 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -196,7 +185,7 @@ export default function Dashboard({ profile, session, onNavigate }) {
               >
                 <p className="text-[9px] text-slate-600 font-bold uppercase tracking-[0.2em] mb-2 flex items-center md:justify-end gap-1.5">
                   <Zap size={9} strokeWidth={2.5} style={{ color: theme.accent }} />
-                  Următor curs
+                  {t('dashboard.nextCourse')}
                 </p>
                 <p className="font-mono text-[2rem] font-bold leading-none" style={{ color: theme.accent }}>
                   {liveDashboard.nextCourse.in}
@@ -231,7 +220,6 @@ export default function Dashboard({ profile, session, onNavigate }) {
                     boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
                   }}
                 >
-                  {/* Top accent line */}
                   <div
                     className="absolute top-0 inset-x-0 h-[2px] rounded-t-xl"
                     style={{ background: `linear-gradient(90deg, transparent, ${accent.color}60, transparent)` }}
@@ -260,8 +248,8 @@ export default function Dashboard({ profile, session, onNavigate }) {
         {/* Modules */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <p className="section-label">Module</p>
-            <span className="text-[10px] text-slate-700 font-medium">{MODULES.length} disponibile</span>
+            <p className="section-label">{t('dashboard.modules')}</p>
+            <span className="text-[10px] text-slate-700 font-medium">{t('dashboard.available', { count: MODULES.length })}</span>
           </div>
           <motion.div
             variants={containerVariants}
@@ -280,14 +268,12 @@ export default function Dashboard({ profile, session, onNavigate }) {
                   onClick={() => onNavigate(m.id)}
                   className={`module-card group text-left p-5 ${m.span || ''}`}
                 >
-                  {/* Colored top border */}
                   <div
                     className="absolute top-0 inset-x-0 h-[1px] rounded-t-2xl"
                     style={{ background: `linear-gradient(90deg, transparent, ${m.accent}55, transparent)` }}
                   />
 
                   <div className="flex items-start justify-between mb-4">
-                    {/* Icon with bezel */}
                     <div className="p-[1.5px] rounded-xl bg-gradient-to-b from-white/10 to-white/[0.02]">
                       <div
                         className="w-11 h-11 rounded-[calc(0.75rem-1.5px)] flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
@@ -317,11 +303,10 @@ export default function Dashboard({ profile, session, onNavigate }) {
                     className="flex items-center gap-1.5 mt-4 text-[11px] font-semibold opacity-0 group-hover:opacity-100 transition-all duration-200"
                     style={{ color: m.accent }}
                   >
-                    Deschide
+                    {t('dashboard.open')}
                     <ArrowUpRight size={12} strokeWidth={2.5} />
                   </div>
 
-                  {/* Hover glow */}
                   <div
                     className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-400"
                     style={{ background: `radial-gradient(circle at 20% 20%, ${m.accent}0b, transparent 60%)` }}
@@ -347,7 +332,7 @@ export default function Dashboard({ profile, session, onNavigate }) {
                 onClick={() => onNavigate('schedule')}
                 className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] px-2.5 py-1.5 text-[10px] font-bold text-emerald-300 transition-colors hover:bg-emerald-500/[0.1]"
               >
-                Orar complet <ArrowUpRight size={10} strokeWidth={2.5} />
+                {t('dashboard.fullSchedule')} <ArrowUpRight size={10} strokeWidth={2.5} />
               </button>
             </div>
 
@@ -357,8 +342,8 @@ export default function Dashboard({ profile, session, onNavigate }) {
                   <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-3">
                     <Calendar size={16} className="text-slate-700" strokeWidth={1.5} />
                   </div>
-                  <p className="text-[13px] text-slate-600 font-medium">Nu ai activități programate.</p>
-                  <p className="text-[11px] text-slate-700 mt-1">Verifică orarul complet.</p>
+                  <p className="text-[13px] text-slate-600 font-medium">{t('dashboard.noActivities')}</p>
+                  <p className="text-[11px] text-slate-700 mt-1">{t('dashboard.checkSchedule')}</p>
                 </div>
               ) : (
                 liveDashboard.upcoming.map((c, i) => (
