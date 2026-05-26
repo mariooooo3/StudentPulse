@@ -16,10 +16,10 @@ export default function FocusForest() {
   const [failed, setFailed] = useState(false)
   const [justRevealed, setJustRevealed] = useState(false)
   const [completed, setCompleted] = useState(() => {
-    try { return Number(localStorage.getItem('sc_focus_trees') || 0) } catch { return 0 }
+    try { return Number(localStorage.getItem('sp_focus_trees') || 0) } catch { return 0 }
   })
   const [bestDigits, setBestDigits] = useState(() => {
-    try { return Number(localStorage.getItem('sc_pi_best') || 2) } catch { return 2 }
+    try { return Number(localStorage.getItem('sp_pi_best') || 2) } catch { return 2 }
   })
   const intervalRef    = useRef(null)
   const prevDigitsRef  = useRef(2)
@@ -41,7 +41,7 @@ export default function FocusForest() {
   function saveBest(value) {
     if (value > bestDigits) {
       setBestDigits(value)
-      localStorage.setItem('sc_pi_best', String(value))
+      localStorage.setItem('sp_pi_best', String(value))
     }
   }
 
@@ -55,7 +55,7 @@ export default function FocusForest() {
           setRunning(false)
           setCompleted(total => {
             const saved = total + 1
-            localStorage.setItem('sc_focus_trees', String(saved))
+            localStorage.setItem('sp_focus_trees', String(saved))
             return saved
           })
           incrementFocus()

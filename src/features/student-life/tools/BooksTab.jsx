@@ -34,7 +34,7 @@ export default function BooksTab({ lifeProfile }) {
           icon={noScopedData ? Building2 : BookOpen}
           title={noScopedData ? 'Nu există cărți pentru facultatea ta' : 'Nicio carte găsită'}
           text={noScopedData
-            ? `Nu am găsit cărți listate pentru ${scopeLabel || 'facultatea ta'}. Poți fi primul care adaugă o carte.`
+            ? `Nu am găsit cărți listate pentru ${scopeLabel || 'facultatea ta'}.`
             : 'Încearcă alt titlu sau categorie.'}
           accent={accent}
         />

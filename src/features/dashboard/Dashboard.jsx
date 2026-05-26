@@ -8,7 +8,7 @@ import { getDashboardData, getScheduleData } from '../../shared/data/facultyCata
 import { getUniversityTheme } from '../../shared/utils/theme'
 import { formatLiveDate, getNextScheduleItem, getUpcomingScheduleItems } from '../../shared/utils/dateTime'
 import { useNow } from '../../shared/hooks/useNow'
-import SCLogo from '../../components/ui/SCLogo'
+import SPLogo from '../../components/ui/SPLogo'
 
 const MODULES = [
   {
@@ -150,7 +150,7 @@ export default function Dashboard({ profile, session, onNavigate }) {
             {/* Left */}
             <div>
               <div className="flex items-center gap-3 mb-5">
-                <SCLogo accent={theme.accent} accentStrong={theme.accentStrong} size="md" />
+                <SPLogo accent={theme.accent} accentStrong={theme.accentStrong} size="md" />
                 <div
                   className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold tracking-widest uppercase"
                   style={{ background: theme.accentSoft, borderColor: theme.accentBorder, color: theme.accent }}
