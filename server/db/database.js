@@ -132,10 +132,43 @@ function migrate() {
       UNIQUE(user_id, period_key, challenge_id)
     );
 
+    CREATE TABLE IF NOT EXISTS carpool_rides (
+      id TEXT PRIMARY KEY,
+      driver_id TEXT NOT NULL,
+      driver_name TEXT NOT NULL,
+      from_city TEXT NOT NULL,
+      from_detail TEXT,
+      to_city TEXT NOT NULL,
+      to_detail TEXT,
+      date TEXT NOT NULL,
+      time TEXT NOT NULL,
+      seats INTEGER NOT NULL DEFAULT 1,
+      price_per_person INTEGER NOT NULL DEFAULT 0,
+      notes TEXT,
+      contact TEXT,
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS carpool_requests (
+      id TEXT PRIMARY KEY,
+      ride_id TEXT NOT NULL REFERENCES carpool_rides(id) ON DELETE CASCADE,
+      passenger_id TEXT NOT NULL,
+      passenger_name TEXT NOT NULL,
+      message TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TEXT NOT NULL,
+      UNIQUE(ride_id, passenger_id)
+    );
+
     CREATE INDEX IF NOT EXISTS idx_notifications_user_time ON notifications(user_id, timestamp DESC);
     CREATE INDEX IF NOT EXISTS idx_direct_messages_channel_time ON direct_messages(channel, timestamp);
     CREATE INDEX IF NOT EXISTS idx_portal_messages_thread_time ON portal_messages(thread_id, timestamp);
     CREATE INDEX IF NOT EXISTS idx_challenge_completions_user ON challenge_completions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_carpool_rides_status ON carpool_rides(status, date);
+    CREATE INDEX IF NOT EXISTS idx_carpool_rides_driver ON carpool_rides(driver_id);
+    CREATE INDEX IF NOT EXISTS idx_carpool_requests_ride ON carpool_requests(ride_id);
+    CREATE INDEX IF NOT EXISTS idx_carpool_requests_passenger ON carpool_requests(passenger_id);
   `)
 }
 

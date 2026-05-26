@@ -18,6 +18,7 @@ import { createPortalRepository } from './db/portalRepository.js'
 import { createAuthHandler } from './handlers/auth.js'
 import { createStreaksHandler } from './handlers/streaks.js'
 import { createChallengesHandler } from './handlers/challenges.js'
+import { createCarpoolHandler } from './handlers/carpool.js'
 
 const PORT = Number(process.env.PORT || 3010)
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -84,6 +85,7 @@ const handlePortal = createPortalRequestHandler(repository, notifications, pubsu
 const handleAuth = createAuthHandler()
 const handleStreaks = createStreaksHandler()
 const handleChallenges = createChallengesHandler()
+const handleCarpool = createCarpoolHandler()
 
 const httpServer = createServer(async (req, res) => {
   if (req.url?.startsWith('/api/auth')) {
@@ -94,6 +96,9 @@ const httpServer = createServer(async (req, res) => {
   }
   if (req.url?.startsWith('/api/challenges')) {
     return handleChallenges(req, res)
+  }
+  if (req.url?.startsWith('/api/carpool')) {
+    return handleCarpool(req, res)
   }
   if (req.url?.startsWith('/api/navigation') || req.url?.startsWith('/api/career') || req.url?.startsWith('/api/ai')) {
     return handleNavigation(req, res)
