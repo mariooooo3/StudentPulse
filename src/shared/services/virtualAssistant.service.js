@@ -1,16 +1,22 @@
 const API_URL = import.meta.env.VITE_NAVIGATION_API_URL || '/api/navigation'
 
 const FEATURE_GUIDE = {
-  dashboard: 'Dashboard-ul arata pe scurt modulele, urmatorul curs, orarul si notificarile.',
-  navigator: 'Campus Navigator ajuta cu trasee in campus, rute indoor intre sali, recunoastere din poza si prezentari ghidate.',
-  schedule: 'Schedule Hub gestioneaza orarul saptamanal, recuperarile si schimburile de sloturi intre studenti.',
-  thesis: 'Thesis Finder ajuta studentii sa gaseasca profesori, sa verifice cerinte si sa trimita cereri de licenta.',
-  tutoring: 'Peer Tutoring ajuta studentii sa gaseasca tutori sau colegi cu care pot face schimb de competente.',
-  messages: 'Mesajele intre studenti sunt limitate la aceeasi universitate si facultate, iar conversatiile cu profesorii sunt in portalul profesorului.',
-  discounts: 'Student Life include reduceri, beneficii, evenimente, comunitati si resurse utile pentru studenti.',
-  career: 'Zona de cariera include practica, voluntariat, consiliere si oportunitati relevante pentru studenti.',
-  citylife: 'City Adaptation acopera cazarea, transportul, zonele sigure, ponturile locale si ghidarea pentru prima saptamana.',
-  professor: 'Portalul profesorului gestioneaza cereri de licenta, cereri de recuperare, profil academic si conversatii student-profesor.',
+  dashboard:  'Dashboard-ul arata pe scurt modulele, urmatorul curs, orarul si notificarile.',
+  navigator:  'Campus Navigator ajuta cu trasee in campus, rute indoor intre sali, recunoastere din poza si prezentari ghidate.',
+  schedule:   'Schedule Hub gestioneaza orarul saptamanal, recuperarile si schimburile de sloturi intre studenti.',
+  thesis:     'Thesis Finder ajuta studentii sa gaseasca profesori, sa verifice cerinte si sa trimita cereri de licenta.',
+  tutoring:   'Peer Tutoring ajuta studentii sa gaseasca tutori sau colegi cu care pot face schimb de competente.',
+  messages:   'Mesajele intre studenti sunt limitate la aceeasi universitate si facultate, iar conversatiile cu profesorii sunt in portalul profesorului.',
+  discounts:  'Reduceri & Beneficii afiseaza oferte studentesti, reduceri locale si beneficii pentru cardul de student.',
+  career:     'Zona de cariera include practica, voluntariat, consiliere si oportunitati relevante pentru studenti. Poti analiza CV-ul cu AI.',
+  community:  'Comunitatea conecteaza studenti din aceeasi facultate prin grupuri de interes, mentori si activitati comune.',
+  events:     'Evenimente listeaza concerte, workshop-uri, hackathoane si activitati studentesti din oras si campus.',
+  wellness:   'Focus & Wellness include un timer Pomodoro si modul FocusForest care dezvaluie cifre din pi pe masura ce lucrezi concentrat.',
+  tools:      'Unelte Studentesti grupeaza carti de imprumut/vanzare, oferte de carpool si colegi de camera cautati.',
+  pulse:      'Campus Pulse arata semnale live din campus: mese libere la cantina, grupuri de studiu, alert trafic si alte anunturi rapide.',
+  challenges: 'Provocarile zilnice, saptamanale si lunare sunt verificate de AI — trimiti dovada si primesti puncte si streak-uri.',
+  citylife:   'City Adaptation acopera cazarea, transportul, zonele sigure, ponturile locale si ghidarea pentru prima saptamana.',
+  professor:  'Portalul profesorului gestioneaza cereri de licenta, cereri de recuperare, profil academic si conversatii student-profesor.',
 }
 
 function normalize(text) {
@@ -93,11 +99,19 @@ export function localVirtualAssistantAnswer(message, context = {}) {
 
   if (
     q.includes('harta') || q.includes('campus') || q.includes('navig') || q.includes('sala') || q.includes('room') ||
+    // TUIASI
     q.includes('mangeron') || q.includes('corp c') || q.includes('corp a') || q.includes('daia') || q.includes('cti') ||
     q.includes('ac ') || q.includes(' ac') || q === 'ac' ||
     q.includes('automatica') || q.includes('calculatoare') || q.includes('asachi') ||
-    q.includes('etti') || q.includes('ieeia') || q.includes('mec ') || q.includes('rectorat') ||
-    q.includes('biblioteca') || q.includes('cantina') || q.includes('secretariat') || q.includes('laborator')
+    q.includes('etti') || q.includes('ieeia') || q.includes('mec ') ||
+    // UAIC
+    q.includes('carol') || q.includes('copou') || q.includes('lapus') || q.includes('lapusneanu') ||
+    q.includes('bcu') || q.includes('fii') || q.includes('feaa') || q.includes('fssp') ||
+    q.includes('fdsa') || q.includes('fmim') || q.includes('geografie') || q.includes('teologie') ||
+    q.includes('tudor vladimirescu') || q.includes('aula') ||
+    // comun
+    q.includes('rectorat') || q.includes('biblioteca') || q.includes('cantina') ||
+    q.includes('secretariat') || q.includes('laborator')
   ) {
     const isCampusNav = q.includes('harta') || q.includes('campus') || q.includes('navig') || q.includes('sala') || q.includes('room')
     if (isCampusNav) {

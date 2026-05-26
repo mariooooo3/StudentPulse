@@ -32,7 +32,7 @@ import { useState } from 'react'
 import { useAuth } from '../providers/AuthContext'
 import { getUniversityTheme } from '../../shared/utils/theme'
 import { useStreaksContext } from '../providers/StreaksContext'
-import SCLogo from '../../components/ui/SCLogo'
+import SPLogo from '../../components/ui/SPLogo'
 
 const NAV_BY_MODE = {
   academic: [
@@ -242,7 +242,7 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
       {/* Brand */}
       <div className="px-5 pt-6 pb-4">
         <div className="flex items-center gap-3">
-          <SCLogo accent={theme.accent} accentStrong={theme.accentStrong} size="sm" />
+          <SPLogo accent={theme.accent} accentStrong={theme.accentStrong} size="sm" />
           <div className="flex-1 min-w-0">
             <p className="font-bold text-white text-[13px] leading-tight tracking-tight">{modeCopy.name}</p>
             <p className="text-[11px] text-slate-600 font-medium">{modeCopy.subtitle}</p>

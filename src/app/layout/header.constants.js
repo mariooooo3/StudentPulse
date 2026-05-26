@@ -9,6 +9,9 @@ export const VIEW_TITLES = {
   discounts:  { title: 'Reduceri & Beneficii', sub: 'Oferte studențești și beneficii locale' },
   career:     { title: 'Carieră & Internship-uri', sub: 'Oportunități personalizate pe facultate' },
   community:  { title: 'Comunitate', sub: 'Grupuri, mentori și evenimente studențești' },
+  events:     { title: 'Evenimente', sub: 'Concerte, workshop-uri și activități studențești' },
+  wellness:   { title: 'Focus & Wellness', sub: 'Timer Pomodoro și concentrare maximă' },
+  tools:      { title: 'Unelte Studențești', sub: 'Cărți, carpool, colegi de cameră și buget' },
   citylife:   { title: 'Viața în Oraș', sub: 'Transport, locuire, siguranță și ghid urban' },
   challenges: { title: 'Provocări', sub: 'Zilnice · Săptămânale · Lunare — verificate de AI' },
 }

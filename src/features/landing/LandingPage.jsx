@@ -1,7 +1,7 @@
 import { Compass, Map, Calendar, BookOpen, Users, ArrowRight, Sparkles, Shield, MessageSquare, GraduationCap, Zap, ChevronRight, Heart, Briefcase, Bell, Bot, ClipboardCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { UNIVERSITIES } from '../../shared/config/universities'
-import SCLogo from '../../components/ui/SCLogo'
+import SPLogo from '../../components/ui/SPLogo'
 
 const FEATURES = [
   {
@@ -136,7 +136,7 @@ export default function LandingPage({ onStart }) {
       {/* ── Header ────────────────────────────────────────── */}
       <header className="relative z-10 flex items-center justify-between px-6 sm:px-12 py-5 max-w-6xl mx-auto w-full">
         <div className="flex items-center gap-2.5">
-          <SCLogo accent="#6366f1" accentStrong="#7c3aed" size="sm" />
+          <SPLogo accent="#6366f1" accentStrong="#7c3aed" size="sm" />
           <div>
             <span className="font-bold text-white text-[14px] tracking-tight leading-none block">StudentPulse</span>
             <span className="text-[10px] text-slate-600 font-medium leading-none">Platforma Studențească</span>

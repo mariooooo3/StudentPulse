@@ -13,10 +13,10 @@ import ToolsSection from './tools/ToolsSection'
 import ChallengesSection from './challenges/ChallengesSection'
 
 export default function StudentLifeHub({ activeSection = 'discounts', profile, session }) {
-  const [saved,  savedOps]  = useStoredSet('sc_saved_v2')
-  const [applied, appliedOps] = useStoredSet('sc_applied_v2')
-  const [joined, joinedOps] = useStoredSet('sc_joined_v2')
-  const [going,  goingOps]  = useStoredSet('sc_going_v1')
+  const [saved,  savedOps]  = useStoredSet('sp_saved_v2')
+  const [applied, appliedOps] = useStoredSet('sp_applied_v2')
+  const [joined, joinedOps] = useStoredSet('sp_joined_v2')
+  const [going,  goingOps]  = useStoredSet('sp_going_v1')
   const lifeProfile = useMemo(() => buildLifeProfile(profile, session), [profile, session])
   const theme = getUniversityTheme(session?.university)
 

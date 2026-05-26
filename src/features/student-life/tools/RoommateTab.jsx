@@ -27,7 +27,7 @@ export default function RoommateTab({ lifeProfile }) {
           icon={noScopedData ? Building2 : Users}
           title={noScopedData ? 'Nu există colegi de cameră pentru facultatea ta' : 'Niciun coleg găsit'}
           text={noScopedData
-            ? `Nu am găsit anunțuri pentru ${scopeLabel || 'facultatea ta'}. Poți adăuga propriul anunț.`
+            ? `Nu am găsit anunțuri pentru ${scopeLabel || 'facultatea ta'}.`
             : 'Încearcă altă zonă sau facultate.'}
           accent={accent}
         />
