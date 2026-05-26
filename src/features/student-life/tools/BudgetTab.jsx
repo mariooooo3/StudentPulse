@@ -13,7 +13,7 @@ export default function BudgetTab() {
 
   const [budget, setBudget] = useState(() => {
     try {
-      const raw = JSON.parse(localStorage.getItem('sc_budget') || '{}')
+      const raw = JSON.parse(localStorage.getItem('sp_budget') || '{}')
       const sanitized = {}
       for (const [k, v] of Object.entries(raw)) {
         const n = Number(v)
@@ -32,12 +32,12 @@ export default function BudgetTab() {
       next[cat] = Math.max(0, parsed)
     }
     setBudget(next)
-    localStorage.setItem('sc_budget', JSON.stringify(next))
+    localStorage.setItem('sp_budget', JSON.stringify(next))
   }
 
   function resetBudget() {
     setBudget({})
-    localStorage.removeItem('sc_budget')
+    localStorage.removeItem('sp_budget')
   }
 
   const total    = CATEGORIES.reduce((s, c) => s + (budget[c] ?? 0), 0)

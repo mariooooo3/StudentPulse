@@ -27,14 +27,14 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
   const [query, setQuery] = useState('')
   const [cvAnalysis, setCvAnalysis] = useState(() => {
     try {
-      const saved = localStorage.getItem('sc_cv_analysis')
+      const saved = localStorage.getItem('sp_cv_analysis')
       return saved ? JSON.parse(saved) : null
     } catch { return null }
   })
 
   function handleCvAnalysis(data) {
-    if (data) localStorage.setItem('sc_cv_analysis', JSON.stringify(data))
-    else localStorage.removeItem('sc_cv_analysis')
+    if (data) localStorage.setItem('sp_cv_analysis', JSON.stringify(data))
+    else localStorage.removeItem('sp_cv_analysis')
     setCvAnalysis(data)
   }
   const now = useNow()
@@ -75,7 +75,7 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
     <section className="space-y-5">
       <SectionHeader section="career" accent={accent} meta={SECTION_META.career} />
 
-      <CVAnalysisPanel allJobs={allJobs} onAnalysis={handleCvAnalysis} cvAnalysis={cvAnalysis} />
+      <CVAnalysisPanel allJobs={allJobs} onAnalysis={handleCvAnalysis} cvAnalysis={cvAnalysis} lifeProfile={lifeProfile} />
 
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-[13px] text-slate-500">
         <Award size={14} className="text-slate-400 shrink-0" strokeWidth={1.75} />

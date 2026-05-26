@@ -30,7 +30,7 @@ Reguli pentru câmpuri:
 - experienceLevel: alege STRICT unul din: "fara experienta" (niciun job/internship), "incepator" (1-2 internship-uri sau proiecte personale), "intermediar" (experiență plătită reală sau proiecte complexe), "avansat" (jobs full-time sau experiență extensivă).
 - summary: 1-2 propoziții obiective despre profilul candidatului bazate pe CV, nu pe potențial.
 - jobAdjustments: pentru FIECARE job din listă calculează un adjustment. Omite doar dacă adjustment este exact 0.
-  Scala de ajustare: -80 (domenii complet incompatibile) → 0 (neutru) → +30 (potrivire excelentă).
+  Scala de ajustare: de la -80 (domenii complet incompatibile) pana la +30 (potrivire excelenta).
   REGULI STRICTE:
   * Dacă domeniul CV-ului este complet diferit de domeniul jobului (ex: CV cu Python/cybersecurity/IT pentru job medical/clinic/biologie SAU CV medicină pentru job inginerie/software), adjustment TREBUIE să fie între -60 și -80. Nu există transfer de skill-uri între domenii complet diferite.
   * Dacă CV-ul are 1-2 skill-uri tangențiale (ex: Excel, statistică) față de un job parțial relevant, adjustment între -20 și -40.
@@ -57,7 +57,7 @@ CV:
 ${cvText.slice(0, 4000)}`,
       },
     ],
-    max_tokens: 1200,
+    max_tokens: 2000,
     temperature: 0.2,
     response_format: { type: 'json_object' },
   })
