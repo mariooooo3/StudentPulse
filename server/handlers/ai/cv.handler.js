@@ -30,11 +30,12 @@ Reguli pentru câmpuri:
 - experienceLevel: alege STRICT unul din: "fara experienta" (niciun job/internship), "incepator" (1-2 internship-uri sau proiecte personale), "intermediar" (experiență plătită reală sau proiecte complexe), "avansat" (jobs full-time sau experiență extensivă).
 - summary: 1-2 propoziții obiective despre profilul candidatului bazate pe CV, nu pe potențial.
 - jobAdjustments: pentru FIECARE job din listă calculează un adjustment. Omite doar dacă adjustment este exact 0.
-  Scala de ajustare: de la -80 (domenii complet incompatibile) pana la +30 (potrivire excelenta).
+  Scala de ajustare: de la -80 (domenii complet incompatibile) pana la 30 (potrivire excelenta).
   REGULI STRICTE:
+  * Valorile adjustment sunt numere intregi fara semn plus: exemple corecte: -70, -40, 0, 15, 25. NU folosi +15, +25 etc.
   * Dacă domeniul CV-ului este complet diferit de domeniul jobului (ex: CV cu Python/cybersecurity/IT pentru job medical/clinic/biologie SAU CV medicină pentru job inginerie/software), adjustment TREBUIE să fie între -60 și -80. Nu există transfer de skill-uri între domenii complet diferite.
   * Dacă CV-ul are 1-2 skill-uri tangențiale (ex: Excel, statistică) față de un job parțial relevant, adjustment între -20 și -40.
-  * Dacă skill-urile din CV se potrivesc direct cu cerințele jobului, adjustment pozitiv între +10 și +30.
+  * Dacă skill-urile din CV se potrivesc direct cu cerințele jobului, adjustment pozitiv între 10 și 30.
   * Motivul trebuie să menționeze explicit skill-uri din CV și de ce se potrivesc sau nu.`,
       },
       {
@@ -45,7 +46,7 @@ Reguli pentru câmpuri:
   "experienceLevel": "fara experienta" | "incepator" | "intermediar" | "avansat",
   "summary": "rezumat obiectiv 1-2 propoziții bazat pe CV",
   "jobAdjustments": [
-    { "jobId": <number>, "adjustment": <-80 to +30>, "reason": "menționează skill-uri concrete din CV și motivul incompatibilității sau potrivirii" }
+    { "jobId": <number>, "adjustment": <numar intreg fara +, ex: -70 sau 20>, "reason": "menționează skill-uri concrete din CV și motivul incompatibilității sau potrivirii" }
   ]
 }
 
@@ -59,11 +60,11 @@ ${cvText.slice(0, 4000)}`,
     ],
     max_tokens: 2000,
     temperature: 0.2,
-    response_format: { type: 'json_object' },
   })
 
-  let parsed = {}
-  try { parsed = JSON.parse(raw) } catch { parsed = {} }
+  // Modelul uneori genereaza "+20" in loc de "20" — invalid JSON; normalizam inainte de parse
+  const normalized = (raw || '').replace(/:\s*\+(\d)/g, ': $1')
+  const parsed = safeJson(normalized, {})
 
   sendJson(res, 200, {
     skills: Array.isArray(parsed.skills) ? parsed.skills.slice(0, 10).map(String) : [],
