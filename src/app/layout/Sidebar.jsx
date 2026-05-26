@@ -397,7 +397,7 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
                   background: `linear-gradient(140deg, ${theme.accent}dd, ${theme.accentStrong || theme.accent}88)`,
                   boxShadow: `0 2px 8px ${theme.accent}40, inset 0 1px 0 rgba(255,255,255,0.18)`,
                 }}
-                title="Editează profilul"
+                title={t('sidebar.editProfile')}
               >
                 {initials}
                 <span className="absolute inset-0 rounded-[0.6rem] flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -412,7 +412,7 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
 
               <button
                 onClick={logout}
-                title="Deconectare"
+                title={t('sidebar.logout')}
                 className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-slate-700 hover:text-red-400 hover:bg-red-400/[0.08] transition-[color,background-color] duration-200"
               >
                 <LogOut size={13} strokeWidth={1.75} />

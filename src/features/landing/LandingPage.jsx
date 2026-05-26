@@ -1,89 +1,27 @@
 import { Compass, Map, Calendar, BookOpen, Users, ArrowRight, Sparkles, Shield, MessageSquare, GraduationCap, Zap, ChevronRight, Heart, Briefcase, Bell, Bot, ClipboardCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { UNIVERSITIES } from '../../shared/config/universities'
 import SPLogo from '../../components/ui/SPLogo'
 
 const FEATURES = [
-  {
-    icon: Map,
-    label: 'Campus Navigator',
-    desc: 'Hartă live, AI chat, routing pedestrian și recunoaștere vizuală a clădirilor.',
-    color: '#6366f1',
-    num: '01',
-    span: 'sm:col-span-2',
-    size: 'large',
-  },
-  {
-    icon: Calendar,
-    label: 'Schedule Hub',
-    desc: 'Orar personal, recuperări, transfer de grupă, hartă sesiune și calculator medie ECTS.',
-    color: '#10b981',
-    num: '02',
-  },
-  {
-    icon: BookOpen,
-    label: 'Thesis Finder',
-    desc: 'Profesori disponibili pentru licență, cu locuri și status live.',
-    color: '#f59e0b',
-    num: '03',
-  },
-  {
-    icon: Users,
-    label: 'Peer Tutoring',
-    desc: 'Sesiuni 1-la-1, grupuri și Skill Swap automat cu colegii.',
-    color: '#f43f5e',
-    num: '04',
-  },
-  {
-    icon: MessageSquare,
-    label: 'Mesaje',
-    desc: 'Chat direct cu profesori și colegi, canale de facultate live.',
-    color: '#3b82f6',
-    num: '05',
-  },
-  {
-    icon: Heart,
-    label: 'Focus & Tools',
-    desc: 'Focus Forest, Pomodoro, Budget Tracker, Book Exchange si Carpool.',
-    color: '#10b981',
-    num: '06',
-  },
-  {
-    icon: Briefcase,
-    label: 'Carieră & Comunitate',
-    desc: 'Internship-uri, evenimente studențești, cluburi și mentori.',
-    color: '#8b5cf6',
-    num: '07',
-  },
-  {
-    icon: ClipboardCheck,
-    label: 'Campus Pulse',
-    desc: 'Noutati live din campus, aglomeratie, evenimente si recomandari pentru momentul zilei.',
-    color: '#14b8a6',
-    num: '08',
-    span: 'sm:col-span-2',
-  },
-  {
-    icon: Bot,
-    label: 'Asistent AI',
-    desc: 'Asistent virtual care navighează aplicația din comenzi în limbaj natural.',
-    color: '#06b6d4',
-    num: '09',
-  },
-  {
-    icon: Bell,
-    label: 'Notificări Live',
-    desc: 'Push-uri instant pentru teze, swap-uri, mesaje și recuperări.',
-    color: '#f59e0b',
-    num: '10',
-  },
+  { id: 'campusNavigator',    icon: Map,           color: '#6366f1', num: '01', span: 'sm:col-span-2', size: 'large' },
+  { id: 'scheduleHub',        icon: Calendar,      color: '#10b981', num: '02' },
+  { id: 'thesisFinder',       icon: BookOpen,      color: '#f59e0b', num: '03' },
+  { id: 'peerTutoring',       icon: Users,         color: '#f43f5e', num: '04' },
+  { id: 'messages',           icon: MessageSquare, color: '#3b82f6', num: '05' },
+  { id: 'focusTools',         icon: Heart,         color: '#10b981', num: '06' },
+  { id: 'career',             icon: Briefcase,     color: '#8b5cf6', num: '07' },
+  { id: 'campusPulse',        icon: ClipboardCheck,color: '#14b8a6', num: '08', span: 'sm:col-span-2' },
+  { id: 'aiAssistant',        icon: Bot,           color: '#06b6d4', num: '09' },
+  { id: 'liveNotifications',  icon: Bell,          color: '#f59e0b', num: '10' },
 ]
 
 const STATS = [
-  { val: `${UNIVERSITIES.length}+`, label: 'Universități' },
-  { val: '10+', label: 'Module' },
-  { val: '100%', label: 'Gratuit' },
-  { val: 'Live', label: 'Real-time' },
+  { key: 'universities', val: `${UNIVERSITIES.length}+` },
+  { key: 'modules',      val: '10+' },
+  { key: 'free',         val: '100%' },
+  { key: 'realtime',     val: 'Live' },
 ]
 
 const containerVariants = {
@@ -97,6 +35,7 @@ const itemVariants = {
 }
 
 export default function LandingPage({ onStart }) {
+  const { t } = useTranslation()
   return (
     <div className="min-h-screen bg-[#050810] text-slate-100 flex flex-col overflow-hidden relative">
 
@@ -139,7 +78,7 @@ export default function LandingPage({ onStart }) {
           <SPLogo accent="#6366f1" accentStrong="#7c3aed" size="sm" />
           <div>
             <span className="font-bold text-white text-[14px] tracking-tight leading-none block">StudentPulse</span>
-            <span className="text-[10px] text-slate-600 font-medium leading-none">Platforma Studențească</span>
+            <span className="text-[10px] text-slate-600 font-medium leading-none">{t('landing.tagline')}</span>
           </div>
         </div>
 
@@ -147,7 +86,7 @@ export default function LandingPage({ onStart }) {
           onClick={onStart}
           className="group inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/[0.09] text-[13px] font-semibold text-slate-400 hover:bg-white/[0.08] hover:text-white hover:border-white/[0.16] transition-all duration-200"
         >
-          Intră în cont
+          {t('landing.login')}
           <ChevronRight size={13} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform duration-200" />
         </button>
       </header>
@@ -173,7 +112,7 @@ export default function LandingPage({ onStart }) {
                 className="w-1.5 h-1.5 rounded-full bg-indigo-400"
                 style={{ animation: 'pulse-dot 2s ease-in-out infinite' }}
               />
-              Disponibil pentru {UNIVERSITIES.length} universități din România
+              {t('landing.badge', { count: UNIVERSITIES.length })}
             </span>
             <Sparkles size={10} strokeWidth={2.5} className="text-indigo-400 opacity-80" />
           </motion.div>
@@ -270,7 +209,7 @@ export default function LandingPage({ onStart }) {
 
           {/* Tagline */}
           <p className="text-[1.5rem] sm:text-[1.9rem] font-bold tracking-tight mb-5 leading-snug">
-            <span className="text-gradient-white">De la pierdut,&nbsp;</span>
+            <span className="text-gradient-white">{t('landing.subtitleStart')}&nbsp;</span>
             <span
               className="italic"
               style={{
@@ -280,13 +219,13 @@ export default function LandingPage({ onStart }) {
                 backgroundClip: 'text',
               }}
             >
-              la acasă.
+              {t('landing.subtitleEnd')}
             </span>
           </p>
 
           {/* Description */}
           <p className="text-[14px] text-slate-500 max-w-[380px] mx-auto mb-12 leading-relaxed font-medium">
-            Tot ce ai nevoie ca student în România — orar, sesiune, licență, tutoring, carieră, viață studențească și navigare campus, într-un singur loc.
+            {t('landing.desc')}
           </p>
 
           {/* CTA */}
@@ -311,24 +250,24 @@ export default function LandingPage({ onStart }) {
                 }}
               />
               <Zap size={16} strokeWidth={2.5} className="relative" />
-              <span className="relative">Începe acum — e gratuit</span>
+              <span className="relative">{t('landing.cta')}</span>
               <ArrowRight size={17} strokeWidth={2.5} className="relative" />
             </motion.button>
 
             <div className="flex items-center gap-3 text-[11px] text-slate-700 flex-wrap justify-center">
               <span className="flex items-center gap-1.5">
                 <Shield size={10} strokeWidth={1.75} />
-                Email instituțional
+                {t('landing.emailInstitutional')}
               </span>
               <span className="text-slate-800">·</span>
               <span className="flex items-center gap-1.5">
                 <GraduationCap size={10} strokeWidth={1.75} />
-                100% gratuit
+                {t('landing.free')}
               </span>
               <span className="text-slate-800">·</span>
               <span className="flex items-center gap-1.5">
                 <Sparkles size={10} strokeWidth={1.75} />
-                AI-powered
+                {t('landing.aiPowered')}
               </span>
             </div>
           </div>
@@ -341,10 +280,10 @@ export default function LandingPage({ onStart }) {
             className="flex items-center gap-0 mb-20"
           >
             {STATS.map((s, i) => (
-              <div key={s.label} className="flex items-center">
+              <div key={s.key} className="flex items-center">
                 <div className="flex flex-col items-center px-7 sm:px-10">
                   <span className="font-mono text-[1.6rem] sm:text-[1.8rem] font-bold text-white leading-none tracking-tight">{s.val}</span>
-                  <span className="text-[10px] text-slate-600 font-semibold mt-1.5 tracking-[0.1em] uppercase">{s.label}</span>
+                  <span className="text-[10px] text-slate-600 font-semibold mt-1.5 tracking-[0.1em] uppercase">{t(`landing.stats.${s.key}`)}</span>
                 </div>
                 {i < STATS.length - 1 && (
                   <div className="w-px h-10 bg-white/[0.07] shrink-0" />
@@ -361,9 +300,9 @@ export default function LandingPage({ onStart }) {
           animate="show"
           className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-4xl w-full"
         >
-          {FEATURES.map(({ icon: Icon, label, desc, color, num, span, size }) => (
+          {FEATURES.map(({ id, icon: Icon, color, num, span, size }) => (
             <motion.div
-              key={label}
+              key={id}
               variants={itemVariants}
               className={`group relative p-5 text-left rounded-2xl border border-white/[0.05] bg-white/[0.015]
                 hover:border-white/[0.11] hover:bg-white/[0.04]
@@ -404,15 +343,15 @@ export default function LandingPage({ onStart }) {
                 <Icon size={17} strokeWidth={1.75} style={{ color }} />
               </div>
 
-              <p className="text-[13px] font-bold text-slate-200 mb-1.5 leading-tight">{label}</p>
-              <p className="text-[11px] text-slate-600 leading-relaxed">{desc}</p>
+              <p className="text-[13px] font-bold text-slate-200 mb-1.5 leading-tight">{t(`landing.features.${id}.label`)}</p>
+              <p className="text-[11px] text-slate-600 leading-relaxed">{t(`landing.features.${id}.desc`)}</p>
 
               {size === 'large' && (
                 <div
                   className="flex items-center gap-1 mt-4 text-[11px] font-semibold opacity-0 group-hover:opacity-100 transition-all duration-200"
                   style={{ color }}
                 >
-                  Explorează <ArrowRight size={11} strokeWidth={2.5} />
+                  {t('landing.explore')} <ArrowRight size={11} strokeWidth={2.5} />
                 </div>
               )}
             </motion.div>
@@ -426,7 +365,7 @@ export default function LandingPage({ onStart }) {
           transition={{ delay: 0.65, duration: 0.6 }}
           className="mt-20 w-full max-w-4xl"
         >
-          <p className="section-label mb-6 text-center">Universități partenere</p>
+          <p className="section-label mb-6 text-center">{t('landing.partnerUniversities')}</p>
           <div className="flex flex-wrap items-center justify-center gap-2">
             {UNIVERSITIES.map(u => (
               <div
@@ -448,7 +387,7 @@ export default function LandingPage({ onStart }) {
           <div className="flex items-center gap-3">
             <span>StudentPulse</span>
             <span className="opacity-40">·</span>
-            <span>Pentru studenții din România</span>
+            <span>{t('landing.forStudents')}</span>
             <span className="opacity-40">·</span>
             <span className="flex items-center gap-1">România <span>🇷🇴</span></span>
           </div>

@@ -9,6 +9,7 @@ import {
   Zap,
   Building2,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useNow } from '../../../shared/hooks/useNow'
 import { eventsData, getScopedEvents } from '../studentLifeData'
 import { SECTION_ACCENTS, SECTION_META, EVENT_CATEGORIES } from '../constants/sectionConfig'
@@ -20,6 +21,7 @@ import EmptyState from '../components/EmptyState'
 import { getScopeLabel } from '../../../shared/utils/tenantScope'
 
 export default function EventsSection({ lifeProfile, going, goingOps }) {
+  const { t } = useTranslation()
   const accent = SECTION_ACCENTS.events
   const [category, setCategory] = useState('Toate')
   const [query, setQuery] = useState('')
@@ -43,18 +45,18 @@ export default function EventsSection({ lifeProfile, going, goingOps }) {
       <SectionHeader section="events" accent={accent} meta={SECTION_META.events} />
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-        <SearchField value={query} onChange={setQuery} placeholder="Caută evenimente, locații..." />
+        <SearchField value={query} onChange={setQuery} placeholder={t('eventsSection.searchPlaceholder')} />
         <FilterPills items={EVENT_CATEGORIES} value={category} onChange={setCategory} accent={accent} />
-        <span className="shrink-0 font-mono text-xs font-semibold text-slate-500">{events.length} evenimente</span>
+        <span className="shrink-0 font-mono text-xs font-semibold text-slate-500">{t('eventsSection.count', { count: events.length })}</span>
       </div>
 
       {events.length === 0 ? (
         <EmptyState
           icon={noScopedData ? Building2 : Calendar}
-          title={noScopedData ? 'Nu există conținut pentru facultatea ta' : 'Niciun eveniment găsit'}
+          title={noScopedData ? t('eventsSection.noEvents') : t('eventsSection.noEvents')}
           text={noScopedData
-            ? `Nu am găsit evenimente pentru ${scopeLabel || 'profilul tău academic'}. Revino curând sau contactează secretariatul.`
-            : 'Încearcă o altă categorie sau cuvânt cheie.'}
+            ? t('eventsSection.noScopedText', { scope: scopeLabel || t('eventsSection.yourProfile') })
+            : t('eventsSection.noEventsText')}
           accent={accent}
         />
       ) : (
@@ -95,7 +97,7 @@ export default function EventsSection({ lifeProfile, going, goingOps }) {
                         </span>
                         {isUpcoming && (
                           <span className="badge-amber">
-                            <Zap size={9} /> {daysLeft === 0 ? 'Azi' : `${daysLeft}z`}
+                            <Zap size={9} /> {daysLeft === 0 ? t('eventsSection.today') : `${daysLeft}z`}
                           </span>
                         )}
                       </div>
@@ -109,14 +111,14 @@ export default function EventsSection({ lifeProfile, going, goingOps }) {
                     <div className="gradient-separator mt-3 mb-3" />
 
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono text-xs text-slate-600">{ev.going + (isGoing ? 1 : 0)} merg</span>
+                      <span className="font-mono text-xs text-slate-600">{t('eventsSection.going', { count: ev.going + (isGoing ? 1 : 0) })}</span>
                       <div className="flex items-center gap-2">
                         {ev.url && (
                           <button
                             onClick={() => window.open(ev.url, '_blank', 'noopener,noreferrer')}
                             className="btn-secondary h-8 px-3 text-[11px]"
                           >
-                            Detalii <ExternalLink size={10} />
+                            {t('eventsSection.details')} <ExternalLink size={10} />
                           </button>
                         )}
                         <button
@@ -133,7 +135,7 @@ export default function EventsSection({ lifeProfile, going, goingOps }) {
                             color: accent.color,
                           } : undefined}
                         >
-                          {isGoing ? <><Check size={11} className="inline mr-1" />Merg</> : 'Merg'}
+                          {isGoing ? <><Check size={11} className="inline mr-1" />{t('eventsSection.attend')}</> : t('eventsSection.attend')}
                         </button>
                       </div>
                     </div>

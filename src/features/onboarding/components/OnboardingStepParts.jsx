@@ -1,14 +1,16 @@
 import { useMemo, useState } from 'react'
 import { Check, Search } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
 
 export function ProgressBar({ step, total }) {
+  const { t } = useTranslation()
   const pct = Math.round((step / total) * 100)
   return (
     <div className="mb-8 space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-semibold text-slate-600 uppercase tracking-widest">Progres</span>
+        <span className="text-[11px] font-semibold text-slate-600 uppercase tracking-widest">{t('onboarding.progress')}</span>
         <span className="text-[11px] font-bold text-indigo-400">{pct}%</span>
       </div>
       <div className="h-1 w-full rounded-full bg-white/[0.06] overflow-hidden">
@@ -111,6 +113,7 @@ export function TagOptions({ options, selected = [], onToggle }) {
 }
 
 export function FacultyStep({ value, onChange, universityFaculties }) {
+  const { t } = useTranslation()
   const [search, setSearch] = useState('')
   const filtered = useMemo(
     () => universityFaculties.filter(f => f.name.toLowerCase().includes(search.toLowerCase())),
@@ -126,7 +129,7 @@ export function FacultyStep({ value, onChange, universityFaculties }) {
           onChange={e => setSearch(e.target.value)}
           autoFocus
           className="bg-transparent text-sm text-slate-200 placeholder-slate-600 outline-none flex-1"
-          placeholder="Caută facultatea ta..."
+          placeholder={t('onboarding.facultySearch')}
         />
       </div>
       <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1 scrollbar-thin">
@@ -140,7 +143,7 @@ export function FacultyStep({ value, onChange, universityFaculties }) {
         ))}
         {filtered.length === 0 && (
           <p className="text-sm text-slate-600 text-center py-6">
-            Nicio facultate găsită. Încearcă alți termeni.
+            {t('onboarding.noFaculty')}
           </p>
         )}
       </div>

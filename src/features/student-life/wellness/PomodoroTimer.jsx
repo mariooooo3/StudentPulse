@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
 import { Flame, Pause, Play, RotateCcw } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { SECTION_ACCENTS } from '../constants/sectionConfig'
 import AccentLine from '../components/AccentLine'
 import { useStreaksContext } from '../../../app/providers/StreaksContext'
 
 export default function PomodoroTimer() {
+  const { t } = useTranslation()
   const { focusStreak, incrementFocus } = useStreaksContext()
   const accent = SECTION_ACCENTS.wellness
   const [mode, setMode] = useState('work')
@@ -15,7 +17,7 @@ export default function PomodoroTimer() {
   const intervalRef = useRef(null)
 
   const DURATIONS = { work: 25 * 60, shortBreak: 5 * 60, longBreak: 15 * 60 }
-  const LABELS    = { work: 'Focus', shortBreak: 'Pauză scurtă', longBreak: 'Pauză lungă' }
+  const MODES = ['work', 'shortBreak', 'longBreak']
 
   function startStop(shouldRun) {
     if (shouldRun) {
@@ -66,11 +68,11 @@ export default function PomodoroTimer() {
   return (
     <div className="premium-card p-6 text-center">
       <AccentLine color={accent.color} />
-      <h3 className="text-sm font-bold text-white mb-4">Timer Pomodoro</h3>
+      <h3 className="text-sm font-bold text-white mb-4">{t('pomodoro.title')}</h3>
 
       {/* Mode selector */}
       <div className="flex justify-center gap-1 mb-6 rounded-xl border border-white/[0.06] bg-white/[0.02] p-1">
-        {Object.entries(LABELS).map(([m, l]) => (
+        {MODES.map((m) => (
           <button
             key={m}
             onClick={() => switchMode(m)}
@@ -80,7 +82,7 @@ export default function PomodoroTimer() {
             )}
             style={mode === m ? { background: accent.bg, color: accent.color } : undefined}
           >
-            {l}
+            {t(`pomodoro.${m}`)}
           </button>
         ))}
       </div>
@@ -111,7 +113,7 @@ export default function PomodoroTimer() {
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="font-mono text-3xl font-black tabular-nums text-white">{mins}:{secs}</span>
-          <span className="mt-0.5 text-[10px] font-semibold text-slate-500">{LABELS[mode]}</span>
+          <span className="mt-0.5 text-[10px] font-semibold text-slate-500">{t(`pomodoro.${mode}`)}</span>
         </div>
       </div>
 
@@ -132,7 +134,7 @@ export default function PomodoroTimer() {
         </button>
       </div>
 
-      <p className="font-mono text-xs text-slate-600 mt-4">{sessions} sesiuni completate azi</p>
+      <p className="font-mono text-xs text-slate-600 mt-4">{t('pomodoro.sessionsToday', { count: sessions })}</p>
       <div className={clsx(
         'mt-3 flex items-center justify-center gap-2 rounded-xl border px-3 py-2 transition-colors duration-300',
         focusStreak > 0
@@ -144,7 +146,7 @@ export default function PomodoroTimer() {
           {focusStreak}
         </span>
         <span className={clsx('text-[11px] font-semibold', focusStreak > 0 ? 'text-orange-400/80' : 'text-slate-700')}>
-          {focusStreak === 0 ? 'Pornește prima sesiune!' : focusStreak === 1 ? 'zi la rând' : 'zile la rând'}
+          {focusStreak === 0 ? t('pomodoro.startFirst') : focusStreak === 1 ? t('pomodoro.streakDay') : t('pomodoro.streakDays')}
         </span>
       </div>
     </div>

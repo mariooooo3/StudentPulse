@@ -1,12 +1,14 @@
 import { useState, useRef } from 'react'
-import { X, Send, CheckCircle, Loader2, Paperclip, FileText, Info, Upload, GraduationCap } from 'lucide-react'
+import { X, Send, CheckCircle, Loader2, FileText, Info, Upload } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useNotifications } from '../../shared/hooks/useNotifications'
 import { useToast } from '../../shared/components/Toast'
 import { createThesisRequest } from '../../shared/services/professorPortal.service'
 import { getTenantScope } from '../../shared/utils/tenantScope.js'
 
 export default function BookingModal({ professor, onClose, session }) {
+  const { t } = useTranslation()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ idea: '', motivation: '' })
@@ -54,16 +56,16 @@ export default function BookingModal({ professor, onClose, session }) {
         attachedFile,
       })
       await pushNotification({
-        title: 'Cerere licenta trimisa',
-        body: `${professor.name} va raspunde in 2-5 zile lucratoare.`,
+        title: t('thesis.booking.notifyTitle'),
+        body: t('thesis.booking.notifyBody', { name: professor.name }),
         type: 'info',
         action: 'thesis.booking.requested',
         meta: { professorId: professor.id, professorName: professor.name, domain: professor.domain },
       })
-      toast({ type: 'success', title: 'Cerere trimisă!', message: `${professor.name} va răspunde în 2–5 zile.` })
+      toast({ type: 'success', title: t('thesis.booking.successTitle'), message: t('thesis.booking.successBody', { name: professor.name }) })
       setStep(2)
     } catch {
-      toast({ type: 'error', title: 'Cererea nu a fost trimisa', message: 'Verifica serverul si incearca din nou.' })
+      toast({ type: 'error', title: t('thesis.booking.errorTitle'), message: t('thesis.booking.errorBody') })
     } finally {
       setLoading(false)
     }
@@ -100,7 +102,7 @@ export default function BookingModal({ professor, onClose, session }) {
 
               {/* Name + label */}
               <div className="flex-1 min-w-0">
-                <p className="section-label mb-0.5">Rezervare loc licență</p>
+                <p className="section-label mb-0.5">{t('thesis.booking.headerLabel')}</p>
                 <h3 className="font-bold text-white text-[14px] truncate leading-snug">{professor.name}</h3>
                 <p className="text-[11px] text-slate-500 truncate">{professor.domain}</p>
               </div>
@@ -137,7 +139,7 @@ export default function BookingModal({ professor, onClose, session }) {
                   {/* Idea field */}
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="section-label">Idee preliminară de temă <span className="text-indigo-400">*</span></label>
+                      <label className="section-label">{t('thesis.booking.ideaLabel')} <span className="text-indigo-400">*</span></label>
                       <span className="text-[10px] text-slate-700 font-mono">{form.idea.length}/300</span>
                     </div>
                     <textarea
@@ -147,14 +149,14 @@ export default function BookingModal({ professor, onClose, session }) {
                       value={form.idea}
                       onChange={e => setForm(p => ({ ...p, idea: e.target.value }))}
                       className="input-base resize-none leading-relaxed"
-                      placeholder="Descrie pe scurt ideea ta de temă pentru licență..."
+                      placeholder={t('thesis.booking.ideaPlaceholder')}
                     />
                   </div>
 
                   {/* Motivation field */}
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="section-label">Motivație <span className="text-indigo-400">*</span></label>
+                      <label className="section-label">{t('thesis.booking.motivationLabel')} <span className="text-indigo-400">*</span></label>
                       <span className="text-[10px] text-slate-700 font-mono">{form.motivation.length}/300</span>
                     </div>
                     <textarea
@@ -164,15 +166,15 @@ export default function BookingModal({ professor, onClose, session }) {
                       value={form.motivation}
                       onChange={e => setForm(p => ({ ...p, motivation: e.target.value }))}
                       className="input-base resize-none leading-relaxed"
-                      placeholder="De ce vrei să lucrezi cu acest profesor și pe această temă?"
+                      placeholder={t('thesis.booking.motivationPlaceholder')}
                     />
                   </div>
 
                   {/* File upload */}
                   <div>
                     <label className="section-label block mb-1.5">
-                      Document atașat{' '}
-                      <span className="normal-case font-normal text-slate-700 tracking-normal">(CV, portofoliu, plan — opțional)</span>
+                      {t('thesis.booking.attachLabel')}{' '}
+                      <span className="normal-case font-normal text-slate-700 tracking-normal">{t('thesis.booking.attachNote')}</span>
                     </label>
 
                     <input
@@ -220,9 +222,9 @@ export default function BookingModal({ professor, onClose, session }) {
                         </div>
                         <div className="text-center">
                           <p className="text-[12px] text-slate-500 group-hover:text-slate-300 transition-colors font-medium">
-                            Click sau drag &amp; drop
+                            {t('thesis.booking.attachDragDrop')}
                           </p>
-                          <p className="text-[10px] text-slate-700 mt-0.5">.pdf, .doc, .docx</p>
+                          <p className="text-[10px] text-slate-700 mt-0.5">{t('thesis.booking.attachFormats')}</p>
                         </div>
                       </button>
                     )}
@@ -231,7 +233,7 @@ export default function BookingModal({ professor, onClose, session }) {
                   {/* Actions */}
                   <div className="flex gap-3 pt-1">
                     <button type="button" onClick={onClose} disabled={loading} className="btn-secondary flex-1 text-[13px]">
-                      Anulează
+                      {t('thesis.booking.cancel')}
                     </button>
                     <button
                       type="submit"
@@ -239,8 +241,8 @@ export default function BookingModal({ professor, onClose, session }) {
                       className="btn-primary flex-1 text-[13px] flex items-center justify-center gap-2"
                     >
                       {loading
-                        ? <><Loader2 size={14} className="animate-spin" /> Se trimite...</>
-                        : <><Send size={13} /> Trimite cererea</>
+                        ? <><Loader2 size={14} className="animate-spin" /> {t('thesis.booking.submitting')}</>
+                        : <><Send size={13} /> {t('thesis.booking.submit')}</>
                       }
                     </button>
                   </div>
@@ -265,26 +267,26 @@ export default function BookingModal({ professor, onClose, session }) {
                     <CheckCircle size={28} className="text-emerald-400" strokeWidth={1.75} />
                   </motion.div>
 
-                  <h4 className="font-bold text-white text-[16px] mb-2">Cerere trimisă cu succes!</h4>
+                  <h4 className="font-bold text-white text-[16px] mb-2">{t('thesis.booking.successHeading')}</h4>
                   <p className="text-[13px] text-slate-400 mb-3 leading-relaxed">
-                    <span className="text-slate-300 font-semibold">{professor.name}</span> va reveni cu un răspuns în 2–5 zile lucrătoare.
+                    {t('thesis.booking.successText', { name: professor.name })}
                   </p>
 
                   {attachedFile && (
                     <div className="flex items-center justify-center gap-2 mb-3 bg-white/[0.03] border border-white/[0.06] rounded-xl py-2.5 px-4">
                       <FileText size={12} className="text-slate-600" strokeWidth={1.5} />
                       <p className="text-[11px] text-slate-500 truncate">
-                        Document atașat: <span className="text-slate-400">{attachedFile.name}</span>
+                        {t('thesis.booking.attachedDoc')} <span className="text-slate-400">{attachedFile.name}</span>
                       </p>
                     </div>
                   )}
 
                   <p className="text-[11px] text-slate-600 mb-6 leading-relaxed">
-                    Vei primi o notificare prin email și în aplicație la acceptare sau refuz.
+                    {t('thesis.booking.successNote')}
                   </p>
 
                   <button onClick={onClose} className="btn-primary w-full text-[13px]">
-                    Închide
+                    {t('thesis.booking.close')}
                   </button>
                 </motion.div>
               )}

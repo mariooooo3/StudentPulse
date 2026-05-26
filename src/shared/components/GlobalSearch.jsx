@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Search,
   Map,
@@ -21,17 +22,17 @@ import { getProfessors, getTutors } from '../data/facultyCatalog'
 import clsx from 'clsx'
 
 const MODULES = [
-  { id: 'dashboard',  label: 'Dashboard',               icon: Map,           mode: 'academic', path: 'Academic' },
-  { id: 'navigator',  label: 'Campus Navigator',         icon: Map,           mode: 'academic', path: 'Academic' },
-  { id: 'schedule',   label: 'Schedule Hub',             icon: Calendar,      mode: 'academic', path: 'Academic' },
-  { id: 'thesis',     label: 'Thesis Finder',            icon: BookOpen,      mode: 'academic', path: 'Academic' },
-  { id: 'tutoring',   label: 'Peer Tutoring',            icon: Users,         mode: 'academic', path: 'Academic' },
-  { id: 'messages',   label: 'Mesaje',                   icon: MessageSquare, mode: 'academic', path: 'Academic' },
-  { id: 'pulse',       label: 'Campus Pulse',             icon: Radio,         mode: 'life',     path: 'Student Life' },
-  { id: 'discounts',   label: 'Reduceri & Beneficii',     icon: Tag,           mode: 'life',     path: 'Student Life' },
-  { id: 'career',      label: 'Carieră & Internship-uri', icon: Briefcase,     mode: 'life',     path: 'Student Life' },
-  { id: 'citylife',    label: 'Viața în Oraș',            icon: MapPin,        mode: 'life',     path: 'Student Life' },
-  { id: 'challenges',  label: 'Provocări',                icon: Trophy,        mode: 'life',     path: 'Student Life' },
+  { id: 'dashboard',  icon: Map,           mode: 'academic' },
+  { id: 'navigator',  icon: Map,           mode: 'academic' },
+  { id: 'schedule',   icon: Calendar,      mode: 'academic' },
+  { id: 'thesis',     icon: BookOpen,      mode: 'academic' },
+  { id: 'tutoring',   icon: Users,         mode: 'academic' },
+  { id: 'messages',   icon: MessageSquare, mode: 'academic' },
+  { id: 'pulse',      icon: Radio,         mode: 'life' },
+  { id: 'discounts',  icon: Tag,           mode: 'life' },
+  { id: 'career',     icon: Briefcase,     mode: 'life' },
+  { id: 'citylife',   icon: MapPin,        mode: 'life' },
+  { id: 'challenges', icon: Trophy,        mode: 'life' },
 ]
 
 const RECENT_SEARCHES_KEY = 'sc_recent_searches'
@@ -95,6 +96,7 @@ function ResultRow({ result, isActive, onMouseEnter, onClick }) {
 }
 
 export default function GlobalSearch({ profile, onNavigate, onClose }) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
   const [recent, setRecent] = useState(getRecent)
@@ -109,34 +111,34 @@ export default function GlobalSearch({ profile, onNavigate, onClose }) {
 
   const results = q.length < 1 ? [] : [
     ...MODULES
-      .filter(m => m.label.toLowerCase().includes(q))
+      .filter(m => t(`nav.${m.id}`).toLowerCase().includes(q))
       .map(m => ({
         type: 'module',
-        label: m.label,
-        sub: m.mode === 'academic' ? 'Academic' : 'Viața Studențească',
-        path: m.path,
+        label: t(`nav.${m.id}`),
+        sub: m.mode === 'academic' ? t('search.academic') : t('search.studentLife'),
+        path: m.mode === 'academic' ? t('search.academic') : t('search.studentLife'),
         icon: m.icon,
         action: () => onNavigate(m.id, m.mode),
       })),
     ...professors
-      .filter(p => p.name.toLowerCase().includes(q) || p.domain.toLowerCase().includes(q) || p.tags.some(t => t.toLowerCase().includes(q)))
+      .filter(p => p.name.toLowerCase().includes(q) || p.domain.toLowerCase().includes(q) || p.tags.some(tag => tag.toLowerCase().includes(q)))
       .slice(0, 4)
       .map(p => ({
         type: 'professor',
         label: p.name,
         sub: p.domain,
-        path: 'Profesori',
+        path: t('search.professorGroup'),
         icon: GraduationCap,
         action: () => onNavigate('thesis', 'academic'),
       })),
     ...tutors
-      .filter(t => t.name.toLowerCase().includes(q) || t.subjects.some(s => s.toLowerCase().includes(q)))
+      .filter(tutor => tutor.name.toLowerCase().includes(q) || tutor.subjects.some(s => s.toLowerCase().includes(q)))
       .slice(0, 3)
-      .map(t => ({
+      .map(tutor => ({
         type: 'tutor',
-        label: t.name,
-        sub: t.subjects.join(', '),
-        path: 'Tutori',
+        label: tutor.name,
+        sub: tutor.subjects.join(', '),
+        path: t('search.tutorGroup'),
         icon: Users,
         action: () => onNavigate('tutoring', 'academic'),
       })),
@@ -144,7 +146,7 @@ export default function GlobalSearch({ profile, onNavigate, onClose }) {
 
   // Group results by type
   const grouped = results.reduce((acc, r) => {
-    const key = r.type === 'module' ? 'Module' : r.type === 'professor' ? 'Profesori' : 'Tutori'
+    const key = r.type === 'module' ? t('search.moduleGroup') : r.type === 'professor' ? t('search.professorGroup') : t('search.tutorGroup')
     if (!acc[key]) acc[key] = []
     acc[key].push(r)
     return acc
@@ -208,7 +210,7 @@ export default function GlobalSearch({ profile, onNavigate, onClose }) {
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 onKeyDown={handleKey}
-                placeholder="Caută module, profesori, tutori..."
+                placeholder={t('search.placeholder')}
                 className="flex-1 bg-transparent text-[15px] font-medium text-slate-200 outline-none placeholder:text-slate-700"
               />
               {query ? (
@@ -232,7 +234,7 @@ export default function GlobalSearch({ profile, onNavigate, onClose }) {
               {showDefault && (
                 <div className="p-4 space-y-4">
                   <div>
-                    <p className="section-label mb-2.5">Module rapide</p>
+                    <p className="section-label mb-2.5">{t('search.quickModules')}</p>
                     <div className="grid grid-cols-3 gap-2">
                       {MODULES.slice(0, 6).map(m => {
                         const Icon = m.icon
@@ -245,7 +247,7 @@ export default function GlobalSearch({ profile, onNavigate, onClose }) {
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.04] transition-all group-hover:border-indigo-400/20 group-hover:bg-indigo-500/15">
                               <Icon size={15} strokeWidth={1.75} className="text-slate-500 transition-colors group-hover:text-indigo-300" />
                             </div>
-                            <span className="text-[11px] font-medium leading-tight text-slate-500 transition-colors group-hover:text-slate-300">{m.label}</span>
+                            <span className="text-[11px] font-medium leading-tight text-slate-500 transition-colors group-hover:text-slate-300">{t(`nav.${m.id}`)}</span>
                           </button>
                         )
                       })}
@@ -254,7 +256,7 @@ export default function GlobalSearch({ profile, onNavigate, onClose }) {
 
                   {recent.length > 0 && (
                     <div>
-                      <p className="section-label mb-2">Căutări recente</p>
+                      <p className="section-label mb-2">{t('search.recentSearches')}</p>
                       <div className="space-y-0.5">
                         {recent.map(r => (
                           <button
@@ -279,8 +281,8 @@ export default function GlobalSearch({ profile, onNavigate, onClose }) {
                     <Sparkles size={20} strokeWidth={1.5} className="text-slate-700" />
                   </div>
                   <div>
-                    <p className="text-[13px] font-semibold text-slate-500">Niciun rezultat</p>
-                    <p className="mt-0.5 text-[12px] text-slate-700">Nu am găsit nimic pentru „{query}"</p>
+                    <p className="text-[13px] font-semibold text-slate-500">{t('search.noResults')}</p>
+                    <p className="mt-0.5 text-[12px] text-slate-700">{t('search.noResultsFor', { query })}</p>
                   </div>
                 </div>
               )}
@@ -313,15 +315,15 @@ export default function GlobalSearch({ profile, onNavigate, onClose }) {
             <div className="flex items-center gap-4 border-t border-white/[0.04] px-4 py-2">
               <span className="flex items-center gap-1 text-[10px] text-slate-700">
                 <kbd className="rounded border border-white/[0.07] px-1.5 py-0.5 font-mono text-[9px]">↑↓</kbd>
-                navighează
+                {t('search.navigate')}
               </span>
               <span className="flex items-center gap-1 text-[10px] text-slate-700">
                 <kbd className="rounded border border-white/[0.07] px-1.5 py-0.5 font-mono text-[9px]">↵</kbd>
-                deschide
+                {t('search.open')}
               </span>
               <span className="ml-auto flex items-center gap-1 text-[10px] text-slate-700">
                 <kbd className="rounded border border-white/[0.07] px-1.5 py-0.5 font-mono text-[9px]">ESC</kbd>
-                închide
+                {t('search.close')}
               </span>
             </div>
 

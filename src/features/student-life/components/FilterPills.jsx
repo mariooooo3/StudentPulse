@@ -1,9 +1,9 @@
 import clsx from 'clsx'
 
-export default function FilterPills({ items, value, onChange, accent }) {
+export default function FilterPills({ items, labels, value, onChange, accent }) {
   return (
     <div className="flex flex-wrap gap-2">
-      {items.map((item) => (
+      {items.map((item, idx) => (
         <button
           key={item}
           onClick={() => onChange(item)}
@@ -19,7 +19,7 @@ export default function FilterPills({ items, value, onChange, accent }) {
             color: accent?.color || '#a5b4fc',
           } : undefined}
         >
-          {item}
+          {labels ? labels[idx] : item}
         </button>
       ))}
     </div>

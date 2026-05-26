@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Users } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { DAYS } from '../../../shared/data/mockData'
 import { staggerContainer, staggerItem } from '../schedule.constants'
 
 export default function AllGroupsView({ schedule }) {
+  const { t } = useTranslation()
   const [search, setSearch] = useState('')
 
   const groupMap = {}
@@ -25,7 +27,7 @@ export default function AllGroupsView({ schedule }) {
       <input
         value={search}
         onChange={e => setSearch(e.target.value)}
-        placeholder="Caută materie sau grupă..."
+        placeholder={t('schedule.allGroups.searchPlaceholder')}
         className="input-base w-full"
       />
 
@@ -34,8 +36,8 @@ export default function AllGroupsView({ schedule }) {
           <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-3">
             <Users size={20} className="text-slate-600" />
           </div>
-          <p className="text-sm font-semibold text-slate-400">Nicio grupă găsită</p>
-          <p className="text-xs text-slate-600 mt-1">Încearcă alt termen de căutare.</p>
+          <p className="text-sm font-semibold text-slate-400">{t('schedule.allGroups.notFound')}</p>
+          <p className="text-xs text-slate-600 mt-1">{t('schedule.allGroups.notFoundText')}</p>
         </div>
       ) : (
         <motion.div className="grid gap-4 sm:grid-cols-2" variants={staggerContainer} initial="hidden" animate="show">
@@ -45,7 +47,7 @@ export default function AllGroupsView({ schedule }) {
                 <div className="w-8 h-8 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
                   <span className="text-xs font-bold text-indigo-300">{g.group}</span>
                 </div>
-                <span className="text-sm font-semibold text-slate-200">Grupa {g.group}</span>
+                <span className="text-sm font-semibold text-slate-200">{t('schedule.allGroups.group', { name: g.group })}</span>
                 <span className="chip ml-auto">{g.courses.length}</span>
               </div>
               <div className="space-y-1.5">

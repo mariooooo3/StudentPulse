@@ -23,6 +23,7 @@ import {
   ImageIcon,
 } from 'lucide-react'
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 
 const ICON_MAP = {
   walking:  Footprints,
@@ -57,17 +58,18 @@ const CATEGORY_COLORS = {
   campus:    { color: '#f43f5e', bg: 'rgba(244,63,94,0.12)',  border: 'rgba(244,63,94,0.2)'  },
 }
 
-const STATUS_CONFIG = {
-  available: { label: 'Disponibilă', color: 'text-slate-500', bgClass: '' },
-  pending:   { label: 'În așteptare', color: 'text-amber-400', bgClass: 'border-amber-400/20 bg-amber-400/[0.07]' },
-  approved:  { label: 'Completată ✓', color: 'text-emerald-400', bgClass: 'border-emerald-400/20 bg-emerald-400/[0.07]' },
-  rejected:  { label: 'Respinsă', color: 'text-rose-400', bgClass: 'border-rose-400/20 bg-rose-400/[0.07]' },
+const STATUS_STYLE = {
+  available: { color: 'text-slate-500', bgClass: '' },
+  pending:   { color: 'text-amber-400', bgClass: 'border-amber-400/20 bg-amber-400/[0.07]' },
+  approved:  { color: 'text-emerald-400', bgClass: 'border-emerald-400/20 bg-emerald-400/[0.07]' },
+  rejected:  { color: 'text-rose-400', bgClass: 'border-rose-400/20 bg-rose-400/[0.07]' },
 }
 
 export default function ChallengeCard({ challenge, onSubmit, index = 0 }) {
+  const { t } = useTranslation()
   const Icon = ICON_MAP[challenge.icon] || Star
   const accent = CATEGORY_COLORS[challenge.category] || CATEGORY_COLORS.academic
-  const statusCfg = STATUS_CONFIG[challenge.status] || STATUS_CONFIG.available
+  const statusStyle = STATUS_STYLE[challenge.status] || STATUS_STYLE.available
   const isCompleted = challenge.status === 'approved'
   const isRejected = challenge.status === 'rejected'
   const isInApp = challenge.verifyType === 'in-app'
@@ -115,15 +117,15 @@ export default function ChallengeCard({ challenge, onSubmit, index = 0 }) {
                   {challenge.category}
                 </span>
                 <span className="font-mono text-[10px] font-bold" style={{ color: accent.color + 'bb' }}>
-                  +{challenge.points} pct
+                  {t('challengeCard.points', { count: challenge.points })}
                 </span>
               </div>
             </div>
 
             {/* Status badge */}
             {challenge.status !== 'available' && (
-              <span className={clsx('shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold', statusCfg.bgClass, statusCfg.color)}>
-                {statusCfg.label}
+              <span className={clsx('shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold', statusStyle.bgClass, statusStyle.color)}>
+                {t(`challengeCard.status.${challenge.status}`)}
               </span>
             )}
           </div>
@@ -178,11 +180,11 @@ export default function ChallengeCard({ challenge, onSubmit, index = 0 }) {
               style={{ background: accent.bg, border: `1px solid ${accent.border}`, color: accent.color }}
             >
               {isRejected ? (
-                <><XCircle size={11} /> Încearcă din nou</>
+                <><XCircle size={11} /> {t('challengeCard.retry')}</>
               ) : challenge.verifyType === 'screenshot' ? (
-                <><ImageIcon size={11} /> Încarcă screenshot</>
+                <><ImageIcon size={11} /> {t('challengeCard.uploadScreenshot')}</>
               ) : (
-                <><ChevronRight size={11} /> Trimite dovada</>
+                <><ChevronRight size={11} /> {t('challengeCard.submitProof')}</>
               )}
             </button>
           )}
@@ -190,7 +192,7 @@ export default function ChallengeCard({ challenge, onSubmit, index = 0 }) {
           {isCompleted && (
             <div className="mt-2.5 flex items-center gap-1.5 text-[11px] font-bold text-emerald-400/70">
               <CheckCircle2 size={12} />
-              Completată · {challenge.earnedPoints} puncte câștigate
+              {t('challengeCard.completed', { count: challenge.earnedPoints })}
             </div>
           )}
         </div>

@@ -145,9 +145,9 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
                   <h3 className="font-bold text-white">{job.role}</h3>
                   <p className="text-sm text-slate-500">{job.company}</p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    <span className="tag">{job.remote ? 'Remote' : `Fizic · ${job.cities[0]}`}</span>
+                    <span className="tag">{job.remote ? 'Remote' : t('career.physical', { city: job.cities[0] })}</span>
                     <span className={clsx('tag', job.paid && 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300')}>
-                      {job.paid ? 'Plătit' : 'Neplătit'}
+                      {job.paid ? t('career.paid') : t('career.unpaid')}
                     </span>
                     <span className="tag">{job.type}</span>
                     <span className="tag border-sky-500/30 bg-sky-500/10 text-sky-300">
@@ -163,8 +163,8 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
                     )}
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1.5">
-                    {job.tags.map((t) => (
-                      <span key={t} className="rounded-lg bg-white/[0.04] px-2 py-1 text-[11px] font-medium text-slate-500">{t}</span>
+                    {job.tags.map((tag) => (
+                      <span key={tag} className="rounded-lg bg-white/[0.04] px-2 py-1 text-[11px] font-medium text-slate-500">{tag}</span>
                     ))}
                   </div>
                 </div>

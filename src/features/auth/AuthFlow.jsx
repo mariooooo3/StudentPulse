@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Compass, Mail, ArrowRight, Check, Loader2, Shield, ChevronLeft, GraduationCap } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { UNIVERSITIES } from '../../shared/config/universities'
 import UniversityGrid from './components/UniversityGrid'
 import VerifyingStep from './components/VerifyingStep'
@@ -9,7 +10,7 @@ import EmailStep from './components/EmailStep'
 import { useAuth } from '../../app/providers/AuthContext'
 import { createUserId, getUserProfile } from '../../shared/services/auth.service'
 import { DEMO_PROFESSOR } from '../../shared/services/professorPortal.service'
-import { STEP, STEP_LABELS } from './auth.constants'
+import { STEP, STEP_LABEL_KEYS } from './auth.constants'
 import { buildUniversityEmail, verifyTotpCode } from './auth.utils'
 import clsx from 'clsx'
 
@@ -17,6 +18,7 @@ const TUIASI = UNIVERSITIES.find(u => u.id === 'tuiasi')
 const AC_FACULTY = TUIASI?.faculties.find(f => f.code === 'AC')
 
 export default function AuthFlow() {
+  const { t } = useTranslation()
   const { login } = useAuth()
   const submitIdRef = useRef(0)
   const [role, setRole] = useState('student')
@@ -37,9 +39,9 @@ export default function AuthFlow() {
     const opId = ++submitIdRef.current
     try {
       const valid = await verifyTotpCode(accessCode)
-      if (!valid) { setAccessCodeError('Cod incorect. Încearcă din nou.'); setLoading(false); return }
+      if (!valid) { setAccessCodeError(t('auth.errors.wrongCode')); setLoading(false); return }
     } catch {
-      setAccessCodeError('Eroare de conexiune. Încearcă din nou.'); setLoading(false); return
+      setAccessCodeError(t('auth.errors.connection')); setLoading(false); return
     }
     setStep(STEP.VERIFYING)
     await new Promise(r => setTimeout(r, 2600))
@@ -62,15 +64,15 @@ export default function AuthFlow() {
 
   async function handleProfessorSubmit() {
     if (professorEmail.trim().toLowerCase() !== DEMO_PROFESSOR.email) {
-      setAccessCodeError('Email profesor invalid.')
+      setAccessCodeError(t('auth.errors.invalidProfessor'))
       return
     }
     setAccessCodeError(''); setLoading(true)
     try {
       const valid = await verifyTotpCode(accessCode)
-      if (!valid) { setAccessCodeError('Cod incorect. Încearcă din nou.'); setLoading(false); return }
+      if (!valid) { setAccessCodeError(t('auth.errors.wrongCode')); setLoading(false); return }
     } catch {
-      setAccessCodeError('Eroare de conexiune. Încearcă din nou.'); setLoading(false); return
+      setAccessCodeError(t('auth.errors.connection')); setLoading(false); return
     }
     await new Promise(r => setTimeout(r, 900))
     setLoading(false)
@@ -128,7 +130,7 @@ export default function AuthFlow() {
             </div>
           </div>
           <h1 className="text-[24px] font-bold text-white tracking-tight">StudentPulse</h1>
-          <p className="text-slate-600 text-[12px] mt-1.5 font-medium">De la pierdut, la acasă.</p>
+          <p className="text-slate-600 text-[12px] mt-1.5 font-medium">{t('auth.tagline')}</p>
         </div>
 
         {/* Card — double bezel */}
@@ -142,8 +144,8 @@ export default function AuthFlow() {
           >
             <div className="grid grid-cols-2 gap-2 mb-5">
               {[
-                ['student', 'Student', Compass],
-                ['professor', 'Profesor', GraduationCap],
+                ['student', t('auth.student'), Compass],
+                ['professor', t('auth.professor'), GraduationCap],
               ].map(([id, label, Icon]) => (
                 <button
                   key={id}
@@ -177,10 +179,10 @@ export default function AuthFlow() {
                     <ChevronLeft size={13} className="text-slate-500" strokeWidth={1.75} />
                   </button>
                 )}
-                {STEP_LABELS.map((label, i) => (
+                {STEP_LABEL_KEYS.map((key, i) => (
                   <div key={i} className="flex items-center gap-1.5">
                     <div
-                      title={label}
+                      title={t(`auth.steps.${key}`)}
                       className={clsx(
                         'w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold transition-all duration-300',
                         i < step
@@ -193,7 +195,7 @@ export default function AuthFlow() {
                     >
                       {i < step ? <Check size={10} strokeWidth={2.5} /> : i + 1}
                     </div>
-                    {i < STEP_LABELS.length - 1 && (
+                    {i < STEP_LABEL_KEYS.length - 1 && (
                       <div
                         className="h-px w-5 rounded-full transition-all duration-500"
                         style={{
@@ -211,17 +213,17 @@ export default function AuthFlow() {
             {/* Step title */}
             <div className="mb-5">
               <h2 className="text-[16px] font-bold text-white">
-                {role === 'professor' && 'Autentificare profesor'}
-                {role === 'student' && step === STEP.SELECT_UNI && 'Selectează universitatea'}
-                {role === 'student' && step === STEP.ENTER_EMAIL && 'Autentifică-te'}
-                {role === 'student' && step === STEP.VERIFYING && 'Verificare în curs'}
-                {role === 'student' && step === STEP.CONFIRMED && 'Identitate confirmată'}
+                {role === 'professor' && t('auth.steps.professorAuth')}
+                {role === 'student' && step === STEP.SELECT_UNI && t('auth.steps.selectUni')}
+                {role === 'student' && step === STEP.ENTER_EMAIL && t('auth.steps.authenticate')}
+                {role === 'student' && step === STEP.VERIFYING && t('auth.steps.verifying')}
+                {role === 'student' && step === STEP.CONFIRMED && t('auth.steps.confirmed')}
               </h2>
               {role === 'student' && step === STEP.SELECT_UNI && (
-                <p className="text-[11px] text-slate-600 mt-0.5">Disponibil pentru {UNIVERSITIES.length} universități din România</p>
+                <p className="text-[11px] text-slate-600 mt-0.5">{t('auth.uniCount', { count: UNIVERSITIES.length })}</p>
               )}
               {role === 'professor' && (
-                <p className="text-[11px] text-slate-600 mt-0.5">Profesorii intra direct cu contul emis de facultate.</p>
+                <p className="text-[11px] text-slate-600 mt-0.5">{t('auth.professorNote')}</p>
               )}
             </div>
 
@@ -250,7 +252,7 @@ export default function AuthFlow() {
         </div>
 
         <p className="text-center text-[11px] text-slate-800 mt-6">
-          Acces exclusiv prin email instituțional · Date protejate
+          {t('auth.footer')}
         </p>
       </div>
     </div>

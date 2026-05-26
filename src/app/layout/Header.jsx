@@ -77,8 +77,8 @@ export default function Header({
     if (settings?.appNotifications === false) return
     toast({
       type: live.type === 'warning' ? 'error' : live.type || 'info',
-      title: live.title || 'Notificare noua',
-      message: live.body || live.text || 'Ai un update nou in StudentPulse.',
+      title: live.title || t('notifications.default'),
+      message: live.body || live.text || t('notifications.defaultBody'),
       duration: 4500,
     })
   }, [notifications, toast])
@@ -130,7 +130,7 @@ export default function Header({
       <div className="hidden lg:flex items-center gap-1.5 shrink-0">
         <div className={clsx('w-1.5 h-1.5 rounded-full shrink-0', connected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400')} />
         <span className={clsx('text-[11px] font-semibold', connected ? 'text-emerald-500' : 'text-amber-500')}>
-          {connected ? 'Online' : 'Offline'}
+          {connected ? t('notifications.connected') : t('notifications.offline')}
         </span>
       </div>
 
@@ -170,7 +170,7 @@ export default function Header({
       >
         <Search size={13} className="text-slate-600 shrink-0 group-hover:text-slate-400 transition-colors" strokeWidth={1.75} />
         <span className="text-[13px] text-slate-700 group-hover:text-slate-500 font-medium flex-1 transition-colors">
-          Caută în StudentPulse...
+          {t('notifications.searchPlaceholder')}
         </span>
         <kbd className="text-[10px] text-slate-700 border border-white/[0.07] rounded-md px-1.5 py-0.5 font-mono shrink-0">
           {typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? '⌘K' : 'Ctrl+K'}
@@ -230,7 +230,7 @@ export default function Header({
                             {connected
                               ? <Wifi size={10} className="text-emerald-400" />
                               : <WifiOff size={10} className="text-amber-400" />}
-                            {connected ? 'Online' : 'Offline, sincronizare locala'}
+                            {connected ? t('notifications.connected') : t('notifications.offlineSync')}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -308,7 +308,7 @@ export default function Header({
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-2">
                                     <p className="text-[13px] font-semibold text-slate-200 truncate">
-                                      {n.title || 'Notificare'}
+                                      {n.title || t('notifications.default')}
                                     </p>
                                     {!n.read && (
                                       <span
@@ -342,7 +342,7 @@ export default function Header({
 
                     {filteredNotifications.length > visible.length && (
                       <div className="border-t border-white/[0.05] px-4 py-2 text-center text-[11px] text-slate-700">
-                        Se afiseaza ultimele {visible.length} din {filteredNotifications.length}.
+                        {t('notifications.showing', { shown: visible.length, total: filteredNotifications.length })}
                       </div>
                     )}
                   </div>
@@ -356,7 +356,7 @@ export default function Header({
       {/* Settings */}
       <button
         onClick={onSettingsOpen}
-        title="Deschide setarile"
+        title={t('notifications.settingsTooltip')}
         className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.07] transition-all duration-300 active:scale-[0.95] hover:rotate-[30deg]"
       >
         <Settings size={14} className="text-slate-500" strokeWidth={1.75} />

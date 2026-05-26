@@ -1,5 +1,6 @@
 import { ChevronRight, ChevronLeft, Compass } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
 import { ProgressBar, SelectOption, CardOption, TagOptions, FacultyStep } from './components/OnboardingStepParts'
 import OnboardingDoneScreen from './components/OnboardingDoneScreen'
@@ -7,6 +8,7 @@ import { useOnboardingFlow } from './hooks/useOnboardingFlow'
 
 // ─── Progress bar ─────────────────────────────────────────────────────────────
 export default function OnboardingFlow({ onComplete, session }) {
+  const { t } = useTranslation()
   const {
     step,
     direction,
@@ -68,7 +70,7 @@ export default function OnboardingFlow({ onComplete, session }) {
         </div>
         <div>
           <p className="font-bold text-white text-[14px] tracking-tight">StudentPulse</p>
-          <p className="text-xs text-slate-600">Setup profil · pas {step + 1} din {total}</p>
+          <p className="text-xs text-slate-600">{t('onboarding.stepTitle', { step: step + 1, total })}</p>
         </div>
       </motion.div>
 
@@ -145,7 +147,7 @@ export default function OnboardingFlow({ onComplete, session }) {
             className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft size={17} />
-            Înapoi
+            {t('onboarding.back')}
           </button>
 
           <span className="text-[11px] font-mono text-slate-700">
@@ -160,7 +162,7 @@ export default function OnboardingFlow({ onComplete, session }) {
               !canProceed() && 'opacity-35 cursor-not-allowed',
             )}
           >
-            {step === total - 1 ? 'Finalizează' : 'Continuă'}
+            {step === total - 1 ? t('onboarding.finish') : t('onboarding.continue')}
             <ChevronRight size={17} />
           </button>
         </div>

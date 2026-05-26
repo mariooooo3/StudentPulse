@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import { Check } from 'lucide-react'
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 import { DAYS } from '../../../shared/data/mockData'
 import { createRecoveryRequest, getRecoveryRequestsForUser } from '../../../shared/services/professorPortal.service'
 import { getTenantScope } from '../../../shared/utils/tenantScope.js'
 import { staggerContainer, staggerItem } from '../schedule.constants'
-import { STATUS_BADGE, STATUS_LABEL, buildSortedCombos, groupCombosByDay } from './scheduleHubParts.utils'
+import { STATUS_BADGE, buildSortedCombos, groupCombosByDay } from './scheduleHubParts.utils'
 import RecoveryModal from './RecoveryModal'
 
 function availColor(slot) {
@@ -17,11 +18,11 @@ function availColor(slot) {
   return 'bg-emerald-900/40 border-emerald-700/50 text-emerald-300'
 }
 
-function availLabel(slot) {
-  if (slot.isMine) return 'ORA TA'
+function availLabel(slot, t) {
+  if (slot.isMine) return t('schedule.recovery.mySlot')
   const free = slot.total - slot.enrolled
-  if (free === 0) return 'COMPLET'
-  return `${free} locuri`
+  if (free === 0) return t('schedule.recovery.full')
+  return t('schedule.recovery.spots', { count: free })
 }
 
 function studentNameFromSession(session) {
@@ -29,6 +30,7 @@ function studentNameFromSession(session) {
 }
 
 export default function RecoveryGrid({ recoverySlots, onNotify, session }) {
+  const { t } = useTranslation()
   const [pendingModal, setPendingModal] = useState(null)
   const [confirmed, setConfirmed] = useState(() => {
     try { return JSON.parse(localStorage.getItem(`sc_recovery_${session?.userId}`) || '{}') } catch { return {} }
@@ -60,7 +62,7 @@ export default function RecoveryGrid({ recoverySlots, onNotify, session }) {
       {studentRequests.length > 0 && (
         <motion.div variants={staggerItem} className="glass-card p-5">
           <div className="flex items-center justify-between mb-4">
-            <p className="section-label">Cererile tale de recuperare</p>
+            <p className="section-label">{t('schedule.recovery.yourRequests')}</p>
             <span className="chip">{studentRequests.length}</span>
           </div>
           <div className="space-y-2">
@@ -68,10 +70,10 @@ export default function RecoveryGrid({ recoverySlots, onNotify, session }) {
               <motion.div key={request.id} whileHover={{ y: -1 }} className="flex items-center gap-3 rounded-xl bg-white/[0.03] border border-white/[0.05] px-4 py-3 hover:border-white/[0.09] transition-colors">
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold text-slate-200 truncate">{request.subject}</p>
-                  <p className="text-[11px] text-slate-600 truncate mt-0.5 font-mono">Gr. {request.group} · {request.room}</p>
+                  <p className="text-[11px] text-slate-600 truncate mt-0.5 font-mono">{t('schedule.recovery.group')} {request.group} · {request.room}</p>
                 </div>
                 <span className={clsx('rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide', STATUS_BADGE[request.status] ?? 'badge-amber')}>
-                  {STATUS_LABEL[request.status] ?? 'În așteptare'}
+                  {t(`schedule.recovery.status.${request.status || 'pending'}`)}
                 </span>
               </motion.div>
             ))}
@@ -81,10 +83,10 @@ export default function RecoveryGrid({ recoverySlots, onNotify, session }) {
 
       <motion.div variants={staggerItem} className="premium-card p-4 border-indigo-500/20 bg-indigo-500/[0.04]">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-400">
-          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-indigo-600/40 border border-indigo-400" />Ora ta curentă</div>
-          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-emerald-900/40 border border-emerald-700/50" />Locuri disponibile <span className="text-slate-600">(click → recuperare)</span></div>
-          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-amber-900/40 border border-amber-700/50" />Aproape plin <span className="text-slate-600">(1–2 loc.)</span></div>
-          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-rose-900/40 border border-rose-700/50" />Complet</div>
+          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-indigo-600/40 border border-indigo-400" />{t('schedule.recovery.mySlotLabel')}</div>
+          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-emerald-900/40 border border-emerald-700/50" />{t('schedule.recovery.availableSlots')} <span className="text-slate-600">{t('schedule.recovery.clickToRecover')}</span></div>
+          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-amber-900/40 border border-amber-700/50" />{t('schedule.recovery.almostFull')} <span className="text-slate-600">{t('schedule.recovery.oneToTwo')}</span></div>
+          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-rose-900/40 border border-rose-700/50" />{t('schedule.recovery.fullLabel')}</div>
         </div>
       </motion.div>
 
@@ -92,7 +94,7 @@ export default function RecoveryGrid({ recoverySlots, onNotify, session }) {
         <table className="border-collapse w-full min-w-[700px]" style={{ tableLayout: 'auto' }}>
           <thead>
             <tr className="bg-white/[0.03]">
-              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 border-b border-r border-white/[0.06] w-48 sticky left-0 bg-[#080e1c] z-10">Materie</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 border-b border-r border-white/[0.06] w-48 sticky left-0 bg-[#080e1c] z-10">{t('schedule.recovery.subject')}</th>
               {Object.entries(byDay).map(([day, combos]) => (
                 <th key={day} colSpan={combos.length} className="px-2 py-3 text-xs font-bold text-slate-300 border-b border-r border-white/[0.06] text-center">{DAYS[Number(day) - 1]}</th>
               ))}
@@ -113,7 +115,7 @@ export default function RecoveryGrid({ recoverySlots, onNotify, session }) {
                   const slot = getSlot(subj, combo)
                   const key = `${subj}|${combo}`
                   if (confirmed[key]) {
-                    return <td key={combo} className="px-2 py-2 border-r border-white/[0.03] text-center"><div className="flex items-center justify-center gap-1 text-emerald-400 text-[10px] font-semibold"><Check size={10} /> Trimis</div></td>
+                    return <td key={combo} className="px-2 py-2 border-r border-white/[0.03] text-center"><div className="flex items-center justify-center gap-1 text-emerald-400 text-[10px] font-semibold"><Check size={10} /> {t('schedule.recovery.sent')}</div></td>
                   }
                   if (!slot) return <td key={combo} className="px-2 py-2 border-r border-white/[0.03]" />
                   const free = slot.total - slot.enrolled
@@ -124,9 +126,9 @@ export default function RecoveryGrid({ recoverySlots, onNotify, session }) {
                         onClick={() => clickable && setPendingModal({ slot, subject: subj, key })}
                         disabled={!clickable}
                         className={clsx('px-2.5 py-1.5 rounded-lg border text-[10px] font-semibold transition-all duration-150 w-full font-mono', availColor(slot), clickable ? 'hover:brightness-125 cursor-pointer active:scale-95' : 'cursor-default')}
-                        title={slot.isMine ? 'Ora ta curentă' : `${slot.room} · Gr. ${slot.group}`}
+                        title={slot.isMine ? t('schedule.recovery.mySlotLabel') : `${slot.room} · ${t('schedule.recovery.group')} ${slot.group}`}
                       >
-                        {availLabel(slot)}
+                        {availLabel(slot, t)}
                       </button>
                     </td>
                   )
@@ -162,8 +164,8 @@ export default function RecoveryGrid({ recoverySlots, onNotify, session }) {
             })
             await refreshRequests()
             onNotify?.({
-              title: 'Cerere recuperare trimisă',
-              body: `${pendingModal.subject} - grupa ${pendingModal.slot.group}, ${DAYS[pendingModal.slot.day - 1]} ${pendingModal.slot.start}:00.`,
+              title: t('schedule.recovery.notifyTitle'),
+              body: t('schedule.recovery.notifyBody', { subject: pendingModal.subject, group: pendingModal.slot.group, day: DAYS[pendingModal.slot.day - 1], time: pendingModal.slot.start }),
               type: 'info',
               action: 'schedule.recovery.requested',
               meta: { subject: pendingModal.subject, group: pendingModal.slot.group, room: pendingModal.slot.room },
