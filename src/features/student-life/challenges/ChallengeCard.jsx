@@ -70,7 +70,10 @@ export default function ChallengeCard({ challenge, onSubmit, index = 0 }) {
   const statusCfg = STATUS_CONFIG[challenge.status] || STATUS_CONFIG.available
   const isCompleted = challenge.status === 'approved'
   const isRejected = challenge.status === 'rejected'
-  const canSubmit = challenge.status === 'available' || challenge.status === 'rejected'
+  const isInApp = challenge.verifyType === 'in-app'
+  const canSubmit = !isInApp && (challenge.status === 'available' || challenge.status === 'rejected')
+  const inAppProgress = challenge.progress ?? 0
+  const inAppTotal = challenge.requiredCount ?? 1
 
   return (
     <motion.div
@@ -138,6 +141,32 @@ export default function ChallengeCard({ challenge, onSubmit, index = 0 }) {
           {isCompleted && challenge.aiFeedback && (
             <div className="mt-2.5 rounded-lg border border-emerald-400/15 bg-emerald-400/[0.06] px-3 py-2">
               <p className="text-[11px] text-emerald-300/80 leading-relaxed">{challenge.aiFeedback}</p>
+            </div>
+          )}
+
+          {/* In-app progress bar */}
+          {isInApp && !isCompleted && (
+            <div className="mt-3 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-slate-500 font-semibold">
+                  {inAppProgress} / {inAppTotal} {inAppTotal === 1 ? 'aplicație' : 'aplicații'}
+                </span>
+                <span className="text-[10px] font-bold" style={{ color: accent.color }}>
+                  {inAppProgress >= inAppTotal ? '✓ Procesare…' : 'În progres'}
+                </span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-white/[0.06] overflow-hidden">
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: accent.color }}
+                  initial={{ width: 0 }}
+                  animate={{ width: inAppTotal > 0 ? `${Math.min(100, (inAppProgress / inAppTotal) * 100)}%` : '0%' }}
+                  transition={{ type: 'spring', stiffness: 80, damping: 20 }}
+                />
+              </div>
+              <p className="text-[10px] text-slate-600 leading-relaxed">
+                Aplică la internship-uri din secțiunea <span className="text-slate-400 font-semibold">Carieră</span> — se completează automat.
+              </p>
             </div>
           )}
 

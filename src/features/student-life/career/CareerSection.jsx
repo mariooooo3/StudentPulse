@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useMemo, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import clsx from 'clsx'
 import { useTranslation } from 'react-i18next'
 import {
@@ -7,7 +7,9 @@ import {
   Bot,
   Briefcase,
   Check,
+  Trophy,
 } from 'lucide-react'
+import { useAuth } from '../../../app/providers/AuthContext'
 import { useNow } from '../../../shared/hooks/useNow'
 import { rollingDays } from '../../../shared/utils/dateTime'
 import { studentLifeData } from '../studentLifeData'
@@ -24,9 +26,11 @@ import CVAnalysisPanel from './CVAnalysisPanel'
 
 export default function CareerSection({ lifeProfile, applied, appliedOps }) {
   const { t } = useTranslation()
+  const { session } = useAuth()
   const accent = SECTION_ACCENTS.career
   const [type, setType] = useState('Toate')
   const [query, setQuery] = useState('')
+  const [challengeToast, setChallengeToast] = useState(null)
   const [cvAnalysis, setCvAnalysis] = useState(() => {
     try {
       const saved = localStorage.getItem('sp_cv_analysis')
@@ -39,6 +43,30 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
     else localStorage.removeItem('sp_cv_analysis')
     setCvAnalysis(data)
   }
+
+  useEffect(() => {
+    if (!challengeToast) return
+    const timer = setTimeout(() => setChallengeToast(null), 4500)
+    return () => clearTimeout(timer)
+  }, [challengeToast])
+
+  async function handleApply(job) {
+    if (job.url) window.open(job.url, '_blank', 'noopener,noreferrer')
+    appliedOps.add(job.id)
+    if (!session?.userId) return
+    try {
+      const res = await fetch('/api/challenges/in-app-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: session.userId, actionType: 'career-apply' }),
+      })
+      const data = await res.json()
+      if (data.completed?.length > 0) {
+        setChallengeToast(data.completed[0])
+      }
+    } catch { /* silent — challenge tracking is non-critical */ }
+  }
+
   const now = useNow()
   const allJobs = studentLifeData.career[lifeProfile.careerKey] || studentLifeData.career.CS
 
@@ -158,10 +186,7 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
                   </span>
                 )}
                 <button
-                  onClick={() => {
-                    if (job.url) window.open(job.url, '_blank', 'noopener,noreferrer')
-                    appliedOps.add(job.id)
-                  }}
+                  onClick={() => { if (!applied.has(job.id)) handleApply(job) }}
                   disabled={applied.has(job.id)}
                   className={clsx(
                     'inline-flex h-10 min-w-28 items-center justify-center gap-2 rounded-xl px-4 text-[13px] font-bold transition-all active:scale-[0.97] disabled:cursor-default',
@@ -178,6 +203,29 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
           ))}
         </motion.div>
       )}
+      {/* Challenge completion toast */}
+      <AnimatePresence>
+        {challengeToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 24, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 22 }}
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-emerald-400/25 bg-[#0a1628]/95 px-4 py-3 backdrop-blur-sm"
+            style={{ boxShadow: '0 0 40px rgba(16,185,129,0.18), 0 4px 24px rgba(0,0,0,0.4)' }}
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-400/10">
+              <Trophy size={18} className="text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white">Provocare completată! 🎉</p>
+              <p className="text-xs font-semibold text-emerald-400">
+                +{challengeToast.points} puncte · {challengeToast.title}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   )
 }

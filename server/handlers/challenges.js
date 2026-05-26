@@ -106,8 +106,7 @@ const WEEKLY_POOL = [
     id: 'w2', title: 'Aplică la un internship',
     description: 'Aplică la un internship sau oportunitate de practică din secțiunea Carieră a aplicației.',
     category: 'carieră', points: 200, icon: 'briefcase',
-    verifyType: 'screenshot', requiresDate: false,
-    screenshotHint: 'Fă un screenshot cu confirmarea aplicației trimise (email de confirmare, pagina "Applied" de pe LinkedIn/site companie, etc.).',
+    verifyType: 'in-app', inAppAction: 'career-apply', requiredCount: 1,
   },
   {
     id: 'w3', title: 'Vizitează biblioteca',
@@ -204,7 +203,7 @@ const MONTHLY_POOL = [
     id: 'm2', title: 'Aplică la 3 oportunități de carieră',
     description: 'Aplică la minimum 3 internship-uri, job-uri de practică sau programe de cercetare în această lună.',
     category: 'carieră', points: 600, icon: 'career',
-    verifyType: 'text',
+    verifyType: 'in-app', inAppAction: 'career-apply', requiredCount: 3,
   },
   {
     id: 'm3', title: 'Participă la un hackathon sau eveniment mare',
@@ -435,12 +434,20 @@ export function createChallengesHandler() {
 
       const enrich = (c) => {
         const comp = completionMap.get(`${c.periodKey}:${c.id}`)
+        let progress = undefined
+        if (c.verifyType === 'in-app' && c.inAppAction) {
+          const row = db.prepare(
+            'SELECT count FROM challenge_progress WHERE user_id = ? AND action_type = ? AND period_key = ?'
+          ).get(userId, c.inAppAction, c.periodKey)
+          progress = row?.count || 0
+        }
         return {
           ...c,
           status: comp?.status || 'available',
           aiFeedback: comp?.ai_feedback || null,
           earnedPoints: comp?.points || 0,
           submittedAt: comp?.submitted_at || null,
+          progress,
         }
       }
 
@@ -546,6 +553,81 @@ export function createChallengesHandler() {
 
       res.writeHead(200)
       res.end(JSON.stringify({ approved, feedback, points, totalPoints: totalRow?.total || 0 }))
+      return
+    }
+
+    // POST /api/challenges/in-app-action
+    if (req.method === 'POST' && req.url === '/api/challenges/in-app-action') {
+      let body = ''
+      for await (const chunk of req) body += chunk
+      let parsed = {}
+      try { parsed = JSON.parse(body) } catch {}
+      const { userId, actionType } = parsed
+
+      if (!userId || !actionType) {
+        res.writeHead(400)
+        res.end(JSON.stringify({ error: 'userId și actionType necesare' }))
+        return
+      }
+
+      // Find active in-app challenges matching this action
+      const { daily, weekly, monthly } = getActiveChallenges()
+      const inAppChallenges = [...daily, ...weekly, ...monthly].filter(
+        c => c.verifyType === 'in-app' && c.inAppAction === actionType
+      )
+
+      const completed = []
+
+      for (const challenge of inAppChallenges) {
+        const { id: challengeId, periodKey, points: basePoints, title, requiredCount = 1 } = challenge
+
+        // Skip if already approved
+        const existing = db.prepare(
+          'SELECT status FROM challenge_completions WHERE user_id = ? AND period_key = ? AND challenge_id = ?'
+        ).get(userId, periodKey, challengeId)
+        if (existing?.status === 'approved') continue
+
+        // Increment progress count
+        db.prepare(`
+          INSERT INTO challenge_progress (user_id, action_type, period_key, count)
+          VALUES (?, ?, ?, 1)
+          ON CONFLICT(user_id, action_type, period_key) DO UPDATE SET count = count + 1
+        `).run(userId, actionType, periodKey)
+
+        const progressRow = db.prepare(
+          'SELECT count FROM challenge_progress WHERE user_id = ? AND action_type = ? AND period_key = ?'
+        ).get(userId, actionType, periodKey)
+        const count = progressRow?.count || 0
+
+        if (count >= requiredCount) {
+          const compId = `chal-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+          const feedback = count === 1
+            ? `Provocare completată automat — ai aplicat la un internship din aplicație!`
+            : `Provocare completată automat — ai aplicat la ${count} oportunități de carieră din aplicație!`
+
+          db.prepare(`
+            INSERT INTO challenge_completions (id, user_id, period_key, challenge_id, status, proof_text, ai_feedback, points, submitted_at)
+            VALUES (?, ?, ?, ?, 'approved', ?, ?, ?, ?)
+            ON CONFLICT(user_id, period_key, challenge_id) DO UPDATE SET
+              status = 'approved', proof_text = excluded.proof_text,
+              ai_feedback = excluded.ai_feedback, points = excluded.points, submitted_at = excluded.submitted_at
+          `).run(compId, userId, periodKey, challengeId, `[in-app: ${actionType} ×${count}]`, feedback, basePoints, nowIso())
+
+          completed.push({ id: challengeId, title, points: basePoints, count, requiredCount })
+        }
+      }
+
+      // Return progress map for all active in-app challenges of this action
+      const progressMap = {}
+      for (const c of inAppChallenges) {
+        const row = db.prepare(
+          'SELECT count FROM challenge_progress WHERE user_id = ? AND action_type = ? AND period_key = ?'
+        ).get(userId, c.inAppAction, c.periodKey)
+        progressMap[c.id] = { count: row?.count || 0, requiredCount: c.requiredCount || 1 }
+      }
+
+      res.writeHead(200)
+      res.end(JSON.stringify({ completed, progressMap }))
       return
     }
 

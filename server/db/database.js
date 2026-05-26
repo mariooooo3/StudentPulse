@@ -164,7 +164,16 @@ function migrate() {
     CREATE INDEX IF NOT EXISTS idx_notifications_user_time ON notifications(user_id, timestamp DESC);
     CREATE INDEX IF NOT EXISTS idx_direct_messages_channel_time ON direct_messages(channel, timestamp);
     CREATE INDEX IF NOT EXISTS idx_portal_messages_thread_time ON portal_messages(thread_id, timestamp);
+    CREATE TABLE IF NOT EXISTS challenge_progress (
+      user_id TEXT NOT NULL,
+      action_type TEXT NOT NULL,
+      period_key TEXT NOT NULL,
+      count INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (user_id, action_type, period_key)
+    );
+
     CREATE INDEX IF NOT EXISTS idx_challenge_completions_user ON challenge_completions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_challenge_progress_user ON challenge_progress(user_id, action_type);
     CREATE INDEX IF NOT EXISTS idx_carpool_rides_status ON carpool_rides(status, date);
     CREATE INDEX IF NOT EXISTS idx_carpool_rides_driver ON carpool_rides(driver_id);
     CREATE INDEX IF NOT EXISTS idx_carpool_requests_ride ON carpool_requests(ride_id);
