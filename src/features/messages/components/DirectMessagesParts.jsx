@@ -289,7 +289,7 @@ export function ChatThread({ contact, currentUserId, currentName, scope, onBack 
     if (!file) return
     if (file.size > 5 * 1024 * 1024) { alert('Fișierul e prea mare. Maxim 5MB.'); return }
     const reader = new FileReader()
-    reader.onload = ev => setAttachment({ base64: ev.target.result.split(',')[1], mimeType: file.type, name: file.name, size: file.size })
+    reader.onload = ev => { const r = ev.target.result; setAttachment({ base64: r?.includes(',') ? r.split(',')[1] : r, mimeType: file.type, name: file.name, size: file.size }) }
     reader.readAsDataURL(file)
     e.target.value = ''
   }

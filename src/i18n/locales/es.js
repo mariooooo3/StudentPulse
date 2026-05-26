@@ -164,6 +164,8 @@ const es = {
     paid: 'Remunerado',
     unpaid: 'No remunerado',
     physical: 'Presencial · {{city}}',
+    challengeCompleted: '¡Reto completado! 🎉',
+    challengePoints: 'pts',
   },
 
   city: {

@@ -60,6 +60,7 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: session.userId, actionType: 'career-apply' }),
       })
+      if (!res.ok) return
       const data = await res.json()
       if (data.completed?.length > 0) {
         setChallengeToast(data.completed[0])
@@ -84,7 +85,7 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
         const cities = job.cities.map(normalizeCity)
         const warnings = []
         if (lifeProfile.year < job.minYear) warnings.push(`Anul ${job.minYear}+`)
-        if (!job.remote && !cities.includes('all') && !cities.includes(lifeProfile.city)) warnings.push(job.cities[0])
+        if (!job.remote && !cities.includes('all') && !cities.includes(lifeProfile.city) && job.cities[0]) warnings.push(job.cities[0])
         const deadlineDays = rollingDays(job.id, 3, 21, now)
         const baseScore = jobMatch(job, lifeProfile)
         const adj = cvAdjMap[job.id]
@@ -145,7 +146,7 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
                   <h3 className="font-bold text-white">{job.role}</h3>
                   <p className="text-sm text-slate-500">{job.company}</p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    <span className="tag">{job.remote ? 'Remote' : t('career.physical', { city: job.cities[0] })}</span>
+                    <span className="tag">{job.remote ? 'Remote' : t('career.physical', { city: job.cities?.[0] || '' })}</span>
                     <span className={clsx('tag', job.paid && 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300')}>
                       {job.paid ? t('career.paid') : t('career.unpaid')}
                     </span>
@@ -218,9 +219,9 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
               <Trophy size={18} className="text-emerald-400" />
             </div>
             <div>
-              <p className="text-sm font-bold text-white">Provocare completată! 🎉</p>
+              <p className="text-sm font-bold text-white">{t('career.challengeCompleted')}</p>
               <p className="text-xs font-semibold text-emerald-400">
-                +{challengeToast.points} puncte · {challengeToast.title}
+                +{challengeToast.points} {t('career.challengePoints')} · {challengeToast.title}
               </p>
             </div>
           </motion.div>

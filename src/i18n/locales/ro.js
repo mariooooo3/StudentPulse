@@ -164,6 +164,8 @@ const ro = {
     paid: 'Plătit',
     unpaid: 'Neplătit',
     physical: 'Fizic · {{city}}',
+    challengeCompleted: 'Provocare completată! 🎉',
+    challengePoints: 'pct',
   },
 
   city: {
