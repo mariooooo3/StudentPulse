@@ -58,7 +58,13 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
         const deadlineDays = rollingDays(job.id, 3, 21, now)
         const baseScore = jobMatch(job, lifeProfile)
         const adj = cvAdjMap[job.id]
-        const match = adj ? Math.min(99, Math.max(8, baseScore + adj.adjustment)) : baseScore
+        // When CV is present, blend: CV signal (70%) + faculty/year signal (30%)
+        // cvScore = 50 (neutral base) + adjustment → strong mismatch pushes it down to 5, strong match up to 80
+        const match = adj
+          ? Math.min(99, Math.max(5, Math.round(
+              baseScore * 0.3 + Math.max(5, 50 + adj.adjustment) * 0.7
+            )))
+          : baseScore
         return { ...job, deadlineDays, match, cvReason: adj?.reason || null, warnings }
       })
       .filter((job) => cvAnalysis ? job.match >= 20 : job.baseMatch >= 1)
