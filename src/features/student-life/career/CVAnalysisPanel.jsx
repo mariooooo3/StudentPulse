@@ -117,16 +117,23 @@ export default function CVAnalysisPanel({ allJobs, onAnalysis, cvAnalysis, lifeP
           <div className="pt-3 space-y-3 border-t border-white/[0.06]">
             <textarea
               value={cvText}
-              onChange={e => setCvText(e.target.value)}
+              onChange={e => { setCvText(e.target.value); setError('') }}
               rows={5}
               placeholder="Lipește conținutul CV-ului..."
               className="input-base resize-none"
             />
             {error && <p className="text-xs text-red-400 flex items-center gap-1"><AlertCircle size={12} />{error}</p>}
-            <button onClick={analyze} disabled={loading || cvText.trim().length < 30}
-              className="btn-primary text-sm h-9 px-4 disabled:opacity-50 disabled:cursor-not-allowed">
-              {loading ? <><Loader2 size={14} className="animate-spin" /> Analizez...</> : 'Actualizează'}
-            </button>
+            <div className="flex items-center gap-2">
+              <input ref={fileRef} type="file" accept=".txt,.pdf,.doc,.docx" className="hidden" onChange={onFile} />
+              <button onClick={() => fileRef.current?.click()} disabled={extracting}
+                className="btn-secondary text-xs h-9 px-3 disabled:opacity-50 disabled:cursor-not-allowed">
+                {extracting ? <><Loader2 size={12} className="animate-spin" /> Se citește...</> : <><Upload size={12} /> PDF / TXT</>}
+              </button>
+              <button onClick={analyze} disabled={loading || cvText.trim().length < 30}
+                className="btn-primary text-sm h-9 px-4 ml-auto disabled:opacity-50 disabled:cursor-not-allowed">
+                {loading ? <><Loader2 size={14} className="animate-spin" /> Analizez...</> : 'Actualizează'}
+              </button>
+            </div>
           </div>
         )}
       </div>
