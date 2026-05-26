@@ -14,17 +14,17 @@ import {
 import clsx from 'clsx'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useNotifications } from '../../shared/hooks/useNotifications'
 import { useSocket } from '../../shared/hooks/useSocket'
 import { useToast } from '../../shared/components/Toast'
 import { getUniversityTheme } from '../../shared/utils/theme'
 import { useSettings } from '../providers/SettingsContext'
-import { VIEW_TITLES, NOTIFICATION_FILTERS } from './header.constants'
 import { getNotificationRoute, getNotificationIcon, timeAgo } from './header.utils'
 
 const MODES = [
-  { id: 'academic', label: 'Academic', icon: Compass },
-  { id: 'life',     label: 'Viață',    icon: Sparkles },
+  { id: 'academic', labelKey: 'mode.academic', icon: Compass },
+  { id: 'life',     labelKey: 'mode.life',     icon: Sparkles },
 ]
 
 export default function Header({
@@ -38,9 +38,16 @@ export default function Header({
   onNavigate,
   onSettingsOpen,
 }) {
-  const { title, sub } = VIEW_TITLES[currentView] || VIEW_TITLES.dashboard
+  const { t } = useTranslation()
+  const viewKey = currentView || 'dashboard'
+  const title = t(`views.${viewKey}.title`, { defaultValue: t('views.dashboard.title') })
+  const sub = t(`views.${viewKey}.sub`, { defaultValue: t('views.dashboard.sub') })
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifFilter, setNotifFilter] = useState('all')
+  const notifFilters = [
+    { id: 'all', label: t('notifications.all') },
+    { id: 'unread', label: t('notifications.unread') },
+  ]
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications(session?.userId)
   const { connected } = useSocket()
   const toast = useToast()
@@ -129,7 +136,7 @@ export default function Header({
 
       {/* Mode switcher — premium pill */}
       <div className="hidden sm:flex p-[1px] rounded-full bg-gradient-to-b from-white/[0.08] to-white/[0.03] border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-        {MODES.map(({ id, label, icon: Icon }) => {
+        {MODES.map(({ id, labelKey, icon: Icon }) => {
           const active = platformMode === id
           return (
             <button
@@ -150,7 +157,7 @@ export default function Header({
                 />
               )}
               <Icon size={13} strokeWidth={active ? 2.25 : 1.75} className="relative z-10" />
-              <span className="relative z-10">{label}</span>
+              <span className="relative z-10">{t(labelKey)}</span>
             </button>
           )
         })}
@@ -218,7 +225,7 @@ export default function Header({
                     <div className="px-4 py-3 border-b border-white/[0.06]">
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <p className="text-[13px] font-bold text-white">Notificari</p>
+                          <p className="text-[13px] font-bold text-white">{t('notifications.title')}</p>
                           <div className="mt-1 flex items-center gap-1.5 text-[10px] font-semibold text-slate-600">
                             {connected
                               ? <Wifi size={10} className="text-emerald-400" />
@@ -234,7 +241,7 @@ export default function Header({
                               style={{ color: theme.accent }}
                             >
                               <CheckCheck size={12} />
-                              Marcheaza
+                              {t('notifications.markAll')}
                             </button>
                           )}
                           <button
@@ -248,7 +255,7 @@ export default function Header({
 
                       {/* Filter tabs */}
                       <div className="mt-3 flex rounded-xl border border-white/[0.06] bg-white/[0.03] p-1">
-                        {NOTIFICATION_FILTERS.map(filter => (
+                        {notifFilters.map(filter => (
                           <button
                             key={filter.id}
                             onClick={() => setNotifFilter(filter.id)}
@@ -272,7 +279,7 @@ export default function Header({
                         <div className="px-4 py-10 text-center">
                           <Bell size={20} className="text-slate-800 mx-auto mb-2" strokeWidth={1.5} />
                           <p className="text-[13px] text-slate-600">
-                            {notifFilter === 'unread' ? 'Nu ai notificari necitite.' : 'Nu ai notificari noi.'}
+                            {notifFilter === 'unread' ? t('notifications.noUnread') : t('notifications.noNew')}
                           </p>
                         </div>
                       ) : (
@@ -357,7 +364,7 @@ export default function Header({
 
       {/* Mobile mode switcher — bottom bar */}
       <div className="fixed inset-x-3 bottom-3 z-[60] flex gap-1 rounded-2xl border border-white/[0.08] bg-[#070b14]/95 p-1 shadow-2xl backdrop-blur-xl sm:hidden">
-        {MODES.map(({ id, label, icon: Icon }) => {
+        {MODES.map(({ id, labelKey, icon: Icon }) => {
           const active = platformMode === id
           return (
             <button
@@ -369,7 +376,7 @@ export default function Header({
               )}
             >
               <Icon size={16} strokeWidth={active ? 2 : 1.75} />
-              {label}
+              {t(labelKey)}
             </button>
           )
         })}
