@@ -36,6 +36,7 @@ const ICON_MAP = {
   digital:  Smartphone,
   brain:    Brain,
   tutoring: Users,
+  users:    Users,
   briefcase: Briefcase,
   library:  Library,
   group:    Users2,

@@ -34,7 +34,11 @@ export default function ChallengesSection() {
   const [submitting, setSubmitting] = useState(null) // challenge being submitted
 
   const load = useCallback(() => {
-    if (!session?.userId) return
+    // FIX: call setLoading(false) before early return to avoid infinite spinner
+    if (!session?.userId) {
+      setLoading(false)
+      return
+    }
     setLoading(true)
     setError('')
     fetchChallenges(session.userId)
@@ -64,8 +68,9 @@ export default function ChallengesSection() {
 
   function handleModalClose(result) {
     setSubmitting(null)
-    if (result?.approved) {
-      // Refresh data to reflect new state
+    // FIX: refresh after any completed submission (approved OR rejected)
+    // result is null only when user cancels without submitting
+    if (result !== null && result !== undefined) {
       load()
     }
   }
