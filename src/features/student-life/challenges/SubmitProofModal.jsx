@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   X, Send, Loader2, CheckCircle2, XCircle,
@@ -35,6 +35,13 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
 
   const accent = CATEGORY_COLORS[challenge.category] || CATEGORY_COLORS.academic
   const maxLen = 500
+
+  // FIX: cleanup object URL on unmount to prevent memory leak
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview)
+    }
+  }, [imagePreview])
 
   // ── Image handling ──────────────────────────────────────────────────────────
   function handleFile(file) {
@@ -85,7 +92,8 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
   function handleClose() {
     if (state === 'loading') return
     if (imagePreview) URL.revokeObjectURL(imagePreview)
-    onClose(result?.approved ? result : null)
+    // FIX: pass result directly so caller can distinguish submitted (approved/rejected) from cancelled (null)
+    onClose(result)
   }
 
   function retry() {
@@ -154,7 +162,9 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
                         ? <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
                         : <XCircle size={18} className="text-amber-400 shrink-0" />}
                       <p className={clsx('text-sm font-bold', state === 'success' ? 'text-emerald-300' : 'text-amber-300')}>
-                        {state === 'success' ? `Aprobat! +${result.points} puncte 🎉` : 'Screenshot respins'}
+                        {state === 'success'
+                          ? `Aprobat! +${result.points} puncte 🎉`
+                          : isScreenshot ? 'Screenshot respins' : 'Dovadă respinsă'}
                       </p>
                     </div>
                     <p className={clsx('text-sm leading-relaxed', state === 'success' ? 'text-emerald-200/80' : 'text-amber-200/80')}>
@@ -163,7 +173,7 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
                     {state === 'error' && (
                       <button onClick={retry}
                               className="text-xs font-semibold text-amber-300 underline underline-offset-2 hover:text-amber-200 transition-colors">
-                        Încearcă cu alt screenshot
+                        {isScreenshot ? 'Încearcă cu alt screenshot' : 'Încearcă din nou'}
                       </button>
                     )}
                   </motion.div>

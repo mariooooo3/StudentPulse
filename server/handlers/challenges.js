@@ -35,7 +35,7 @@ const DAILY_POOL = [
     id: 'd1', title: 'Mers pe jos 30 de minute',
     description: 'Fă o plimbare de cel puțin 30 de minute — pe campus, în parc sau în oraș.',
     category: 'sănătate', points: 50, icon: 'walking',
-    verifyType: 'screenshot',
+    verifyType: 'screenshot', requiresDate: true,
     screenshotHint: 'Încarcă un screenshot din Google Fit, Strava, Samsung Health sau Apple Health care să arate activitatea de azi (mers ≥ 30 min cu data vizibilă).',
   },
   {
@@ -66,7 +66,7 @@ const DAILY_POOL = [
     id: 'd6', title: 'Stretching 10 minute',
     description: 'Fă 10 minute de stretching sau exerciții ușoare dimineața sau seara.',
     category: 'sănătate', points: 30, icon: 'stretch',
-    verifyType: 'text',
+    verifyType: 'text', requiresDate: false,
   },
   {
     id: 'd7', title: 'Contactează un coleg',
@@ -78,7 +78,7 @@ const DAILY_POOL = [
     id: 'd8', title: 'Organizează-ți notițele',
     description: 'Organizează sau rezumă notițele de la cursul de azi în maxim 30 de minute.',
     category: 'academic', points: 40, icon: 'notes',
-    verifyType: 'screenshot',
+    verifyType: 'screenshot', requiresDate: false,
     screenshotHint: 'Fă un screenshot sau o poză cu notițele organizate (Notion, Word, caiet, etc.) — să se vadă că sunt structurate și complete.',
   },
   {
@@ -106,70 +106,70 @@ const WEEKLY_POOL = [
     id: 'w2', title: 'Aplică la un internship',
     description: 'Aplică la un internship sau oportunitate de practică din secțiunea Carieră a aplicației.',
     category: 'carieră', points: 200, icon: 'briefcase',
-    verifyType: 'screenshot',
+    verifyType: 'screenshot', requiresDate: false,
     screenshotHint: 'Fă un screenshot cu confirmarea aplicației trimise (email de confirmare, pagina "Applied" de pe LinkedIn/site companie, etc.).',
   },
   {
     id: 'w3', title: 'Vizitează biblioteca',
     description: 'Mergi fizic la biblioteca campusului și studiază acolo cel puțin o oră.',
     category: 'campus', points: 150, icon: 'library',
-    verifyType: 'screenshot',
+    verifyType: 'screenshot', requiresDate: false,
     screenshotHint: 'Fă o fotografie în interiorul bibliotecii — raft cu cărți, sală de lectură sau intrare. Nu trebuie data vizibilă, poza singură e suficientă.',
   },
   {
     id: 'w4', title: 'Sesiune de studiu în grup',
     description: 'Organizează sau participă la o sesiune de studiu în grup cu minimum 2 colegi.',
     category: 'social', points: 150, icon: 'group',
-    verifyType: 'screenshot',
+    verifyType: 'screenshot', requiresDate: false,
     screenshotHint: 'Fă o poză la sesiunea de studiu cu colegii (birou, laptop-uri deschise, whiteboard) sau un screenshot dintr-un apel video de grup de studiu.',
   },
   {
     id: 'w5', title: 'Workout 45 minute',
     description: 'Fă un antrenament de 45 de minute — sală, alergat, înot sau sport de echipă.',
     category: 'sănătate', points: 150, icon: 'workout',
-    verifyType: 'screenshot',
+    verifyType: 'screenshot', requiresDate: true,
     screenshotHint: 'Încarcă un screenshot din Google Fit, Strava, Samsung Health, Nike Run Club sau orice aplicație de sport care arată antrenamentul de azi (≥ 45 min, data vizibilă).',
   },
   {
     id: 'w6', title: 'Participă la un eveniment de campus',
     description: 'Mergi la un eveniment studențesc — conferință, club, workshop sau activitate culturală.',
     category: 'campus', points: 200, icon: 'event',
-    verifyType: 'screenshot',
+    verifyType: 'screenshot', requiresDate: false,
     screenshotHint: 'Fă o fotografie la eveniment (afișul, sala, certificat de participare) sau un screenshot cu confirmarea înregistrării/biletului.',
   },
   {
     id: 'w7', title: 'Aleargă 5 km',
     description: 'Aleargă 5 kilometri într-o singură sesiune — pe stradă, în parc sau pe bandă.',
     category: 'sănătate', points: 200, icon: 'workout',
-    verifyType: 'screenshot',
+    verifyType: 'screenshot', requiresDate: true,
     screenshotHint: 'Încarcă un screenshot din Strava, Nike Run Club, Google Fit sau orice aplicație de alergare care arată distanța ≥ 5 km cu data din această săptămână vizibilă.',
   },
   {
     id: 'w8', title: 'Curăță și organizează-ți spațiul de lucru',
     description: 'Fă curat la birou sau în camera ta, organizează materialele de studiu și elimină distragerile din jur.',
     category: 'wellbeing', points: 150, icon: 'notes',
-    verifyType: 'screenshot',
+    verifyType: 'screenshot', requiresDate: false,
     screenshotHint: 'Fă o poză cu biroul sau spațiul de lucru organizat — să se vadă că e curat și aranjat.',
   },
   {
     id: 'w9', title: 'Actualizează-ți profilul LinkedIn',
     description: 'Adaugă o experiență nouă, un proiect sau un skill la profilul tău LinkedIn și fă un screenshot cu profilul actualizat.',
     category: 'carieră', points: 150, icon: 'briefcase',
-    verifyType: 'screenshot',
+    verifyType: 'screenshot', requiresDate: false,
     screenshotHint: 'Fă un screenshot cu profilul tău LinkedIn actualizat — să se vadă secțiunea adăugată (experiență, proiect sau skill) și numele tău.',
   },
   {
     id: 'w10', title: 'Participă la un club studențesc',
     description: 'Mergi la o întâlnire a unui club studențesc, asociații sau cerc academic de pe campus și fă o poză acolo.',
     category: 'social', points: 150, icon: 'group',
-    verifyType: 'screenshot',
+    verifyType: 'screenshot', requiresDate: false,
     screenshotHint: 'Fă o fotografie la întâlnire (sală, oameni, prezentare sau afiș) sau un screenshot cu confirmarea înscrierii/grupului.',
   },
   {
     id: 'w11', title: 'Fă voluntariat o oră',
     description: 'Dedică cel puțin o oră unui act de voluntariat — la o organizație, eveniment sau activitate comunitară.',
     category: 'social', points: 200, icon: 'users',
-    verifyType: 'screenshot',
+    verifyType: 'screenshot', requiresDate: false,
     screenshotHint: 'Fă o fotografie de la activitatea de voluntariat sau un screenshot cu confirmarea/badge-ul de participare de la organizație.',
   },
   {
@@ -188,7 +188,7 @@ const WEEKLY_POOL = [
     id: 'w14', title: 'Donează sânge',
     description: 'Donează sânge la centrul de transfuzie sau la o campanie organizată pe campus.',
     category: 'social', points: 300, icon: 'users',
-    verifyType: 'screenshot',
+    verifyType: 'screenshot', requiresDate: false,
     screenshotHint: 'Fă o poză cu adeverința/certificatul de donare sau cu confirmarea programării la centrul de transfuzie.',
   },
 ]
@@ -210,7 +210,7 @@ const MONTHLY_POOL = [
     id: 'm3', title: 'Participă la un hackathon sau eveniment mare',
     description: 'Participă la un hackathon, conferință, olimpiadă sau eveniment academic major.',
     category: 'campus', points: 700, icon: 'hackathon',
-    verifyType: 'screenshot',
+    verifyType: 'screenshot', requiresDate: false,
     screenshotHint: 'Încarcă o fotografie de la eveniment, un screenshot cu confirmarea înscrierii sau un certificat de participare.',
   },
   {
@@ -270,14 +270,24 @@ function getActiveChallenges() {
   // Slot 0: always a screenshot task (physical) — rotates among screenshot-only daily tasks
   const screenshotDailyPool = DAILY_POOL.filter(c => c.verifyType === 'screenshot')
   const textDailyPool       = DAILY_POOL.filter(c => c.verifyType !== 'screenshot')
-  const [screenshotTask] = seededPick(screenshotDailyPool, 1, seed)
-  const textTasks        = seededPick(textDailyPool, 2, seed ^ 0xdeadbeef)
-  const daily = [screenshotTask, ...textTasks].map(c => ({ ...c, type: 'daily', periodKey: dailyKey }))
+
+  // FIX: guard against empty screenshotDailyPool to prevent TypeError on spread
+  const screenshotPicked = screenshotDailyPool.length > 0
+    ? seededPick(screenshotDailyPool, 1, seed)
+    : []
+  const textTasks = seededPick(textDailyPool, screenshotPicked.length > 0 ? 2 : 3, seed ^ 0xdeadbeef)
+  const daily = [...screenshotPicked, ...textTasks].map(c => ({ ...c, type: 'daily', periodKey: dailyKey }))
 
   const weekly  = seededPick(WEEKLY_POOL,  3, dateSeed(weeklyKey)).map(c => ({ ...c, type: 'weekly',  periodKey: weeklyKey }))
   const monthly = seededPick(MONTHLY_POOL, 1, dateSeed(monthlyKey)).map(c => ({ ...c, type: 'monthly', periodKey: monthlyKey }))
 
   return { daily, weekly, monthly }
+}
+
+// ─── Lookup helper — find a challenge by id from the active pool ──────────────
+function findActiveChallenge(challengeId) {
+  const { daily, weekly, monthly } = getActiveChallenges()
+  return [...daily, ...weekly, ...monthly].find(c => c.id === challengeId) || null
 }
 
 // ─── Text proof verification (AI text model) ─────────────────────────────────
@@ -325,8 +335,20 @@ Reguli stricte:
 }
 
 // ─── Screenshot verification (AI vision model) ───────────────────────────────
-async function verifyWithScreenshot(challengeTitle, challengeDescription, screenshotBase64, mimeType) {
+async function verifyWithScreenshot(challengeTitle, challengeDescription, screenshotBase64, mimeType, requiresDate = true) {
   const today = getDailyKey()  // e.g. "2026-05-25"
+
+  const dateInstruction = requiresDate
+    ? `2. Verifică dacă data activității din screenshot corespunde cu data de azi (${today}) sau este din ziua curentă — OBLIGATORIU`
+    : `2. Data nu este obligatorie pentru această provocare — ignoră lipsa datei`
+
+  const dateApproval = requiresDate
+    ? `- Data din screenshot este de azi (${today})? → DA, NU sau NECLAR (OBLIGATORIU pentru aprobare)`
+    : `- Data din screenshot: nu este criteriu de aprobare pentru această provocare`
+
+  const dateStrictness = requiresDate
+    ? `Fii STRICT cu data — dacă nu se vede data de azi clar, approved=false.`
+    : `Data NU este criteriu de respingere pentru această provocare.`
 
   const prompt = `Ești un verificator de provocări studențești. Analizezi un screenshot trimis ca dovadă.
 
@@ -335,28 +357,27 @@ PROVOCARE: "${challengeTitle}"
 CE TREBUIE SĂ VERIFICI: "${challengeDescription}"
 
 INSTRUCȚIUNI DE ANALIZĂ:
-1. Identifică aplicația din screenshot (Google Fit, Strava, Samsung Health, Apple Health, Nike Run, Fitbit, Garmin, etc.)
-2. Verifică dacă data activității din screenshot corespunde cu data de azi (${today}) sau este din ziua curentă
-3. Verifică dacă activitatea din screenshot corespunde cu provocarea (tip activitate, durată minimă)
-4. Verifică dacă pare un screenshot real (nu editat evident)
+1. Identifică ce se vede în screenshot (aplicație fitness, fotografie, document, etc.)
+${dateInstruction}
+3. Verifică dacă conținutul screenshot-ului corespunde cu provocarea
+4. Verifică dacă pare un screenshot/fotografie reală (nu editată evident)
 
 CRITERII DE APROBARE:
-- Este o aplicație de fitness / sport / sănătate reală? → DA sau NU
-- Data din screenshot este de azi (${today})? → DA, NU sau NECLAR
-- Activitatea corespunde provocării? → DA sau NU
-- Durata/distanța îndeplinește minimul cerut? → DA, NU sau NECLAR
+- Conținutul corespunde provocării? → DA sau NU
+${dateApproval}
+- Imaginea pare autentică? → DA sau NU
 
 Răspunde DOAR cu JSON valid:
 {
   "approved": true/false,
-  "app_detected": "numele aplicației sau 'necunoscut'",
+  "app_detected": "ce s-a detectat în imagine sau 'necunoscut'",
   "date_matches": true/false/null,
   "activity_matches": true/false,
   "feedback": "1-2 propoziții în română, explică decizia"
 }
 
-Fii STRICT cu data — dacă nu se vede data de azi clar, approved=false.
-Fii STRICT cu aplicația — dacă nu e o aplicație reală de fitness/sport, approved=false.`
+${dateStrictness}
+Fii rezonabil cu conținutul — dacă imaginea corespunde clar provocării, aprobă.`
 
   try {
     const completion = await groq.chat.completions.create({
@@ -366,7 +387,7 @@ Fii STRICT cu aplicația — dacă nu e o aplicație reală de fitness/sport, ap
           role: 'user',
           content: [
             { type: 'image_url', image_url: { url: `data:${mimeType || 'image/jpeg'};base64,${screenshotBase64}` } },
-            { type: 'text', text: prompt },
+            { type: 'text',      text: prompt },
           ],
         },
       ],
@@ -438,23 +459,38 @@ export function createChallengesHandler() {
 
     // POST /api/challenges/submit
     if (req.method === 'POST' && req.url === '/api/challenges/submit') {
+      // FIX: body size limit — max 12 MB (base64 image ~8MB → ~10.7MB JSON)
+      const MAX_BODY_BYTES = 12 * 1024 * 1024
       let body = ''
-      for await (const chunk of req) body += chunk
+      let bodyBytes = 0
+      for await (const chunk of req) {
+        bodyBytes += Buffer.byteLength(chunk)
+        if (bodyBytes > MAX_BODY_BYTES) {
+          res.writeHead(413); res.end(JSON.stringify({ error: 'Request prea mare. Maxim 8MB per imagine.' })); return
+        }
+        body += chunk
+      }
+
       let parsed
       try { parsed = JSON.parse(body) } catch {
         res.writeHead(400); res.end(JSON.stringify({ error: 'Invalid JSON' })); return
       }
 
-      const {
-        userId, challengeId, challengeType, periodKey,
-        proofText, proofImage, proofImageMime,
-        verifyType,
-        challengeTitle, challengeDescription,
-      } = parsed
+      const { userId, challengeId, proofText, proofImage, proofImageMime } = parsed
 
       if (!userId || !challengeId) {
         res.writeHead(400); res.end(JSON.stringify({ error: 'userId și challengeId sunt necesare' })); return
       }
+
+      // FIX: look up challenge server-side — never trust type/points/verifyType from client
+      const challenge = findActiveChallenge(challengeId)
+      if (!challenge) {
+        res.writeHead(400); res.end(JSON.stringify({ error: 'Provocare inexistentă sau expirată.' })); return
+      }
+
+      const { verifyType, periodKey, type: challengeType, points: basePoints,
+              title: challengeTitle, description: challengeDescription,
+              requiresDate = true } = challenge
 
       if (verifyType === 'screenshot' && !proofImage) {
         res.writeHead(400); res.end(JSON.stringify({ error: 'Screenshot-ul este necesar pentru această provocare.' })); return
@@ -463,28 +499,31 @@ export function createChallengesHandler() {
         res.writeHead(400); res.end(JSON.stringify({ error: 'Descrierea dovezii este necesară.' })); return
       }
 
+      // FIX: validate periodKey is present (NULL bypass protection)
+      if (!periodKey) {
+        res.writeHead(400); res.end(JSON.stringify({ error: 'Perioadă invalidă.' })); return
+      }
+
       // Already approved → block
       const existing = db.prepare('SELECT status FROM challenge_completions WHERE user_id = ? AND period_key = ? AND challenge_id = ?').get(userId, periodKey, challengeId)
       if (existing?.status === 'approved') {
         res.writeHead(409); res.end(JSON.stringify({ error: 'Provocarea a fost deja completată.' })); return
       }
 
-      const pointsMap = { daily: 50, weekly: 150, monthly: 500 }
-      const basePoints = parsed.challengePoints || pointsMap[challengeType] || 50
-
-      // Verify based on type
+      // Verify based on type — use server-side requiresDate flag
       let verifyResult
       if (verifyType === 'screenshot') {
         verifyResult = await verifyWithScreenshot(
-          challengeTitle || challengeId,
-          challengeDescription || '',
+          challengeTitle,
+          challengeDescription,
           proofImage,
           proofImageMime || 'image/jpeg',
+          requiresDate,
         )
       } else {
         verifyResult = await verifyWithText(
-          challengeTitle || challengeId,
-          challengeDescription || '',
+          challengeTitle,
+          challengeDescription,
           proofText?.trim() || '',
         )
       }
