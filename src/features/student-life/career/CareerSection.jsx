@@ -67,7 +67,7 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
           : baseScore
         return { ...job, deadlineDays, match, cvReason: adj?.reason || null, warnings }
       })
-      .filter((job) => cvAnalysis ? job.match >= 20 : job.baseMatch >= 1)
+      .filter((job) => cvAnalysis ? job.match >= 35 : job.baseMatch >= 1)
       .sort((a, b) => b.match - a.match)
   }, [allJobs, lifeProfile, now, query, type, cvAdjMap])
 
