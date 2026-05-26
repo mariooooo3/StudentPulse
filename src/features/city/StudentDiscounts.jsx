@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { ChevronLeft, Tag, MapPin, CheckCircle, Flame, Percent } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { studentDiscounts } from '../../shared/data/cityData'
 import clsx from 'clsx'
 
 const CATS = ['Toate', 'Mâncare', 'Cultură', 'Transport', 'Sport', 'Rechizite', 'Shopping']
+const CAT_KEYS = { 'Toate': 'all', 'Mâncare': 'mancare', 'Cultură': 'cultura', 'Transport': 'transport', 'Sport': 'sport', 'Rechizite': 'rechizite', 'Shopping': 'shopping' }
 
 const CAT_COLORS = {
   'Mâncare':   '#f97316',
@@ -25,6 +27,7 @@ const itemVar = {
 }
 
 export default function StudentDiscounts({ onBack }) {
+  const { t } = useTranslation()
   const [filter, setFilter] = useState('Toate')
 
   const filtered = filter === 'Toate'
@@ -60,10 +63,10 @@ export default function StudentDiscounts({ onBack }) {
                 style={{ background: '#6366f120', border: '1.5px solid #6366f145' }}>
                 <Tag size={14} style={{ color: '#6366f1' }} />
               </div>
-              <h2 className="text-lg font-bold text-white">Reduceri Studenți</h2>
+              <h2 className="text-lg font-bold text-white">{t('cityContent.cityDiscounts.title')}</h2>
             </div>
             <p className="text-xs text-slate-500 mt-0.5 ml-9">
-              {studentDiscounts.length} oferte în toată țara
+              {t('cityContent.cityDiscounts.subtitle', { count: studentDiscounts.length })}
             </p>
           </div>
 
@@ -94,7 +97,7 @@ export default function StudentDiscounts({ onBack }) {
                 ? { background: color, boxShadow: `0 0 12px ${color}40` }
                 : {}}
             >
-              {c}
+              {t(`cityContent.cityDiscounts.cats.${CAT_KEYS[c]}`)}
             </button>
           )
         })}
@@ -111,7 +114,7 @@ export default function StudentDiscounts({ onBack }) {
             style={{ background: '#6366f118', border: '1.5px solid #6366f135' }}>
             <Tag size={28} className="opacity-50" style={{ color: '#6366f1' }} />
           </div>
-          <p className="text-sm text-slate-500">Nicio reducere în această categorie</p>
+          <p className="text-sm text-slate-500">{t('cityContent.cityDiscounts.noDiscounts')}</p>
         </motion.div>
       ) : (
         <motion.div

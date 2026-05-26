@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { Heart } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { wellnessData } from '../studentLifeData'
 import { SECTION_ACCENTS, SECTION_META, WELLNESS_ICONS } from '../constants/sectionConfig'
 import { containerVariants, itemVariants } from '../utils/motionVariants'
@@ -9,6 +10,7 @@ import PomodoroTimer from './PomodoroTimer'
 import FocusForest from './FocusForest'
 
 export default function WellnessSection() {
+  const { t } = useTranslation()
   const accent = SECTION_ACCENTS.wellness
   return (
     <section className="space-y-6">
@@ -22,7 +24,7 @@ export default function WellnessSection() {
                  style={{ background: accent.bg, border: `1px solid ${accent.border}` }}>
               <Heart size={13} style={{ color: accent.color }} strokeWidth={1.8} />
             </div>
-            <h3 className="text-sm font-bold text-white">Sfaturi de Wellbeing</h3>
+            <h3 className="text-sm font-bold text-white">{t('wellnessSection.wellbeingTips')}</h3>
           </div>
           <motion.div
             variants={containerVariants}

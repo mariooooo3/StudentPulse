@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Search, Star, Calendar, Clock, Check, MessageSquare, ArrowLeftRight, Users, GraduationCap, SlidersHorizontal } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { getSubjectFilters, getTutors } from '../../shared/data/facultyCatalog'
 import SkillSwap from './SkillSwap'
 import clsx from 'clsx'
 import { useToast } from '../../shared/components/Toast'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const TABS = [
-  { label: 'Tutori', icon: <GraduationCap size={13} /> },
-  { label: 'Grup & Swap', icon: <ArrowLeftRight size={11} /> },
-]
+const TAB_IDS = ['tutors', 'groupSwap']
+const TAB_ICONS = [<GraduationCap size={13} />, <ArrowLeftRight size={11} />]
 
 const containerVariants = {
   hidden: {},
@@ -63,13 +62,14 @@ function TutorSkeleton() {
   )
 }
 
-function TutorCard({ t }) {
+function TutorCard({ t: tutor }) {
+  const { t } = useTranslation()
   const storageKey = 'sc_tutor_actions'
   const [booked, setBooked] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(storageKey) || '{}')[t.name]?.booked || false } catch { return false }
+    try { return JSON.parse(localStorage.getItem(storageKey) || '{}')[tutor.name]?.booked || false } catch { return false }
   })
   const [contacted, setContacted] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(storageKey) || '{}')[t.name]?.contacted || false } catch { return false }
+    try { return JSON.parse(localStorage.getItem(storageKey) || '{}')[tutor.name]?.contacted || false } catch { return false }
   })
   const [showSlots, setShowSlots] = useState(false)
   const toast = useToast()
@@ -77,7 +77,7 @@ function TutorCard({ t }) {
   function saveTutorAction(field, value) {
     try {
       const all = JSON.parse(localStorage.getItem(storageKey) || '{}')
-      all[t.name] = { ...all[t.name], [field]: value }
+      all[tutor.name] = { ...all[tutor.name], [field]: value }
       localStorage.setItem(storageKey, JSON.stringify(all))
     } catch {}
   }
@@ -85,13 +85,13 @@ function TutorCard({ t }) {
   function handleBook() {
     setBooked(true)
     saveTutorAction('booked', true)
-    toast({ type: 'success', title: 'Sesiune rezervată!', message: `${t.name} te va contacta pentru confirmare.` })
+    toast({ type: 'success', title: t('peerTutoring.toast.booked'), message: t('peerTutoring.toast.bookedMsg', { name: tutor.name }) })
   }
 
   function handleContact() {
     setContacted(true)
     saveTutorAction('contacted', true)
-    toast({ type: 'info', title: 'Contact cerut', message: `Ai cerut contact cu ${t.name}. Cand este online, il gasesti in Mesaje.` })
+    toast({ type: 'info', title: t('peerTutoring.toast.contactTitle'), message: t('peerTutoring.toast.contactMsg', { name: tutor.name }) })
   }
 
   return (
@@ -102,48 +102,48 @@ function TutorCard({ t }) {
       className="premium-card flex flex-col group cursor-default"
     >
       {/* Gradient accent bar */}
-      <div className={`h-0.5 rounded-t-2xl bg-gradient-to-r ${t.color} opacity-80`} />
+      <div className={`h-0.5 rounded-t-2xl bg-gradient-to-r ${tutor.color} opacity-80`} />
 
       <div className="p-5 flex-1 flex flex-col">
         {/* Header */}
         <div className="flex items-start gap-3 mb-4">
           {/* Avatar */}
           <div className="relative shrink-0">
-            <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-white font-bold text-sm shadow-lg ring-2 ring-white/[0.07]`}>
-              {t.avatar}
+            <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${tutor.color} flex items-center justify-center text-white font-bold text-sm shadow-lg ring-2 ring-white/[0.07]`}>
+              {tutor.avatar}
             </div>
-            {t.online && (
+            {tutor.online && (
               <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#080e1c] shadow-sm shadow-emerald-500/40" />
             )}
           </div>
 
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-white text-sm leading-tight">{t.name}</p>
-            <p className="text-[11px] text-slate-500 mt-0.5">Anul {t.year} · {t.sessions} sesiuni</p>
+            <p className="font-bold text-white text-sm leading-tight">{tutor.name}</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">{t('peerTutoring.card.yearSessions', { year: tutor.year, sessions: tutor.sessions })}</p>
             <div className="flex items-center gap-0.5 mt-1.5">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
                   size={10}
-                  className={i < Math.floor(t.rating) ? 'text-amber-400 fill-amber-400' : 'text-slate-700 fill-slate-700'}
+                  className={i < Math.floor(tutor.rating) ? 'text-amber-400 fill-amber-400' : 'text-slate-700 fill-slate-700'}
                 />
               ))}
-              <span className="text-[10px] text-slate-500 ml-1.5">{t.rating} <span className="text-slate-700">({t.reviews})</span></span>
+              <span className="text-[10px] text-slate-500 ml-1.5">{tutor.rating} <span className="text-slate-700">({tutor.reviews})</span></span>
             </div>
           </div>
 
           {/* Price */}
           <div className="shrink-0">
-            <span className="badge-amber text-[11px] font-bold px-2.5 py-1">{t.price} lei</span>
-            <p className="text-[9px] text-slate-600 text-right mt-1">/ sesiune</p>
+            <span className="badge-amber text-[11px] font-bold px-2.5 py-1">{tutor.price} lei</span>
+            <p className="text-[9px] text-slate-600 text-right mt-1">{t('peerTutoring.card.perSession')}</p>
           </div>
         </div>
 
         {/* Subject tags */}
         <div className="mb-4">
-          <p className="section-label mb-2">Materii</p>
+          <p className="section-label mb-2">{t('peerTutoring.card.subjects')}</p>
           <div className="flex flex-wrap gap-1.5">
-            {t.subjects.map(s => (
+            {tutor.subjects.map(s => (
               <span key={s} className="tag text-[10px] py-0.5 px-2">{s}</span>
             ))}
           </div>
@@ -152,12 +152,12 @@ function TutorCard({ t }) {
         {/* Stats grid */}
         <div className="grid grid-cols-2 gap-2 mb-4">
           <div className="bg-white/[0.03] border border-white/[0.05] rounded-xl p-2.5 group-hover:border-white/[0.08] transition-colors">
-            <p className="text-[9px] text-slate-600 uppercase font-semibold tracking-wide mb-0.5">Notă obținută</p>
-            <p className="text-sm font-bold text-emerald-400 font-mono">{t.grade}<span className="text-slate-600 font-normal">/10</span></p>
+            <p className="text-[9px] text-slate-600 uppercase font-semibold tracking-wide mb-0.5">{t('peerTutoring.card.grade')}</p>
+            <p className="text-sm font-bold text-emerald-400 font-mono">{tutor.grade}<span className="text-slate-600 font-normal">/10</span></p>
           </div>
           <div className="bg-white/[0.03] border border-white/[0.05] rounded-xl p-2.5 group-hover:border-white/[0.08] transition-colors">
-            <p className="text-[9px] text-slate-600 uppercase font-semibold tracking-wide mb-0.5">Stil predare</p>
-            <p className="text-[10px] text-slate-400 leading-tight">{t.style}</p>
+            <p className="text-[9px] text-slate-600 uppercase font-semibold tracking-wide mb-0.5">{t('peerTutoring.card.style')}</p>
+            <p className="text-[10px] text-slate-400 leading-tight">{tutor.style}</p>
           </div>
         </div>
 
@@ -167,8 +167,8 @@ function TutorCard({ t }) {
           className="flex items-center gap-2 text-[11px] text-slate-500 hover:text-slate-300 transition-colors mb-2 w-fit"
         >
           <Calendar size={11} className="text-slate-600" />
-          Disponibilitate
-          <span className="badge-blue text-[9px] py-0 px-1.5">{t.availability.length} sloturi</span>
+          {t('peerTutoring.card.availability')}
+          <span className="badge-blue text-[9px] py-0 px-1.5">{t('peerTutoring.card.slots', { count: tutor.availability.length })}</span>
         </button>
 
         <AnimatePresence>
@@ -181,7 +181,7 @@ function TutorCard({ t }) {
               className="overflow-hidden"
             >
               <div className="flex flex-wrap gap-1.5 mb-3">
-                {t.availability.map(slot => (
+                {tutor.availability.map(slot => (
                   <span
                     key={slot}
                     className="px-2.5 py-1 rounded-lg text-[10px] bg-white/[0.03] border border-white/[0.07] text-slate-400 flex items-center gap-1"
@@ -204,7 +204,7 @@ function TutorCard({ t }) {
                 ? 'bg-emerald-600/20 border-emerald-500/30'
                 : 'bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.06] hover:border-white/[0.12]',
             )}
-            title={contacted ? 'Contact cerut' : 'Cere contact'}
+            title={contacted ? t('peerTutoring.card.contactRequested') : t('peerTutoring.card.contactRequest')}
           >
             {contacted
               ? <Check size={13} className="text-emerald-400" />
@@ -213,14 +213,14 @@ function TutorCard({ t }) {
 
           {booked ? (
             <div className="flex-1 flex items-center justify-center gap-2 bg-emerald-600/15 border border-emerald-500/25 rounded-xl text-emerald-400 text-xs font-semibold">
-              <Check size={13} /> Rezervat!
+              <Check size={13} /> {t('peerTutoring.card.booked')}
             </div>
           ) : (
             <button
               onClick={handleBook}
               className="flex-1 btn-primary text-xs flex items-center justify-center gap-2 py-2.5"
             >
-              <Calendar size={13} /> Rezervă sesiune
+              <Calendar size={13} /> {t('peerTutoring.card.book')}
             </button>
           )}
         </div>
@@ -230,6 +230,7 @@ function TutorCard({ t }) {
 }
 
 export default function PeerTutoring({ profile, session }) {
+  const { t } = useTranslation()
   const tutors = getTutors(profile, session)
   const SUBJECTS = getSubjectFilters(profile, session)
 
@@ -239,16 +240,16 @@ export default function PeerTutoring({ profile, session }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 400)
-    return () => clearTimeout(t)
+    const timer = setTimeout(() => setLoading(false), 400)
+    return () => clearTimeout(timer)
   }, [])
 
-  const filtered = tutors.filter(t => {
+  const filtered = tutors.filter(tutor => {
     const matchSearch =
-      t.name.toLowerCase().includes(search.toLowerCase()) ||
-      t.subjects.some(s => s.toLowerCase().includes(search.toLowerCase()))
+      tutor.name.toLowerCase().includes(search.toLowerCase()) ||
+      tutor.subjects.some(s => s.toLowerCase().includes(search.toLowerCase()))
     const subjectKey = subject.toLowerCase().replace(' / ', '/').split('/')[0].trim()
-    const matchSubject = subject === 'Toate' || (t.subjects || []).some(s => s?.toLowerCase().includes(subjectKey))
+    const matchSubject = subject === 'Toate' || (tutor.subjects || []).some(s => s?.toLowerCase().includes(subjectKey))
     return matchSearch && matchSubject
   })
 
@@ -262,9 +263,9 @@ export default function PeerTutoring({ profile, session }) {
         <div className="flex gap-2 items-center">
           {/* Pill switcher */}
           <div className="flex p-[2px] rounded-full bg-white/[0.04] border border-white/[0.07] gap-0.5">
-            {TABS.map(({ label, icon }, i) => (
+            {TAB_IDS.map((id, i) => (
               <button
-                key={label}
+                key={id}
                 onClick={() => setTab(i)}
                 className={clsx(
                   'relative px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-all flex items-center gap-1.5',
@@ -281,7 +282,7 @@ export default function PeerTutoring({ profile, session }) {
                   />
                 )}
                 <span className="relative z-10 flex items-center gap-1.5">
-                  {icon} {label}
+                  {TAB_ICONS[i]} {t(`peerTutoring.tabs.${id}`)}
                 </span>
               </button>
             ))}
@@ -293,7 +294,7 @@ export default function PeerTutoring({ profile, session }) {
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Caută tutor sau materie..."
+                placeholder={t('peerTutoring.searchPlaceholder')}
                 className="bg-transparent text-[13px] text-slate-300 placeholder-slate-700 outline-none flex-1"
               />
             </div>
@@ -335,13 +336,13 @@ export default function PeerTutoring({ profile, session }) {
                   <GraduationCap size={14} className="text-indigo-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-white leading-tight">Tutori disponibili</p>
-                  <p className="text-[11px] text-slate-600">Studenti verificati din facultatea ta</p>
+                  <p className="text-sm font-bold text-white leading-tight">{t('peerTutoring.available')}</p>
+                  <p className="text-[11px] text-slate-600">{t('peerTutoring.verified')}</p>
                 </div>
               </div>
               {!loading && (
                 <span className="badge-blue text-[11px] font-semibold px-2.5 py-1">
-                  {filtered.length} tutori
+                  {t('peerTutoring.count', { count: filtered.length })}
                 </span>
               )}
             </div>
@@ -356,8 +357,8 @@ export default function PeerTutoring({ profile, session }) {
                 <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-4">
                   <Users size={28} className="text-slate-700" strokeWidth={1.25} />
                 </div>
-                <p className="text-slate-400 text-sm font-semibold mb-1">Niciun tutor găsit</p>
-                <p className="text-slate-700 text-xs">Încearcă alt filtru sau șterge căutarea</p>
+                <p className="text-slate-400 text-sm font-semibold mb-1">{t('peerTutoring.notFound')}</p>
+                <p className="text-slate-700 text-xs">{t('peerTutoring.notFoundText')}</p>
               </motion.div>
             ) : (
               <motion.div
@@ -368,7 +369,7 @@ export default function PeerTutoring({ profile, session }) {
               >
                 {loading
                   ? Array.from({ length: 6 }).map((_, i) => <TutorSkeleton key={i} />)
-                  : filtered.map(t => <TutorCard key={t.id} t={t} />)
+                  : filtered.map(tutor => <TutorCard key={tutor.id} t={tutor} />)
                 }
               </motion.div>
             )}

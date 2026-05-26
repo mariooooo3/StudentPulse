@@ -1,17 +1,20 @@
 import { useState } from 'react'
 import { CheckSquare, Square, ChevronLeft, AlertTriangle, Clock, Info, CheckCircle2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { arrivalChecklist } from '../../shared/data/cityData'
 import clsx from 'clsx'
 
-const URGENCY_META = {
-  critical: { label: 'Critic',    color: '#ef4444', bg: '#ef444420' },
-  high:     { label: 'Urgent',    color: '#f97316', bg: '#f9731620' },
-  medium:   { label: 'Mediu',     color: '#eab308', bg: '#eab30820' },
-  low:      { label: 'Opțional',  color: '#6b7280', bg: '#6b728020' },
+const URGENCY_COLORS = {
+  critical: { color: '#ef4444', bg: '#ef444420' },
+  high:     { color: '#f97316', bg: '#f9731620' },
+  medium:   { color: '#eab308', bg: '#eab30820' },
+  low:      { color: '#6b7280', bg: '#6b728020' },
 }
 
+// Romanian values used for filter comparison against cityData.js cat field
 const CATS = ['Toate', 'Documente', 'Finanțe', 'Transport', 'Sănătate', 'Social']
+const CAT_KEYS = { 'Toate': 'all', 'Documente': 'documents', 'Finanțe': 'finance', 'Transport': 'transport', 'Sănătate': 'health', 'Social': 'social' }
 
 const container = {
   hidden: {},
@@ -23,6 +26,7 @@ const itemVar = {
 }
 
 export default function ArrivalAssistant({ onBack }) {
+  const { t } = useTranslation()
   const [items, setItems]     = useState(arrivalChecklist)
   const [filter, setFilter]   = useState('Toate')
   const [expanded, setExpanded] = useState(null)
@@ -64,14 +68,14 @@ export default function ArrivalAssistant({ onBack }) {
                 style={{ background: '#10b98120', border: '1.5px solid #10b98145' }}>
                 <CheckSquare size={14} style={{ color: '#10b981' }} />
               </div>
-              <h2 className="text-lg font-bold text-white">Asistent Sosire</h2>
+              <h2 className="text-lg font-bold text-white">{t('cityContent.arrival.title')}</h2>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5 ml-9">Checklist pentru primele zile</p>
+            <p className="text-xs text-slate-500 mt-0.5 ml-9">{t('cityContent.arrival.subtitle')}</p>
           </div>
 
           <div className="text-right shrink-0">
             <p className="text-2xl font-bold" style={{ color: '#10b981' }}>{pct}%</p>
-            <p className="text-[10px] text-slate-600">{done}/{items.length} completat</p>
+            <p className="text-[10px] text-slate-600">{t('cityContent.arrival.completed', { done, total: items.length })}</p>
           </div>
         </div>
 
@@ -101,7 +105,7 @@ export default function ArrivalAssistant({ onBack }) {
             )}
             style={filter === c ? { background: '#10b981', boxShadow: '0 0 12px #10b98140' } : {}}
           >
-            {c}
+            {t(`cityContent.arrival.cats.${CAT_KEYS[c]}`)}
           </button>
         ))}
       </div>
@@ -114,7 +118,7 @@ export default function ArrivalAssistant({ onBack }) {
         className="space-y-2"
       >
         {filtered.map(it => {
-          const u     = URGENCY_META[it.urgency]
+          const u     = URGENCY_COLORS[it.urgency] || URGENCY_COLORS.low
           const isExp = expanded === it.id
           return (
             <motion.div key={it.id} variants={itemVar}>
@@ -149,7 +153,7 @@ export default function ArrivalAssistant({ onBack }) {
                         className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
                         style={{ background: u.bg, color: u.color }}
                       >
-                        {u.label}
+                        {t(`cityContent.arrival.urgency.${it.urgency}`)}
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 mt-0.5 truncate">{it.desc}</p>

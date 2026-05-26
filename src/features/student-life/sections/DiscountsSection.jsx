@@ -8,6 +8,7 @@ import {
   Sparkles,
   Tag,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useNow } from '../../../shared/hooks/useNow'
 import { dateInDays, daysUntil, rollingDays } from '../../../shared/utils/dateTime'
 import { getScopedDiscountOffers, studentLifeData } from '../studentLifeData'
@@ -21,6 +22,7 @@ import AccentLine from '../components/AccentLine'
 import EmptyState from '../components/EmptyState'
 
 export default function DiscountsSection({ lifeProfile, saved, savedOps }) {
+  const { t } = useTranslation()
   const accent = SECTION_ACCENTS.discounts
   const [category, setCategory] = useState('Toate')
   const [query, setQuery] = useState('')
@@ -54,20 +56,20 @@ export default function DiscountsSection({ lifeProfile, saved, savedOps }) {
       <SectionHeader section="discounts" accent={accent} meta={SECTION_META.discounts} />
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-        <SearchField value={query} onChange={setQuery} placeholder="Caută oferte, branduri, categorii..." />
+        <SearchField value={query} onChange={setQuery} placeholder={t('discountsSection.searchPlaceholder')} />
         <FilterPills items={studentLifeData.discounts.categories} value={category} onChange={setCategory} accent={accent} />
-        <span className="shrink-0 font-mono text-xs font-semibold text-slate-500">{offers.length} rezultate</span>
+        <span className="shrink-0 font-mono text-xs font-semibold text-slate-500">{t('discountsSection.results', { count: offers.length })}</span>
       </div>
 
       {saved.size > 0 && (
         <div className="flex items-center gap-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/8 px-4 py-3 text-sm text-emerald-300">
           <Bookmark size={14} />
-          {saved.size} {saved.size === 1 ? 'ofertă salvată' : 'oferte salvate'}
+          {saved.size === 1 ? t('discountsSection.savedOne') : t('discountsSection.savedMany', { count: saved.size })}
         </div>
       )}
 
       {offers.length === 0 ? (
-        <EmptyState icon={Tag} title="Nicio ofertă găsită" text="Încearcă o altă căutare sau categorie." accent={accent} />
+        <EmptyState icon={Tag} title={t('discountsSection.noOffers')} text={t('discountsSection.noOffersText')} accent={accent} />
       ) : (
         <motion.div
           variants={containerVariants}
@@ -92,18 +94,18 @@ export default function DiscountsSection({ lifeProfile, saved, savedOps }) {
                 </div>
                 <div className="min-w-0">
                   <h3 className="truncate text-sm font-bold text-white">{offer.brand}</h3>
-                  <p className="text-xs text-slate-500">{offer.category} · {offer.city === 'all' ? 'Toate orașele' : offer.city}</p>
+                  <p className="text-xs text-slate-500">{offer.category} · {offer.city === 'all' ? t('discountsSection.allCities') : offer.city}</p>
                 </div>
               </div>
               <p className="mt-4 min-h-12 text-sm leading-relaxed text-slate-400">{offer.description}</p>
               <div className="mt-4 flex items-end justify-between gap-2">
                 <div>
                   {offer.discount === 100
-                    ? <span className="text-2xl font-black text-emerald-400">GRATUIT</span>
+                    ? <span className="text-2xl font-black text-emerald-400">{t('discountsSection.free')}</span>
                     : <span className="text-2xl font-black text-white">-{offer.discount}%</span>
                   }
                   <p className="mt-1 flex items-center gap-1 font-mono text-[11px] text-slate-500">
-                    <Clock size={11} /> Expiră în {offer.expiryDays} {offer.expiryDays === 1 ? 'zi' : 'zile'}
+                    <Clock size={11} /> {offer.expiryDays === 1 ? t('discountsSection.expiresDay', { count: offer.expiryDays }) : t('discountsSection.expiresDays', { count: offer.expiryDays })}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -113,7 +115,7 @@ export default function DiscountsSection({ lifeProfile, saved, savedOps }) {
                       className="inline-flex h-9 items-center gap-1.5 rounded-xl border px-3 text-xs font-bold transition-all active:scale-[0.97]"
                       style={{ background: accent.bg, borderColor: accent.border, color: accent.color }}
                     >
-                      Site oficial <ExternalLink size={11} />
+                      {t('discountsSection.officialSite')} <ExternalLink size={11} />
                     </button>
                   )}
                   <button
@@ -126,7 +128,7 @@ export default function DiscountsSection({ lifeProfile, saved, savedOps }) {
                     )}
                   >
                     <Bookmark size={13} />
-                    {saved.has(offer.id) ? 'Salvat' : 'Salvează'}
+                    {saved.has(offer.id) ? t('discountsSection.saved') : t('discountsSection.save')}
                   </button>
                 </div>
               </div>

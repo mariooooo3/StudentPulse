@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Users, Building2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { booksData, carpoolData, getScopedToolsData, roommateData } from '../studentLifeData'
 import { SECTION_ACCENTS } from '../constants/sectionConfig'
 import { containerVariants, itemVariants } from '../utils/motionVariants'
@@ -10,6 +11,7 @@ import EmptyState from '../components/EmptyState'
 import { getScopeLabel } from '../../../shared/utils/tenantScope'
 
 export default function RoommateTab({ lifeProfile }) {
+  const { t } = useTranslation()
   const accent = SECTION_ACCENTS.community
   const [query, setQuery] = useState('')
   const scoped = useMemo(() => getScopedToolsData(lifeProfile, { booksData, carpoolData, roommateData }), [lifeProfile])
@@ -21,14 +23,14 @@ export default function RoommateTab({ lifeProfile }) {
 
   return (
     <div className="space-y-4">
-      <SearchField value={query} onChange={setQuery} placeholder="Caută zonă, facultate..." />
+      <SearchField value={query} onChange={setQuery} placeholder={t('roommateTab.searchPlaceholder')} />
       {people.length === 0 ? (
         <EmptyState
           icon={noScopedData ? Building2 : Users}
-          title={noScopedData ? 'Nu există colegi de cameră pentru facultatea ta' : 'Niciun coleg găsit'}
+          title={noScopedData ? t('roommateTab.noScopedTitle') : t('roommateTab.noRoommates')}
           text={noScopedData
             ? `Nu am găsit anunțuri pentru ${scopeLabel || 'facultatea ta'}.`
-            : 'Încearcă altă zonă sau facultate.'}
+            : t('roommateTab.noRoommatesText')}
           accent={accent}
         />
       ) : (
@@ -53,8 +55,8 @@ export default function RoommateTab({ lifeProfile }) {
               <span className="tag">{r.zone}</span>
               <span className="tag">{r.budget}</span>
               <span className="tag">{r.schedule}</span>
-              {!r.smoking && <span className="tag">Non-fumător</span>}
-              {r.pets && <span className="tag">Animale ok</span>}
+              {!r.smoking && <span className="tag">{t('roommateTab.nonSmoker')}</span>}
+              {r.pets && <span className="tag">{t('roommateTab.petsOk')}</span>}
             </div>
             <div className="gradient-separator mt-4 mb-4" />
             <button
@@ -62,7 +64,7 @@ export default function RoommateTab({ lifeProfile }) {
               className="w-full h-9 rounded-xl text-xs font-bold transition-all active:scale-[0.97]"
               style={{ background: accent.bg, border: `1px solid ${accent.border}`, color: accent.color }}
             >
-              Contactează {r.contact}
+              {t('roommateTab.contact')} {r.contact}
             </button>
           </motion.div>
         ))}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { getScheduleData } from '../../shared/data/facultyCatalog'
 import { useNotifications } from '../../shared/hooks/useNotifications'
 import { TABS } from './schedule.constants'
@@ -8,6 +9,7 @@ import { WeeklyView, AllGroupsView, RecoveryGrid, SlotSwapView, ExamMapView, Gra
 import clsx from 'clsx'
 
 export default function ScheduleHub({ profile, session }) {
+  const { t } = useTranslation()
   const [tab,  setTab]  = useState(0)
   const [week, setWeek] = useState(0)
   const { pushNotification } = useNotifications(session?.userId)
@@ -15,7 +17,7 @@ export default function ScheduleHub({ profile, session }) {
   const facultyData = getScheduleData(profile, session) || { schedule: [], recoverySlots: [], swapRequests: [], exams: [] }
   const { schedule, recoverySlots, swapRequests, exams = [] } = facultyData
 
-  const weekLabel = week === 0 ? 'Săptămâna curentă' : week > 0 ? `+${week} săpt.` : `${week} săpt.`
+  const weekLabel = week === 0 ? t('schedule.currentWeek') : week > 0 ? t('schedule.weekForward', { count: week }) : t('schedule.weekBack', { count: Math.abs(week) })
 
   return (
     <div className="flex flex-col h-full animate-fade-in">
@@ -27,7 +29,7 @@ export default function ScheduleHub({ profile, session }) {
         <div className="relative px-5 sm:px-6 py-4 flex flex-wrap items-center gap-x-4 gap-y-3">
           {/* Page title */}
           <div className="mr-2">
-            <p className="section-label">Orar</p>
+            <p className="section-label">{t('schedule.title')}</p>
             <h1 className="text-base font-bold text-gradient-indigo leading-tight">
               Schedule Hub
             </h1>
@@ -58,9 +60,9 @@ export default function ScheduleHub({ profile, session }) {
 
           {/* Tab pill switcher */}
           <div className="flex gap-1 bg-white/[0.04] border border-white/[0.06] p-1 rounded-xl ml-auto">
-            {TABS.map(({ label, icon: Icon }, i) => (
+            {TABS.map(({ id, icon: Icon }, i) => (
               <motion.button
-                key={label}
+                key={id}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => setTab(i)}
                 className={clsx(
@@ -79,7 +81,7 @@ export default function ScheduleHub({ profile, session }) {
                 )}
                 <span className="relative z-10 flex items-center gap-1.5">
                   <Icon size={12} />
-                  {label}
+                  {t(`schedule.tabs.${id}`)}
                 </span>
               </motion.button>
             ))}

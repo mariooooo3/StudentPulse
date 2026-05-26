@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { ChevronLeft, ThumbsUp, CheckCircle, Lightbulb } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { localTips } from '../../shared/data/cityData'
 import clsx from 'clsx'
 
+// Romanian values used for filter comparison against localTips cat field
 const CATS = ['Toate', 'Transport', 'Mâncare', 'Academic', 'Social', 'Birocrație', 'Safety']
+const CAT_KEYS = { 'Toate': 'all', 'Transport': 'transport', 'Mâncare': 'food', 'Academic': 'academic', 'Social': 'social', 'Birocrație': 'bureaucracy', 'Safety': 'safety' }
 
 const CAT_COLORS = {
   Transport:  '#06b6d4',
@@ -25,6 +28,7 @@ const itemVar = {
 }
 
 export default function LocalTips({ onBack }) {
+  const { t } = useTranslation()
   const [filter, setFilter]   = useState('Toate')
   const [upvoted, setUpvoted] = useState(new Set())
   const [tips, setTips]       = useState(localTips)
@@ -67,12 +71,12 @@ export default function LocalTips({ onBack }) {
                 style={{ background: '#f59e0b20', border: '1.5px solid #f59e0b45' }}>
                 <Lightbulb size={14} style={{ color: '#f59e0b' }} />
               </div>
-              <h2 className="text-lg font-bold text-white">Sfaturi Locale</h2>
+              <h2 className="text-lg font-bold text-white">{t('cityContent.localTips.title')}</h2>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5 ml-9">De la studenți pentru studenți · Iași</p>
+            <p className="text-xs text-slate-500 mt-0.5 ml-9">{t('cityContent.localTips.subtitle')}</p>
           </div>
 
-          <span className="text-xs text-slate-500 shrink-0">{tips.length} sfaturi</span>
+          <span className="text-xs text-slate-500 shrink-0">{t('cityContent.localTips.count', { count: tips.length })}</span>
         </div>
       </motion.div>
 
@@ -92,7 +96,7 @@ export default function LocalTips({ onBack }) {
               ? { background: CAT_COLORS[c] || '#f59e0b', boxShadow: `0 0 12px ${CAT_COLORS[c] || '#f59e0b'}40` }
               : {}}
           >
-            {c}
+            {t(`cityContent.localTips.cats.${CAT_KEYS[c]}`)}
           </button>
         ))}
       </div>
@@ -108,7 +112,7 @@ export default function LocalTips({ onBack }) {
             style={{ background: '#f59e0b18', border: '1.5px solid #f59e0b35' }}>
             <Lightbulb size={28} style={{ color: '#f59e0b' }} className="opacity-50" />
           </div>
-          <p className="text-sm text-slate-500">Niciun sfat în această categorie</p>
+          <p className="text-sm text-slate-500">{t('cityContent.localTips.noTips')}</p>
         </motion.div>
       ) : (
         <motion.div

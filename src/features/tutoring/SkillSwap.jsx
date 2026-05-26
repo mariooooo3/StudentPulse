@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { ArrowLeftRight, Plus, Users, Calendar, Check, Zap, Repeat2, BookOpen, Sparkles, Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { getGroupSessions, getSkillSwapUsers } from '../../shared/data/facultyCatalog'
 import clsx from 'clsx'
 import { useToast } from '../../shared/components/Toast'
@@ -21,6 +22,7 @@ const itemVariants = {
 
 /* ─── Skill Swap 1-la-1 ─── */
 function SkillSwapTab({ users, matchLoading }) {
+  const { t } = useTranslation()
   const [contacted, setContacted] = useState({})
   const [skills, setSkills] = useState(() => JSON.parse(localStorage.getItem('sc_swap_skills') || '[]'))
   const [wants, setWants] = useState(() => JSON.parse(localStorage.getItem('sc_swap_wants') || '[]'))
@@ -40,7 +42,7 @@ function SkillSwapTab({ users, matchLoading }) {
       setWants(next)
       localStorage.setItem('sc_swap_wants', JSON.stringify(next))
     }
-    toast({ type: 'success', title: 'Profil actualizat', message: `${nextItem} a fost adaugat in profilul de Skill Swap.` })
+    toast({ type: 'success', title: t('skillSwap.toastUpdated'), message: t('skillSwap.toastAddedSkill', { item: nextItem }) })
   }
 
   return (
@@ -55,7 +57,7 @@ function SkillSwapTab({ users, matchLoading }) {
           <div>
             <p className="text-sm font-bold text-white leading-tight">Skill Swap</p>
             <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-              Schimbă cunoștințe cu colegi — tu predai ce știi, ei te învață ce vrei.
+              {t('skillSwap.groupSubtitle')}
             </p>
           </div>
         </div>
@@ -63,7 +65,7 @@ function SkillSwapTab({ users, matchLoading }) {
         {/* My profile card */}
         <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] overflow-hidden">
           <div className="px-4 py-2.5 border-b border-white/[0.05]">
-            <p className="section-label">Profilul tău de Skill Swap</p>
+            <p className="section-label">{t('skillSwap.profileTitle')}</p>
           </div>
           <div className="grid grid-cols-2 divide-x divide-white/[0.05]">
             {/* Offers */}
@@ -72,7 +74,7 @@ function SkillSwapTab({ users, matchLoading }) {
                 <span className="w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
                   <Check size={9} className="text-emerald-400" />
                 </span>
-                Oferi
+                {t('skillSwap.offersLabel')}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {skills.map(skill => (
@@ -82,7 +84,7 @@ function SkillSwapTab({ users, matchLoading }) {
                   onClick={() => addSkill('skill')}
                   className="px-2 py-1 rounded-full text-[10px] bg-white/[0.04] border border-dashed border-white/[0.12] text-slate-500 hover:text-slate-300 hover:border-white/[0.2] transition-colors flex items-center gap-1"
                 >
-                  <Plus size={9} /> Adaugă skill
+                  <Plus size={9} /> {t('skillSwap.addSkill')}
                 </button>
               </div>
             </div>
@@ -93,7 +95,7 @@ function SkillSwapTab({ users, matchLoading }) {
                 <span className="w-4 h-4 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center">
                   <BookOpen size={8} className="text-indigo-400" />
                 </span>
-                Primești
+                {t('skillSwap.receivesLabel')}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {wants.map(skill => (
@@ -103,7 +105,7 @@ function SkillSwapTab({ users, matchLoading }) {
                   onClick={() => addSkill('want')}
                   className="px-2 py-1 rounded-full text-[10px] bg-white/[0.04] border border-dashed border-white/[0.12] text-slate-500 hover:text-slate-300 hover:border-white/[0.2] transition-colors flex items-center gap-1"
                 >
-                  <Plus size={9} /> Adaugă
+                  <Plus size={9} /> {t('skillSwap.add')}
                 </button>
               </div>
             </div>
@@ -115,13 +117,13 @@ function SkillSwapTab({ users, matchLoading }) {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Zap size={13} className="text-amber-400" />
-          <p className="text-xs font-bold text-white">Match-uri compatibile</p>
+          <p className="text-xs font-bold text-white">{t('skillSwap.compatibleMatches')}</p>
           {matchLoading ? (
             <span className="flex items-center gap-1 text-[10px] text-slate-500">
-              <Loader2 size={10} className="animate-spin" /> Se calculează...
+              <Loader2 size={10} className="animate-spin" /> {t('skillSwap.calculating')}
             </span>
           ) : users.filter(u => u.match).length > 0 && (
-            <span className="badge-amber text-[9px] py-0 px-1.5">{users.filter(u => u.match).length} top match</span>
+            <span className="badge-amber text-[9px] py-0 px-1.5">{users.filter(u => u.match).length} {t('skillSwap.topMatch')}</span>
           )}
         </div>
 
@@ -134,10 +136,10 @@ function SkillSwapTab({ users, matchLoading }) {
             <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-3">
               <Users size={24} className="text-slate-700" strokeWidth={1.25} />
             </div>
-            <p className="text-slate-400 text-sm font-semibold mb-1">Niciun match găsit</p>
-            <p className="text-slate-700 text-xs mb-4">Adaugă skill-uri la profilul tău pentru a găsi parteneri</p>
+            <p className="text-slate-400 text-sm font-semibold mb-1">{t('skillSwap.noMatch')}</p>
+            <p className="text-slate-700 text-xs mb-4">{t('skillSwap.noMatchText')}</p>
             <button onClick={() => addSkill('skill')} className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5">
-              <Plus size={12} /> Adaugă skill
+              <Plus size={12} /> {t('skillSwap.addSkill')}
             </button>
           </motion.div>
         ) : (
@@ -178,12 +180,12 @@ function SkillSwapTab({ users, matchLoading }) {
                     {/* Skill exchange visualization */}
                     <div className="flex items-center gap-2 flex-wrap mt-2">
                       <div className="flex items-center gap-1.5">
-                        <span className="section-label text-emerald-600 text-[9px]">Oferă</span>
+                        <span className="section-label text-emerald-600 text-[9px]">{t('skillSwap.offersTag')}</span>
                         <span className="tag text-[10px] py-0.5 border-emerald-500/20 text-emerald-300/80">{u.teaches}</span>
                       </div>
                       <ArrowLeftRight size={11} className="text-slate-600 shrink-0" />
                       <div className="flex items-center gap-1.5">
-                        <span className="section-label text-indigo-600 text-[9px]">Primește</span>
+                        <span className="section-label text-indigo-600 text-[9px]">{t('skillSwap.receivesTag')}</span>
                         <span className="tag text-[10px] py-0.5 border-indigo-500/20 text-indigo-300/80">{u.learns}</span>
                       </div>
                     </div>
@@ -191,7 +193,7 @@ function SkillSwapTab({ users, matchLoading }) {
                     {/* Compatibility bar */}
                     {u.match && (
                       <div className="mt-3 flex items-center gap-2">
-                        <p className="text-[10px] text-slate-600 shrink-0">Compatibilitate</p>
+                        <p className="text-[10px] text-slate-600 shrink-0">{t('skillSwap.compatibility')}</p>
                         <div className="flex-1 h-1 rounded-full bg-white/[0.05] overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
@@ -209,14 +211,14 @@ function SkillSwapTab({ users, matchLoading }) {
                   <div className="shrink-0">
                     {contacted[u.id] ? (
                       <div className="flex items-center gap-1 text-emerald-400 text-[11px] font-semibold bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-2.5 py-1.5">
-                        <Check size={11} /> Trimis
+                        <Check size={11} /> {t('skillSwap.sent')}
                       </div>
                     ) : (
                       <button
                         onClick={() => setContacted(p => ({ ...p, [u.id]: true }))}
                         className="btn-primary text-[11px] px-3 py-1.5 flex items-center gap-1.5"
                       >
-                        <Repeat2 size={11} /> Propune swap
+                        <Repeat2 size={11} /> {t('skillSwap.proposeSwap')}
                       </button>
                     )}
                   </div>
@@ -232,6 +234,7 @@ function SkillSwapTab({ users, matchLoading }) {
 
 /* ─── Group Sessions ─── */
 function GroupSessionsTab({ sessions }) {
+  const { t } = useTranslation()
   const [joined, setJoined] = useState({})
   const [created, setCreated] = useState([])
   const toast = useToast()
@@ -251,7 +254,7 @@ function GroupSessionsTab({ sessions }) {
     }
     setCreated(prev => [session, ...prev])
     setJoined(prev => ({ ...prev, [id]: true }))
-    toast({ type: 'success', title: 'Sesiune creata', message: 'Noua sesiune apare acum in lista si esti inscris ca organizator.' })
+    toast({ type: 'success', title: t('skillSwap.toastCreatedSession'), message: t('skillSwap.toastCreatedText') })
   }
 
   const visibleSessions = [...created, ...sessions]
@@ -265,12 +268,12 @@ function GroupSessionsTab({ sessions }) {
             <Users size={15} className="text-blue-400" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-bold text-white leading-tight">Sesiuni de grup</p>
-            <p className="text-[11px] text-slate-500 mt-0.5">Alătură-te sau creează sesiuni de studiu colaborativ cu colegi.</p>
+            <p className="text-sm font-bold text-white leading-tight">{t('skillSwap.groupTitle')}</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">{t('skillSwap.groupSubtitle')}</p>
           </div>
         </div>
         <button onClick={createSession} className="btn-primary flex items-center gap-2 text-xs py-2.5 w-full justify-center">
-          <Plus size={13} /> Creează sesiune de grup
+          <Plus size={13} /> {t('skillSwap.createGroup')}
         </button>
       </div>
 
@@ -283,13 +286,13 @@ function GroupSessionsTab({ sessions }) {
           <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-3">
             <Users size={24} className="text-slate-700" strokeWidth={1.25} />
           </div>
-          <p className="text-slate-400 text-sm font-semibold mb-1">Nicio sesiune disponibilă</p>
-          <p className="text-slate-700 text-xs">Fii primul care creează o sesiune de grup</p>
+          <p className="text-slate-400 text-sm font-semibold mb-1">{t('skillSwap.noSessions')}</p>
+          <p className="text-slate-700 text-xs">{t('skillSwap.noSessionsText')}</p>
         </motion.div>
       ) : (
         <>
           <div className="flex items-center gap-2">
-            <p className="section-label">Sesiuni disponibile</p>
+            <p className="section-label">{t('skillSwap.availableSessions')}</p>
             <span className="badge-blue text-[9px] py-0 px-1.5">{visibleSessions.length}</span>
           </div>
 
@@ -315,21 +318,21 @@ function GroupSessionsTab({ sessions }) {
                           ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
                           : 'bg-blue-500/15 text-blue-400 border border-blue-500/20',
                       )}>
-                        {s.type === 'teach' ? 'Predare' : 'Grup studiu'}
+                        {t(`skillSwap.sessionType.${s.type === 'teach' ? 'teach' : 'study'}`)}
                       </span>
                     </div>
                     <p className="font-bold text-white text-sm leading-tight">{s.topic}</p>
-                    <p className="text-[11px] text-slate-600 mt-0.5">Organizat de <span className="text-slate-400">{s.host}</span></p>
+                    <p className="text-[11px] text-slate-600 mt-0.5">{t('skillSwap.organizedBy')} <span className="text-slate-400">{s.host}</span></p>
                   </div>
 
                   {joined[s.id] ? (
                     <span className="badge-green shrink-0 text-[10px] flex items-center gap-1">
-                      <Check size={10} /> Înscris
+                      <Check size={10} /> {t('skillSwap.enrolled')}
                     </span>
                   ) : s.spots === 0 ? (
-                    <span className="badge-red shrink-0 text-[10px]">Complet</span>
+                    <span className="badge-red shrink-0 text-[10px]">{t('skillSwap.full')}</span>
                   ) : (
-                    <span className="badge-amber shrink-0 text-[10px]">{s.spots} locuri</span>
+                    <span className="badge-amber shrink-0 text-[10px]">{t('skillSwap.spots', { count: s.spots })}</span>
                   )}
                 </div>
 
@@ -356,7 +359,7 @@ function GroupSessionsTab({ sessions }) {
                     onClick={() => setJoined(p => ({ ...p, [s.id]: true }))}
                     className="btn-primary w-full text-xs py-2.5"
                   >
-                    Înscrie-te la sesiune
+                    {t('skillSwap.joinSession')}
                   </button>
                 )}
               </motion.div>
@@ -370,6 +373,7 @@ function GroupSessionsTab({ sessions }) {
 
 /* ─── Root export ─── */
 export default function SkillSwap({ profile, session }) {
+  const { t } = useTranslation()
   const sessions = getGroupSessions(profile, session)
   const [users, setUsers] = useState(() => getSkillSwapUsers(profile, session))
   const [matchLoading, setMatchLoading] = useState(true)
@@ -395,18 +399,16 @@ export default function SkillSwap({ profile, session }) {
 
   const [tab, setTab] = useState(0)
 
-  const tabs = [
-    { label: 'Skill Swap 1-la-1', icon: <Repeat2 size={11} /> },
-    { label: 'Sesiuni de grup', icon: <Users size={11} /> },
-  ]
+  const tabIcons = [<Repeat2 size={11} />, <Users size={11} />]
+  const tabKeys = ['tab1on1', 'tabGroup']
 
   return (
     <div>
       {/* Inner tab switcher */}
       <div className="flex gap-1 bg-white/[0.04] border border-white/[0.06] p-1 rounded-xl mb-5 w-fit">
-        {tabs.map(({ label, icon }, i) => (
+        {tabKeys.map((key, i) => (
           <button
-            key={label}
+            key={key}
             onClick={() => setTab(i)}
             className={clsx(
               'px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all flex items-center gap-1.5',
@@ -415,7 +417,7 @@ export default function SkillSwap({ profile, session }) {
                 : 'text-slate-500 hover:text-slate-300',
             )}
           >
-            {icon} {label}
+            {tabIcons[i]} {t(`skillSwap.${key}`)}
           </button>
         ))}
       </div>

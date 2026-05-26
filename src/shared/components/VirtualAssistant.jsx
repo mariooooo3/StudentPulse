@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import {
   Bot,
   Check,
@@ -88,13 +89,6 @@ const PROFESSOR_NAVIGATION_ACTIONS = [
   { match: ['dashboard', 'acasa', 'home', 'overview'], view: 'dashboard', mode: 'professor' },
 ]
 
-function initialAssistantMessage(role) {
-  if (role === 'professor') {
-    return 'Salut, sunt asistentul pentru portalul profesorului. Te pot ajuta cu cereri de licenta, recuperari, mesaje, notificari live si profilul academic.'
-  }
-  return 'Salut, sunt asistentul StudentPulse. Pot naviga direct: spune "academic", "orar", "harta", "student life", "cariera", "city" sau orice modul. Te pot ajuta si cu cont, cereri de licenta si viata studenteasca.'
-}
-
 function findNavigationAction(label, role) {
   const normalized = String(label || '').toLowerCase()
   const actions = role === 'professor' ? PROFESSOR_NAVIGATION_ACTIONS : NAVIGATION_ACTIONS
@@ -154,6 +148,7 @@ function AssistantBubble({ onClick, unread, brand }) {
 }
 
 function CodeBlock({ lang, code }) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   function copy() {
     navigator.clipboard.writeText(code).catch(() => {})
@@ -169,7 +164,7 @@ function CodeBlock({ lang, code }) {
           className="flex items-center gap-1 rounded px-2 py-0.5 text-[10px] text-slate-400 transition hover:bg-white/10 hover:text-white"
         >
           {copied ? <Check size={10} className="text-green-400" /> : <Copy size={10} />}
-          <span>{copied ? 'Copiat!' : 'Copiază'}</span>
+          <span>{copied ? t('assistant.copied') : t('assistant.copy')}</span>
         </button>
       </div>
       <pre className="overflow-x-auto p-3 font-mono text-[11px] leading-relaxed text-slate-200">
@@ -288,6 +283,7 @@ export default function VirtualAssistant({
   currentLabel,
   onNavigate,
 }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -296,7 +292,7 @@ export default function VirtualAssistant({
   const [messages, setMessages] = useState(() => [
     {
       role: 'assistant',
-      text: initialAssistantMessage(session?.role),
+      text: session?.role === 'professor' ? t('assistant.initialProfessor') : t('assistant.initialStudent'),
     },
   ])
   const bottomRef = useRef(null)
@@ -317,7 +313,7 @@ export default function VirtualAssistant({
 
   useEffect(() => {
     setSuggestions(defaultSuggestions(context))
-    setMessages([{ role: 'assistant', text: initialAssistantMessage(context.role) }])
+    setMessages([{ role: 'assistant', text: context.role === 'professor' ? t('assistant.initialProfessor') : t('assistant.initialStudent') }])
   }, [context.role])
 
   useEffect(() => {
@@ -480,7 +476,7 @@ export default function VirtualAssistant({
                 <button
                   type="button"
                   onClick={() => {
-                    setMessages([{ role: 'assistant', text: initialAssistantMessage(session?.role) }])
+                    setMessages([{ role: 'assistant', text: session?.role === 'professor' ? t('assistant.initialProfessor') : t('assistant.initialStudent') }])
                     setSuggestions(defaultSuggestions(context))
                   }}
                   className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-all hover:bg-white/[0.07] hover:text-slate-300"
@@ -519,7 +515,7 @@ export default function VirtualAssistant({
                 return (
                   <div className="mb-2 overflow-hidden rounded-xl border border-white/[0.08] bg-[#0b1221] shadow-[0_-8px_32px_rgba(0,0,0,0.5)]">
                     <div className="border-b border-white/[0.06] px-3 py-1.5">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">Navigare rapidă</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">{t('assistant.navLabel')}</span>
                     </div>
                     {filtered.map(c => (
                       <button
@@ -554,8 +550,8 @@ export default function VirtualAssistant({
                     rows={1}
                     placeholder={
                       context.role === 'professor'
-                        ? 'Intreaba despre cereri, mesaje sau profil...'
-                        : 'Intreaba despre cont, module sau viata de student...'
+                        ? t('assistant.placeholderProfessor')
+                        : t('assistant.placeholderStudent')
                     }
                     className="max-h-24 min-h-7 flex-1 resize-none bg-transparent text-[13px] leading-6 text-slate-200 outline-none placeholder:text-slate-700"
                   />

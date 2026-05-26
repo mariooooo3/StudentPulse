@@ -1,7 +1,9 @@
 import { ArrowRight, Loader2, Mail, Shield } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
 
 export default function EmailStep({ university, email, setEmail, accessCode, setAccessCode, error, onSubmit, loading }) {
+  const { t } = useTranslation()
   return (
     <div className="space-y-4">
       <div
@@ -21,7 +23,7 @@ export default function EmailStep({ university, email, setEmail, accessCode, set
 
       <div>
         <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block mb-2">
-          Email instituțional
+          {t('auth.emailLabel')}
         </label>
         <div className="flex items-center bg-white/[0.03] border border-white/[0.07] rounded-xl overflow-hidden focus-within:border-white/[0.15] transition-colors">
           <Mail size={13} className="text-slate-600 ml-4 shrink-0" strokeWidth={1.75} />
@@ -38,13 +40,13 @@ export default function EmailStep({ university, email, setEmail, accessCode, set
           <span className="pr-4 text-[12px] text-slate-600 shrink-0 font-mono">@{university.emailDomain}</span>
         </div>
         <p className="text-[11px] text-slate-700 mt-1.5 pl-1">
-          Folosim email-ul instituțional pentru a detecta automat facultatea ta.
+          {t('auth.emailNote')}
         </p>
       </div>
 
       <div>
         <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block mb-2">
-          Cod institutional
+          {t('auth.codeLabel')}
         </label>
         <div className="flex items-center bg-white/[0.03] border border-white/[0.07] rounded-xl overflow-hidden focus-within:border-white/[0.15] transition-colors">
           <Shield size={13} className="text-slate-600 ml-4 shrink-0" strokeWidth={1.75} />
@@ -61,7 +63,7 @@ export default function EmailStep({ university, email, setEmail, accessCode, set
           />
         </div>
         <p className="text-[11px] text-slate-700 mt-1.5 pl-1">
-          Parola de acces instituțională.
+          {t('auth.codeNote')}
         </p>
         {error && <p className="text-[11px] text-red-400 mt-1.5 pl-1">{error}</p>}
       </div>
@@ -77,7 +79,7 @@ export default function EmailStep({ university, email, setEmail, accessCode, set
         )}
       >
         {loading ? <Loader2 size={15} className="animate-spin" /> : <ArrowRight size={15} />}
-        {loading ? 'Se verifică...' : 'Continuă'}
+        {loading ? t('auth.checking') : t('auth.continue')}
       </button>
     </div>
   )
