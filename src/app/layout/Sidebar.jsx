@@ -29,6 +29,7 @@ import {
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../providers/AuthContext'
 import { getUniversityTheme } from '../../shared/utils/theme'
 import { useStreaksContext } from '../providers/StreaksContext'
@@ -36,29 +37,29 @@ import SPLogo from '../../components/ui/SPLogo'
 
 const NAV_BY_MODE = {
   academic: [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'navigator', label: 'Campus Navigator', icon: Map },
-    { id: 'schedule', label: 'Schedule Hub', icon: Calendar },
-    { id: 'thesis', label: 'Thesis Finder', icon: BookOpen },
-    { id: 'tutoring', label: 'Peer Tutoring', icon: Users },
-    { id: 'messages', label: 'Mesaje', icon: MessageSquare },
+    { id: 'dashboard', icon: Home },
+    { id: 'navigator', icon: Map },
+    { id: 'schedule',  icon: Calendar },
+    { id: 'thesis',    icon: BookOpen },
+    { id: 'tutoring',  icon: Users },
+    { id: 'messages',  icon: MessageSquare },
   ],
   life: [
-    { id: 'challenges', label: 'Provocări', icon: Trophy },
-    { id: 'pulse', label: 'Campus Pulse', icon: Radio },
-    { id: 'discounts', label: 'Reduceri & Beneficii', icon: Tag },
-    { id: 'career', label: 'Carieră & Internship-uri', icon: Briefcase },
-    { id: 'community', label: 'Comunitate', icon: Users },
-    { id: 'events', label: 'Evenimente', icon: Calendar },
-    { id: 'wellness', label: 'Focus', icon: Heart },
-    { id: 'tools', label: 'Unelte Studențești', icon: Wrench },
-    { id: 'citylife', label: 'Viața în Oraș', icon: MapPin },
+    { id: 'challenges', icon: Trophy },
+    { id: 'pulse',      icon: Radio },
+    { id: 'discounts',  icon: Tag },
+    { id: 'career',     icon: Briefcase },
+    { id: 'community',  icon: Users },
+    { id: 'events',     icon: Calendar },
+    { id: 'wellness',   icon: Heart },
+    { id: 'tools',      icon: Wrench },
+    { id: 'citylife',   icon: MapPin },
   ],
 }
 
 const MODE_COPY = {
-  academic: { name: 'StudentPulse', subtitle: 'Academic', label: 'Academic', icon: Activity },
-  life: { name: 'StudentPulse', subtitle: 'Viața Studențească', label: 'Viața Studențească', icon: Sparkles },
+  academic: { name: 'StudentPulse', modeKey: 'mode.academic', icon: Activity },
+  life:     { name: 'StudentPulse', modeKey: 'mode.life',     icon: Sparkles },
 }
 
 const IT_FACULTY_TYPES = new Set(['CS', 'ENGINEERING_CS', 'MATH_CS'])
@@ -70,6 +71,7 @@ function isItFaculty(profile, session) {
 
 function ProfileModal({ profile, session, theme, initials, onClose }) {
   const { updateProfile } = useAuth()
+  const { t } = useTranslation()
   const displayName = profile?.name || session?.email?.split('@')[0] || 'Student'
   const showSocialLinks = isItFaculty(profile, session)
   const [interests, setInterests] = useState((profile?.interests || []).join(', '))
@@ -101,7 +103,7 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
 
             {/* Header */}
             <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
-              <p className="text-[14px] font-semibold text-white">Profilul meu</p>
+              <p className="text-[14px] font-semibold text-white">{t('profile.title')}</p>
               <button onClick={onClose} className="text-slate-600 hover:text-slate-300 transition-colors p-1 rounded-lg hover:bg-white/[0.05]">
                 <X size={15} strokeWidth={1.75} />
               </button>
@@ -135,7 +137,7 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
 
               {/* Name — read-only */}
               <div>
-                <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">Nume</label>
+                <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">{t('profile.name')}</label>
                 <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-white/[0.04] bg-white/[0.02] text-slate-400 text-[13px] select-none">
                   <span className="flex-1 truncate">{displayName}</span>
                   <Lock size={11} className="text-slate-700 shrink-0" />
@@ -144,14 +146,14 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
 
               {/* Group */}
               <div>
-                <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">Grupă</label>
+                <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">{t('profile.group')}</label>
                 <div className="relative">
                   <Hash size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none" />
                   <input
                     value={group}
                     onChange={e => setGroup(e.target.value)}
                     className="input-base pl-8"
-                    placeholder="ex: B1, B3, C2..."
+                    placeholder={t('profile.groupPlaceholder')}
                     maxLength={10}
                   />
                 </div>
@@ -159,12 +161,12 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
 
               {/* Interests */}
               <div>
-                <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">Interese (virgulă)</label>
+                <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">{t('profile.interests')}</label>
                 <input
                   value={interests}
                   onChange={e => setInterests(e.target.value)}
                   className="input-base"
-                  placeholder="ex: AI, web dev, mobile..."
+                  placeholder={t('profile.interestsPlaceholder')}
                 />
               </div>
 
@@ -172,27 +174,27 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
               {showSocialLinks && (
                 <>
                   <div>
-                    <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">GitHub</label>
+                    <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">{t('profile.github')}</label>
                     <div className="relative">
                       <Github size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none" />
                       <input
                         value={github}
                         onChange={e => setGithub(e.target.value)}
                         className="input-base pl-8"
-                        placeholder="username sau link..."
+                        placeholder={t('profile.githubPlaceholder')}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">LinkedIn</label>
+                    <label className="text-[10px] text-slate-600 uppercase font-semibold tracking-wide block mb-1.5">{t('profile.linkedin')}</label>
                     <div className="relative">
                       <Linkedin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none" />
                       <input
                         value={linkedin}
                         onChange={e => setLinkedin(e.target.value)}
                         className="input-base pl-8"
-                        placeholder="username sau link..."
+                        placeholder={t('profile.linkedinPlaceholder')}
                       />
                     </div>
                   </div>
@@ -205,9 +207,9 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
                 className="w-full btn-primary flex items-center justify-center gap-2 text-sm"
               >
                 {saved ? (
-                  <><GraduationCap size={14} /> Salvat!</>
+                  <><GraduationCap size={14} /> {t('profile.saved')}</>
                 ) : (
-                  <><Save size={14} /> Salvează modificările</>
+                  <><Save size={14} /> {t('profile.save')}</>
                 )}
               </button>
             </div>
@@ -220,6 +222,7 @@ function ProfileModal({ profile, session, theme, initials, onClose }) {
 
 export default function Sidebar({ platformMode = 'academic', currentView, onNavigate, profile, session, open, onClose, onlineCount = 0 }) {
   const { logout } = useAuth()
+  const { t } = useTranslation()
   const [showProfile, setShowProfile] = useState(false)
   const { focusStreak, pulseStreak } = useStreaksContext()
   const university = session?.university
@@ -245,7 +248,7 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
           <SPLogo accent={theme.accent} accentStrong={theme.accentStrong} size="sm" />
           <div className="flex-1 min-w-0">
             <p className="font-bold text-white text-[13px] leading-tight tracking-tight">{modeCopy.name}</p>
-            <p className="text-[11px] text-slate-600 font-medium">{modeCopy.subtitle}</p>
+            <p className="text-[11px] text-slate-600 font-medium">{t(modeCopy.modeKey)}</p>
           </div>
           {/* Close button — mobile only */}
           <button
@@ -281,9 +284,10 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
 
       {/* Nav */}
       <nav key={platformMode} className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-        <p className="section-label px-3 pb-3">{modeCopy.label}</p>
+        <p className="section-label px-3 pb-3">{t(modeCopy.modeKey)}</p>
 
-        {nav.map(({ id, label, icon: Icon }, i) => {
+        {nav.map(({ id, icon: Icon }, i) => {
+          const label = t(`nav.${id}`)
           const badge = id === 'messages' && onlineCount > 0 ? onlineCount : null
           const active = currentView === id
           return (
@@ -343,7 +347,7 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
 
       {/* Streak card */}
       {(focusStreak > 0 || pulseStreak > 0) && <div className="mx-3 mb-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-600 mb-2">Streaks zilnice</p>
+        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-600 mb-2">{t('streaks.title')}</p>
         <div className="flex items-center gap-2">
           <div className={clsx(
             'flex-1 flex items-center gap-2 rounded-lg border px-2.5 py-1.5 transition-colors duration-300',
