@@ -59,7 +59,7 @@ function IndoorTab({
             <Route size={11} className="text-indigo-400 shrink-0 mr-0.5" />
             {indoorPath.map((id, i) => {
               const room = IND_ROOMS.find(r => r.id === id)
-              const floorPart = id.includes('_') ? id.split('_')[1] : null
+              const floorPart = typeof id === 'string' && id.includes('_') ? id.split('_')[1] : null
               const label = room?.label ?? (floorPart != null ? `Scară Et.${floorPart === '0' ? 'P' : floorPart}` : 'Scară')
               return (
                 <span key={id} className="flex items-center gap-1">

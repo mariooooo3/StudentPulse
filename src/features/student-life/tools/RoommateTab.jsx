@@ -43,7 +43,7 @@ export default function RoommateTab({ lifeProfile }) {
                 className="h-10 w-10 shrink-0 rounded-full flex items-center justify-center text-white text-sm font-bold"
                 style={{ background: `linear-gradient(135deg, ${accent.color}, #8b5cf6)` }}
               >
-                {r.name.split(' ').map(w => w[0]).join('')}
+                {(r.name || '').split(' ').map(w => w[0]).join('')}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-white">{r.name}</p>

@@ -164,6 +164,8 @@ const en = {
     paid: 'Paid',
     unpaid: 'Unpaid',
     physical: 'On-site · {{city}}',
+    challengeCompleted: 'Challenge completed! 🎉',
+    challengePoints: 'pts',
   },
 
   city: {

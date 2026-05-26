@@ -34,7 +34,7 @@ export default function ChatTab({
       const dataUrl = ev.target.result
       const attachment = {
         preview: dataUrl,
-        base64: dataUrl.split(',')[1],
+        base64: dataUrl?.includes(',') ? dataUrl.split(',')[1] : dataUrl,
         mimeType: file.type || 'image/jpeg',
       }
       onSubmit(chatInput, attachment)
