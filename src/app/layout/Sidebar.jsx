@@ -2,7 +2,7 @@ import {
   BookOpen,
   Briefcase,
   Calendar,
-  Compass,
+  Activity,
   Flame,
   Heart,
   Home,
@@ -57,7 +57,7 @@ const NAV_BY_MODE = {
 }
 
 const MODE_COPY = {
-  academic: { name: 'StudentPulse', subtitle: 'Academic', label: 'Academic', icon: Compass },
+  academic: { name: 'StudentPulse', subtitle: 'Academic', label: 'Academic', icon: Activity },
   life: { name: 'StudentPulse', subtitle: 'Viața Studențească', label: 'Viața Studențească', icon: Sparkles },
 }
 

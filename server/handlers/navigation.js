@@ -40,6 +40,9 @@ export function createNavigationRequestHandler() {
     try {
       await dispatchNavigationRoute(req, res, { allowAiRoutes: true })
     } catch (error) {
+      if (error.statusCode >= 400) {
+        console.error(`[Navigation] ${error.message}${error.details ? ` — ${error.details}` : ''}`)
+      }
       sendJson(res, error.statusCode || 500, { error: error.message || 'Navigation API error' })
     }
   }
