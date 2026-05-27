@@ -80,7 +80,7 @@ export default function LoginStep({ onSuccess, onGoRegister }) {
             value={password}
             onChange={e => { setPassword(e.target.value); setError('') }}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-            autoComplete="new-password"
+            autoComplete="off"
             placeholder="••••••••"
             className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none autofill-dark"
           />
