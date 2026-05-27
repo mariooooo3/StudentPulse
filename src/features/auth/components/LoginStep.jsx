@@ -3,10 +3,12 @@ import { ArrowRight, Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import clsx from 'clsx'
 
 const BASE = import.meta.env.VITE_API_URL || ''
+const REMEMBER_KEY = 'sp_remember_identifier'
 
 export default function LoginStep({ onSuccess, onGoRegister }) {
   const [identifier, setIdentifier] = useState('')
   const [password,   setPassword]   = useState('')
+  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem(REMEMBER_KEY))
   const [showPwd,    setShowPwd]    = useState(false)
   const [loading,    setLoading]    = useState(false)
   const [error,      setError]      = useState('')
@@ -23,6 +25,11 @@ export default function LoginStep({ onSuccess, onGoRegister }) {
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Eroare la autentificare'); return }
+      if (rememberMe) {
+        localStorage.setItem(REMEMBER_KEY, identifier.trim())
+      } else {
+        localStorage.removeItem(REMEMBER_KEY)
+      }
       onSuccess(data.user)
     } catch {
       setError('Nu s-a putut conecta la server')
@@ -80,6 +87,26 @@ export default function LoginStep({ onSuccess, onGoRegister }) {
           </button>
         </div>
       </div>
+
+      {/* Remember me */}
+      <label className="flex items-center gap-2.5 cursor-pointer select-none w-fit">
+        <div
+          onClick={() => setRememberMe(p => !p)}
+          className={clsx(
+            'w-4 h-4 rounded-[4px] border flex items-center justify-center transition-all shrink-0',
+            rememberMe
+              ? 'bg-indigo-600 border-indigo-500'
+              : 'bg-white/[0.03] border-white/[0.12] hover:border-white/25',
+          )}
+        >
+          {rememberMe && (
+            <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+              <path d="M1 3.5L3.5 6L8 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          )}
+        </div>
+        <span className="text-[12px] text-slate-500">Ține-mă minte</span>
+      </label>
 
       {error && (
         <p className="text-[11px] text-red-400 pl-1">{error}</p>

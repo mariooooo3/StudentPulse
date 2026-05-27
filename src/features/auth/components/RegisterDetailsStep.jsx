@@ -6,8 +6,12 @@ const BASE = import.meta.env.VITE_API_URL || ''
 
 const USERNAME_HINT = 'ex: prenume_nume — litere mici, cifre, _ (fără spații)'
 
-function deriveUsername(emailPrefix) {
-  return emailPrefix.toLowerCase().replace(/\./g, '_').replace(/[^a-z0-9_]/g, '')
+function validateEmailPrefix(prefix) {
+  if (!prefix) return null
+  if (!prefix.includes('.')) return 'Formatul obligatoriu: prenume.nume (cu punct)'
+  if (prefix.startsWith('.') || prefix.endsWith('.')) return 'Punctul nu poate fi la început sau la sfârșit'
+  if (prefix.includes('..')) return 'Nu pot fi două puncte consecutive'
+  return null
 }
 
 function validateUsername(u) {
@@ -21,24 +25,26 @@ function validateUsername(u) {
 }
 
 export default function RegisterDetailsStep({ university, onSuccess, onBack }) {
-  const [emailPrefix,     setEmailPrefix]     = useState('')
-  const [username,        setUsername]        = useState('')
-  const [usernameEdited,  setUsernameEdited]  = useState(false)
-  const [password,        setPassword]        = useState('')
+  const [emailPrefix, setEmailPrefix] = useState('')
+  const [username,    setUsername]    = useState('')
+  const [password,    setPassword]    = useState('')
   const [confirmPwd,  setConfirmPwd]  = useState('')
   const [showPwd,     setShowPwd]     = useState(false)
   const [loading,     setLoading]     = useState(false)
   const [error,       setError]       = useState('')
 
-  const usernameError = username ? validateUsername(username) : null
-  const fullEmail = emailPrefix ? `${emailPrefix}@${university.emailDomain}` : ''
-  const detectedFaculty = university.faculties?.find(f =>
+  const emailPrefixError = emailPrefix ? validateEmailPrefix(emailPrefix) : null
+  const usernameError    = username    ? validateUsername(username)        : null
+  const fullEmail        = emailPrefix ? `${emailPrefix}@${university.emailDomain}` : ''
+  const detectedFaculty  = university.faculties?.find(f =>
     fullEmail.includes(f.emailPrefix || f.code?.toLowerCase())
   ) || university.faculties?.[0] || null
 
   async function handleSubmit(e) {
     e?.preventDefault()
-    if (!emailPrefix.trim()) { setError('Introduceți prefixul email-ului'); return }
+    if (!emailPrefix.trim()) { setError('Introduceți emailul instituțional'); return }
+    const eErr = validateEmailPrefix(emailPrefix)
+    if (eErr) { setError(eErr); return }
     const uErr = validateUsername(username)
     if (uErr) { setError(uErr); return }
     if (password.length < 6) { setError('Parola trebuie să aibă minim 6 caractere'); return }
@@ -67,7 +73,8 @@ export default function RegisterDetailsStep({ university, onSuccess, onBack }) {
     }
   }
 
-  const canSubmit = emailPrefix.trim() && !usernameError && username.length >= 3 &&
+  const canSubmit = emailPrefix.trim() && !emailPrefixError &&
+                    !usernameError && username.length >= 3 &&
                     password.length >= 6 && password === confirmPwd && !loading
 
   return (
@@ -93,24 +100,30 @@ export default function RegisterDetailsStep({ university, onSuccess, onBack }) {
         <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block mb-2">
           Email instituțional *
         </label>
-        <div className="flex items-center bg-white/[0.03] border border-white/[0.07] rounded-xl overflow-hidden focus-within:border-indigo-500/40 transition-colors">
+        <div className={clsx(
+          'flex items-center bg-white/[0.03] border rounded-xl overflow-hidden transition-colors',
+          emailPrefixError && emailPrefix
+            ? 'border-rose-500/40 focus-within:border-rose-500/60'
+            : 'border-white/[0.07] focus-within:border-indigo-500/40',
+        )}>
           <Mail size={13} className="text-slate-600 ml-4 shrink-0" strokeWidth={1.75} />
           <input
             autoFocus
             type="text"
             value={emailPrefix}
-            onChange={e => {
-              const prefix = e.target.value.replace(/@.*/, '')
-              setEmailPrefix(prefix)
-              if (!usernameEdited) setUsername(deriveUsername(prefix))
-              setError('')
-            }}
+            onChange={e => { setEmailPrefix(e.target.value.replace(/@.*/, '')); setError('') }}
             autoComplete="off"
             placeholder="prenume.nume"
             className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none font-medium"
           />
           <span className="pr-4 text-[12px] text-slate-600 shrink-0 font-mono">@{university.emailDomain}</span>
         </div>
+        {emailPrefixError && emailPrefix && (
+          <p className="text-[11px] text-rose-400 mt-1.5 pl-1">{emailPrefixError}</p>
+        )}
+        {!emailPrefixError && !emailPrefix && (
+          <p className="text-[11px] text-slate-700 mt-1.5 pl-1">Obligatoriu în format prenume.nume</p>
+        )}
       </div>
 
       {/* Username */}
@@ -128,11 +141,7 @@ export default function RegisterDetailsStep({ university, onSuccess, onBack }) {
           <input
             type="text"
             value={username}
-            onChange={e => {
-              setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))
-              setUsernameEdited(true)
-              setError('')
-            }}
+            onChange={e => { setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')); setError('') }}
             autoComplete="off"
             placeholder="prenume_nume"
             className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none font-medium"
