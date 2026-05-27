@@ -164,23 +164,18 @@ export function createCarpoolHandler() {
       return json(res, 201, { ride: { ...ride, isOwn: true, myRequest: null, requests: [], seatsLeft: ride.seats } })
     }
 
-    // ── DELETE /api/carpool/rides/:id — anulează traseu propriu ─────────────
+    // ── DELETE /api/carpool/rides/:id — șterge traseu propriu ──────────────
     const deleteMatch = url.match(/^\/api\/carpool\/rides\/([^/]+)$/)
     if (method === 'DELETE' && deleteMatch) {
       const rideId = deleteMatch[1]
-      const parsed = JSON.parse(await readBody(req).catch(() => '{}')).catch?.() || (() => {
-        try { return JSON.parse('{}') } catch { return {} }
-      })()
-
-      // Re-parse properly
       let body = {}
-      try { body = JSON.parse(await readBody(req).catch(() => '{}')) } catch {}
+      try { body = JSON.parse(await readBody(req)) } catch {}
 
       const ride = db.prepare('SELECT * FROM carpool_rides WHERE id = ?').get(rideId)
       if (!ride) return json(res, 404, { error: 'Traseu inexistent' })
-      if (ride.driver_id !== body.userId) return json(res, 403, { error: 'Nu poți anula traseul altcuiva' })
+      if (ride.driver_id !== body.userId) return json(res, 403, { error: 'Nu poți șterge traseul altcuiva' })
 
-      db.prepare(`UPDATE carpool_rides SET status = 'cancelled' WHERE id = ?`).run(rideId)
+      db.prepare('DELETE FROM carpool_rides WHERE id = ?').run(rideId)
       return json(res, 200, { ok: true })
     }
 

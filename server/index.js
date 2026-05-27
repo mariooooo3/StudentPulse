@@ -19,6 +19,8 @@ import { createAuthHandler } from './handlers/auth.js'
 import { createStreaksHandler } from './handlers/streaks.js'
 import { createChallengesHandler } from './handlers/challenges.js'
 import { createCarpoolHandler } from './handlers/carpool.js'
+import { createBooksHandler } from './handlers/books.js'
+import { createRoommatesHandler } from './handlers/roommates.js'
 
 const PORT = Number(process.env.PORT || 3010)
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -86,6 +88,8 @@ const handleAuth = createAuthHandler()
 const handleStreaks = createStreaksHandler()
 const handleChallenges = createChallengesHandler()
 const handleCarpool = createCarpoolHandler()
+const handleBooks = createBooksHandler()
+const handleRoommates = createRoommatesHandler()
 
 const httpServer = createServer(async (req, res) => {
   if (req.url?.startsWith('/api/auth')) {
@@ -99,6 +103,12 @@ const httpServer = createServer(async (req, res) => {
   }
   if (req.url?.startsWith('/api/carpool')) {
     return handleCarpool(req, res)
+  }
+  if (req.url?.startsWith('/api/books')) {
+    return handleBooks(req, res)
+  }
+  if (req.url?.startsWith('/api/roommates')) {
+    return handleRoommates(req, res)
   }
   if (req.url?.startsWith('/api/navigation') || req.url?.startsWith('/api/career') || req.url?.startsWith('/api/ai')) {
     return handleNavigation(req, res)
