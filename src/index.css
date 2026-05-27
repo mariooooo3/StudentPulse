@@ -30,6 +30,23 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 2px; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.12); }
+
+  /* Fix browser autofill white background on dark theme */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #0d1426 inset !important;
+    -webkit-text-fill-color: #e2e8f0 !important;
+    caret-color: #e2e8f0;
+  }
+
+  .autofill-dark:-webkit-autofill,
+  .autofill-dark:-webkit-autofill:hover,
+  .autofill-dark:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #0d1426 inset !important;
+    -webkit-text-fill-color: #e2e8f0 !important;
+  }
 }
 
 /* ── Settings: Reduced motion ─────────────────────────── */
