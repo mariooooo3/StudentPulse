@@ -1,4 +1,4 @@
-const CACHE = 'studentcompass-v3'
+const CACHE = 'studentpulse-v1'
 const PRECACHE = ['/index.html']
 
 self.addEventListener('install', e => {
