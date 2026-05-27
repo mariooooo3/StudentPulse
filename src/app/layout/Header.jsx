@@ -55,6 +55,12 @@ export default function Header({
   const seenNotificationIds = useRef(new Set())
   const initializedNotifications = useRef(false)
 
+  // Dynamic browser tab title
+  useEffect(() => {
+    const base = `${title} — StudentPulse`
+    document.title = unreadCount > 0 ? `(${unreadCount}) ${base}` : base
+  }, [title, unreadCount])
+
   const filteredNotifications = useMemo(
     () => notifFilter === 'unread' ? notifications.filter(n => !n.read) : notifications,
     [notifFilter, notifications],
