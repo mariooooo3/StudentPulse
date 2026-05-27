@@ -44,8 +44,8 @@ export default function WellnessSection() {
                     <Icon size={15} style={{ color: accent.color }} />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-white">{tip.title}</p>
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">{tip.body}</p>
+                    <p className="text-sm font-bold text-white">{t(tip.titleKey)}</p>
+                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">{t(tip.bodyKey)}</p>
                   </div>
                 </motion.div>
               )

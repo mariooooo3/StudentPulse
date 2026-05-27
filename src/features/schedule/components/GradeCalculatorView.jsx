@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { BookOpen, GraduationCap } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 export default function GradeCalculatorView({ exams, session }) {
+  const { t } = useTranslation()
   const storageKey = `sc_grades_${session?.email || 'guest'}`
 
   const [grades, setGrades] = useState(() => {
@@ -34,8 +36,8 @@ export default function GradeCalculatorView({ exams, session }) {
         <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-4">
           <GraduationCap size={24} className="text-indigo-400" strokeWidth={1.75} />
         </div>
-        <p className="text-white font-bold mb-1">Nicio materie detectată</p>
-        <p className="text-slate-500 text-sm">Materiile apar automat din orarul tău.</p>
+        <p className="text-white font-bold mb-1">{t('schedule.gradeCalc.noSubjects')}</p>
+        <p className="text-slate-500 text-sm">{t('schedule.gradeCalc.noSubjectsText')}</p>
       </motion.div>
     )
   }
@@ -45,26 +47,26 @@ export default function GradeCalculatorView({ exams, session }) {
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-center">
           <p className={`text-2xl font-black ${avgColor}`}>{average ? average.toFixed(2) : '—'}</p>
-          <p className="text-[11px] text-slate-500 mt-1">Medie ponderată</p>
+          <p className="text-[11px] text-slate-500 mt-1">{t('schedule.gradeCalc.weightedAvg')}</p>
         </div>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-center">
           <p className="text-2xl font-black text-white">
             {gradedEcts}<span className="text-sm font-semibold text-slate-500">/{totalEcts}</span>
           </p>
-          <p className="text-[11px] text-slate-500 mt-1">ECTS completate</p>
+          <p className="text-[11px] text-slate-500 mt-1">{t('schedule.gradeCalc.ectsCompleted')}</p>
         </div>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-center">
           <p className="text-2xl font-black text-white">
             {graded.length}<span className="text-sm font-semibold text-slate-500">/{subjects.length}</span>
           </p>
-          <p className="text-[11px] text-slate-500 mt-1">Note introduse</p>
+          <p className="text-[11px] text-slate-500 mt-1">{t('schedule.gradeCalc.gradesEntered')}</p>
         </div>
       </div>
 
       {graded.length > 0 && (
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs text-slate-500">
-            <span>Progres sesiune</span>
+            <span>{t('schedule.gradeCalc.sessionProgress')}</span>
             <span>{Math.round(gradedEcts / totalEcts * 100)}%</span>
           </div>
           <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
@@ -81,7 +83,7 @@ export default function GradeCalculatorView({ exams, session }) {
       <div className="space-y-2">
         <div className="flex items-center gap-2 mb-1">
           <BookOpen size={13} className="text-slate-500" strokeWidth={1.75} />
-          <p className="section-label">Note per materie</p>
+          <p className="section-label">{t('schedule.gradeCalc.gradesPerSubject')}</p>
         </div>
         {subjects.map(s => {
           const g = s.grade

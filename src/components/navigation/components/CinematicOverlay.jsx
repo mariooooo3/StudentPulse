@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Play, ChevronLeft, ChevronRight, CheckCircle, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 function CinematicOverlay({
   cinematicMode,
@@ -10,6 +11,7 @@ function CinematicOverlay({
   onPrev,
   onExit,
 }) {
+  const { t } = useTranslation()
   return (
     <AnimatePresence>
       {cinematicMode && (() => {
@@ -44,7 +46,7 @@ function CinematicOverlay({
                         <Play size={10} fill="white" className="text-white" />
                       </div>
                       <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest">
-                        Tur ghidat
+                        {t('navigation.cinematic.guidedTour')}
                       </span>
                       <span className="text-xs text-slate-500 font-medium">
                         {cinematicStep + 1} / {cinematicSteps.length}
@@ -54,7 +56,7 @@ function CinematicOverlay({
                       <button
                         onClick={onExit}
                         className="w-7 h-7 rounded-lg bg-white/[0.06] hover:bg-red-500/20 flex items-center justify-center text-slate-400 hover:text-red-400 transition-colors"
-                        title="Ieși din tur"
+                        title={t('navigation.cinematic.exit')}
                       >
                         <X size={13} />
                       </button>
@@ -84,7 +86,7 @@ function CinematicOverlay({
                         </p>
                         {currentStep?.isFinal && (
                           <p className="text-xs text-green-400 mt-1 flex items-center gap-1.5">
-                            <CheckCircle size={11} /> Ai ajuns la destinație
+                            <CheckCircle size={11} /> {t('navigation.cinematic.arrived')}
                           </p>
                         )}
                       </div>
@@ -98,21 +100,21 @@ function CinematicOverlay({
                       disabled={cinematicStep === 0}
                       className="flex-1 h-9 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-25 border border-white/[0.07] text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
                     >
-                      <ChevronLeft size={15} /> Înapoi
+                      <ChevronLeft size={15} /> {t('navigation.cinematic.back')}
                     </button>
                     {!isLast ? (
                       <button
                         onClick={onNext}
                         className="flex-1 h-9 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-[0.97]"
                       >
-                        Înainte <ChevronRight size={15} />
+                        {t('navigation.cinematic.next')} <ChevronRight size={15} />
                       </button>
                     ) : (
                       <button
                         onClick={onExit}
                         className="flex-1 h-9 rounded-xl bg-green-600 hover:bg-green-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-[0.97]"
                       >
-                        <CheckCircle size={14} /> Done
+                        <CheckCircle size={14} /> {t('navigation.cinematic.done')}
                       </button>
                     )}
                   </div>

@@ -29,7 +29,7 @@ export default function RoommateTab({ lifeProfile }) {
           icon={noScopedData ? Building2 : Users}
           title={noScopedData ? t('roommateTab.noScopedTitle') : t('roommateTab.noRoommates')}
           text={noScopedData
-            ? `Nu am găsit anunțuri pentru ${scopeLabel || 'facultatea ta'}.`
+            ? t('roommateTab.noScopedText', { scope: scopeLabel || t('roommateTab.defaultScope') })
             : t('roommateTab.noRoommatesText')}
           accent={accent}
         />

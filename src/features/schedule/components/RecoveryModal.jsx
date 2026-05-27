@@ -2,9 +2,11 @@ import { X, Send } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 import { DAYS } from '../../../shared/data/mockData'
 
 export default function RecoveryModal({ slot, subject, onClose, onConfirm }) {
+  const { t } = useTranslation()
   const [reason, setReason] = useState('')
 
   return (
@@ -27,9 +29,9 @@ export default function RecoveryModal({ slot, subject, onClose, onConfirm }) {
           <div className="bezel-inner">
             <div className="flex items-center justify-between p-5 border-b border-white/[0.06]">
               <div>
-                <p className="section-label mb-1">Cerere Recuperare</p>
+                <p className="section-label mb-1">{t('schedule.recoveryModal.title')}</p>
                 <h3 className="font-bold text-white text-base">{subject}</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Grupa {slot.group}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{t('schedule.recoveryModal.group')} {slot.group}</p>
               </div>
               <button
                 onClick={onClose}
@@ -42,11 +44,11 @@ export default function RecoveryModal({ slot, subject, onClose, onConfirm }) {
             <div className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  ['Zi', DAYS[slot.day - 1]],
-                  ['Interval', `${slot.start}:00–${slot.end}:00`],
-                  ['Sală', slot.room],
-                  ['Profesor', slot.professor],
-                  ['Locuri rămase', `${slot.total - slot.enrolled}/${slot.total}`],
+                  [t('schedule.recoveryModal.day'), DAYS[slot.day - 1]],
+                  [t('schedule.recoveryModal.interval'), `${slot.start}:00–${slot.end}:00`],
+                  [t('schedule.recoveryModal.room'), slot.room],
+                  [t('schedule.recoveryModal.professor'), slot.professor],
+                  [t('schedule.recoveryModal.spotsLeft'), `${slot.total - slot.enrolled}/${slot.total}`],
                 ].map(([k, v]) => (
                   <div key={k} className="bg-white/[0.03] rounded-xl p-3 border border-white/[0.05]">
                     <p className="text-[9px] font-semibold text-slate-600 uppercase tracking-wider mb-0.5">{k}</p>
@@ -56,18 +58,18 @@ export default function RecoveryModal({ slot, subject, onClose, onConfirm }) {
               </div>
 
               <div>
-                <label className="section-label block mb-2">Motivul recuperării *</label>
+                <label className="section-label block mb-2">{t('schedule.recoveryModal.reasonLabel')}</label>
                 <textarea
                   rows={3}
                   value={reason}
                   onChange={e => setReason(e.target.value)}
                   className="input-base w-full resize-none"
-                  placeholder="Ex: Am absentat din motive medicale / suprapunere cu alt curs..."
+                  placeholder={t('schedule.recoveryModal.reasonPlaceholder')}
                 />
               </div>
 
               <div className="flex gap-3 pt-1">
-                <button onClick={onClose} className="btn-secondary flex-1">Anulează</button>
+                <button onClick={onClose} className="btn-secondary flex-1">{t('schedule.recoveryModal.cancel')}</button>
                 <button
                   onClick={() => onConfirm(reason)}
                   disabled={!reason.trim()}
@@ -76,7 +78,7 @@ export default function RecoveryModal({ slot, subject, onClose, onConfirm }) {
                     !reason.trim() && 'opacity-40 cursor-not-allowed',
                   )}
                 >
-                  <Send size={13} /> Trimite cerere
+                  <Send size={13} /> {t('schedule.recoveryModal.send')}
                 </button>
               </div>
             </div>
