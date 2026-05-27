@@ -902,6 +902,21 @@ const ro = {
     facultyChannels: 'Canale facultate',
     universityFallback: 'Universitate',
     facultyFallback: 'Facultate',
+    typing: 'scrie...',
+    typingPlural: 'scriu...',
+    facultyChannel: 'Canal facultate',
+    channelBadge: 'canal',
+    emptyGroup: 'Niciun mesaj încă. Fii primul care scrie!',
+    groupPlaceholder: 'Scrie în #{{label}}...',
+    fileTooLarge: 'Fișierul e prea mare. Maxim 5MB.',
+    onlineStatus: 'Online acum',
+    sameFaculty: 'Aceeași facultate',
+    emptyDM: 'Niciun mesaj încă. Poți discuta doar cu studenți din aceeași universitate și facultate.',
+    selfConversation: 'Conversație cu tine însuți',
+    messagePlaceholder: 'Scrie un mesaj...',
+    portalBadge: 'Portal profesor',
+    emptyPortal: 'Nu există mesaje încă.',
+    replyPlaceholder: 'Răspunde profesorului...',
   },
 
   thesis: {
@@ -1026,6 +1041,9 @@ const ro = {
     toastAddedSkill: '{{item}} a fost adăugat în profilul de Skill Swap.',
     toastCreatedSession: 'Sesiune creată',
     toastCreatedText: 'Noua sesiune apare acum în listă și ești înscris ca organizator.',
+    newSessionTopic: 'Sesiune nouă de recapitulare',
+    you: 'Tu',
+    thisWeek: 'Săptămâna aceasta',
   },
 
   search: {

@@ -921,6 +921,21 @@ const es = {
     facultyChannels: 'Canales de facultad',
     universityFallback: 'Universidad',
     facultyFallback: 'Facultad',
+    typing: 'escribiendo...',
+    typingPlural: 'escribiendo...',
+    facultyChannel: 'Canal de facultad',
+    channelBadge: 'canal',
+    emptyGroup: '¡Sin mensajes aún. ¡Sé el primero en escribir!',
+    groupPlaceholder: 'Escribe en #{{label}}...',
+    fileTooLarge: 'El archivo es demasiado grande. Máximo 5MB.',
+    onlineStatus: 'En línea ahora',
+    sameFaculty: 'Misma facultad',
+    emptyDM: 'Sin mensajes aún. Solo puedes chatear con estudiantes de la misma universidad y facultad.',
+    selfConversation: 'Conversación contigo mismo',
+    messagePlaceholder: 'Escribe un mensaje...',
+    portalBadge: 'Portal del profesor',
+    emptyPortal: 'No hay mensajes aún.',
+    replyPlaceholder: 'Responde al profesor...',
   },
 
   thesis: {
@@ -1045,6 +1060,9 @@ const es = {
     toastAddedSkill: '{{item}} fue añadido a tu perfil de Skill Swap.',
     toastCreatedSession: 'Sesión creada',
     toastCreatedText: 'La nueva sesión aparece ahora en la lista y estás inscrito como organizador.',
+    newSessionTopic: 'Nueva sesión de repaso',
+    you: 'Tú',
+    thisWeek: 'Esta semana',
   },
 }
 
