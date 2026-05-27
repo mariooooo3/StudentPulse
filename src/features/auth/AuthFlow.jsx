@@ -1,71 +1,92 @@
-import { useRef, useState } from 'react'
-import { Compass, Mail, ArrowRight, Check, Loader2, Shield, ChevronLeft, GraduationCap } from 'lucide-react'
+import { useState } from 'react'
+import { Compass, Check, ChevronLeft, GraduationCap, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { UNIVERSITIES } from '../../shared/config/universities'
 import UniversityGrid from './components/UniversityGrid'
 import VerifyingStep from './components/VerifyingStep'
 import ConfirmedStep from './components/ConfirmedStep'
 import ProfessorLogin from './components/ProfessorLogin'
-import EmailStep from './components/EmailStep'
+import LoginStep from './components/LoginStep'
+import RegisterDetailsStep from './components/RegisterDetailsStep'
 import { useAuth } from '../../app/providers/AuthContext'
-import { createUserId, getUserProfile } from '../../shared/services/auth.service'
+import { getUserProfile } from '../../shared/services/auth.service'
 import { DEMO_PROFESSOR } from '../../shared/services/professorPortal.service'
-import { STEP, STEP_LABEL_KEYS } from './auth.constants'
-import { buildUniversityEmail, verifyTotpCode } from './auth.utils'
+import { STEP, REGISTER_STEP_KEYS } from './auth.constants'
+import { verifyTotpCode } from './auth.utils'
 import clsx from 'clsx'
 
-const TUIASI = UNIVERSITIES.find(u => u.id === 'tuiasi')
+const TUIASI    = UNIVERSITIES.find(u => u.id === 'tuiasi')
 const AC_FACULTY = TUIASI?.faculties.find(f => f.code === 'AC')
 
 export default function AuthFlow() {
-  const { t } = useTranslation()
+  const { t }    = useTranslation()
   const { login } = useAuth()
-  const submitIdRef = useRef(0)
-  const [role, setRole] = useState('student')
-  const [step, setStep] = useState(STEP.SELECT_UNI)
-  const [university, setUniversity] = useState(null)
-  const [email, setEmail] = useState('')
-  const [professorEmail, setProfessorEmail] = useState(DEMO_PROFESSOR.email)
-  const [accessCode, setAccessCode] = useState('')
-  const [accessCodeError, setAccessCodeError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [detectedFaculty, setDetectedFaculty] = useState(null)
-  const [isReturning, setIsReturning] = useState(false)
 
-  function selectUniversity(u) { setUniversity(u); setStep(STEP.ENTER_EMAIL) }
+  const [role,              setRole]              = useState('student')
+  const [step,              setStep]              = useState(STEP.LOGIN)
+  const [university,        setUniversity]        = useState(null)
+  const [detectedFaculty,   setDetectedFaculty]   = useState(null)
+  const [isReturning,       setIsReturning]       = useState(false)
+  const [pendingUser,       setPendingUser]        = useState(null) // user from backend after register/login
 
-  async function handleEmailSubmit() {
-    setAccessCodeError(''); setLoading(true)
-    const opId = ++submitIdRef.current
-    try {
-      const valid = await verifyTotpCode(accessCode)
-      if (!valid) { setAccessCodeError(t('auth.errors.wrongCode')); setLoading(false); return }
-    } catch {
-      setAccessCodeError(t('auth.errors.connection')); setLoading(false); return
-    }
-    setStep(STEP.VERIFYING)
-    await new Promise(r => setTimeout(r, 2600))
-    if (opId !== submitIdRef.current) return   // utilizatorul a apăsat înapoi
-    setDetectedFaculty(null)
-    const fullEmail = buildUniversityEmail(email, university.emailDomain)
-    const returning = !!getUserProfile(fullEmail)
+  // Professor demo state
+  const [professorEmail,    setProfessorEmail]    = useState(DEMO_PROFESSOR.email)
+  const [accessCode,        setAccessCode]        = useState('')
+  const [accessCodeError,   setAccessCodeError]   = useState('')
+  const [loading,           setLoading]           = useState(false)
+
+  // ── Login success (existing student) ────────────────────────────────────────
+  function handleLoginSuccess(user) {
+    const returning = !!getUserProfile(user.email)
     setIsReturning(returning)
-    setLoading(false); setStep(STEP.CONFIRMED)
-  }
+    setPendingUser(user)
 
-  function handleContinue() {
+    const uni = UNIVERSITIES.find(u => u.id === user.universityId) || null
+    const fac = uni?.faculties?.find(f => f.code === user.facultyCode) || null
+
     login({
-      role: 'student',
-      userId: createUserId('mock'),
-      email: buildUniversityEmail(email, university.emailDomain),
-      university, detectedFaculty, isNewUser: !isReturning,
+      role:            'student',
+      userId:          user.id,
+      email:           user.email,
+      name:            user.username,
+      university:      uni,
+      detectedFaculty: fac,
+      isNewUser:       !returning,
     })
   }
 
+  // ── Register: university selected → go to details ────────────────────────
+  function selectUniversity(u) {
+    setUniversity(u)
+    setStep(STEP.ENTER_DETAILS)
+  }
+
+  // ── Register success (new student) ──────────────────────────────────────────
+  function handleRegisterSuccess(user, faculty) {
+    setIsReturning(false)
+    setPendingUser(user)
+    setDetectedFaculty(faculty)
+    setStep(STEP.CONFIRMED)
+  }
+
+  function handleContinue() {
+    const uni = UNIVERSITIES.find(u => u.id === pendingUser?.universityId) || university
+    const fac = detectedFaculty || uni?.faculties?.[0] || null
+    login({
+      role:            'student',
+      userId:          pendingUser.id,
+      email:           pendingUser.email,
+      name:            pendingUser.username,
+      university:      uni,
+      detectedFaculty: fac,
+      isNewUser:       true,
+    })
+  }
+
+  // ── Professor demo login ─────────────────────────────────────────────────────
   async function handleProfessorSubmit() {
     if (professorEmail.trim().toLowerCase() !== DEMO_PROFESSOR.email) {
-      setAccessCodeError(t('auth.errors.invalidProfessor'))
-      return
+      setAccessCodeError(t('auth.errors.invalidProfessor')); return
     }
     setAccessCodeError(''); setLoading(true)
     try {
@@ -77,21 +98,30 @@ export default function AuthFlow() {
     await new Promise(r => setTimeout(r, 900))
     setLoading(false)
     login({
-      role: 'professor',
-      userId: DEMO_PROFESSOR.id,
-      email: DEMO_PROFESSOR.email,
-      university: TUIASI,
+      role:            'professor',
+      userId:          DEMO_PROFESSOR.id,
+      email:           DEMO_PROFESSOR.email,
+      name:            DEMO_PROFESSOR.name,
+      university:      TUIASI,
       detectedFaculty: AC_FACULTY,
       profile: {
         ...DEMO_PROFESSOR,
-        university: TUIASI,
+        university:      TUIASI,
         detectedFaculty: AC_FACULTY,
-        facultyCode: 'AC',
-        facultyType: 'ENGINEERING_CS',
+        facultyCode:     'AC',
+        facultyType:     'ENGINEERING_CS',
       },
       isNewUser: false,
     })
   }
+
+  // ── Register step index for progress dots ────────────────────────────────────
+  const registerStepIndex = step === STEP.SELECT_UNI ? 0
+                          : step === STEP.ENTER_DETAILS ? 1
+                          : step === STEP.CONFIRMED ? 2
+                          : -1
+
+  const isRegisterFlow = step !== STEP.LOGIN
 
   return (
     <div className="min-h-screen bg-[#050810] flex items-center justify-center p-6 relative overflow-hidden">
@@ -104,17 +134,14 @@ export default function AuthFlow() {
         />
         <div className="absolute inset-0 grid-lines" />
         <div className="absolute inset-0 dot-grid opacity-40" />
-        <div
-          className="absolute bottom-0 inset-x-0 h-64"
-          style={{ background: 'linear-gradient(to top, #050810 0%, transparent 100%)' }}
-        />
+        <div className="absolute bottom-0 inset-x-0 h-64"
+          style={{ background: 'linear-gradient(to top, #050810 0%, transparent 100%)' }} />
       </div>
 
       <div className="w-full max-w-md relative z-10 animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-10">
           <div className="relative w-fit mx-auto mb-5">
-            {/* Logo waves */}
             <div className="logo-wave" />
             <div className="logo-wave logo-wave-delay" />
             <div className="relative p-[2px] rounded-[1.4rem] bg-gradient-to-b from-white/25 to-white/[0.03]">
@@ -133,7 +160,7 @@ export default function AuthFlow() {
           <p className="text-slate-600 text-[12px] mt-1.5 font-medium">{t('auth.tagline')}</p>
         </div>
 
-        {/* Card — double bezel */}
+        {/* Card */}
         <div className="p-[1px] rounded-2xl bg-gradient-to-b from-white/[0.1] to-white/[0.02]">
           <div
             className="rounded-[calc(1rem-1px)] p-6 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.9),0_2px_4px_rgba(0,0,0,0.5)]"
@@ -142,9 +169,10 @@ export default function AuthFlow() {
               border: '1px solid rgba(255,255,255,0.05)',
             }}
           >
+            {/* Role switcher */}
             <div className="grid grid-cols-2 gap-2 mb-5">
               {[
-                ['student', t('auth.student'), Compass],
+                ['student',   t('auth.student'),   Compass],
                 ['professor', t('auth.professor'), GraduationCap],
               ].map(([id, label, Icon]) => (
                 <button
@@ -152,57 +180,52 @@ export default function AuthFlow() {
                   onClick={() => {
                     setRole(id)
                     setAccessCodeError('')
-                    setStep(STEP.SELECT_UNI)
-                    if (id === 'professor') setAccessCode('')
+                    setStep(STEP.LOGIN)
                   }}
                   className={clsx(
                     'h-10 rounded-xl border text-[12px] font-bold flex items-center justify-center gap-2 transition-all',
                     role === id
-                      ? id === 'professor' ? 'border-amber-500/40 bg-amber-500/15 text-amber-200' : 'border-indigo-500/40 bg-indigo-500/15 text-indigo-200'
+                      ? id === 'professor'
+                        ? 'border-amber-500/40 bg-amber-500/15 text-amber-200'
+                        : 'border-indigo-500/40 bg-indigo-500/15 text-indigo-200'
                       : 'border-white/[0.06] bg-white/[0.03] text-slate-500 hover:text-slate-300',
                   )}
                 >
-                  <Icon size={14} />
-                  {label}
+                  <Icon size={14} /> {label}
                 </button>
               ))}
             </div>
 
-            {/* Step indicator */}
-            {role === 'student' && (
+            {/* Register progress dots (only during register flow for students) */}
+            {role === 'student' && isRegisterFlow && (
               <div className="flex items-center gap-2 mb-6">
-                {step === STEP.ENTER_EMAIL && (
+                {step !== STEP.LOGIN && step !== STEP.SELECT_UNI && (
                   <button
-                    onClick={() => { submitIdRef.current++; setStep(STEP.SELECT_UNI) }}
-                    className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.08] hover:border-white/[0.12] transition-all mr-1"
+                    onClick={() => setStep(step === STEP.ENTER_DETAILS ? STEP.SELECT_UNI : STEP.LOGIN)}
+                    className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.07] flex items-center justify-center hover:bg-white/[0.08] transition-all mr-1"
                   >
                     <ChevronLeft size={13} className="text-slate-500" strokeWidth={1.75} />
                   </button>
                 )}
-                {STEP_LABEL_KEYS.map((key, i) => (
+                {REGISTER_STEP_KEYS.map((key, i) => (
                   <div key={i} className="flex items-center gap-1.5">
                     <div
-                      title={t(`auth.steps.${key}`)}
                       className={clsx(
                         'w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold transition-all duration-300',
-                        i < step
+                        i < registerStepIndex
                           ? 'text-white shadow-[0_0_8px_rgba(99,102,241,0.5)]'
-                          : i === step
+                          : i === registerStepIndex
                           ? 'border border-indigo-500/50 text-indigo-400 bg-indigo-500/10'
                           : 'bg-white/[0.03] border border-white/[0.07] text-slate-700',
                       )}
-                      style={i < step ? { background: 'linear-gradient(135deg,#6366f1,#7c3aed)' } : undefined}
+                      style={i < registerStepIndex ? { background: 'linear-gradient(135deg,#6366f1,#7c3aed)' } : undefined}
                     >
-                      {i < step ? <Check size={10} strokeWidth={2.5} /> : i + 1}
+                      {i < registerStepIndex ? <Check size={10} strokeWidth={2.5} /> : i + 1}
                     </div>
-                    {i < STEP_LABEL_KEYS.length - 1 && (
+                    {i < REGISTER_STEP_KEYS.length - 1 && (
                       <div
                         className="h-px w-5 rounded-full transition-all duration-500"
-                        style={{
-                          background: i < step
-                            ? 'linear-gradient(90deg,#6366f1,#7c3aed)'
-                            : 'rgba(255,255,255,0.07)',
-                        }}
+                        style={{ background: i < registerStepIndex ? 'linear-gradient(90deg,#6366f1,#7c3aed)' : 'rgba(255,255,255,0.07)' }}
                       />
                     )}
                   </div>
@@ -213,20 +236,29 @@ export default function AuthFlow() {
             {/* Step title */}
             <div className="mb-5">
               <h2 className="text-[16px] font-bold text-white">
-                {role === 'professor' && t('auth.steps.professorAuth')}
-                {role === 'student' && step === STEP.SELECT_UNI && t('auth.steps.selectUni')}
-                {role === 'student' && step === STEP.ENTER_EMAIL && t('auth.steps.authenticate')}
-                {role === 'student' && step === STEP.VERIFYING && t('auth.steps.verifying')}
-                {role === 'student' && step === STEP.CONFIRMED && t('auth.steps.confirmed')}
+                {role === 'professor'                         && t('auth.steps.professorAuth')}
+                {role === 'student' && step === STEP.LOGIN    && 'Bun venit înapoi'}
+                {role === 'student' && step === STEP.SELECT_UNI   && t('auth.steps.selectUni')}
+                {role === 'student' && step === STEP.ENTER_DETAILS && 'Creează-ți contul'}
+                {role === 'student' && step === STEP.CREATING      && 'Se creează contul...'}
+                {role === 'student' && step === STEP.CONFIRMED     && t('auth.steps.confirmed')}
               </h2>
+              {role === 'student' && step === STEP.LOGIN && (
+                <p className="text-[11px] text-slate-600 mt-0.5">
+                  Intră cu email-ul sau username-ul tău
+                </p>
+              )}
               {role === 'student' && step === STEP.SELECT_UNI && (
-                <p className="text-[11px] text-slate-600 mt-0.5">{t('auth.uniCount', { count: UNIVERSITIES.length })}</p>
+                <p className="text-[11px] text-slate-600 mt-0.5">
+                  {t('auth.uniCount', { count: UNIVERSITIES.length })}
+                </p>
               )}
               {role === 'professor' && (
                 <p className="text-[11px] text-slate-600 mt-0.5">{t('auth.professorNote')}</p>
               )}
             </div>
 
+            {/* Steps content */}
             {role === 'professor' && (
               <ProfessorLogin
                 email={professorEmail}
@@ -238,15 +270,49 @@ export default function AuthFlow() {
                 loading={loading}
               />
             )}
-            {role === 'student' && step === STEP.SELECT_UNI && <UniversityGrid onSelect={selectUniversity} />}
-            {role === 'student' && step === STEP.ENTER_EMAIL && (
-              <EmailStep university={university} email={email} setEmail={setEmail}
-                accessCode={accessCode} setAccessCode={setAccessCode}
-                error={accessCodeError} onSubmit={handleEmailSubmit} loading={loading} />
+
+            {role === 'student' && step === STEP.LOGIN && (
+              <LoginStep
+                onSuccess={handleLoginSuccess}
+                onGoRegister={() => setStep(STEP.SELECT_UNI)}
+              />
             )}
-            {role === 'student' && step === STEP.VERIFYING && <VerifyingStep email={email} university={university} />}
+
+            {role === 'student' && step === STEP.SELECT_UNI && (
+              <>
+                <UniversityGrid onSelect={selectUniversity} />
+                <div className="text-center mt-4">
+                  <button
+                    onClick={() => setStep(STEP.LOGIN)}
+                    className="text-[12px] text-slate-600 hover:text-slate-400 transition-colors"
+                  >
+                    ← Înapoi la login
+                  </button>
+                </div>
+              </>
+            )}
+
+            {role === 'student' && step === STEP.ENTER_DETAILS && university && (
+              <RegisterDetailsStep
+                university={university}
+                onSuccess={handleRegisterSuccess}
+                onBack={() => setStep(STEP.SELECT_UNI)}
+              />
+            )}
+
+            {role === 'student' && step === STEP.CREATING && (
+              <div className="flex flex-col items-center justify-center py-8 gap-3">
+                <Loader2 size={24} className="animate-spin text-indigo-400" />
+                <p className="text-sm text-slate-500">Se creează contul tău...</p>
+              </div>
+            )}
+
             {role === 'student' && step === STEP.CONFIRMED && (
-              <ConfirmedStep university={university} onContinue={handleContinue} isReturning={isReturning} />
+              <ConfirmedStep
+                university={university}
+                onContinue={handleContinue}
+                isReturning={false}
+              />
             )}
           </div>
         </div>
@@ -258,8 +324,3 @@ export default function AuthFlow() {
     </div>
   )
 }
-
-
-
-
-
