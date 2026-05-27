@@ -164,8 +164,8 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
                         : <XCircle size={18} className="text-amber-400 shrink-0" />}
                       <p className={clsx('text-sm font-bold', state === 'success' ? 'text-emerald-300' : 'text-amber-300')}>
                         {state === 'success'
-                          ? `Aprobat! +${result.points} puncte 🎉`
-                          : isScreenshot ? 'Screenshot respins' : 'Dovadă respinsă'}
+                          ? t('submitProof.approved', { points: result.points })
+                          : isScreenshot ? t('submitProof.screenshotRejected') : t('submitProof.rejected')}
                       </p>
                     </div>
                     <p className={clsx('text-sm leading-relaxed', state === 'success' ? 'text-emerald-200/80' : 'text-amber-200/80')}>
@@ -187,7 +187,7 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
                       <div className="flex items-start gap-2">
                         <AlertCircle size={14} className="text-violet-400 shrink-0 mt-0.5" />
                         <p className="text-xs text-violet-200/80 leading-relaxed">
-                          {challenge.screenshotHint || 'Încarcă un screenshot din aplicația de fitness care arată activitatea de azi.'}
+                          {challenge.screenshotHint || t('submitProof.screenshotHintDefault')}
                         </p>
                       </div>
                     </div>
@@ -264,7 +264,7 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
                         onChange={e => setProof(e.target.value.slice(0, maxLen))}
                         disabled={state === 'loading'}
                         rows={4}
-                        placeholder="Ex: Am mers 35 de minute în Parcul Copou după cursuri, am ieșit de la facultate la 17:30 și am mers pe aleea principală până la lac și înapoi..."
+                        placeholder={t('submitProof.proofPlaceholder')}
                         className="input-base resize-none w-full disabled:opacity-50"
                       />
                       <div className="flex justify-between mt-1.5">

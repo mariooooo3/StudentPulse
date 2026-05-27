@@ -176,6 +176,15 @@ const ro = {
       weeklyDesc: 'Se resetează luni',
       monthlyDesc: 'Se resetează la 1 ale lunii',
     },
+    card: {
+      appOne: 'aplicație',
+      appMany: 'aplicații',
+      processing: '✓ Procesare…',
+      inProgress: 'În progres',
+      careerHintBefore: 'Aplică la internship-uri din secțiunea ',
+      careerHintSection: 'Carieră',
+      careerHintAfter: ' — se completează automat.',
+    },
   },
 
   career: {
@@ -245,6 +254,11 @@ const ro = {
     errorOnlyImages: 'Doar imagini sunt acceptate (JPG, PNG, WebP).',
     errorFileTooLarge: 'Imaginea e prea mare. Maxim {{max}}MB.',
     errorCVTooShort: 'CV-ul e prea scurt. Adaugă mai mult conținut.',
+    approved: 'Aprobat! +{{points}} puncte 🎉',
+    screenshotRejected: 'Screenshot respins',
+    rejected: 'Dovadă respinsă',
+    screenshotHintDefault: 'Încarcă un screenshot din aplicația de fitness care arată activitatea de azi.',
+    proofPlaceholder: 'Ex: Am mers 35 de minute în Parcul Copou după cursuri, am ieșit de la facultate la 17:30 și am mers pe aleea principală până la lac și înapoi...',
   },
 
   cvPanel: {
@@ -551,6 +565,7 @@ const ro = {
       },
     },
     chat: {
+      cityFallback: 'oraș',
       title: 'Asistent AI Oraș',
       online: 'Online',
       errorMsg: 'Momentan nu pot răspunde.',
@@ -882,6 +897,22 @@ const ro = {
     initialProfessor: 'Salut, sunt asistentul pentru portalul profesorului. Te pot ajuta cu cereri de licență, recuperări, mesaje, notificări live și profilul academic.',
     copied: 'Copiat!',
     copy: 'Copiază',
+    navigatedTo: '{{icon}} Te duc la **{{label}}** acum!',
+    arrivedAt: 'Te-am dus la {{label}}. Cu ce te pot ajuta acolo?',
+    slashLabels: {
+      campusMap: 'Hartă campus',
+      schedule: 'Orar',
+      messages: 'Mesaje',
+      careerCv: 'Carieră & CV',
+      community: 'Comunitate',
+      events: 'Evenimente',
+      toolsBudget: 'Tools & Buget',
+      challenges: 'Provocări',
+      thesisRequests: 'Cereri licență',
+      recovery: 'Recuperări',
+      studentMessages: 'Mesaje studenți',
+      academicProfile: 'Profil academic',
+    },
   },
 
   messages: {

@@ -7,7 +7,7 @@ import clsx from 'clsx'
 
 export default function CityChat({ profile, onBack }) {
   const { t } = useTranslation()
-  const city = profile?.university?.city || 'oraș'
+  const city = profile?.university?.city || t('cityContent.chat.cityFallback')
   const [messages, setMessages] = useState(() => [
     {
       role: 'assistant',
@@ -107,7 +107,7 @@ export default function CityChat({ profile, onBack }) {
           <div className="flex-1 min-w-0">
             <h2 className="text-base font-bold text-white">{t('cityContent.chat.title')}</h2>
             <p className="text-xs text-slate-500">
-              {profile?.university?.city || 'Oraș'} · {profile?.university?.shortName || 'Universitate'}
+              {profile?.university?.city || t('cityContent.chat.cityFallback')} · {profile?.university?.shortName || t('messages.universityFallback')}
             </p>
           </div>
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">

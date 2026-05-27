@@ -151,10 +151,10 @@ export default function ChallengeCard({ challenge, onSubmit, index = 0 }) {
             <div className="mt-3 space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] text-slate-500 font-semibold">
-                  {inAppProgress} / {inAppTotal} {inAppTotal === 1 ? 'aplicație' : 'aplicații'}
+                  {inAppProgress} / {inAppTotal} {inAppTotal === 1 ? t('challenges.card.appOne') : t('challenges.card.appMany')}
                 </span>
                 <span className="text-[10px] font-bold" style={{ color: accent.color }}>
-                  {inAppProgress >= inAppTotal ? '✓ Procesare…' : 'În progres'}
+                  {inAppProgress >= inAppTotal ? t('challenges.card.processing') : t('challenges.card.inProgress')}
                 </span>
               </div>
               <div className="h-1.5 w-full rounded-full bg-white/[0.06] overflow-hidden">
@@ -167,7 +167,9 @@ export default function ChallengeCard({ challenge, onSubmit, index = 0 }) {
                 />
               </div>
               <p className="text-[10px] text-slate-600 leading-relaxed">
-                Aplică la internship-uri din secțiunea <span className="text-slate-400 font-semibold">Carieră</span> — se completează automat.
+                {t('challenges.card.careerHintBefore')}
+                <span className="text-slate-400 font-semibold">{t('challenges.card.careerHintSection')}</span>
+                {t('challenges.card.careerHintAfter')}
               </p>
             </div>
           )}
