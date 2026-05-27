@@ -307,6 +307,8 @@ const en = {
     groups: '{{count}} groups',
     noGroups: 'No groups found',
     noGroupsText: 'Try a more general activity or type.',
+    noGroupsScoped: 'No groups found for {{scope}}. You can create the first group for your colleagues.',
+    defaultScope: 'your academic profile',
     commonInterests: '{{count}} common interests',
     openGroup: 'Open group',
     fullGroup: 'Full group',
@@ -793,11 +795,6 @@ const en = {
         examsQ: 'How do I prepare effectively for the exam session? Practical tips.',
       },
     },
-  },
-
-  communitySection: {
-    noGroupsScoped: 'No groups found for {{scope}}. You can create the first group for your colleagues.',
-    defaultScope: 'your academic profile',
   },
 
   landing: {
