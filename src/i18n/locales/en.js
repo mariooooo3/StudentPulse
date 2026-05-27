@@ -83,6 +83,10 @@ const en = {
     highContrast: { label: 'High contrast', description: 'Increase interface contrast for easier reading' },
     language: { label: 'Interface language', description: 'Change the language of the application' },
     version: 'Version',
+    colors: {
+      indigo: 'Indigo', violet: 'Violet', blue: 'Blue', cyan: 'Cyan',
+      emerald: 'Green', rose: 'Pink', orange: 'Orange', amber: 'Gold',
+    },
   },
 
   streaks: { title: 'Daily streaks' },

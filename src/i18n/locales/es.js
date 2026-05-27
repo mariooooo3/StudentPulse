@@ -83,6 +83,16 @@ const es = {
     highContrast: { label: 'Alto contraste', description: 'Aumenta el contraste de la interfaz para una lectura más fácil' },
     language: { label: 'Idioma de la interfaz', description: 'Cambia el idioma de la aplicación' },
     version: 'Versión',
+    colors: {
+      indigo: 'Índigo',
+      violet: 'Violeta',
+      blue: 'Azul',
+      cyan: 'Cian',
+      emerald: 'Verde',
+      rose: 'Rosa',
+      orange: 'Naranja',
+      amber: 'Dorado',
+    },
   },
 
   streaks: { title: 'Rachas diarias' },

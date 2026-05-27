@@ -83,6 +83,10 @@ const ro = {
     highContrast: { label: 'Contrast ridicat', description: 'Crește contrastul interfeței pentru o citire mai ușoară' },
     language: { label: 'Limbă interfață', description: 'Schimbă limba în care vezi aplicația' },
     version: 'Versiune',
+    colors: {
+      indigo: 'Indigo', violet: 'Violet', blue: 'Albastru', cyan: 'Cyan',
+      emerald: 'Verde', rose: 'Roz', orange: 'Portocaliu', amber: 'Auriu',
+    },
   },
 
   streaks: { title: 'Streaks zilnice' },

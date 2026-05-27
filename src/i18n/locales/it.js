@@ -83,6 +83,16 @@ const it = {
     highContrast: { label: 'Alto contrasto', description: "Aumenta il contrasto dell'interfaccia per una lettura più facile" },
     language: { label: "Lingua dell'interfaccia", description: "Cambia la lingua dell'applicazione" },
     version: 'Versione',
+    colors: {
+      indigo: 'Indaco',
+      violet: 'Viola',
+      blue: 'Blu',
+      cyan: 'Ciano',
+      emerald: 'Verde',
+      rose: 'Rosa',
+      orange: 'Arancione',
+      amber: 'Ambra',
+    },
   },
 
   streaks: { title: 'Streak giornalieri' },
