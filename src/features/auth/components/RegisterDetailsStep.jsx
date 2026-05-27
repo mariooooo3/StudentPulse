@@ -4,7 +4,11 @@ import clsx from 'clsx'
 
 const BASE = import.meta.env.VITE_API_URL || ''
 
-const USERNAME_HINT = 'ex: claudiu_mocanu — litere mici, cifre, _ (fără spații)'
+const USERNAME_HINT = 'ex: prenume_nume — litere mici, cifre, _ (fără spații)'
+
+function deriveUsername(emailPrefix) {
+  return emailPrefix.toLowerCase().replace(/\./g, '_').replace(/[^a-z0-9_]/g, '')
+}
 
 function validateUsername(u) {
   if (!u || u.length < 3)       return 'Minim 3 caractere'
@@ -17,9 +21,10 @@ function validateUsername(u) {
 }
 
 export default function RegisterDetailsStep({ university, onSuccess, onBack }) {
-  const [emailPrefix, setEmailPrefix] = useState('')
-  const [username,    setUsername]    = useState('')
-  const [password,    setPassword]    = useState('')
+  const [emailPrefix,     setEmailPrefix]     = useState('')
+  const [username,        setUsername]        = useState('')
+  const [usernameEdited,  setUsernameEdited]  = useState(false)
+  const [password,        setPassword]        = useState('')
   const [confirmPwd,  setConfirmPwd]  = useState('')
   const [showPwd,     setShowPwd]     = useState(false)
   const [loading,     setLoading]     = useState(false)
@@ -94,7 +99,12 @@ export default function RegisterDetailsStep({ university, onSuccess, onBack }) {
             autoFocus
             type="text"
             value={emailPrefix}
-            onChange={e => { setEmailPrefix(e.target.value.replace(/@.*/, '')); setError('') }}
+            onChange={e => {
+              const prefix = e.target.value.replace(/@.*/, '')
+              setEmailPrefix(prefix)
+              if (!usernameEdited) setUsername(deriveUsername(prefix))
+              setError('')
+            }}
             autoComplete="off"
             placeholder="prenume.nume"
             className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none font-medium"
@@ -118,9 +128,13 @@ export default function RegisterDetailsStep({ university, onSuccess, onBack }) {
           <input
             type="text"
             value={username}
-            onChange={e => { setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')); setError('') }}
-            autoComplete="username"
-            placeholder="claudiu_mocanu"
+            onChange={e => {
+              setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))
+              setUsernameEdited(true)
+              setError('')
+            }}
+            autoComplete="off"
+            placeholder="prenume_nume"
             className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none font-medium"
           />
           {username && !usernameError && (

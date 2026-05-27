@@ -44,7 +44,7 @@ function validateUsername(u) {
   if (!u || u.length < 3)       return 'Minim 3 caractere'
   if (u.length > 30)             return 'Maxim 30 de caractere'
   if (!/^[a-z]/.test(u))        return 'Trebuie să înceapă cu o literă mică (a-z)'
-  if (!/^[a-z0-9_]+$/.test(u))  return 'Doar litere mici, cifre și _ (ex: claudiu_mocanu)'
+  if (!/^[a-z0-9_]+$/.test(u))  return 'Doar litere mici, cifre și _ (ex: prenume_nume)'
   if (/__/.test(u))              return 'Fără _ consecutivi'
   if (/_$/.test(u))              return 'Nu poate termina cu _'
   return null

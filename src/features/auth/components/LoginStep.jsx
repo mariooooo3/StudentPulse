@@ -48,9 +48,9 @@ export default function LoginStep({ onSuccess, onGoRegister }) {
             value={identifier}
             onChange={e => { setIdentifier(e.target.value); setError('') }}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-            autoComplete="username email"
-            placeholder="claudiu_mocanu sau email@uni.ro"
-            className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none"
+            autoComplete="off"
+            placeholder="username sau email@uni.ro"
+            className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none autofill-dark"
           />
         </div>
       </div>
@@ -67,9 +67,9 @@ export default function LoginStep({ onSuccess, onGoRegister }) {
             value={password}
             onChange={e => { setPassword(e.target.value); setError('') }}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-            autoComplete="current-password"
+            autoComplete="off"
             placeholder="••••••••"
-            className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none"
+            className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none autofill-dark"
           />
           <button
             type="button"
