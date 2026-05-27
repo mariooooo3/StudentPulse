@@ -6,7 +6,7 @@ const BASE = import.meta.env.VITE_API_URL || ''
 const REMEMBER_KEY = 'sp_remember_identifier'
 
 export default function LoginStep({ onSuccess, onGoRegister }) {
-  const [identifier, setIdentifier] = useState('')
+  const [identifier, setIdentifier] = useState(() => localStorage.getItem(REMEMBER_KEY) || '')
   const [password,   setPassword]   = useState('')
   const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem(REMEMBER_KEY))
   const [showPwd,    setShowPwd]    = useState(false)
@@ -41,7 +41,13 @@ export default function LoginStep({ onSuccess, onGoRegister }) {
   const canSubmit = identifier.trim().length > 0 && password.length > 0 && !loading
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
+      {/* Honeypots — absorb browser password manager autofill */}
+      <input type="text"     name="username" tabIndex={-1} aria-hidden="true" readOnly
+        style={{ position: 'absolute', width: 0, height: 0, opacity: 0, pointerEvents: 'none' }} />
+      <input type="password" name="password" tabIndex={-1} aria-hidden="true" readOnly
+        style={{ position: 'absolute', width: 0, height: 0, opacity: 0, pointerEvents: 'none' }} />
+
       {/* Email / username */}
       <div>
         <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block mb-2">
@@ -74,7 +80,7 @@ export default function LoginStep({ onSuccess, onGoRegister }) {
             value={password}
             onChange={e => { setPassword(e.target.value); setError('') }}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-            autoComplete="off"
+            autoComplete="new-password"
             placeholder="••••••••"
             className="flex-1 bg-transparent px-3 py-3 text-[13px] text-slate-200 placeholder-slate-700 outline-none autofill-dark"
           />
@@ -118,7 +124,7 @@ export default function LoginStep({ onSuccess, onGoRegister }) {
         className={clsx(
           'w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-[13px] transition-all duration-200',
           canSubmit
-            ? 'bg-indigo-600 hover:bg-indigo-500 text-white active:scale-[0.98] shadow-[0_0_0_1px_rgba(99,102,241,0.3)]'
+            ? 'bg-indigo-600 hover:bg-indigo-500 text-white active:scale-[0-98] shadow-[0_0_0_1px_rgba(99,102,241,0.3)]'
             : 'bg-white/[0.03] text-slate-600 cursor-not-allowed border border-white/[0.06]',
         )}
       >
