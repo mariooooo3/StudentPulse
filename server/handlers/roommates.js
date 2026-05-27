@@ -1,4 +1,4 @@
-import { db, nowIso } from '../db/database.js'
+import { query, nowIso } from '../db/database.js'
 
 function readBody(req, maxBytes = 64 * 1024) {
   return new Promise((resolve, reject) => {
@@ -14,7 +14,7 @@ function readBody(req, maxBytes = 64 * 1024) {
   })
 }
 
-function json(res, status, data) {
+function jsonRes(res, status, data) {
   res.writeHead(status, {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
@@ -40,10 +40,11 @@ export function createRoommatesHandler() {
     if (method === 'GET' && url.startsWith('/api/roommates')) {
       const userId = new URL(url, 'http://localhost').searchParams.get('userId') || ''
       const now = new Date().toISOString()
-      const listings = db.prepare(
-        `SELECT * FROM roommate_listings WHERE expires_at > ? ORDER BY created_at DESC`
-      ).all(now)
-      return json(res, 200, {
+      const { rows: listings } = await query(
+        `SELECT * FROM roommate_listings WHERE expires_at > $1 ORDER BY created_at DESC`,
+        [now]
+      )
+      return jsonRes(res, 200, {
         roommates: listings.map(r => ({ ...r, isOwn: r.user_id === userId })),
       })
     }
@@ -52,34 +53,34 @@ export function createRoommatesHandler() {
     if (method === 'POST' && url === '/api/roommates') {
       let parsed
       try { parsed = JSON.parse(await readBody(req)) } catch {
-        return json(res, 400, { error: 'JSON invalid' })
+        return jsonRes(res, 400, { error: 'JSON invalid' })
       }
 
       const { userId, name, faculty, year, budget, zone,
               smoking, pets, schedule, bio, contact } = parsed
 
-      if (!userId || !name?.trim()) return json(res, 400, { error: 'userId și name necesare' })
-      if (!zone?.trim())            return json(res, 400, { error: 'Zona este necesară' })
-      if (!contact?.trim())         return json(res, 400, { error: 'Contactul este necesar' })
+      if (!userId || !name?.trim()) return jsonRes(res, 400, { error: 'userId și name necesare' })
+      if (!zone?.trim())            return jsonRes(res, 400, { error: 'Zona este necesară' })
+      if (!contact?.trim())         return jsonRes(res, 400, { error: 'Contactul este necesar' })
 
       const id = `room-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
       const now = nowIso()
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
 
-      db.prepare(`
+      await query(`
         INSERT INTO roommate_listings
           (id, user_id, name, faculty, year, budget, zone, smoking, pets,
            schedule, bio, contact, created_at, expires_at)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-      `).run(
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      `, [
         id, userId, name.trim(), faculty?.trim() || null,
         year ? Number(year) : null, budget?.trim() || null, zone.trim(),
-        smoking ? 1 : 0, pets ? 1 : 0,
+        Boolean(smoking), Boolean(pets),
         schedule?.trim() || null, bio?.trim() || null, contact.trim(), now, expiresAt,
-      )
+      ])
 
-      const listing = db.prepare('SELECT * FROM roommate_listings WHERE id = ?').get(id)
-      return json(res, 201, { roommate: { ...listing, isOwn: true } })
+      const { rows } = await query('SELECT * FROM roommate_listings WHERE id = $1', [id])
+      return jsonRes(res, 201, { roommate: { ...rows[0], isOwn: true } })
     }
 
     // DELETE /api/roommates/:id
@@ -89,14 +90,14 @@ export function createRoommatesHandler() {
       let body = {}
       try { body = JSON.parse(await readBody(req)) } catch {}
 
-      const listing = db.prepare('SELECT * FROM roommate_listings WHERE id = ?').get(id)
-      if (!listing) return json(res, 404, { error: 'Anunț inexistent' })
-      if (listing.user_id !== body.userId) return json(res, 403, { error: 'Nu poți șterge anunțul altcuiva' })
+      const { rows } = await query('SELECT * FROM roommate_listings WHERE id = $1', [id])
+      if (!rows[0]) return jsonRes(res, 404, { error: 'Anunț inexistent' })
+      if (rows[0].user_id !== body.userId) return jsonRes(res, 403, { error: 'Nu poți șterge anunțul altcuiva' })
 
-      db.prepare('DELETE FROM roommate_listings WHERE id = ?').run(id)
-      return json(res, 200, { ok: true })
+      await query('DELETE FROM roommate_listings WHERE id = $1', [id])
+      return jsonRes(res, 200, { ok: true })
     }
 
-    return json(res, 404, { error: 'Not found' })
+    return jsonRes(res, 404, { error: 'Not found' })
   }
 }

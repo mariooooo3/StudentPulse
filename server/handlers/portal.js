@@ -23,29 +23,29 @@ export function createPortalRequestHandler(repository, notifications, pubsub = n
 
     try {
       if (req.method === 'GET' && path === '/professor-profile') {
-        return sendJson(res, 200, { profile: repository.getProfessorProfile(DEMO_PROFESSOR) })
+        return sendJson(res, 200, { profile: await repository.getProfessorProfile(DEMO_PROFESSOR) })
       }
 
       if (req.method === 'POST' && path === '/professor-profile') {
         const { patch = {} } = await readJson(req)
-        const current = repository.getProfessorProfile(DEMO_PROFESSOR)
-        const updated = repository.saveProfessorProfile(DEMO_PROFESSOR.id, { ...current, ...patch })
+        const current = await repository.getProfessorProfile(DEMO_PROFESSOR)
+        const updated = await repository.saveProfessorProfile(DEMO_PROFESSOR.id, { ...current, ...patch })
         return sendJson(res, 200, { profile: updated })
       }
 
       if (req.method === 'GET' && path === '/thesis-requests') {
-        return sendJson(res, 200, { requests: repository.listThesisRequests(url.searchParams.get('userId')) })
+        return sendJson(res, 200, { requests: await repository.listThesisRequests(url.searchParams.get('userId')) })
       }
 
       if (req.method === 'POST' && path === '/thesis-requests') {
-        const request = repository.createThesisRequest(await readJson(req))
+        const request = await repository.createThesisRequest(await readJson(req))
         const professorId = request.professorId || DEMO_PROFESSOR.id
-        const thread = repository.upsertThread({
+        const thread = await repository.upsertThread({
           student: { userId: request.studentId, name: request.studentName, email: request.studentEmail },
           professor: { id: professorId, name: request.professorName || DEMO_PROFESSOR.name },
           subject: `Licenta: ${request.idea}`,
         })
-        repository.addPortalMessage(thread.id, {
+        await repository.addPortalMessage(thread.id, {
           senderId: request.studentId,
           senderName: request.studentName,
           senderRole: 'student',
@@ -65,7 +65,7 @@ export function createPortalRequestHandler(repository, notifications, pubsub = n
       const thesisStatus = path.match(/^\/thesis-requests\/([^/]+)\/status$/)
       if (req.method === 'POST' && thesisStatus) {
         const { status, note = '' } = await readJson(req)
-        const request = repository.updateThesisStatus(thesisStatus[1], status, note)
+        const request = await repository.updateThesisStatus(thesisStatus[1], status, note)
         if (request?.studentId) {
           notifications.push(request.studentId, {
             title: status === 'accepted' ? 'Cerere licenta acceptata' : 'Cerere licenta respinsa',
@@ -82,19 +82,19 @@ export function createPortalRequestHandler(repository, notifications, pubsub = n
       }
 
       if (req.method === 'GET' && path === '/recovery-requests') {
-        return sendJson(res, 200, { requests: repository.listRecoveryRequests(url.searchParams.get('userId')) })
+        return sendJson(res, 200, { requests: await repository.listRecoveryRequests(url.searchParams.get('userId')) })
       }
 
       if (req.method === 'POST' && path === '/recovery-requests') {
-        const request = repository.createRecoveryRequest(await readJson(req))
+        const request = await repository.createRecoveryRequest(await readJson(req))
         const professorId = request.professorId || DEMO_PROFESSOR.id
         const professorName = request.professorName || DEMO_PROFESSOR.name
-        const thread = repository.upsertThread({
+        const thread = await repository.upsertThread({
           student: { userId: request.studentId, name: request.studentName, email: request.studentEmail },
           professor: { id: professorId, name: professorName },
           subject: `Recuperare: ${request.subject}`,
         })
-        repository.addPortalMessage(thread.id, {
+        await repository.addPortalMessage(thread.id, {
           senderId: request.studentId,
           senderName: request.studentName,
           senderRole: 'student',
@@ -114,7 +114,7 @@ export function createPortalRequestHandler(repository, notifications, pubsub = n
       const recoveryStatus = path.match(/^\/recovery-requests\/([^/]+)\/status$/)
       if (req.method === 'POST' && recoveryStatus) {
         const { status, note = '' } = await readJson(req)
-        const request = repository.updateRecoveryStatus(recoveryStatus[1], status, note)
+        const request = await repository.updateRecoveryStatus(recoveryStatus[1], status, note)
         if (request?.studentId) {
           notifications.push(request.studentId, {
             title: status === 'accepted' ? 'Recuperare aprobata' : 'Recuperare respinsa',
@@ -131,18 +131,18 @@ export function createPortalRequestHandler(repository, notifications, pubsub = n
       }
 
       if (req.method === 'GET' && path === '/threads') {
-        return sendJson(res, 200, { threads: repository.listThreads(url.searchParams.get('userId')) })
+        return sendJson(res, 200, { threads: await repository.listThreads(url.searchParams.get('userId')) })
       }
 
       if (req.method === 'POST' && path === '/threads/upsert') {
-        const thread = repository.upsertThread(await readJson(req))
+        const thread = await repository.upsertThread(await readJson(req))
         return sendJson(res, 200, { thread })
       }
 
       const threadMessage = path.match(/^\/threads\/([^/]+)\/messages$/)
       if (req.method === 'POST' && threadMessage) {
         const { message } = await readJson(req)
-        const thread = repository.addPortalMessage(threadMessage[1], message)
+        const thread = await repository.addPortalMessage(threadMessage[1], message)
         if (thread && message.senderRole === 'professor') {
           notifications.push(thread.studentId, {
             title: `Mesaj de la ${thread.professorName}`,

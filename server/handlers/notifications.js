@@ -4,7 +4,7 @@ const TTL_MS = 7 * 24 * 60 * 60 * 1000  // 7 days
 export function createNotificationsHandler(store, pubsub, repository = null) {
   const notifKey = userId => `notif:${userId}`
 
-  function getNotifications(userId) {
+  async function getNotifications(userId) {
     if (repository) return repository.listNotifications(userId)
     const raw = store.get(notifKey(userId))
     if (!raw) return []
@@ -16,13 +16,13 @@ export function createNotificationsHandler(store, pubsub, repository = null) {
     }
   }
 
-  function push(userId, notification) {
+  async function push(userId, notification) {
     if (repository) {
-      const entry = repository.addNotification(userId, notification)
+      const entry = await repository.addNotification(userId, notification)
       pubsub.publish(`notifications:${userId}`, entry)
       return entry
     }
-    const notifs = getNotifications(userId)
+    const notifs = await getNotifications(userId)
     const entry = {
       id: `notif-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       ...notification,
@@ -33,14 +33,13 @@ export function createNotificationsHandler(store, pubsub, repository = null) {
     if (notifs.length > MAX_NOTIFS) notifs.pop()
     store.set(notifKey(userId), JSON.stringify(notifs), TTL_MS)
 
-    // Real-time delivery
     pubsub.publish(`notifications:${userId}`, entry)
     return entry
   }
 
-  function markRead(userId, notifId) {
+  async function markRead(userId, notifId) {
     if (repository) return repository.markNotificationRead(userId, notifId)
-    const notifs = getNotifications(userId)
+    const notifs = await getNotifications(userId)
     const n = notifs.find(n => n.id === notifId)
     if (n) {
       n.read = true
@@ -49,12 +48,12 @@ export function createNotificationsHandler(store, pubsub, repository = null) {
     return !!n
   }
 
-  function markAllRead(userId) {
+  async function markAllRead(userId) {
     if (repository) {
-      repository.markAllNotificationsRead(userId)
+      await repository.markAllNotificationsRead(userId)
       return
     }
-    const notifs = getNotifications(userId)
+    const notifs = await getNotifications(userId)
     notifs.forEach(n => { n.read = true })
     store.set(notifKey(userId), JSON.stringify(notifs), TTL_MS)
   }

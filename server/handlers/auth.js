@@ -1,6 +1,6 @@
 import { createHmac } from 'node:crypto'
 import { scryptSync, randomBytes, timingSafeEqual } from 'node:crypto'
-import { db, nowIso } from '../db/database.js'
+import { query, nowIso } from '../db/database.js'
 
 function readBody(req, maxBytes = 64 * 1024) {
   return new Promise((resolve, reject) => {
@@ -123,19 +123,20 @@ export function createAuthHandler() {
       if (!emailLocal.includes('.') || emailLocal.startsWith('.') || emailLocal.endsWith('.'))
         return json(res, 400, { error: 'Email-ul trebuie să fie în format prenume.nume@domeniu' })
 
-      if (db.prepare('SELECT id FROM users WHERE email = ?').get(normalizedEmail))
-        return json(res, 409, { error: 'Există deja un cont cu acest email' })
+      const { rows: emailRows } = await query('SELECT id FROM users WHERE email = $1', [normalizedEmail])
+      if (emailRows[0]) return json(res, 409, { error: 'Există deja un cont cu acest email' })
 
-      if (db.prepare('SELECT id FROM users WHERE username = ?').get(normalizedUsername))
-        return json(res, 409, { error: 'Username-ul este deja folosit, alege altul' })
+      const { rows: usernameRows } = await query('SELECT id FROM users WHERE username = $1', [normalizedUsername])
+      if (usernameRows[0]) return json(res, 409, { error: 'Username-ul este deja folosit, alege altul' })
 
       const id = `user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
-      db.prepare(`
-        INSERT INTO users (id, username, email, password_hash, university_id, faculty_code, role, created_at)
-        VALUES (?,?,?,?,?,?,'student',?)
-      `).run(id, normalizedUsername, normalizedEmail, hashPassword(password),
-             universityId || null, facultyCode || null, nowIso())
+      await query(
+        `INSERT INTO users (id, username, email, password_hash, university_id, faculty_code, role, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, 'student', $7)`,
+        [id, normalizedUsername, normalizedEmail, hashPassword(password),
+         universityId || null, facultyCode || null, nowIso()]
+      )
 
       return json(res, 201, {
         user: { id, username: normalizedUsername, email: normalizedEmail, universityId, facultyCode },
@@ -153,8 +154,9 @@ export function createAuthHandler() {
       if (!identifier?.trim()) return json(res, 400, { error: 'Email sau username obligatoriu' })
       if (!password)           return json(res, 400, { error: 'Parola obligatorie' })
 
-      const val  = identifier.trim().toLowerCase()
-      const user = db.prepare('SELECT * FROM users WHERE email = ? OR username = ?').get(val, val)
+      const val = identifier.trim().toLowerCase()
+      const { rows } = await query('SELECT * FROM users WHERE email = $1 OR username = $1', [val])
+      const user = rows[0]
 
       if (!user)                              return json(res, 401, { error: 'Cont inexistent' })
       if (!verifyPassword(password, user.password_hash))
@@ -162,11 +164,11 @@ export function createAuthHandler() {
 
       return json(res, 200, {
         user: {
-          id:          user.id,
-          username:    user.username,
-          email:       user.email,
+          id:           user.id,
+          username:     user.username,
+          email:        user.email,
           universityId: user.university_id,
-          facultyCode: user.faculty_code,
+          facultyCode:  user.faculty_code,
         },
       })
     }

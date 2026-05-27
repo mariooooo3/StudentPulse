@@ -1,25 +1,46 @@
-import Database from 'better-sqlite3'
-import { mkdirSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import pg from 'pg'
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url))
-const DB_PATH = resolve(__dirname, '..', 'data', 'studentcompass.db')
+const { Pool } = pg
 
-mkdirSync(dirname(DB_PATH), { recursive: true })
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
+})
 
-export const db = new Database(DB_PATH)
-db.pragma('journal_mode = WAL')
-db.pragma('foreign_keys = ON')
+export async function query(sql, params = []) {
+  return pool.query(sql, params)
+}
 
-function migrate() {
-  db.exec(`
+export function nowIso() {
+  return new Date().toISOString()
+}
+
+export function json(value) {
+  return value == null ? null : JSON.stringify(value)
+}
+
+export function parseJson(value, fallback = null) {
+  if (!value) return fallback
+  try {
+    return JSON.parse(value)
+  } catch {
+    return fallback
+  }
+}
+
+async function migrate() {
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS professor_profiles (
       id TEXT PRIMARY KEY,
       data TEXT NOT NULL,
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );
+    )
+  `)
 
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS thesis_requests (
       id TEXT PRIMARY KEY,
       status TEXT NOT NULL DEFAULT 'pending',
@@ -36,8 +57,10 @@ function migrate() {
       professor_note TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
-    );
+    )
+  `)
 
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS recovery_requests (
       id TEXT PRIMARY KEY,
       status TEXT NOT NULL DEFAULT 'pending',
@@ -56,8 +79,10 @@ function migrate() {
       professor_note TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
-    );
+    )
+  `)
 
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS portal_threads (
       id TEXT PRIMARY KEY,
       student_id TEXT NOT NULL,
@@ -67,8 +92,10 @@ function migrate() {
       professor_name TEXT NOT NULL,
       subject TEXT NOT NULL,
       updated_at TEXT NOT NULL
-    );
+    )
+  `)
 
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS portal_messages (
       id TEXT PRIMARY KEY,
       thread_id TEXT NOT NULL REFERENCES portal_threads(id) ON DELETE CASCADE,
@@ -77,8 +104,10 @@ function migrate() {
       sender_role TEXT NOT NULL,
       text TEXT NOT NULL,
       timestamp TEXT NOT NULL
-    );
+    )
+  `)
 
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS notifications (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -87,10 +116,12 @@ function migrate() {
       type TEXT,
       action TEXT,
       meta_json TEXT,
-      read INTEGER NOT NULL DEFAULT 0,
+      read BOOLEAN NOT NULL DEFAULT FALSE,
       timestamp TEXT NOT NULL
-    );
+    )
+  `)
 
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS direct_messages (
       id TEXT PRIMARY KEY,
       channel TEXT NOT NULL,
@@ -99,8 +130,10 @@ function migrate() {
       content TEXT NOT NULL,
       attachment_json TEXT,
       timestamp TEXT NOT NULL
-    );
+    )
+  `)
 
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS schedule_swaps (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -109,16 +142,20 @@ function migrate() {
       need_slot TEXT NOT NULL,
       message TEXT,
       submitted_at TEXT NOT NULL
-    );
+    )
+  `)
 
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS streaks (
       user_id TEXT NOT NULL,
       type TEXT NOT NULL,
       count INTEGER NOT NULL DEFAULT 1,
       last_date TEXT NOT NULL,
       PRIMARY KEY (user_id, type)
-    );
+    )
+  `)
 
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS challenge_completions (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -130,8 +167,20 @@ function migrate() {
       points INTEGER NOT NULL DEFAULT 0,
       submitted_at TEXT NOT NULL,
       UNIQUE(user_id, period_key, challenge_id)
-    );
+    )
+  `)
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS challenge_progress (
+      user_id TEXT NOT NULL,
+      action_type TEXT NOT NULL,
+      period_key TEXT NOT NULL,
+      count INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (user_id, action_type, period_key)
+    )
+  `)
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS carpool_rides (
       id TEXT PRIMARY KEY,
       driver_id TEXT NOT NULL,
@@ -148,8 +197,10 @@ function migrate() {
       contact TEXT,
       status TEXT NOT NULL DEFAULT 'active',
       created_at TEXT NOT NULL
-    );
+    )
+  `)
 
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS carpool_requests (
       id TEXT PRIMARY KEY,
       ride_id TEXT NOT NULL REFERENCES carpool_rides(id) ON DELETE CASCADE,
@@ -159,26 +210,10 @@ function migrate() {
       status TEXT NOT NULL DEFAULT 'pending',
       created_at TEXT NOT NULL,
       UNIQUE(ride_id, passenger_id)
-    );
+    )
+  `)
 
-    CREATE INDEX IF NOT EXISTS idx_notifications_user_time ON notifications(user_id, timestamp DESC);
-    CREATE INDEX IF NOT EXISTS idx_direct_messages_channel_time ON direct_messages(channel, timestamp);
-    CREATE INDEX IF NOT EXISTS idx_portal_messages_thread_time ON portal_messages(thread_id, timestamp);
-    CREATE TABLE IF NOT EXISTS challenge_progress (
-      user_id TEXT NOT NULL,
-      action_type TEXT NOT NULL,
-      period_key TEXT NOT NULL,
-      count INTEGER NOT NULL DEFAULT 0,
-      PRIMARY KEY (user_id, action_type, period_key)
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_challenge_completions_user ON challenge_completions(user_id);
-    CREATE INDEX IF NOT EXISTS idx_challenge_progress_user ON challenge_progress(user_id, action_type);
-    CREATE INDEX IF NOT EXISTS idx_carpool_rides_status ON carpool_rides(status, date);
-    CREATE INDEX IF NOT EXISTS idx_carpool_rides_driver ON carpool_rides(driver_id);
-    CREATE INDEX IF NOT EXISTS idx_carpool_requests_ride ON carpool_requests(ride_id);
-    CREATE INDEX IF NOT EXISTS idx_carpool_requests_passenger ON carpool_requests(passenger_id);
-
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS book_listings (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -194,8 +229,10 @@ function migrate() {
       faculty TEXT,
       created_at TEXT NOT NULL,
       expires_at TEXT NOT NULL
-    );
+    )
+  `)
 
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS roommate_listings (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -204,18 +241,17 @@ function migrate() {
       year INTEGER,
       budget TEXT,
       zone TEXT NOT NULL,
-      smoking INTEGER NOT NULL DEFAULT 0,
-      pets INTEGER NOT NULL DEFAULT 0,
+      smoking BOOLEAN NOT NULL DEFAULT FALSE,
+      pets BOOLEAN NOT NULL DEFAULT FALSE,
       schedule TEXT,
       bio TEXT,
       contact TEXT NOT NULL,
       created_at TEXT NOT NULL,
       expires_at TEXT NOT NULL
-    );
+    )
+  `)
 
-    CREATE INDEX IF NOT EXISTS idx_book_listings_expires ON book_listings(expires_at);
-    CREATE INDEX IF NOT EXISTS idx_roommate_listings_expires ON roommate_listings(expires_at);
-
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       username TEXT NOT NULL UNIQUE,
@@ -225,28 +261,26 @@ function migrate() {
       faculty_code TEXT,
       role TEXT NOT NULL DEFAULT 'student',
       created_at TEXT NOT NULL
-    );
-
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username);
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    )
   `)
+
+  // Indexes — use IF NOT EXISTS (PG 9.5+)
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_notifications_user_time ON notifications(user_id, timestamp DESC)`)
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_direct_messages_channel_time ON direct_messages(channel, timestamp)`)
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_portal_messages_thread_time ON portal_messages(thread_id, timestamp)`)
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_challenge_completions_user ON challenge_completions(user_id)`)
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_challenge_progress_user ON challenge_progress(user_id, action_type)`)
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_carpool_rides_status ON carpool_rides(status, date)`)
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_carpool_rides_driver ON carpool_rides(driver_id)`)
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_carpool_requests_ride ON carpool_requests(ride_id)`)
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_carpool_requests_passenger ON carpool_requests(passenger_id)`)
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_book_listings_expires ON book_listings(expires_at)`)
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_roommate_listings_expires ON roommate_listings(expires_at)`)
+  await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username)`)
+  await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)`)
 }
 
-migrate()
-
-export function nowIso() {
-  return new Date().toISOString()
-}
-
-export function json(value) {
-  return value == null ? null : JSON.stringify(value)
-}
-
-export function parseJson(value, fallback = null) {
-  if (!value) return fallback
-  try {
-    return JSON.parse(value)
-  } catch {
-    return fallback
-  }
-}
+migrate().catch(err => {
+  console.error('[DB] Migration failed:', err)
+  process.exit(1)
+})
