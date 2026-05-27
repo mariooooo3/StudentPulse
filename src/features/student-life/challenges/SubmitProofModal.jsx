@@ -5,6 +5,7 @@ import {
   Upload, ImageIcon, Smartphone, AlertCircle,
 } from 'lucide-react'
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 
 const CATEGORY_COLORS = {
   sănătate:  { color: '#10b981', bg: 'rgba(16,185,129,0.12)',  border: 'rgba(16,185,129,0.2)' },
@@ -15,10 +16,10 @@ const CATEGORY_COLORS = {
   campus:    { color: '#f43f5e', bg: 'rgba(244,63,94,0.12)',  border: 'rgba(244,63,94,0.2)'  },
 }
 
-const TYPE_LABELS = { daily: 'Zilnic', weekly: 'Săptămânal', monthly: 'Lunar' }
 const MAX_FILE_MB = 8
 
 export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
+  const { t } = useTranslation()
   const isScreenshot = challenge.verifyType === 'screenshot'
 
   // text proof state
@@ -47,11 +48,11 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
   function handleFile(file) {
     if (!file) return
     if (!file.type.startsWith('image/')) {
-      alert('Doar imagini sunt acceptate (JPG, PNG, WebP).')
+      alert(t('submitProof.errorOnlyImages'))
       return
     }
     if (file.size > MAX_FILE_MB * 1024 * 1024) {
-      alert(`Imaginea e prea mare. Maxim ${MAX_FILE_MB}MB.`)
+      alert(t('submitProof.errorFileTooLarge', { max: MAX_FILE_MB }))
       return
     }
     setImageFile(file)
@@ -84,7 +85,7 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
       setResult(res)
       setState(res.approved ? 'success' : 'error')
     } catch (err) {
-      setResult({ approved: false, feedback: err.message || 'A apărut o eroare. Încearcă din nou.' })
+      setResult({ approved: false, feedback: err.message || t('submitProof.errorGeneric') })
       setState('error')
     }
   }
@@ -125,7 +126,7 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-[10px] font-bold uppercase tracking-widest"
                         style={{ color: accent.color + 'bb' }}>
-                    {TYPE_LABELS[challenge.type]} · {challenge.points} pct
+                    {t(`submitProof.typeLabels.${challenge.type}`)} · {challenge.points} pct
                   </span>
                   {/* Verify type badge */}
                   <span className={clsx(
@@ -163,8 +164,8 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
                         : <XCircle size={18} className="text-amber-400 shrink-0" />}
                       <p className={clsx('text-sm font-bold', state === 'success' ? 'text-emerald-300' : 'text-amber-300')}>
                         {state === 'success'
-                          ? `Aprobat! +${result.points} puncte 🎉`
-                          : isScreenshot ? 'Screenshot respins' : 'Dovadă respinsă'}
+                          ? t('submitProof.approved', { points: result.points })
+                          : isScreenshot ? t('submitProof.screenshotRejected') : t('submitProof.rejected')}
                       </p>
                     </div>
                     <p className={clsx('text-sm leading-relaxed', state === 'success' ? 'text-emerald-200/80' : 'text-amber-200/80')}>
@@ -173,7 +174,7 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
                     {state === 'error' && (
                       <button onClick={retry}
                               className="text-xs font-semibold text-amber-300 underline underline-offset-2 hover:text-amber-200 transition-colors">
-                        {isScreenshot ? 'Încearcă cu alt screenshot' : 'Încearcă din nou'}
+                        {isScreenshot ? t('submitProof.retryScreenshot') : t('submitProof.retry')}
                       </button>
                     )}
                   </motion.div>
@@ -186,7 +187,7 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
                       <div className="flex items-start gap-2">
                         <AlertCircle size={14} className="text-violet-400 shrink-0 mt-0.5" />
                         <p className="text-xs text-violet-200/80 leading-relaxed">
-                          {challenge.screenshotHint || 'Încarcă un screenshot din aplicația de fitness care arată activitatea de azi.'}
+                          {challenge.screenshotHint || t('submitProof.screenshotHintDefault')}
                         </p>
                       </div>
                     </div>
@@ -209,7 +210,7 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
                           <Upload size={20} className="text-slate-400" />
                         </div>
                         <div className="text-center">
-                          <p className="text-sm font-semibold text-slate-300">Trage sau click pentru upload</p>
+                          <p className="text-sm font-semibold text-slate-300">{t('submitProof.dragOrClick')}</p>
                           <p className="text-xs text-slate-600 mt-1">JPG, PNG, WebP · max {MAX_FILE_MB}MB</p>
                         </div>
                         <input
@@ -247,8 +248,8 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
                       style={{ background: accent.bg, border: `1px solid ${accent.border}`, color: accent.color }}
                     >
                       {state === 'loading'
-                        ? <><Loader2 size={15} className="animate-spin" /> Se analizează cu AI Vision...</>
-                        : <><Send size={14} /> Verifică screenshot-ul</>}
+                        ? <><Loader2 size={15} className="animate-spin" /> {t('submitProof.analyzingVision')}</>
+                        : <><Send size={14} /> {t('submitProof.verifyScreenshot')}</>}
                     </button>
                   </motion.form>
                 ) : (
@@ -256,18 +257,18 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
                   <motion.form key="text-form" onSubmit={handleSubmit} className="space-y-3">
                     <div>
                       <label className="text-[10px] font-bold uppercase tracking-widest text-slate-600 block mb-2">
-                        Descrie ce ai făcut (specific și detaliat)
+                        {t('submitProof.describeLabel')}
                       </label>
                       <textarea
                         value={proof}
                         onChange={e => setProof(e.target.value.slice(0, maxLen))}
                         disabled={state === 'loading'}
                         rows={4}
-                        placeholder="Ex: Am mers 35 de minute în Parcul Copou după cursuri, am ieșit de la facultate la 17:30 și am mers pe aleea principală până la lac și înapoi..."
+                        placeholder={t('submitProof.proofPlaceholder')}
                         className="input-base resize-none w-full disabled:opacity-50"
                       />
                       <div className="flex justify-between mt-1.5">
-                        <p className="text-[10px] text-slate-600">Minim 15 caractere · AI verifică detaliile</p>
+                        <p className="text-[10px] text-slate-600">{t('submitProof.minChars')}</p>
                         <p className={clsx('text-[10px] font-mono font-semibold', proof.length > maxLen * 0.9 ? 'text-amber-400' : 'text-slate-600')}>
                           {proof.length}/{maxLen}
                         </p>
@@ -281,8 +282,8 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
                       style={{ background: accent.bg, border: `1px solid ${accent.border}`, color: accent.color }}
                     >
                       {state === 'loading'
-                        ? <><Loader2 size={15} className="animate-spin" /> Se verifică cu AI...</>
-                        : <><Send size={14} /> Trimite dovada</>}
+                        ? <><Loader2 size={15} className="animate-spin" /> {t('submitProof.analyzingAI')}</>
+                        : <><Send size={14} /> {t('submitProof.submit')}</>}
                     </button>
                   </motion.form>
                 )}
@@ -292,8 +293,8 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
               {state === 'idle' && (
                 <p className="text-[11px] text-slate-600 text-center leading-relaxed">
                   {isScreenshot
-                    ? 'AI Vision analizează aplicația, data și activitatea din screenshot. Data de azi trebuie să fie vizibilă.'
-                    : 'AI-ul verifică că dovada e specifică și realistă. Datele se păstrează pentru concurs.'}
+                    ? t('submitProof.footerScreenshot')
+                    : t('submitProof.footerText')}
                 </p>
               )}
             </div>

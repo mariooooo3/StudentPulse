@@ -16,14 +16,14 @@ import { useSettings } from '../providers/SettingsContext'
 import { getUniversityTheme } from '../../shared/utils/theme'
 
 const ACCENT_COLORS = [
-  { id: 'indigo',  label: 'Indigo',     color: '#6366f1' },
-  { id: 'violet',  label: 'Violet',     color: '#8b5cf6' },
-  { id: 'blue',    label: 'Albastru',   color: '#3b82f6' },
-  { id: 'cyan',    label: 'Cyan',       color: '#06b6d4' },
-  { id: 'emerald', label: 'Verde',      color: '#10b981' },
-  { id: 'rose',    label: 'Roz',        color: '#f43f5e' },
-  { id: 'orange',  label: 'Portocaliu', color: '#f97316' },
-  { id: 'amber',   label: 'Auriu',      color: '#f59e0b' },
+  { id: 'indigo',  labelKey: 'settings.colors.indigo',  color: '#6366f1' },
+  { id: 'violet',  labelKey: 'settings.colors.violet',  color: '#8b5cf6' },
+  { id: 'blue',    labelKey: 'settings.colors.blue',    color: '#3b82f6' },
+  { id: 'cyan',    labelKey: 'settings.colors.cyan',    color: '#06b6d4' },
+  { id: 'emerald', labelKey: 'settings.colors.emerald', color: '#10b981' },
+  { id: 'rose',    labelKey: 'settings.colors.rose',    color: '#f43f5e' },
+  { id: 'orange',  labelKey: 'settings.colors.orange',  color: '#f97316' },
+  { id: 'amber',   labelKey: 'settings.colors.amber',   color: '#f59e0b' },
 ]
 
 const LANGUAGES = [
@@ -227,12 +227,12 @@ export default function SettingsPanel({ open, onClose, session }) {
                   </div>
 
                   <div className="flex flex-wrap gap-3">
-                    {ACCENT_COLORS.map(({ id, label, color }) => {
+                    {ACCENT_COLORS.map(({ id, labelKey, color }) => {
                       const isActive = customAccent === color
                       return (
                         <button
                           key={id}
-                          title={label}
+                          title={t(labelKey)}
                           onClick={() => updateSetting('customAccentColor', isActive ? null : color)}
                           className="flex flex-col items-center gap-1.5 group focus:outline-none"
                         >
@@ -252,7 +252,7 @@ export default function SettingsPanel({ open, onClose, session }) {
                             )}
                           </span>
                           <span className={`text-[10px] font-medium ${isActive ? 'text-slate-300' : 'text-slate-600'}`}>
-                            {label}
+                            {t(labelKey)}
                           </span>
                         </button>
                       )

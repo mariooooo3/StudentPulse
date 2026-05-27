@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { Search, Users, Compass, AlertTriangle, ShieldCheck } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useOnlineCount } from '../../shared/hooks/useOnlineCount'
 import { createUserId } from '../../shared/services/auth.service'
 import { listPortalThreadsForUser } from '../../shared/services/professorPortal.service'
@@ -10,6 +11,7 @@ import { GroupThread, ChatThread, PortalThread, ContactRow, ChannelRow, PortalRo
 import clsx from 'clsx'
 
 export default function DirectMessages({ session, profile }) {
+  const { t } = useTranslation()
   // Stabilize currentUserId — generate guest ID once, never regenerate
   const currentUserId = useMemo(
     () => session?.userId || createUserId('guest'),
@@ -33,7 +35,7 @@ export default function DirectMessages({ session, profile }) {
   }), [scope, profile?.university?.id, profile?.university?.shortName, profile?.facultyCode, profile?.faculty,
       session?.university?.id, session?.university?.shortName, session?.detectedFaculty?.code, session?.detectedFaculty?.name])
 
-  const scopeLabel = `${meta.universityName || 'Universitate'} · ${meta.facultyName || 'Facultate'}`
+  const scopeLabel = `${meta.universityName || t('messages.universityFallback')} · ${meta.facultyName || t('messages.facultyFallback')}`
 
   const [onlineUsers, setOnlineUsers] = useState([])
   const [active, setActive] = useState(null)
@@ -162,7 +164,7 @@ export default function DirectMessages({ session, profile }) {
               tab === 'dm' ? 'text-white' : 'text-slate-600 hover:text-slate-400',
             )}
           >
-            Mesaje Directe
+            {t('messages.tabDirect')}
             {tab === 'dm' && (
               <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-indigo-500 rounded-full" />
             )}
@@ -174,7 +176,7 @@ export default function DirectMessages({ session, profile }) {
               tab === 'channels' ? 'text-white' : 'text-slate-600 hover:text-slate-400',
             )}
           >
-            Canale
+            {t('messages.tabChannels')}
             {tab === 'channels' && (
               <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-indigo-500 rounded-full" />
             )}
@@ -184,7 +186,7 @@ export default function DirectMessages({ session, profile }) {
         {/* ── Channels tab ────────────────────────────────────────────── */}
         {tab === 'channels' ? (
           <div className="flex-1 overflow-y-auto py-3">
-            <p className="section-label px-5 mb-2">Canale facultate</p>
+            <p className="section-label px-5 mb-2">{t('messages.facultyChannels')}</p>
             {GROUP_CHANNELS.map(g => (
               <ChannelRow
                 key={g.id}
@@ -204,21 +206,21 @@ export default function DirectMessages({ session, profile }) {
                 <input
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  placeholder="Caută colegi online..."
+                  placeholder={t('messages.searchPlaceholder')}
                   className="input-base w-full pl-8 py-2 text-sm"
                 />
               </div>
               <div className="flex items-start gap-2 rounded-xl border border-indigo-500/15 bg-indigo-500/[0.06] px-3 py-2.5">
                 <ShieldCheck size={12} className="text-indigo-400 mt-0.5 shrink-0" />
                 <p className="text-[10px] text-slate-500 leading-relaxed">
-                  Poți comunica doar cu studenți din aceeași universitate și facultate.
+                  {t('messages.scopeNote')}
                 </p>
               </div>
             </div>
 
             {/* Current user identity */}
             <div className="px-4 py-3 border-b border-white/[0.04] shrink-0">
-              <p className="section-label mb-2">Tu ești</p>
+              <p className="section-label mb-2">{t('messages.youAre')}</p>
               <div className="flex items-center gap-2.5">
                 <div className="relative shrink-0">
                   <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${colorFor(currentUserId)} flex items-center justify-center text-white text-[10px] font-bold`}>
@@ -239,7 +241,7 @@ export default function DirectMessages({ session, profile }) {
               {/* Professor portal threads */}
               {portalThreads.length > 0 && (
                 <div className="pt-3 pb-1">
-                  <p className="section-label px-5 mb-1">Profesori</p>
+                  <p className="section-label px-5 mb-1">{t('messages.professors')}</p>
                   {portalThreads.map(thread => (
                     <PortalRow
                       key={thread.id}
@@ -254,9 +256,9 @@ export default function DirectMessages({ session, profile }) {
               {/* DM contacts */}
               <div className="pt-3">
                 <p className="section-label px-5 mb-1">
-                  Direct
+                  {t('messages.direct')}
                   {contacts.length > 0 && (
-                    <span className="ml-2 font-mono text-slate-700 normal-case tracking-normal">{contacts.length} online</span>
+                    <span className="ml-2 font-mono text-slate-700 normal-case tracking-normal">{t('messages.online', { count: contacts.length })}</span>
                   )}
                 </p>
                 {contacts.length === 0 ? (
@@ -265,8 +267,8 @@ export default function DirectMessages({ session, profile }) {
                       <Users size={18} className="text-slate-700" />
                     </div>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      Niciun coleg eligibil online.<br />
-                      <span className="text-slate-700">Deschide aplicația cu același profil de facultate.</span>
+                      {t('messages.noContacts')}<br />
+                      <span className="text-slate-700">{t('messages.noContactsHint')}</span>
                     </p>
                   </div>
                 ) : (
@@ -325,9 +327,9 @@ export default function DirectMessages({ session, profile }) {
                   <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-5">
                     <AlertTriangle size={28} className="text-amber-400" />
                   </div>
-                  <p className="text-slate-300 font-semibold text-base mb-1">Conversație indisponibilă</p>
+                  <p className="text-slate-300 font-semibold text-base mb-1">{t('messages.unavailable')}</p>
                   <p className="text-slate-500 text-sm leading-relaxed">
-                    Conversația a fost închisă sau ștearsă. Selectează alta din listă.
+                    {t('messages.unavailableText')}
                   </p>
                 </>
               ) : (
@@ -335,9 +337,9 @@ export default function DirectMessages({ session, profile }) {
                   <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-5">
                     <Compass size={28} className="text-slate-600" />
                   </div>
-                  <p className="text-slate-300 font-semibold text-base mb-1">Selectează o conversație</p>
+                  <p className="text-slate-300 font-semibold text-base mb-1">{t('messages.selectConversation')}</p>
                   <p className="text-slate-600 text-sm leading-relaxed">
-                    Studenții din alte facultăți sau universități nu apar în lista DM.
+                    {t('messages.selectHint')}
                   </p>
                 </>
               )}

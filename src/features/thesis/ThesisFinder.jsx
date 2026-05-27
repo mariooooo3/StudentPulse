@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Search, BookOpen, Star, Users, ChevronDown, Check, AlertCircle, X, GraduationCap, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { getProfessors, getThesisDomains } from '../../shared/data/facultyCatalog'
 import BookingModal from './BookingModal'
 import clsx from 'clsx'
@@ -26,7 +27,7 @@ const DEMO_THESIS_PROFESSOR = {
   contact: 'Email / Teams',
   avatar: DEMO_PROFESSOR.avatar,
   color: 'from-amber-600 to-orange-600',
-  requirementsNote: 'Pentru demo, acest profesor este conectat cu portalul Profesor. Cererile trimise aici apar direct in contul lui.',
+  requirementsNote: 'thesis.demoNote',
 }
 
 /* ── Animation variants ──────────────────────────────────── */
@@ -110,6 +111,7 @@ function RatingStars({ rating = 4.5 }) {
 
 /* ── Professor card ──────────────────────────────────────── */
 function ProfessorCard({ p, onBook }) {
+  const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
 
   const initials = p.avatar || p.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
@@ -144,37 +146,37 @@ function ProfessorCard({ p, onBook }) {
           {p.available ? (
             <span className="badge-green shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              {p.slotsLeft} locuri
+              {p.slotsLeft}
             </span>
           ) : (
-            <span className="badge-red shrink-0">Rezervat</span>
+            <span className="badge-red shrink-0">{t('thesis.fullyBooked')}</span>
           )}
         </div>
 
         {/* ── Department tag + domain ── */}
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           <span className="chip text-[10px] py-0.5">{p.domain}</span>
-          {p.tags.slice(0, 1).map(t => (
-            <span key={t} className="tag text-[10px] py-0.5">{t}</span>
+          {p.tags.slice(0, 1).map(tag => (
+            <span key={tag} className="tag text-[10px] py-0.5">{tag}</span>
           ))}
         </div>
 
         {p.requirementsNote && (
           <div className="flex gap-2 bg-indigo-500/[0.07] border border-indigo-500/20 rounded-xl px-3 py-2.5 mb-3">
             <Sparkles size={12} className="text-indigo-400 shrink-0 mt-0.5" strokeWidth={1.75} />
-            <p className="text-[11px] text-indigo-200/70 leading-relaxed">{p.requirementsNote}</p>
+            <p className="text-[11px] text-indigo-200/70 leading-relaxed">{t(p.requirementsNote, { defaultValue: p.requirementsNote })}</p>
           </div>
         )}
 
         {/* ── Expectation tags ── */}
         <div className="flex flex-wrap gap-1.5 mb-4">
-          {p.tags.map(t => <span key={t} className="tag text-[10px] py-0.5">{t}</span>)}
+          {p.tags.map(tag => <span key={tag} className="tag text-[10px] py-0.5">{tag}</span>)}
         </div>
 
         {/* ── Slot bar ── */}
         <div className="mb-4">
           <div className="flex justify-between text-[10px] mb-1">
-            <span className="text-slate-500 font-medium">Locuri disponibile</span>
+            <span className="text-slate-500 font-medium">{t('thesis.slotsLabel')}</span>
             <span className="text-slate-400 font-mono font-semibold">{p.slotsLeft}/{p.totalSlots}</span>
           </div>
           <SlotBar left={p.slotsLeft} total={p.totalSlots} />
@@ -183,22 +185,22 @@ function ProfessorCard({ p, onBook }) {
         {/* ── Criteria grid ── */}
         <div className="grid grid-cols-2 gap-2 mb-4">
           <div className="bg-white/[0.03] border border-white/[0.05] rounded-xl p-2.5 hover:border-white/[0.08] transition-colors">
-            <p className="text-[9px] text-slate-600 uppercase font-bold tracking-widest mb-1">Medie minimă</p>
+            <p className="text-[9px] text-slate-600 uppercase font-bold tracking-widest mb-1">{t('thesis.minGrade')}</p>
             <p className="text-[13px] font-bold text-slate-200 font-mono">{p.minGrade}</p>
           </div>
           <div className="bg-white/[0.03] border border-white/[0.05] rounded-xl p-2.5 hover:border-white/[0.08] transition-colors">
-            <p className="text-[9px] text-slate-600 uppercase font-bold tracking-widest mb-1">Limbă</p>
+            <p className="text-[9px] text-slate-600 uppercase font-bold tracking-widest mb-1">{t('thesis.language')}</p>
             <p className="text-[11px] font-semibold text-slate-200 truncate">{p.language}</p>
           </div>
           <div className="bg-white/[0.03] border border-white/[0.05] rounded-xl p-2.5 hover:border-white/[0.08] transition-colors">
-            <p className="text-[9px] text-slate-600 uppercase font-bold tracking-widest mb-1">Alte specializări</p>
+            <p className="text-[9px] text-slate-600 uppercase font-bold tracking-widest mb-1">{t('thesis.otherSpecs')}</p>
             <p className="text-[11px] font-semibold flex items-center gap-1" style={{ color: p.acceptsOther ? '#34d399' : '#f87171' }}>
               {p.acceptsOther ? <Check size={11} /> : <X size={11} />}
-              {p.acceptsOther ? 'Acceptă' : 'Nu acceptă'}
+              {p.acceptsOther ? t('thesis.accepts') : t('thesis.notAccepts')}
             </p>
           </div>
           <div className="bg-white/[0.03] border border-white/[0.05] rounded-xl p-2.5 hover:border-white/[0.08] transition-colors">
-            <p className="text-[9px] text-slate-600 uppercase font-bold tracking-widest mb-1">Contact</p>
+            <p className="text-[9px] text-slate-600 uppercase font-bold tracking-widest mb-1">{t('thesis.contactLabel')}</p>
             <p className="text-[11px] font-semibold text-slate-200 truncate">{p.contact}</p>
           </div>
         </div>
@@ -209,7 +211,7 @@ function ProfessorCard({ p, onBook }) {
           className="flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-300 transition-colors mb-3 group"
         >
           <ChevronDown size={13} className={clsx('transition-transform duration-200 group-hover:text-indigo-400', expanded && 'rotate-180')} />
-          Teme licență anterioare
+          {t('thesis.previousTheses')}
           <span className="badge-blue ml-0.5">{p.previousTheses.length}</span>
         </button>
 
@@ -245,9 +247,9 @@ function ProfessorCard({ p, onBook }) {
             )}
           >
             {p.available ? (
-              <><GraduationCap size={14} /> Contactează</>
+              <><GraduationCap size={14} /> {t('thesis.contactBtn')}</>
             ) : (
-              <><AlertCircle size={14} /> Rezervat complet</>
+              <><AlertCircle size={14} /> {t('thesis.fullyBooked')}</>
             )}
           </button>
         </div>
@@ -259,6 +261,7 @@ function ProfessorCard({ p, onBook }) {
 
 /* ── Main component ──────────────────────────────────────── */
 export default function ThesisFinder({ profile, session }) {
+  const { t } = useTranslation()
   const baseProfessors = getProfessors(profile, session)
   const { universityId, facultyCode } = getTenantScope(profile, session)
   const canUseDemoProfessor = universityId === 'tuiasi' && facultyCode === 'AC'
@@ -293,7 +296,7 @@ export default function ThesisFinder({ profile, session }) {
   const filtered = professors.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.domain.toLowerCase().includes(search.toLowerCase()) ||
-      p.tags.some(t => t.toLowerCase().includes(search.toLowerCase()))
+      p.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase()))
     const matchDomain = domain === 'Toate' || p.domain === domain
     const matchAvail = !onlyAvailable || p.available
     return matchSearch && matchDomain && matchAvail
@@ -305,13 +308,13 @@ export default function ThesisFinder({ profile, session }) {
       {/* ── Page header ── */}
       <div className="px-6 pt-6 pb-4 shrink-0">
         <div className="flex items-center justify-between mb-1">
-          <h1 className="text-[22px] font-extrabold text-gradient-indigo tracking-tight">Găsește coordonator</h1>
+          <h1 className="text-[22px] font-extrabold text-gradient-indigo tracking-tight">{t('thesis.title')}</h1>
           <span className="badge-blue">
             <Users size={10} />
-            {professors.length} profesori
+            {t('thesis.professors', { count: professors.length })}
           </span>
         </div>
-        <p className="text-[13px] text-slate-500">Explorează profesorii disponibili și trimite o cerere de coordonare a lucrării de licență.</p>
+        <p className="text-[13px] text-slate-500">{t('thesis.subtitle')}</p>
       </div>
 
       {/* ── Filter bar ── */}
@@ -324,7 +327,7 @@ export default function ThesisFinder({ profile, session }) {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Caută profesor, domeniu, tag..."
+              placeholder={t('thesis.searchPlaceholder')}
               className="input-base pl-9 text-[13px]"
             />
           </div>
@@ -336,7 +339,7 @@ export default function ThesisFinder({ profile, session }) {
             >
               {onlyAvailable && <Check size={10} className="text-white" />}
             </div>
-            <span className="text-[11px] text-slate-500 font-medium whitespace-nowrap select-none">Doar disponibili</span>
+            <span className="text-[11px] text-slate-500 font-medium whitespace-nowrap select-none">{t('thesis.onlyAvailable')}</span>
           </label>
         </div>
 
@@ -368,7 +371,7 @@ export default function ThesisFinder({ profile, session }) {
             transition={{ type: 'spring', stiffness: 80, damping: 18 }}
             className="mb-5 elevated-card p-4"
           >
-            <p className="section-label mb-3">Cererile tale</p>
+            <p className="section-label mb-3">{t('thesis.myRequests')}</p>
             <div className="space-y-2">
               {myRequests.slice(0, 3).map(request => (
                 <div key={request.id} className="flex items-center gap-3 rounded-xl bg-white/[0.02] border border-white/[0.04] px-3 py-2.5">
@@ -382,7 +385,7 @@ export default function ThesisFinder({ profile, session }) {
                     request.status === 'rejected' ? 'bg-red-500/15 text-red-300 border border-red-500/20' :
                     'bg-amber-500/15 text-amber-300 border border-amber-500/20',
                   )}>
-                    {request.status === 'accepted' ? 'Acceptata' : request.status === 'rejected' ? 'Respinsa' : 'In asteptare'}
+                    {request.status === 'accepted' ? t('thesis.status.accepted') : request.status === 'rejected' ? t('thesis.status.rejected') : t('thesis.status.pending')}
                   </span>
                 </div>
               ))}
@@ -393,10 +396,10 @@ export default function ThesisFinder({ profile, session }) {
         {/* Count row */}
         <div className="flex items-center justify-between mb-5">
           <p className="text-[12px] text-slate-500 font-medium">
-            <span className="text-slate-300 font-bold">{filtered.length}</span> profesori găsiți
+            {t('thesis.found', { count: filtered.length })}
           </p>
           <p className="text-[11px] text-slate-600">
-            <span className="text-emerald-500/80 font-semibold">{filtered.filter(p => p.available).length}</span> cu locuri disponibile
+            {t('thesis.withSpots', { count: filtered.filter(p => p.available).length })}
           </p>
         </div>
 
@@ -411,8 +414,8 @@ export default function ThesisFinder({ profile, session }) {
             <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-4">
               <GraduationCap size={28} className="text-slate-700" strokeWidth={1.5} />
             </div>
-            <p className="text-slate-400 text-[14px] font-semibold">Niciun profesor găsit</p>
-            <p className="text-slate-600 text-[12px] mt-1.5">Încearcă un alt domeniu sau șterge filtrele</p>
+            <p className="text-slate-400 text-[14px] font-semibold">{t('thesis.notFound')}</p>
+            <p className="text-slate-600 text-[12px] mt-1.5">{t('thesis.notFoundText')}</p>
           </motion.div>
         ) : (
           <motion.div

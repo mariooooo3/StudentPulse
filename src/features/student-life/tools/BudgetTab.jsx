@@ -2,14 +2,18 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
 import { Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { SECTION_ACCENTS } from '../constants/sectionConfig'
 import { containerVariants, itemVariants } from '../utils/motionVariants'
 import AccentLine from '../components/AccentLine'
 
+const CATEGORIES = ['Cazare', 'Mâncare', 'Transport', 'Cursuri', 'Distracție', 'Diverse']
+const AVERAGES   = { Cazare: 800, Mâncare: 400, Transport: 100, Cursuri: 150, Distracție: 200, Diverse: 100 }
+const CAT_I18N   = { Cazare: 'cazare', Mâncare: 'mancare', Transport: 'transport', Cursuri: 'cursuri', Distracție: 'distractie', Diverse: 'diverse' }
+
 export default function BudgetTab() {
+  const { t } = useTranslation()
   const accent = SECTION_ACCENTS.tools
-  const CATEGORIES = ['Cazare', 'Mâncare', 'Transport', 'Cursuri', 'Distracție', 'Diverse']
-  const AVERAGES   = { Cazare: 800, Mâncare: 400, Transport: 100, Cursuri: 150, Distracție: 200, Diverse: 100 }
 
   const [budget, setBudget] = useState(() => {
     try {
@@ -50,19 +54,19 @@ export default function BudgetTab() {
       <div className="premium-card flex items-center justify-between p-5">
         <AccentLine color={accent.color} />
         <div>
-          <p className="section-label mb-1">Total lunar</p>
+          <p className="section-label mb-1">{t('budget.monthlyTotal')}</p>
           <p className="font-mono text-3xl font-black text-white">{total} <span className="text-lg text-slate-400">RON</span></p>
           {total > 0 && (
             <p className={clsx('mt-1 text-xs font-semibold', diff > 0 ? 'text-red-400' : 'text-emerald-400')}>
-              {diff > 0 ? `+${diff} față de medie` : `${diff} față de medie`}
+              {diff > 0 ? `+${diff} ${t('budget.vsAverage')}` : `${diff} ${t('budget.vsAverage')}`}
             </p>
           )}
         </div>
         <div className="text-right">
-          <p className="section-label mb-1">Medie studenți Iași</p>
+          <p className="section-label mb-1">{t('budget.average')}</p>
           <p className="font-mono text-xl font-bold text-slate-400">{avgTotal} RON</p>
           <button onClick={resetBudget} className="mt-2 flex items-center gap-1 text-[11px] text-slate-600 hover:text-red-400 transition-colors ml-auto">
-            <Trash2 size={11} /> Resetează
+            <Trash2 size={11} /> {t('budget.reset')}
           </button>
         </div>
       </div>
@@ -77,8 +81,8 @@ export default function BudgetTab() {
             <motion.div key={cat} variants={itemVariants} className="premium-card p-4">
               <AccentLine color={over ? '#f43f5e' : accent.color} />
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-semibold text-white">{cat}</span>
-                <span className="font-mono text-xs text-slate-500">Medie: {AVERAGES[cat]} RON</span>
+                <span className="text-sm font-semibold text-white">{t(`budget.categories.${CAT_I18N[cat]}`)}</span>
+                <span className="font-mono text-xs text-slate-500">{t('budget.average_label')} {AVERAGES[cat]} RON</span>
               </div>
               <div className="flex items-center gap-3">
                 <input
@@ -89,7 +93,7 @@ export default function BudgetTab() {
                   placeholder={String(AVERAGES[cat])}
                   className="input-base h-9 w-28 text-sm"
                 />
-                <span className="font-mono text-xs text-slate-600">RON/lună</span>
+                <span className="font-mono text-xs text-slate-600">{t('budget.currency')}</span>
                 <div className="flex-1 h-1.5 rounded-full overflow-hidden bg-white/[0.05]">
                   <div
                     className="h-full rounded-full transition-all duration-500"

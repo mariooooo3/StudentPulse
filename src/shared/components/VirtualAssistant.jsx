@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import {
   Bot,
   Check,
@@ -29,7 +30,7 @@ const VIEW_LABELS = {
   career:     'Career',
   community:  'Community',
   citylife:   'City Adaptation',
-  challenges: 'Provocări',
+  challenges: 'Challenges',
   professor:  'Professor Portal',
 }
 
@@ -53,26 +54,26 @@ const NAVIGATION_ACTIONS = [
 ]
 
 const SLASH_COMMANDS_STUDENT = [
-  { cmd: '/harta',      label: 'Hartă campus',       icon: '🗺️', view: 'navigator',  mode: 'academic' },
-  { cmd: '/orar',       label: 'Orar',               icon: '📅', view: 'schedule',   mode: 'academic' },
+  { cmd: '/harta',      label: 'Hartă campus',       labelKey: 'assistant.slashLabels.campusMap',        icon: '🗺️', view: 'navigator',  mode: 'academic' },
+  { cmd: '/orar',       label: 'Orar',               labelKey: 'assistant.slashLabels.schedule',          icon: '📅', view: 'schedule',   mode: 'academic' },
   { cmd: '/licenta',    label: 'Thesis Finder',      icon: '🎓', view: 'thesis',     mode: 'academic' },
   { cmd: '/tutoring',   label: 'Peer Tutoring',      icon: '🧑‍🏫', view: 'tutoring',  mode: 'academic' },
-  { cmd: '/mesaje',     label: 'Mesaje',             icon: '💬', view: 'messages',   mode: 'academic' },
+  { cmd: '/mesaje',     label: 'Mesaje',             labelKey: 'assistant.slashLabels.messages',          icon: '💬', view: 'messages',   mode: 'academic' },
   { cmd: '/dashboard',  label: 'Dashboard',          icon: '🏠', view: 'dashboard',  mode: 'academic' },
   { cmd: '/viata',      label: 'Student Life',       icon: '✨', view: 'discounts',  mode: 'life' },
-  { cmd: '/cariera',    label: 'Carieră & CV',       icon: '💼', view: 'career',     mode: 'life' },
+  { cmd: '/cariera',    label: 'Carieră & CV',       labelKey: 'assistant.slashLabels.careerCv',          icon: '💼', view: 'career',     mode: 'life' },
   { cmd: '/wellness',   label: 'Wellness & Focus',   icon: '🌿', view: 'wellness',   mode: 'life' },
   { cmd: '/oras',       label: 'City Adaptation',    icon: '🏙️', view: 'citylife',   mode: 'life' },
-  { cmd: '/comunitate', label: 'Comunitate',         icon: '👥', view: 'community',  mode: 'life' },
-  { cmd: '/evenimente', label: 'Evenimente',         icon: '📆', view: 'events',     mode: 'life' },
-  { cmd: '/tools',      label: 'Tools & Buget',      icon: '🛠️', view: 'tools',      mode: 'life' },
+  { cmd: '/comunitate', label: 'Comunitate',         labelKey: 'assistant.slashLabels.community',         icon: '👥', view: 'community',  mode: 'life' },
+  { cmd: '/evenimente', label: 'Evenimente',         labelKey: 'assistant.slashLabels.events',            icon: '📆', view: 'events',     mode: 'life' },
+  { cmd: '/tools',      label: 'Tools & Buget',      labelKey: 'assistant.slashLabels.toolsBudget',       icon: '🛠️', view: 'tools',      mode: 'life' },
 ]
 
 const SLASH_COMMANDS_PROFESSOR = [
-  { cmd: '/licente',    label: 'Cereri licență',     icon: '🎓', view: 'thesis',     mode: 'professor' },
-  { cmd: '/recuperari', label: 'Recuperări',         icon: '📋', view: 'recovery',   mode: 'professor' },
-  { cmd: '/mesaje',     label: 'Mesaje studenți',    icon: '💬', view: 'messages',   mode: 'professor' },
-  { cmd: '/profil',     label: 'Profil academic',    icon: '👤', view: 'profile',    mode: 'professor' },
+  { cmd: '/licente',    label: 'Cereri licență',     labelKey: 'assistant.slashLabels.thesisRequests',    icon: '🎓', view: 'thesis',     mode: 'professor' },
+  { cmd: '/recuperari', label: 'Recuperări',         labelKey: 'assistant.slashLabels.recovery',          icon: '📋', view: 'recovery',   mode: 'professor' },
+  { cmd: '/mesaje',     label: 'Mesaje studenți',    labelKey: 'assistant.slashLabels.studentMessages',   icon: '💬', view: 'messages',   mode: 'professor' },
+  { cmd: '/profil',     label: 'Profil academic',    labelKey: 'assistant.slashLabels.academicProfile',   icon: '👤', view: 'profile',    mode: 'professor' },
   { cmd: '/dashboard',  label: 'Dashboard',          icon: '🏠', view: 'dashboard',  mode: 'professor' },
 ]
 
@@ -88,24 +89,17 @@ const PROFESSOR_NAVIGATION_ACTIONS = [
   { match: ['dashboard', 'acasa', 'home', 'overview'], view: 'dashboard', mode: 'professor' },
 ]
 
-function initialAssistantMessage(role) {
-  if (role === 'professor') {
-    return 'Salut, sunt asistentul pentru portalul profesorului. Te pot ajuta cu cereri de licenta, recuperari, mesaje, notificari live si profilul academic.'
-  }
-  return 'Salut, sunt asistentul StudentPulse. Pot naviga direct: spune "academic", "orar", "harta", "student life", "cariera", "city" sau orice modul. Te pot ajuta si cu cont, cereri de licenta si viata studenteasca.'
-}
-
 function findNavigationAction(label, role) {
   const normalized = String(label || '').toLowerCase()
   const actions = role === 'professor' ? PROFESSOR_NAVIGATION_ACTIONS : NAVIGATION_ACTIONS
   return actions.find(action => action.match.some(token => normalized.includes(token)))
 }
 
-function assistantBrand(role) {
+function assistantBrand(role, t) {
   if (role === 'professor') {
     return {
       title: 'ProfessorPulse Assistant',
-      subtitle: 'Cereri, mesaje, profil',
+      subtitle: t('assistant.brandProfessorSubtitle'),
       badge: 'Professor help',
       footer: 'Professor-aware help',
     }
@@ -154,6 +148,7 @@ function AssistantBubble({ onClick, unread, brand }) {
 }
 
 function CodeBlock({ lang, code }) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   function copy() {
     navigator.clipboard.writeText(code).catch(() => {})
@@ -169,7 +164,7 @@ function CodeBlock({ lang, code }) {
           className="flex items-center gap-1 rounded px-2 py-0.5 text-[10px] text-slate-400 transition hover:bg-white/10 hover:text-white"
         >
           {copied ? <Check size={10} className="text-green-400" /> : <Copy size={10} />}
-          <span>{copied ? 'Copiat!' : 'Copiază'}</span>
+          <span>{copied ? t('assistant.copied') : t('assistant.copy')}</span>
         </button>
       </div>
       <pre className="overflow-x-auto p-3 font-mono text-[11px] leading-relaxed text-slate-200">
@@ -288,6 +283,7 @@ export default function VirtualAssistant({
   currentLabel,
   onNavigate,
 }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -296,7 +292,7 @@ export default function VirtualAssistant({
   const [messages, setMessages] = useState(() => [
     {
       role: 'assistant',
-      text: initialAssistantMessage(session?.role),
+      text: session?.role === 'professor' ? t('assistant.initialProfessor') : t('assistant.initialStudent'),
     },
   ])
   const bottomRef = useRef(null)
@@ -311,13 +307,13 @@ export default function VirtualAssistant({
     year: profile?.year || '',
     platformMode,
     currentView,
-    currentLabel: currentLabel || VIEW_LABELS[currentView] || currentView,
+    currentLabel: currentLabel || t('nav.' + currentView, { defaultValue: VIEW_LABELS[currentView] || currentView }),
   }
-  const brand = assistantBrand(context.role)
+  const brand = assistantBrand(context.role, t)
 
   useEffect(() => {
     setSuggestions(defaultSuggestions(context))
-    setMessages([{ role: 'assistant', text: initialAssistantMessage(context.role) }])
+    setMessages([{ role: 'assistant', text: context.role === 'professor' ? t('assistant.initialProfessor') : t('assistant.initialStudent') }])
   }, [context.role])
 
   useEffect(() => {
@@ -343,7 +339,7 @@ export default function VirtualAssistant({
         setMessages(prev => [
           ...prev,
           { role: 'user', text },
-          { role: 'assistant', text: `${matched.icon} Te duc la **${matched.label}** acum!` },
+          { role: 'assistant', text: t('assistant.navigatedTo', { icon: matched.icon, label: matched.labelKey ? t(matched.labelKey) : matched.label }) },
         ])
         setInput('')
         onNavigate(matched.view, matched.mode)
@@ -359,8 +355,8 @@ export default function VirtualAssistant({
 
     if (navAction && onNavigate) {
       onNavigate(navAction.view, navAction.mode)
-      const label = VIEW_LABELS[navAction.view] || navAction.view
-      const confirmMsg = `Te-am dus la ${label}. Cu ce te pot ajuta acolo?`
+      const label = t('nav.' + navAction.view, { defaultValue: VIEW_LABELS[navAction.view] || navAction.view })
+      const confirmMsg = t('assistant.arrivedAt', { label })
       setMessages(prev => [...prev, { role: 'assistant', text: confirmMsg }])
       setSuggestions(defaultSuggestions(context))
       if (!open) setUnread(value => value + 1)
@@ -480,7 +476,7 @@ export default function VirtualAssistant({
                 <button
                   type="button"
                   onClick={() => {
-                    setMessages([{ role: 'assistant', text: initialAssistantMessage(session?.role) }])
+                    setMessages([{ role: 'assistant', text: session?.role === 'professor' ? t('assistant.initialProfessor') : t('assistant.initialStudent') }])
                     setSuggestions(defaultSuggestions(context))
                   }}
                   className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-all hover:bg-white/[0.07] hover:text-slate-300"
@@ -519,7 +515,7 @@ export default function VirtualAssistant({
                 return (
                   <div className="mb-2 overflow-hidden rounded-xl border border-white/[0.08] bg-[#0b1221] shadow-[0_-8px_32px_rgba(0,0,0,0.5)]">
                     <div className="border-b border-white/[0.06] px-3 py-1.5">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">Navigare rapidă</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">{t('assistant.navLabel')}</span>
                     </div>
                     {filtered.map(c => (
                       <button
@@ -530,7 +526,7 @@ export default function VirtualAssistant({
                       >
                         <span className="text-base leading-none">{c.icon}</span>
                         <span className="font-mono text-[12px] text-violet-400">{c.cmd}</span>
-                        <span className="text-[12px] text-slate-400">{c.label}</span>
+                        <span className="text-[12px] text-slate-400">{c.labelKey ? t(c.labelKey) : c.label}</span>
                       </button>
                     ))}
                   </div>
@@ -554,8 +550,8 @@ export default function VirtualAssistant({
                     rows={1}
                     placeholder={
                       context.role === 'professor'
-                        ? 'Intreaba despre cereri, mesaje sau profil...'
-                        : 'Intreaba despre cont, module sau viata de student...'
+                        ? t('assistant.placeholderProfessor')
+                        : t('assistant.placeholderStudent')
                     }
                     className="max-h-24 min-h-7 flex-1 resize-none bg-transparent text-[13px] leading-6 text-slate-200 outline-none placeholder:text-slate-700"
                   />

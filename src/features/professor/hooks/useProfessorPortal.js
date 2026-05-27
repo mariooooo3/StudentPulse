@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useToast } from '../../../shared/components/Toast'
 import { socketService } from '../../../shared/services/socket.service'
 import {
@@ -15,6 +16,7 @@ import {
 } from '../../../shared/services/professorPortal.service'
 
 export function useProfessorPortal(profile) {
+  const { t } = useTranslation()
   const toast = useToast()
   const [professor, setProfessor] = useState(() => ({ ...(profile || DEMO_PROFESSOR) }))
   const [requests, setRequests] = useState([])
@@ -103,16 +105,18 @@ export function useProfessorPortal(profile) {
         senderName: professor.name,
         senderRole: 'professor',
         text: status === 'accepted'
-          ? `Am acceptat cererea ta pentru licenta. ${note || 'Stabilim detaliile la o discutie initiala.'}`
-          : `Am respins cererea ta pentru licenta. ${note || 'Tema nu se potriveste directiei curente.'}`,
+          ? t('professor.notifications.thesisAcceptedMsg', { note: note || t('professor.notifications.thesisDefaultAcceptNote') })
+          : t('professor.notifications.thesisRejectedMsg', { note: note || t('professor.notifications.thesisDefaultRejectNote') }),
       })
       await refreshThreads()
     }
     await refreshRequests()
     toast({
       type: status === 'accepted' ? 'success' : 'info',
-      title: status === 'accepted' ? 'Cerere acceptata' : 'Cerere respinsa',
-      message: updated?.studentName ? `${updated.studentName} primeste notificare in contul de student.` : 'Status actualizat.',
+      title: status === 'accepted' ? t('professor.notifications.thesisAccepted') : t('professor.notifications.thesisRejected'),
+      message: updated?.studentName
+        ? t('professor.notifications.thesisNotified', { name: updated.studentName })
+        : t('professor.notifications.statusUpdated'),
     })
   }
 
@@ -122,20 +126,24 @@ export function useProfessorPortal(profile) {
       const thread = await upsertPortalThread({
         student: { userId: updated.studentId, name: updated.studentName, email: updated.studentEmail },
         professor,
-        subject: `Recuperare: ${updated.subject}`,
+        subject: t('professor.notifications.recoverySubject', { subject: updated.subject }),
       })
       await sendPortalMessage(thread.id, {
         senderId: professor.id,
         senderName: professor.name,
         senderRole: 'professor',
         text: status === 'accepted'
-          ? `Recuperarea la ${updated.subject} a fost aprobata. ${note}`
-          : `Recuperarea la ${updated.subject} a fost respinsa. ${note}`,
+          ? t('professor.notifications.recoveryApproved', { subject: updated.subject, note })
+          : t('professor.notifications.recoveryRejected', { subject: updated.subject, note }),
       })
     }
     await refreshRecoveryRequests()
     await refreshThreads()
-    toast({ type: status === 'accepted' ? 'success' : 'info', title: 'Recuperare actualizata', message: `${updated?.studentName || 'Studentul'} primeste notificare.` })
+    toast({
+      type: status === 'accepted' ? 'success' : 'info',
+      title: t('professor.notifications.recoveryUpdated'),
+      message: t('professor.notifications.recoveryNotified', { name: updated?.studentName || '' }),
+    })
   }
 
   async function handleSendMessage(threadId, text) {
@@ -151,7 +159,7 @@ export function useProfessorPortal(profile) {
   async function handleProfessorSave(patch) {
     const updated = await saveProfessorProfile(patch)
     setProfessor({ ...(profile || DEMO_PROFESSOR), ...updated })
-    toast({ type: 'success', title: 'Profil actualizat', message: 'Datele publice ale contului de profesor au fost salvate.' })
+    toast({ type: 'success', title: t('professor.notifications.profileUpdated'), message: t('professor.notifications.profileSaved') })
   }
 
   return {

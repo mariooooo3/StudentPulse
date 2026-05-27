@@ -1,8 +1,10 @@
 import { CalendarClock } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { staggerContainer, staggerItem } from '../schedule.constants'
 
 export default function ExamMapView({ exams }) {
+  const { t } = useTranslation()
   const now = new Date()
   const sorted = [...exams].sort((a, b) => a.date - b.date)
 
@@ -12,8 +14,8 @@ export default function ExamMapView({ exams }) {
         <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-4">
           <CalendarClock size={24} className="text-indigo-400" strokeWidth={1.75} />
         </div>
-        <p className="text-white font-bold mb-1">Nicio sesiune detectată</p>
-        <p className="text-slate-500 text-sm">Datele de examen apar automat din orarul tău.</p>
+        <p className="text-white font-bold mb-1">{t('schedule.examMap.noExams')}</p>
+        <p className="text-slate-500 text-sm">{t('schedule.examMap.noExamsText')}</p>
       </motion.div>
     )
   }
@@ -23,12 +25,12 @@ export default function ExamMapView({ exams }) {
       <div className="flex items-center gap-2 mb-1">
         <CalendarClock size={14} className="text-indigo-400" strokeWidth={1.75} />
         <p className="section-label">{(() => {
-          const MONTHS = ['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec']
+          const MONTHS = t('schedule.examMap.months').split('_')
           const first = sorted[0].date, last = sorted[sorted.length - 1].date
           const label = first.getMonth() === last.getMonth()
             ? `${MONTHS[first.getMonth()]} ${first.getFullYear()}`
             : `${MONTHS[first.getMonth()]}–${MONTHS[last.getMonth()]} ${last.getFullYear()}`
-          return `Sesiune · ${label}`
+          return `${t('schedule.examMap.sessionLabel')} · ${label}`
         })()}</p>
       </div>
       {sorted.map(exam => {
@@ -47,7 +49,11 @@ export default function ExamMapView({ exams }) {
           soon: 'text-amber-300 bg-amber-500/15 border border-amber-500/30',
           ok: 'text-emerald-300 bg-emerald-500/15 border border-emerald-500/30',
         }[urgency]
-        const pillLabel = isPast ? 'Trecut' : daysLeft === 0 ? 'Azi' : daysLeft === 1 ? 'Mâine' : `${daysLeft} zile`
+        const pillLabel = isPast
+          ? t('schedule.examMap.past')
+          : daysLeft === 0 ? t('schedule.examMap.today')
+          : daysLeft === 1 ? t('schedule.examMap.tomorrow')
+          : t('schedule.examMap.daysLeft', { count: daysLeft })
 
         return (
           <motion.div key={exam.id} variants={staggerItem} className={`relative rounded-xl border p-4 transition-all ${cardCls}`}>
@@ -60,7 +66,7 @@ export default function ExamMapView({ exams }) {
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1.5 text-xs text-slate-500">
                   <span>{exam.date.toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
-                  <span>ora {exam.time}</span>
+                  <span>{t('schedule.examMap.timePrefix')} {exam.time}</span>
                   <span>{exam.room}</span>
                   <span className="hidden sm:inline">{exam.professor}</span>
                 </div>

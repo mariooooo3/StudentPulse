@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CalendarClock, Plus } from 'lucide-react'
-import { statusLabel } from '../utils/professorUtils'
 
 export default function RecoveryView({ requests, onDecision }) {
+  const { t } = useTranslation()
   const [created, setCreated] = useState(false)
 
   return (
@@ -14,7 +15,7 @@ export default function RecoveryView({ requests, onDecision }) {
         className="btn-primary inline-flex items-center gap-2 text-sm"
       >
         <Plus size={14} />
-        Adauga slot de recuperare
+        {t('professor.recovery.addSlot')}
       </button>
 
       <AnimatePresence>
@@ -25,7 +26,7 @@ export default function RecoveryView({ requests, onDecision }) {
             exit={{ opacity: 0, y: -8 }}
             className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300"
           >
-            Slot publicat: Structuri de Date, Vineri 14:00, sala C210.
+            {t('professor.recovery.slotPublished')}
           </motion.div>
         )}
       </AnimatePresence>
@@ -33,8 +34,8 @@ export default function RecoveryView({ requests, onDecision }) {
       {requests.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/[0.08] p-12 text-center">
           <CalendarClock size={32} className="mx-auto text-slate-700 mb-3" />
-          <p className="text-sm font-semibold text-slate-400">Nu exista cereri de recuperare.</p>
-          <p className="text-xs text-slate-700 mt-1">Studentii le trimit din Schedule Hub.</p>
+          <p className="text-sm font-semibold text-slate-400">{t('professor.recovery.noRequests')}</p>
+          <p className="text-xs text-slate-700 mt-1">{t('professor.recovery.noRequestsHint')}</p>
         </div>
       ) : (
         requests.map(item => (
@@ -47,16 +48,16 @@ export default function RecoveryView({ requests, onDecision }) {
             {item.status === 'pending' && (
               <div className="flex gap-2 shrink-0">
                 <button
-                  onClick={() => onDecision(item.id, 'accepted', 'Cererea de recuperare a fost aprobata.')}
+                  onClick={() => onDecision(item.id, 'accepted', t('professor.recovery.defaultAcceptNote'))}
                   className="h-9 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 transition-all duration-150"
                 >
-                  Accepta
+                  {t('professor.recovery.accept')}
                 </button>
                 <button
-                  onClick={() => onDecision(item.id, 'rejected', 'Nu exista locuri disponibile pentru slotul cerut.')}
+                  onClick={() => onDecision(item.id, 'rejected', t('professor.recovery.defaultRejectNote'))}
                   className="h-9 rounded-xl border border-red-500/30 bg-red-500/10 px-4 text-xs font-bold text-red-300 hover:bg-red-500/20 transition-all duration-150"
                 >
-                  Respinge
+                  {t('professor.recovery.reject')}
                 </button>
               </div>
             )}
@@ -65,7 +66,7 @@ export default function RecoveryView({ requests, onDecision }) {
                 'text-xs font-semibold rounded-full px-3 py-1 shrink-0',
                 item.status === 'accepted' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-red-500/15 text-red-300',
               )}>
-                {statusLabel(item.status)}
+                {t(`schedule.recovery.status.${item.status}`, { defaultValue: item.status })}
               </span>
             )}
           </div>

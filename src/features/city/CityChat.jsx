@@ -1,21 +1,17 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronLeft, Send, Bot, Loader2, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { streamCityAssistant } from '../../shared/services/ai.service'
 import clsx from 'clsx'
 
-const SUGGESTIONS = [
-  'Ce acte îmi trebuie la secretariat?',
-  'Cum obțin abonament CTP student?',
-  'Unde pot deschide un cont bancar?',
-  'Ce cămine sunt disponibile?',
-]
-
 export default function CityChat({ profile, onBack }) {
-  const [messages, setMessages] = useState([
+  const { t } = useTranslation()
+  const city = profile?.university?.city || t('cityContent.chat.cityFallback')
+  const [messages, setMessages] = useState(() => [
     {
       role: 'assistant',
-      content: `Salut! Sunt asistentul tău pentru adaptare în ${profile?.university?.city || 'oraș'}. Te pot ajuta cu acte, transport, cazare, bănci și orice altceva legat de viața de student. Ce vrei să știi?`,
+      content: t('cityContent.chat.greeting', { city }),
     },
   ])
   const [input, setInput] = useState('')
@@ -62,7 +58,7 @@ export default function CityChat({ profile, onBack }) {
           setMessages(prev => {
             const msgs = [...prev]
             const last = msgs[msgs.length - 1]
-            if (last?.streaming) msgs[msgs.length - 1] = { ...last, streaming: false, content: event.msg || 'Momentan nu pot răspunde.' }
+            if (last?.streaming) msgs[msgs.length - 1] = { ...last, streaming: false, content: event.msg || t('cityContent.chat.errorMsg') }
             return msgs
           })
         }
@@ -71,7 +67,7 @@ export default function CityChat({ profile, onBack }) {
       setMessages(prev => {
         const msgs = [...prev]
         const last = msgs[msgs.length - 1]
-        if (last?.streaming) msgs[msgs.length - 1] = { ...last, streaming: false, content: 'Momentan nu pot răspunde. Încearcă din nou.' }
+        if (last?.streaming) msgs[msgs.length - 1] = { ...last, streaming: false, content: t('cityContent.chat.retryMsg') }
         return msgs
       })
     } finally {
@@ -109,14 +105,14 @@ export default function CityChat({ profile, onBack }) {
             <Sparkles size={16} style={{ color: '#818cf8' }} />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-base font-bold text-white">Asistent AI Oraș</h2>
+            <h2 className="text-base font-bold text-white">{t('cityContent.chat.title')}</h2>
             <p className="text-xs text-slate-500">
-              {profile?.university?.city || 'Oraș'} · {profile?.university?.shortName || 'Universitate'}
+              {profile?.university?.city || t('cityContent.chat.cityFallback')} · {profile?.university?.shortName || t('messages.universityFallback')}
             </p>
           </div>
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[10px] font-semibold text-emerald-400">Online</span>
+            <span className="text-[10px] font-semibold text-emerald-400">{t('cityContent.chat.online')}</span>
           </div>
         </div>
       </motion.div>
@@ -192,13 +188,13 @@ export default function CityChat({ profile, onBack }) {
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-wrap gap-1.5 shrink-0"
         >
-          {SUGGESTIONS.map(s => (
+          {['suggestion1', 'suggestion2', 'suggestion3', 'suggestion4'].map(key => (
             <button
-              key={s}
-              onClick={() => send(s)}
+              key={key}
+              onClick={() => send(t(`cityContent.chat.${key}`))}
               className="px-3 py-1.5 rounded-full text-xs font-medium bg-white/[0.04] border border-white/[0.08] text-slate-400 hover:text-white hover:border-indigo-500/40 hover:bg-indigo-500/10 transition-all"
             >
-              {s}
+              {t(`cityContent.chat.${key}`)}
             </button>
           ))}
         </motion.div>
@@ -211,7 +207,7 @@ export default function CityChat({ profile, onBack }) {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKey}
-          placeholder="Întreabă ceva despre viața de student..."
+          placeholder={t('cityContent.chat.placeholder')}
           className="flex-1 bg-white/[0.04] border border-white/[0.09] rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all"
           disabled={loading}
         />

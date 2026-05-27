@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { ChevronLeft, Home, MapPin, AlertTriangle, ChevronDown, ChevronUp, Wallet } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { housingListings, SCAM_WARNINGS } from '../../shared/data/cityData'
 import clsx from 'clsx'
 
+// Romanian values used for filter comparison against housingListings data
 const TYPE_TABS = ['Toate', 'Cămin', 'Chirie', 'Coabitare']
+const TYPE_KEYS = { 'Toate': 'all', 'Cămin': 'dorm', 'Chirie': 'rental', 'Coabitare': 'coliving' }
 
 const TYPE_COLORS = {
   'Cămin':      { color: '#3b82f6', bg: '#3b82f620', border: '#3b82f640' },
@@ -22,6 +25,7 @@ const itemVar = {
 }
 
 export default function StudentHousing({ onBack }) {
+  const { t } = useTranslation()
   const [tab, setTab]           = useState('Toate')
   const [showScams, setShowScams] = useState(false)
 
@@ -56,12 +60,12 @@ export default function StudentHousing({ onBack }) {
                 style={{ background: '#3b82f620', border: '1.5px solid #3b82f645' }}>
                 <Home size={14} style={{ color: '#3b82f6' }} />
               </div>
-              <h2 className="text-lg font-bold text-white">Cazare Studenți</h2>
+              <h2 className="text-lg font-bold text-white">{t('cityContent.housing.title')}</h2>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5 ml-9">Cămine și chirii verificate în Iași</p>
+            <p className="text-xs text-slate-500 mt-0.5 ml-9">{t('cityContent.housing.subtitle')}</p>
           </div>
 
-          <span className="text-xs text-slate-500 shrink-0">{housingListings.length} oferte</span>
+          <span className="text-xs text-slate-500 shrink-0">{t('cityContent.housing.offers', { count: housingListings.length })}</span>
         </div>
       </motion.div>
 
@@ -78,7 +82,7 @@ export default function StudentHousing({ onBack }) {
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-rose-500/15 border border-rose-500/30">
             <AlertTriangle size={13} className="text-rose-400" />
           </div>
-          <span className="flex-1 text-sm font-medium text-rose-300">Atenție: Escrocherii frecvente</span>
+          <span className="flex-1 text-sm font-medium text-rose-300">{t('cityContent.housing.scamWarning')}</span>
           {showScams
             ? <ChevronUp size={15} className="text-rose-400 shrink-0" />
             : <ChevronDown size={15} className="text-rose-400 shrink-0" />}
@@ -112,23 +116,23 @@ export default function StudentHousing({ onBack }) {
 
       {/* Type tabs */}
       <div className="flex gap-1.5 flex-wrap">
-        {TYPE_TABS.map(t => {
-          const tc = TYPE_COLORS[t]
+        {TYPE_TABS.map(tabVal => {
+          const tc = TYPE_COLORS[tabVal]
           return (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={tabVal}
+              onClick={() => setTab(tabVal)}
               className={clsx(
                 'px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
-                tab === t
+                tab === tabVal
                   ? 'text-white shadow-lg'
                   : 'bg-white/[0.03] text-slate-400 hover:text-slate-200 border border-white/[0.07]'
               )}
-              style={tab === t
+              style={tab === tabVal
                 ? { background: tc?.color || '#3b82f6', boxShadow: `0 0 12px ${tc?.color || '#3b82f6'}40` }
                 : {}}
             >
-              {t}
+              {t(`cityContent.housing.types.${TYPE_KEYS[tabVal]}`)}
             </button>
           )
         })}
@@ -145,7 +149,7 @@ export default function StudentHousing({ onBack }) {
             style={{ background: '#3b82f618', border: '1.5px solid #3b82f635' }}>
             <Home size={28} className="opacity-50" style={{ color: '#3b82f6' }} />
           </div>
-          <p className="text-sm text-slate-500">Nicio ofertă în această categorie</p>
+          <p className="text-sm text-slate-500">{t('cityContent.housing.noOffers')}</p>
         </motion.div>
       ) : (
         <motion.div
@@ -189,7 +193,7 @@ export default function StudentHousing({ onBack }) {
                           <Wallet size={12} style={{ color: tc.color }} />
                           <p className="text-base font-bold" style={{ color: tc.color }}>{h.price}</p>
                         </div>
-                        <p className="text-[10px] text-slate-600">/lună</p>
+                        <p className="text-[10px] text-slate-600">{t('cityContent.housing.perMonth')}</p>
                       </div>
                     </div>
 

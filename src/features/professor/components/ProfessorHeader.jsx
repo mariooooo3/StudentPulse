@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Bell, Check, CheckCheck, Wifi, WifiOff, X } from 'lucide-react'
 import { useToast } from '../../../shared/components/Toast'
@@ -8,7 +9,9 @@ import { useSocket } from '../../../shared/hooks/useSocket'
 import { NAV } from '../constants/nav'
 
 export default function ProfessorHeader({ current, pendingCount, profile, requests, recoveryRequests, threads, onNavigate }) {
-  const title = NAV.find(item => item.id === current)?.label || 'Dashboard'
+  const { t } = useTranslation()
+  const navItem = NAV.find(item => item.id === current)
+  const title = navItem ? (navItem.labelKey ? t(navItem.labelKey) : navItem.label) : 'Dashboard'
   const [open, setOpen] = useState(false)
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications(profile.id)
   const { connected } = useSocket()
@@ -19,21 +22,21 @@ export default function ProfessorHeader({ current, pendingCount, profile, reques
   const fallbackLatest = [
     ...requests.filter(item => item.status === 'pending').map(item => ({
       id: item.id,
-      title: 'Cerere licenta noua',
+      title: t('professor.notifications.newThesisRequest'),
       body: `${item.studentName}: ${item.idea}`,
       time: item.createdAt,
       target: 'thesis',
     })),
     ...recoveryRequests.filter(item => item.status === 'pending').map(item => ({
       id: item.id,
-      title: 'Cerere recuperare noua',
+      title: t('professor.notifications.newRecoveryRequest'),
       body: `${item.studentName}: ${item.subject}`,
       time: item.createdAt,
       target: 'recovery',
     })),
     ...threads.filter(thread => thread.messages.at(-1)?.senderRole === 'student').map(thread => ({
       id: thread.id,
-      title: `Mesaj de la ${thread.studentName}`,
+      title: t('professor.notifications.messageFrom', { name: thread.studentName }),
       body: thread.messages.at(-1)?.text,
       time: thread.updatedAt,
       target: 'messages',
@@ -44,7 +47,7 @@ export default function ProfessorHeader({ current, pendingCount, profile, reques
   const latest = notifications.length
     ? notifications.slice(0, 8).map(item => ({
         id: item.id,
-        title: item.title || 'Notificare profesor',
+        title: item.title || t('professor.notifications.defaultTitle'),
         body: item.body || item.text,
         time: item.timestamp || item.createdAt,
         target: item.action?.includes('recovery') ? 'recovery' : item.action?.includes('message') ? 'messages' : 'thesis',
@@ -66,8 +69,8 @@ export default function ProfessorHeader({ current, pendingCount, profile, reques
     if (!live) return
     toast({
       type: live.type === 'warning' ? 'error' : live.type || 'info',
-      title: live.title || 'Update profesor',
-      message: live.body || live.text || 'Ai un update nou in portal.',
+      title: live.title || t('professor.notifications.toastUpdate'),
+      message: live.body || live.text || t('professor.notifications.toastDefault'),
       duration: 4500,
     })
   }, [notifications, toast])
@@ -140,12 +143,12 @@ export default function ProfessorHeader({ current, pendingCount, profile, reques
                     {/* Header */}
                     <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
                       <div>
-                        <p className="text-[13px] font-semibold text-white">Notificari profesor</p>
+                        <p className="text-[13px] font-semibold text-white">{t('professor.notifications.title')}</p>
                         <div className="mt-1 flex items-center gap-1.5 text-[10px] font-semibold text-slate-600">
                           {connected
                             ? <Wifi size={10} className="text-emerald-400" />
                             : <WifiOff size={10} className="text-amber-400" />}
-                          {connected ? 'Live conectat' : 'Offline, sincronizare la refresh'}
+                          {connected ? t('professor.notifications.liveConnected') : t('professor.notifications.offlineSync')}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -155,7 +158,7 @@ export default function ProfessorHeader({ current, pendingCount, profile, reques
                             className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-400 hover:text-amber-300"
                           >
                             <CheckCheck size={12} />
-                            Marcheaza
+                            {t('professor.notifications.markAll')}
                           </button>
                         )}
                         <button onClick={() => setOpen(false)} className="text-slate-600 hover:text-slate-300 transition-colors">
@@ -168,7 +171,7 @@ export default function ProfessorHeader({ current, pendingCount, profile, reques
                     {latest.length === 0 ? (
                       <div className="px-4 py-8 text-center">
                         <Bell size={20} className="text-slate-800 mx-auto mb-2" strokeWidth={1.5} />
-                        <p className="text-sm text-slate-600">Nu ai notificari noi.</p>
+                        <p className="text-sm text-slate-600">{t('professor.notifications.noNew')}</p>
                       </div>
                     ) : (
                       latest.map(item => (

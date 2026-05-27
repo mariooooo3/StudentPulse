@@ -1,7 +1,9 @@
 import { Check, Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { VERIFICATION_PROGRESS } from '../auth.constants'
 
 export default function VerifyingStep({ email, university }) {
+  const { t } = useTranslation()
   return (
     <div className="text-center py-6 space-y-6">
       <div className="relative w-16 h-16 mx-auto">
@@ -11,7 +13,7 @@ export default function VerifyingStep({ email, university }) {
         </div>
       </div>
       <div>
-        <p className="text-[15px] font-bold text-white mb-1">Se verifică identitatea...</p>
+        <p className="text-[15px] font-bold text-white mb-1">{t('auth.verifyingTitle')}</p>
         <p className="text-[12px] text-slate-500 font-mono">
           {email}@{university.emailDomain}
         </p>
@@ -22,7 +24,7 @@ export default function VerifyingStep({ email, university }) {
             {s.done
               ? <Check size={13} className="text-emerald-400 shrink-0" strokeWidth={2} />
               : <Loader2 size={13} className="text-indigo-400 animate-spin shrink-0" strokeWidth={1.75} />}
-            <span className={s.done ? 'text-slate-400' : 'text-slate-600'}>{s.label}</span>
+            <span className={s.done ? 'text-slate-400' : 'text-slate-600'}>{t(`auth.verification.${s.key}`)}</span>
           </div>
         ))}
       </div>

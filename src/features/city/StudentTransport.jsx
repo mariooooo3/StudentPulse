@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronLeft, Bus, Clock, MapPin, CreditCard, ChevronDown, ChevronUp, Zap, Tag } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { transportData, DEFAULT_TRANSPORT } from '../../shared/data/cityData'
 
 const container = {
@@ -13,6 +14,7 @@ const itemVar = {
 }
 
 export default function StudentTransport({ onBack, profile, session, onNavigate }) {
+  const { t } = useTranslation()
   const [expanded, setExpanded] = useState(null)
 
   const universityId = profile?.university?.id || profile?.universityId || session?.university?.id || ''
@@ -48,12 +50,12 @@ export default function StudentTransport({ onBack, profile, session, onNavigate 
                 style={{ background: '#06b6d420', border: '1.5px solid #06b6d445' }}>
                 <Bus size={14} style={{ color: '#06b6d4' }} />
               </div>
-              <h2 className="text-lg font-bold text-white">Transport {data.operator}</h2>
+              <h2 className="text-lg font-bold text-white">{t('cityContent.transport.title', { operator: data.operator })}</h2>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5 ml-9">Rute recomandate pentru studenți · {data.city}</p>
+            <p className="text-xs text-slate-500 mt-0.5 ml-9">{t('cityContent.transport.subtitle', { city: data.city })}</p>
           </div>
 
-          <span className="text-xs text-slate-500 shrink-0">{lines.length} linii</span>
+          <span className="text-xs text-slate-500 shrink-0">{t('cityContent.transport.lines', { count: lines.length })}</span>
         </div>
       </motion.div>
 
@@ -71,7 +73,7 @@ export default function StudentTransport({ onBack, profile, session, onNavigate 
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-semibold" style={{ color: '#67e8f9' }}>Abonament Student</p>
+            <p className="text-sm font-semibold" style={{ color: '#67e8f9' }}>{t('cityContent.transport.studentPass')}</p>
             <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
               style={{ background: '#06b6d420', color: '#06b6d4' }}>
               {data.studentPass.discount} OFF
@@ -91,7 +93,7 @@ export default function StudentTransport({ onBack, profile, session, onNavigate 
             style={{ background: '#06b6d415', color: '#22d3ee', border: '1px solid #06b6d430' }}
           >
             <Tag size={10} />
-            Vezi reduceri
+            {t('cityContent.transport.seeDiscounts')}
           </button>
         )}
       </motion.div>
@@ -99,7 +101,7 @@ export default function StudentTransport({ onBack, profile, session, onNavigate 
       {/* Lines */}
       {lines.length === 0 ? (
         <div className="text-center py-10 text-slate-500 text-sm">
-          Date transport pentru {data.city} în curând.
+          {t('cityContent.transport.comingSoon', { city: data.city })}
         </div>
       ) : (
       <motion.div
@@ -170,7 +172,7 @@ export default function StudentTransport({ onBack, profile, session, onNavigate 
                             style={{ background: '#10b98110' }}>
                             <span className="text-emerald-400 text-xs shrink-0">✓</span>
                             <p className="text-xs text-emerald-400/80">
-                              Abonament student disponibil pe această linie
+                              {t('cityContent.transport.passAvailable')}
                             </p>
                           </div>
                         )}
@@ -178,7 +180,7 @@ export default function StudentTransport({ onBack, profile, session, onNavigate 
                         {/* Stops timeline */}
                         <div>
                           <p className="text-xs font-semibold text-slate-500 mb-2.5 uppercase tracking-wider">
-                            Stații principale
+                            {t('cityContent.transport.mainStops')}
                           </p>
                           <div className="relative pl-5">
                             <div className="absolute left-2 top-1 bottom-1 w-px bg-white/[0.08]" />

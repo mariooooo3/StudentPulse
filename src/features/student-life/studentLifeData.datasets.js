@@ -1559,12 +1559,12 @@ export const wellnessData = {
     { id: 'wc4', name: 'Sala de Sport Campus TUIASI', phone: '0232-278-680', available: 'L-D, 7:00-22:00', type: 'Sport', free: false, url: 'https://campus.tuiasi.ro/' },
   ],
   tips: [
-    { id: 'wt1', icon: 'brain', title: 'Tehnica Pomodoro', body: '25 minute focus, 5 minute pauză. Crește productivitatea cu până la 40%.' },
-    { id: 'wt2', icon: 'sleep', title: 'Somnul contează', body: '7-8 ore pe noapte îmbunătățesc memoria și concentrarea. Nu sacrifica somnul pentru studiu.' },
-    { id: 'wt3', icon: 'movement', title: 'Mișcare zilnică', body: '30 minute de mers pe jos reduc anxietatea cu 50%. Ieși din cameră.' },
-    { id: 'wt4', icon: 'food', title: 'Mânâncă regulat', body: 'Sare peste mese = concentrare slabă. Cantina TUIASI e ieftină și accesibilă (11:00-15:00).' },
-    { id: 'wt5', icon: 'phone', title: 'Detox digital', body: 'O oră fără telefon înainte de culcare îmbunătățește calitatea somnului semnificativ.' },
-    { id: 'wt6', icon: 'support', title: 'Vorbește cu cineva', body: 'Nu ești singur. Consilierea psihologică TUIASI e gratuită și confidențială.' },
+    { id: 'wt1', icon: 'brain',    titleKey: 'wellnessSection.tips.pomodoroTitle', bodyKey: 'wellnessSection.tips.pomodoroBody' },
+    { id: 'wt2', icon: 'sleep',    titleKey: 'wellnessSection.tips.sleepTitle',    bodyKey: 'wellnessSection.tips.sleepBody' },
+    { id: 'wt3', icon: 'movement', titleKey: 'wellnessSection.tips.movementTitle', bodyKey: 'wellnessSection.tips.movementBody' },
+    { id: 'wt4', icon: 'food',     titleKey: 'wellnessSection.tips.foodTitle',     bodyKey: 'wellnessSection.tips.foodBody' },
+    { id: 'wt5', icon: 'phone',    titleKey: 'wellnessSection.tips.detoxTitle',    bodyKey: 'wellnessSection.tips.detoxBody' },
+    { id: 'wt6', icon: 'support',  titleKey: 'wellnessSection.tips.talkTitle',     bodyKey: 'wellnessSection.tips.talkBody' },
   ],
   pomodoroConfig: { work: 25, shortBreak: 5, longBreak: 15, sessionsUntilLong: 4 },
 }

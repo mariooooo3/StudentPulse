@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export default function SectionHeader({ section, accent, meta, children }) {
+  const { t } = useTranslation()
   const Icon = meta?.icon || Sparkles
   return (
     <motion.div
@@ -33,9 +35,9 @@ export default function SectionHeader({ section, accent, meta, children }) {
             </div>
           </div>
           <div>
-            <p className="section-label mb-1.5" style={{ color: accent.color + 'aa' }}>{meta?.kicker}</p>
-            <h2 className="text-lg font-black leading-tight text-white">{meta?.title}</h2>
-            <p className="mt-1 text-sm leading-relaxed text-slate-400">{meta?.description}</p>
+            <p className="section-label mb-1.5" style={{ color: accent.color + 'aa' }}>{t(`sectionMeta.${section}.kicker`)}</p>
+            <h2 className="text-lg font-black leading-tight text-white">{t(`sectionMeta.${section}.title`)}</h2>
+            <p className="mt-1 text-sm leading-relaxed text-slate-400">{t(`sectionMeta.${section}.description`)}</p>
           </div>
         </div>
         {children && <div className="shrink-0">{children}</div>}

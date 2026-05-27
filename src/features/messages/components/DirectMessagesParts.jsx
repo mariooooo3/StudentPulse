@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Send, Wifi, WifiOff, ShieldCheck, Paperclip, X, FileText, ArrowLeft, Hash, Check, CheckCheck, MessageSquare } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useMessages } from '../../../shared/hooks/useMessages'
 import { socketService } from '../../../shared/services/socket.service'
 import { listPortalThreadsForUser, sendPortalMessage } from '../../../shared/services/professorPortal.service'
@@ -8,6 +9,7 @@ import { avatarLetters, colorFor, nameFromEmail } from '../messages.utils'
 import clsx from 'clsx'
 
 export function TypingDots({ names, single }) {
+  const { t } = useTranslation()
   return (
     <div className="flex items-center gap-2 px-6 py-2 animate-fade-in">
       <div className="flex gap-[3px] items-end">
@@ -16,7 +18,7 @@ export function TypingDots({ names, single }) {
         <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-bounce" style={{ animationDelay: '300ms' }} />
       </div>
       <p className="font-mono text-[11px] text-slate-500 italic">
-        {names} {single ? 'scrie...' : 'scriu...'}
+        {names} {single ? t('messages.typing') : t('messages.typingPlural')}
       </p>
     </div>
   )
@@ -101,7 +103,7 @@ export function DateSeparator({ label }) {
 
 /* ─── Message bubble ─────────────────────────────────────────────────────── */
 export function Bubble({ isMe, content, attachment, timestamp, isSeen, showSeen, senderAvatar, senderName }) {
-  const time = new Date(timestamp).toLocaleTimeString('ro', { hour: '2-digit', minute: '2-digit' })
+  const time = new Date(timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
   return (
     <div className={clsx('flex items-end gap-2', isMe ? 'justify-end' : 'justify-start')}>
       {!isMe && (
@@ -168,6 +170,7 @@ export function EmptyChat({ text }) {
 
 /* ─── GroupThread ────────────────────────────────────────────────────────── */
 export function GroupThread({ groupId, groupLabel, scope, currentUserId, currentName, onBack }) {
+  const { t } = useTranslation()
   const channel = `group:${scope}:${groupId}`
   const { messages, sendMessage, connected, typingUsers, sendTyping } = useMessages(channel, currentUserId)
   const [input, setInput] = useState('')
@@ -210,14 +213,14 @@ export function GroupThread({ groupId, groupLabel, scope, currentUserId, current
           </div>
         }
         name={`#${groupLabel}`}
-        subtitle="Canal facultate"
-        badge="canal"
+        subtitle={t('messages.facultyChannel')}
+        badge={t('messages.channelBadge')}
         connected={connected}
       />
 
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
         {messages.length === 0 && (
-          <EmptyChat text="Niciun mesaj încă. Fii primul care scrie!" />
+          <EmptyChat text={t('messages.emptyGroup')} />
         )}
         {messages.map(msg => {
           const isMe = msg.senderId === currentUserId
@@ -253,7 +256,7 @@ export function GroupThread({ groupId, groupLabel, scope, currentUserId, current
         onKeyDown={e => e.key === 'Enter' && send()}
         onSend={send}
         canSend={!!input.trim()}
-        placeholder={`Scrie în #${groupLabel}...`}
+        placeholder={t('messages.groupPlaceholder', { label: groupLabel })}
       />
     </div>
   )
@@ -261,6 +264,7 @@ export function GroupThread({ groupId, groupLabel, scope, currentUserId, current
 
 /* ─── ChatThread ─────────────────────────────────────────────────────────── */
 export function ChatThread({ contact, currentUserId, currentName, scope, onBack }) {
+  const { t } = useTranslation()
   const isSelfConversation = contact.userId === currentUserId
   const channel = `dm:${scope}:${[currentUserId, contact.userId].sort().join(':')}`
   const { messages, sendMessage, connected, typingUsers, sendTyping, contactSeenAt, sendRead } = useMessages(channel, currentUserId)
@@ -287,9 +291,9 @@ export function ChatThread({ contact, currentUserId, currentName, scope, onBack 
   function onFile(e) {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 5 * 1024 * 1024) { alert('Fișierul e prea mare. Maxim 5MB.'); return }
+    if (file.size > 5 * 1024 * 1024) { alert(t('messages.fileTooLarge')); return }
     const reader = new FileReader()
-    reader.onload = ev => setAttachment({ base64: ev.target.result.split(',')[1], mimeType: file.type, name: file.name, size: file.size })
+    reader.onload = ev => { const r = ev.target.result; setAttachment({ base64: r?.includes(',') ? r.split(',')[1] : r, mimeType: file.type, name: file.name, size: file.size }) }
     reader.readAsDataURL(file)
     e.target.value = ''
   }
@@ -336,17 +340,17 @@ export function ChatThread({ contact, currentUserId, currentName, scope, onBack 
         name={contact.name}
         subtitle={
           isTyping
-            ? 'scrie...'
-            : 'Online acum'
+            ? t('messages.typing')
+            : t('messages.onlineStatus')
         }
         subtitleClass={isTyping ? 'text-indigo-400 italic' : 'text-emerald-400'}
-        badge={contact.facultyName || 'Aceeași facultate'}
+        badge={contact.facultyName || t('messages.sameFaculty')}
         connected={connected}
       />
 
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
         {messages.length === 0 && (
-          <EmptyChat text="Niciun mesaj încă. Poți discuta doar cu studenți din aceeași universitate și facultate." />
+          <EmptyChat text={t('messages.emptyDM')} />
         )}
         {messages.map(msg => {
           const isMe = msg.senderId === currentUserId
@@ -413,7 +417,7 @@ export function ChatThread({ contact, currentUserId, currentName, scope, onBack 
             value={input}
             onChange={handleInput}
             onKeyDown={e => e.key === 'Enter' && send()}
-            placeholder={isSelfConversation ? 'Conversație cu tine însuți' : 'Scrie un mesaj...'}
+            placeholder={isSelfConversation ? t('messages.selfConversation') : t('messages.messagePlaceholder')}
             disabled={isSelfConversation}
             className="flex-1 bg-transparent text-sm text-slate-200 placeholder-slate-600 outline-none disabled:opacity-40"
           />
@@ -437,6 +441,7 @@ export function ChatThread({ contact, currentUserId, currentName, scope, onBack 
 
 /* ─── PortalThread ───────────────────────────────────────────────────────── */
 export function PortalThread({ thread, currentUserId, currentName }) {
+  const { t } = useTranslation()
   const [input, setInput] = useState('')
   const [localThread, setLocalThread] = useState(thread)
   const [typingUsers, setTypingUsers] = useState({})
@@ -528,15 +533,15 @@ export function PortalThread({ thread, currentUserId, currentName }) {
           </div>
         }
         name={localThread.professorName}
-        subtitle={isTyping ? 'scrie...' : localThread.subject}
+        subtitle={isTyping ? t('messages.typing') : localThread.subject}
         subtitleClass={isTyping ? 'text-amber-300 italic' : 'text-slate-500'}
-        badge="Portal profesor"
+        badge={t('messages.portalBadge')}
         connected={true}
       />
 
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
         {localThread.messages.length === 0 && (
-          <EmptyChat text="Nu există mesaje încă." />
+          <EmptyChat text={t('messages.emptyPortal')} />
         )}
         {localThread.messages.map(msg => {
           const isMe = msg.senderRole === 'student'
@@ -563,7 +568,7 @@ export function PortalThread({ thread, currentUserId, currentName }) {
         onKeyDown={e => e.key === 'Enter' && send()}
         onSend={send}
         canSend={!!input.trim()}
-        placeholder="Răspunde profesorului..."
+        placeholder={t('messages.replyPlaceholder')}
       />
     </div>
   )
@@ -571,6 +576,7 @@ export function PortalThread({ thread, currentUserId, currentName }) {
 
 /* ─── Contact row ────────────────────────────────────────────────────────── */
 export function ContactRow({ user, isActive, onClick }) {
+  const { t } = useTranslation()
   return (
     <button
       onClick={onClick}
@@ -595,7 +601,7 @@ export function ContactRow({ user, isActive, onClick }) {
         <p className={clsx('text-sm font-semibold truncate', isActive ? 'text-white' : 'text-slate-200 group-hover:text-white transition-colors')}>
           {user.name}
         </p>
-        <p className="text-[11px] text-slate-500 truncate">{user.facultyName || 'Aceeași facultate'}</p>
+        <p className="text-[11px] text-slate-500 truncate">{user.facultyName || t('messages.sameFaculty')}</p>
       </div>
     </button>
   )

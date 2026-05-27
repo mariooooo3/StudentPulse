@@ -8,6 +8,7 @@ import {
   Users,
   Building2,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useNow } from '../../../shared/hooks/useNow'
 import { eventTiming } from '../../../shared/utils/dateTime'
 import { getScopedCommunityGroups, studentLifeData } from '../studentLifeData'
@@ -21,6 +22,7 @@ import EmptyState from '../components/EmptyState'
 import { getScopeLabel } from '../../../shared/utils/tenantScope'
 
 export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
+  const { t } = useTranslation()
   const accent = SECTION_ACCENTS.community
   const [type, setType] = useState('Toate')
   const [query, setQuery] = useState('')
@@ -48,7 +50,7 @@ export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
       <SectionHeader section="community" accent={accent} meta={SECTION_META.community} />
 
       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-        <p className="section-label mb-3">Alătură-te rapid după activitate</p>
+        <p className="section-label mb-3">{t('communitySection.quickJoin')}</p>
         <div className="flex gap-2 overflow-x-auto pb-1">
           {studentLifeData.community.activities.map((activity) => (
             <button
@@ -63,18 +65,18 @@ export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
       </div>
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-        <SearchField value={query} onChange={setQuery} placeholder="Caută grupuri, activități, interese..." />
+        <SearchField value={query} onChange={setQuery} placeholder={t('communitySection.searchPlaceholder')} />
         <FilterPills items={GROUP_TYPES} value={type} onChange={setType} accent={accent} />
-        <span className="shrink-0 font-mono text-xs font-semibold text-slate-500">{groups.length} grupuri</span>
+        <span className="shrink-0 font-mono text-xs font-semibold text-slate-500">{t('communitySection.groups', { count: groups.length })}</span>
       </div>
 
       {groups.length === 0 ? (
         <EmptyState
           icon={noScopedData ? Building2 : Users}
-          title={noScopedData ? 'Nu există conținut pentru facultatea ta' : 'Niciun grup găsit'}
+          title={noScopedData ? t('communitySection.noGroups') : t('communitySection.noGroups')}
           text={noScopedData
-            ? `Nu am găsit grupuri pentru ${scopeLabel || 'profilul tău academic'}. Poți crea primul grup pentru colegii tăi.`
-            : 'Încearcă o activitate sau tip mai general.'}
+            ? t('communitySection.noGroupsScoped', { scope: scopeLabel || t('communitySection.defaultScope') })
+            : t('communitySection.noGroupsText')}
           accent={accent}
         />
       ) : (
@@ -93,7 +95,7 @@ export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
                     </span>
                     {group.shared.length > 0 && (
                       <span className="badge-green">
-                        <Check size={10} /> {group.shared.length} interese comune
+                        <Check size={10} /> {t('communitySection.commonInterests', { count: group.shared.length })}
                       </span>
                     )}
                   </div>
@@ -110,7 +112,7 @@ export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
               <div className="gradient-separator mt-4 mb-4" />
               <div className="flex items-center justify-between gap-2">
                 <span className={clsx('text-xs font-semibold', group.open ? 'text-slate-500' : 'text-amber-400')}>
-                  {group.open ? 'Grup deschis' : 'Grup plin'}
+                  {group.open ? t('communitySection.openGroup') : t('communitySection.fullGroup')}
                 </span>
                 <div className="flex items-center gap-2">
                   {group.url && (
@@ -138,7 +140,7 @@ export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
                       color: accent.color,
                     } : undefined}
                   >
-                    {joined.has(group.id) ? 'Alăturat' : group.open ? 'Cere acces' : 'Indisponibil'}
+                    {joined.has(group.id) ? t('communitySection.joined') : group.open ? t('communitySection.requestAccess') : t('communitySection.unavailable')}
                   </button>
                 </div>
               </div>

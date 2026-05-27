@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 import { SECTION_ACCENTS, SECTION_META, TOOLS_TABS } from '../constants/sectionConfig'
 import SectionHeader from '../components/SectionHeader'
 import AccentLine from '../components/AccentLine'
@@ -10,6 +11,7 @@ import CarpoolTab from './CarpoolTab'
 import RoommateTab from './RoommateTab'
 
 export default function ToolsSection({ lifeProfile }) {
+  const { t } = useTranslation()
   const accent = SECTION_ACCENTS.tools
   const [toolTab, setToolTab] = useState('Budget')
   const activeTool = TOOLS_TABS.find(t => t.id === toolTab) || TOOLS_TABS[0]
@@ -53,8 +55,8 @@ export default function ToolsSection({ lifeProfile }) {
                   {tool.stat}
                 </span>
               </div>
-              <p className="text-sm font-bold text-white">{tool.label}</p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-500">{tool.description}</p>
+              <p className="text-sm font-bold text-white">{t(`toolsSection.tabs.${tool.id}.label`)}</p>
+              <p className="mt-1 text-xs leading-relaxed text-slate-500">{t(`toolsSection.tabs.${tool.id}.description`)}</p>
             </button>
           )
         })}
@@ -71,12 +73,12 @@ export default function ToolsSection({ lifeProfile }) {
             <ActiveIcon size={17} style={{ color: accent.color }} />
           </div>
           <div>
-            <p className="text-sm font-bold text-white">{activeTool.title}</p>
-            <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{activeTool.hint}</p>
+            <p className="text-sm font-bold text-white">{t(`toolsSection.tabs.${activeTool.id}.title`)}</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{t(`toolsSection.tabs.${activeTool.id}.hint`)}</p>
           </div>
         </div>
         <span className="w-fit rounded-full border border-white/[0.07] bg-white/[0.03] px-3 py-1 text-[11px] font-bold text-slate-500 shrink-0">
-          Date locale în browser
+          {t('toolsSection.localData')}
         </span>
       </div>
 

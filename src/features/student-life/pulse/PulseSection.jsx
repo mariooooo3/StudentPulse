@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
 import {
   Activity,
@@ -25,6 +26,7 @@ import AccentLine from '../components/AccentLine'
 import EmptyState from '../components/EmptyState'
 
 export default function PulseSection({ lifeProfile }) {
+  const { t } = useTranslation()
   const now = useNow()
   const accent = SECTION_ACCENTS.pulse
   const { session } = useAuth()
@@ -156,19 +158,19 @@ export default function PulseSection({ lifeProfile }) {
                   {!localMode && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-40" />}
                   <span className={clsx('relative inline-flex h-2.5 w-2.5 rounded-full', localMode ? 'bg-amber-300' : 'bg-cyan-300')} />
                 </span>
-                <p className="section-label">Campus Pulse live</p>
+                <p className="section-label">{t('pulse.campusPulseLive')}</p>
                 <span className={clsx(
                   'rounded-full border px-2 py-0.5 text-[10px] font-bold',
                   localMode ? 'border-amber-400/20 bg-amber-400/10 text-amber-200' : 'border-cyan-400/20 bg-cyan-400/10 text-cyan-200',
                 )}>
-                  {localMode ? 'Mod local' : 'Live'}
+                  {localMode ? t('pulse.localMode') : t('pulse.live')}
                 </span>
               </div>
               <div className="grid w-full max-w-[300px] grid-cols-3 gap-1.5 rounded-2xl bg-white/[0.025] p-1.5 text-center">
                 {[
-                  { val: liveEvents.length, label: 'Live' },
-                  { val: liveEvents.reduce((s, e) => s + (e.confirmations || 0), 0), label: 'Stats' },
-                  { val: topLocations.length, label: 'Zone' },
+                  { val: liveEvents.length, label: t('pulse.liveLabel') },
+                  { val: liveEvents.reduce((s, e) => s + (e.confirmations || 0), 0), label: t('pulse.statsLabel') },
+                  { val: topLocations.length, label: t('pulse.zonesLabel') },
                 ].map(({ val, label }) => (
                   <div key={label} className="rounded-xl px-3 py-2">
                     <p className="font-mono text-lg font-black leading-none text-white">{val}</p>
@@ -188,7 +190,7 @@ export default function PulseSection({ lifeProfile }) {
             </div>
           ) : liveEvents.length === 0 ? (
             <div className="p-5">
-              <EmptyState icon={Radio} title="Campusul e tacut momentan" text="Adauga primul semnal live: loc linistit, aglomeratie, studiu, cafea sau sport." accent={accent} />
+              <EmptyState icon={Radio} title={t('pulse.campusQuiet')} text={t('pulse.campusQuietText')} accent={accent} />
             </div>
           ) : (
             <motion.div
@@ -209,14 +211,14 @@ export default function PulseSection({ lifeProfile }) {
                         </span>
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-sm font-bold text-white">{meta.label}</h3>
+                            <h3 className="text-sm font-bold text-white">{t(`pulse.types.${item.type}`)}</h3>
                             <span className="inline-flex items-center gap-1 rounded-full border border-white/[0.06] bg-white/[0.03] px-2 py-0.5 text-[10px] font-bold text-slate-500">
                               <MapPin size={10} /> {item.location}
                             </span>
                           </div>
                           {item.note && <p className="mt-2 text-sm leading-relaxed text-slate-400">{item.note}</p>}
                           <p className="mt-2 font-mono text-xs font-semibold text-slate-600">
-                            {item.authorName || 'Student'} · expira in {minutesUntil(item.expiresAt, now)} min
+                            {item.authorName || 'Student'} · {t('pulse.expiresIn', { min: minutesUntil(item.expiresAt, now) })}
                           </p>
                         </div>
                       </div>
@@ -224,7 +226,7 @@ export default function PulseSection({ lifeProfile }) {
                         onClick={() => confirmPulse(item.id)}
                         className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-3 text-[11px] font-bold text-emerald-200 transition-all hover:bg-emerald-400/18 active:scale-[0.97]"
                       >
-                        <Check size={13} /> Confirm
+                        <Check size={13} /> {t('pulse.confirm')}
                         <span className="font-mono text-emerald-100">{item.confirmations || 0}</span>
                       </button>
                     </div>
@@ -238,17 +240,17 @@ export default function PulseSection({ lifeProfile }) {
           <div className="border-t border-white/[0.06] p-5">
             <div className="flex items-center gap-2 mb-3">
               <Activity size={14} style={{ color: accent.color }} />
-              <p className="text-sm font-bold text-white">Zone active</p>
+              <p className="text-sm font-bold text-white">{t('pulse.activeZones')}</p>
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               {topLocations.length === 0 ? (
                 <p className="rounded-xl border border-white/[0.07] bg-white/[0.035] px-3 py-3 text-xs leading-relaxed text-slate-400 sm:col-span-3">
-                  Aici vor aparea locurile confirmate de colegi in ultimele ore.
+                  {t('pulse.noZones')}
                 </p>
               ) : topLocations.map(([location, count]) => (
                 <div key={location} className="rounded-xl border border-white/[0.07] bg-white/[0.04] px-3 py-2.5">
                   <span className="block truncate text-xs font-bold text-slate-200">{location}</span>
-                  <span className="mt-1 block font-mono text-xs font-bold text-slate-400">{count} semnale</span>
+                  <span className="mt-1 block font-mono text-xs font-bold text-slate-400">{t('pulse.signals', { count })}</span>
                 </div>
               ))}
             </div>
@@ -267,14 +269,14 @@ export default function PulseSection({ lifeProfile }) {
                 </span>
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-bold text-white">Adauga semnal live</p>
+                    <p className="text-sm font-bold text-white">{t('pulse.addSignal')}</p>
                     {pulseStreak > 0 && (
                       <span className="inline-flex items-center gap-0.5 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-cyan-300">
                         <Zap size={9} /> {pulseStreak}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500">{localMode ? 'Merge local acum.' : 'Apare instant.'}</p>
+                  <p className="text-xs text-slate-500">{localMode ? t('pulse.worksLocal') : t('pulse.appearsInstant')}</p>
                 </div>
               </div>
               <button
@@ -284,13 +286,13 @@ export default function PulseSection({ lifeProfile }) {
                 style={{ background: accent.bg, border: `1px solid ${accent.border}`, color: accent.color }}
               >
                 {submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-                Publica
+                {t('pulse.publish')}
               </button>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="section-label mb-2 block">Tip semnal</label>
+                <label className="section-label mb-2 block">{t('pulse.signalType')}</label>
                 <div className="grid grid-cols-2 gap-2">
                   {PULSE_TYPES.map((type) => {
                     const Icon = type.icon
@@ -305,7 +307,7 @@ export default function PulseSection({ lifeProfile }) {
                           active ? PULSE_TONES[type.tone] : 'border-white/[0.06] bg-white/[0.02] text-slate-500 hover:text-slate-300',
                         )}
                       >
-                        <Icon size={13} /> {type.label}
+                        <Icon size={13} /> {t(`pulse.types.${type.id}`)}
                       </button>
                     )
                   })}
@@ -313,7 +315,7 @@ export default function PulseSection({ lifeProfile }) {
               </div>
 
               <label className="block">
-                <span className="section-label mb-2 block">Locatie</span>
+                <span className="section-label mb-2 block">{t('pulse.location')}</span>
                 <select
                   value={form.location}
                   onChange={(e) => setForm(c => ({ ...c, location: e.target.value }))}
@@ -324,13 +326,13 @@ export default function PulseSection({ lifeProfile }) {
               </label>
 
               <label className="block">
-                <span className="section-label mb-2 block">Detaliu optional</span>
+                <span className="section-label mb-2 block">{t('pulse.optDetail')}</span>
                 <textarea
                   value={form.note}
                   onChange={(e) => setForm(c => ({ ...c, note: e.target.value }))}
                   maxLength={160}
                   rows={2}
-                  placeholder="Ex: masa mare libera langa geam..."
+                  placeholder={t('pulse.detailPlaceholder')}
                   className="input-base resize-none"
                 />
               </label>

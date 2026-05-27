@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 import { Check, CheckCheck } from 'lucide-react'
 import { socketService } from '../../../shared/services/socket.service'
 import { DEMO_PROFESSOR } from '../../../shared/services/professorPortal.service'
 
 export default function MessagesView({ threads, onSend, selectedThreadId, onThreadSelect, professor }) {
+  const { t } = useTranslation()
   const [activeId, setActiveId] = useState(threads[0]?.id || null)
   const [text, setText] = useState('')
   const [typingUsers, setTypingUsers] = useState({})
@@ -83,12 +85,12 @@ export default function MessagesView({ threads, onSend, selectedThreadId, onThre
       {/* Thread list */}
       <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] overflow-hidden flex flex-col">
         <div className="px-4 py-3 border-b border-white/[0.05]">
-          <p className="text-sm font-bold text-white">Conversatii</p>
-          <p className="text-[11px] text-slate-600 mt-0.5">{threads.length} active</p>
+          <p className="text-sm font-bold text-white">{t('professor.messages.conversations')}</p>
+          <p className="text-[11px] text-slate-600 mt-0.5">{t('professor.messages.activeCount', { count: threads.length })}</p>
         </div>
         <div className="flex-1 overflow-auto">
           {threads.length === 0 ? (
-            <div className="p-8 text-center text-sm text-slate-600">Nu exista conversatii.</div>
+            <div className="p-8 text-center text-sm text-slate-600">{t('professor.messages.noConversations')}</div>
           ) : (
             threads.map(thread => (
               <button
@@ -129,7 +131,7 @@ export default function MessagesView({ threads, onSend, selectedThreadId, onThre
                 <p className="font-bold text-white text-sm">{active.studentName}</p>
                 <p className="text-xs">
                   {Object.keys(typingUsers).length > 0
-                    ? <span className="text-amber-400 italic">{Object.values(typingUsers).join(', ')} scrie...</span>
+                    ? <span className="text-amber-400 italic">{Object.values(typingUsers).join(', ')} {t('professor.messages.typing')}</span>
                     : <span className="text-slate-600">{active.subject}</span>}
                 </p>
               </div>
@@ -138,7 +140,7 @@ export default function MessagesView({ threads, onSend, selectedThreadId, onThre
             {/* Messages */}
             <div className="flex-1 overflow-auto p-4 space-y-3">
               {active.messages.length === 0 ? (
-                <p className="text-sm text-slate-600 text-center py-10">Incepe conversatia cu studentul.</p>
+                <p className="text-sm text-slate-600 text-center py-10">{t('professor.messages.startConversation')}</p>
               ) : (
                 active.messages.map(message => {
                   const isMe = message.senderRole === 'professor'
@@ -179,7 +181,7 @@ export default function MessagesView({ threads, onSend, selectedThreadId, onThre
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400/60 animate-bounce" style={{ animationDelay: '150ms' }} />
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400/60 animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
-                  <p className="text-xs text-slate-500 italic">{Object.values(typingUsers).join(', ')} scrie...</p>
+                  <p className="text-xs text-slate-500 italic">{Object.values(typingUsers).join(', ')} {t('professor.messages.typing')}</p>
                 </div>
               )}
               <div ref={messagesEndRef} />
@@ -191,15 +193,15 @@ export default function MessagesView({ threads, onSend, selectedThreadId, onThre
                 value={text}
                 onChange={handleTextChange}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitMessage() } }}
-                placeholder="Scrie raspuns..."
+                placeholder={t('professor.messages.inputPlaceholder')}
                 className="input-base flex-1 text-sm"
               />
-              <button onClick={submitMessage} className="btn-primary px-4 text-sm shrink-0">Trimite</button>
+              <button onClick={submitMessage} className="btn-primary px-4 text-sm shrink-0">{t('professor.messages.send')}</button>
             </div>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-sm text-slate-600">
-            Selecteaza o conversatie
+            {t('professor.messages.selectConversation')}
           </div>
         )}
       </div>

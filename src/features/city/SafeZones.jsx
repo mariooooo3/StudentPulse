@@ -1,12 +1,13 @@
 import { ChevronLeft, Phone, Shield, AlertTriangle, CheckCircle, MapPin } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { safetyZones, emergencyContacts } from '../../shared/data/cityData'
 import clsx from 'clsx'
 
 const LEVEL_META = {
-  safe:     { icon: CheckCircle,    label: 'Sigur',   color: '#10b981' },
-  moderate: { icon: Shield,         label: 'Moderat', color: '#f59e0b' },
-  caution:  { icon: AlertTriangle,  label: 'Atenție', color: '#ef4444' },
+  safe:     { icon: CheckCircle,    color: '#10b981' },
+  moderate: { icon: Shield,         color: '#f59e0b' },
+  caution:  { icon: AlertTriangle,  color: '#ef4444' },
 }
 
 const container = {
@@ -19,6 +20,7 @@ const itemVar = {
 }
 
 export default function SafeZones({ onBack }) {
+  const { t } = useTranslation()
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       {/* Header */}
@@ -48,9 +50,9 @@ export default function SafeZones({ onBack }) {
                 style={{ background: '#f43f5e20', border: '1.5px solid #f43f5e45' }}>
                 <Shield size={14} style={{ color: '#f43f5e' }} />
               </div>
-              <h2 className="text-lg font-bold text-white">Zone Sigure</h2>
+              <h2 className="text-lg font-bold text-white">{t('cityContent.safety.title')}</h2>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5 ml-9">Ghid de siguranță pentru studenți · Iași</p>
+            <p className="text-xs text-slate-500 mt-0.5 ml-9">{t('cityContent.safety.subtitle')}</p>
           </div>
         </div>
 
@@ -61,7 +63,7 @@ export default function SafeZones({ onBack }) {
             return (
               <div key={key} className="flex items-center gap-1.5 text-xs text-slate-400">
                 <Icon size={12} style={{ color: meta.color }} />
-                <span>{meta.label}</span>
+                <span>{t(`cityContent.safety.levels.${key}`)}</span>
               </div>
             )
           })}
@@ -104,7 +106,7 @@ export default function SafeZones({ onBack }) {
                       className="text-[9px] font-bold px-2 py-0.5 rounded-full"
                       style={{ background: zone.color + '20', color: zone.color }}
                     >
-                      {meta.label}
+                      {t(`cityContent.safety.levels.${zone.level}`)}
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">{zone.desc}</p>
@@ -122,7 +124,7 @@ export default function SafeZones({ onBack }) {
         transition={{ delay: 0.3, type: 'spring', stiffness: 80, damping: 18 }}
       >
         <div className="flex items-center gap-3 mb-3">
-          <span className="section-label">Contacte urgență</span>
+          <span className="section-label">{t('cityContent.safety.emergency')}</span>
           <div className="flex-1 h-px bg-white/[0.06]" />
         </div>
 
