@@ -215,6 +215,20 @@ function migrate() {
 
     CREATE INDEX IF NOT EXISTS idx_book_listings_expires ON book_listings(expires_at);
     CREATE INDEX IF NOT EXISTS idx_roommate_listings_expires ON roommate_listings(expires_at);
+
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      username TEXT NOT NULL UNIQUE,
+      email TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      university_id TEXT,
+      faculty_code TEXT,
+      role TEXT NOT NULL DEFAULT 'student',
+      created_at TEXT NOT NULL
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email);
   `)
 }
 
