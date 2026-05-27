@@ -918,6 +918,21 @@ const en = {
     facultyChannels: 'Faculty channels',
     universityFallback: 'University',
     facultyFallback: 'Faculty',
+    typing: 'typing...',
+    typingPlural: 'typing...',
+    facultyChannel: 'Faculty channel',
+    channelBadge: 'channel',
+    emptyGroup: 'No messages yet. Be the first to write!',
+    groupPlaceholder: 'Write in #{{label}}...',
+    fileTooLarge: 'File is too large. Maximum 5MB.',
+    onlineStatus: 'Online now',
+    sameFaculty: 'Same faculty',
+    emptyDM: 'No messages yet. You can only chat with students from the same university and faculty.',
+    selfConversation: 'Conversation with yourself',
+    messagePlaceholder: 'Write a message...',
+    portalBadge: 'Professor portal',
+    emptyPortal: 'No messages yet.',
+    replyPlaceholder: 'Reply to professor...',
   },
 
   thesis: {
@@ -1042,6 +1057,9 @@ const en = {
     toastAddedSkill: '{{item}} was added to your Skill Swap profile.',
     toastCreatedSession: 'Session created',
     toastCreatedText: 'The new session now appears in the list and you are enrolled as organizer.',
+    newSessionTopic: 'New study session',
+    you: 'You',
+    thisWeek: 'This week',
   },
 }
 

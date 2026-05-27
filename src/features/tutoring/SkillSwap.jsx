@@ -244,13 +244,13 @@ function GroupSessionsTab({ sessions }) {
     const session = {
       id,
       type: 'study',
-      topic: 'Sesiune noua de recapitulare',
-      host: 'Tu',
-      date: 'Saptamana aceasta',
+      topic: t('skillSwap.newSessionTopic'),
+      host: t('skillSwap.you'),
+      date: t('skillSwap.thisWeek'),
       time: '18:00',
       totalSpots: 6,
       spots: 5,
-      tags: ['recapitulare', 'peer learning'],
+      tags: ['peer learning'],
     }
     setCreated(prev => [session, ...prev])
     setJoined(prev => ({ ...prev, [id]: true }))
