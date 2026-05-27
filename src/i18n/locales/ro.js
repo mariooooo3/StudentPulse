@@ -307,6 +307,8 @@ const ro = {
     groups: '{{count}} grupuri',
     noGroups: 'Niciun grup găsit',
     noGroupsText: 'Încearcă o activitate sau tip mai general.',
+    noGroupsScoped: 'Nu am găsit grupuri pentru {{scope}}. Poți crea primul grup pentru colegii tăi.',
+    defaultScope: 'profilul tău academic',
     commonInterests: '{{count}} interese comune',
     openGroup: 'Grup deschis',
     fullGroup: 'Grup plin',
@@ -793,11 +795,6 @@ const ro = {
         examsQ: 'Cum mă pregătesc eficient pentru sesiunea de examene? Sfaturi practice.',
       },
     },
-  },
-
-  communitySection: {
-    noGroupsScoped: 'Nu am găsit grupuri pentru {{scope}}. Poți crea primul grup pentru colegii tăi.',
-    defaultScope: 'profilul tău academic',
   },
 
   landing: {
