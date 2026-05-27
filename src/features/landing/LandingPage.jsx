@@ -75,7 +75,7 @@ export default function LandingPage({ onStart }) {
       {/* ── Header ────────────────────────────────────────── */}
       <header className="relative z-10 flex items-center justify-between px-6 sm:px-12 py-5 max-w-6xl mx-auto w-full">
         <div className="flex items-center gap-2.5">
-          <SPLogo accent="#6366f1" accentStrong="#7c3aed" size="sm" />
+          <img src="/icon-192.png" alt="StudentPulse" className="w-9 h-9 object-contain rounded-xl" />
           <div>
             <span className="font-bold text-white text-[14px] tracking-tight leading-none block">StudentPulse</span>
             <span className="text-[10px] text-slate-600 font-medium leading-none">{t('landing.tagline')}</span>
@@ -184,19 +184,13 @@ export default function LandingPage({ onStart }) {
             {/* ── Bezel ─────────────────────────────────────────── */}
             <div className="relative p-[2.5px] rounded-[1.75rem] bg-gradient-to-b from-white/35 to-white/[0.03]">
               <div
-                className="w-32 h-32 rounded-[calc(1.75rem-2.5px)] flex items-center justify-center"
+                className="w-32 h-32 rounded-[calc(1.75rem-2.5px)] flex items-center justify-center overflow-hidden"
                 style={{
                   background: 'linear-gradient(140deg, #6366f1 0%, #4f46e5 40%, #7c3aed 100%)',
                   boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -2px 0 rgba(0,0,0,0.25), 0 8px 32px rgba(99,102,241,0.5)',
                 }}
               >
-                {/* Needle-settle: overshoot, damp, lock — like a real compass finding north */}
-                <motion.div
-                  animate={{ rotate: [0, 22, -14, 8, -4, 1, 0] }}
-                  transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut', repeatDelay: 4.5 }}
-                >
-                  <Compass size={56} className="text-white drop-shadow-lg" strokeWidth={1.5} />
-                </motion.div>
+                <img src="/icon-512.png" alt="StudentPulse" className="w-20 h-20 object-contain drop-shadow-lg" />
               </div>
             </div>
           </motion.div>

@@ -245,7 +245,7 @@ export default function Sidebar({ platformMode = 'academic', currentView, onNavi
       {/* Brand */}
       <div className="px-5 pt-6 pb-4">
         <div className="flex items-center gap-3">
-          <SPLogo accent={theme.accent} accentStrong={theme.accentStrong} size="sm" />
+          <img src="/icon-192.png" alt="StudentPulse" className="w-9 h-9 object-contain rounded-xl shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="font-bold text-white text-[13px] leading-tight tracking-tight">{modeCopy.name}</p>
             <p className="text-[11px] text-slate-600 font-medium">{t(modeCopy.modeKey)}</p>
