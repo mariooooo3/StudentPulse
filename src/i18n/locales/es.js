@@ -182,6 +182,15 @@ const es = {
       weeklyDesc: 'Se reinicia el lunes',
       monthlyDesc: 'Se reinicia el día 1',
     },
+    card: {
+      appOne: 'aplicación',
+      appMany: 'aplicaciones',
+      processing: '✓ Procesando…',
+      inProgress: 'En progreso',
+      careerHintBefore: 'Aplica a pasantías en la sección ',
+      careerHintSection: 'Carrera',
+      careerHintAfter: ' — se completa automáticamente.',
+    },
   },
 
   career: {
@@ -251,6 +260,11 @@ const es = {
     errorOnlyImages: 'Solo se aceptan imágenes (JPG, PNG, WebP).',
     errorFileTooLarge: 'La imagen es demasiado grande. Máximo {{max}}MB.',
     errorCVTooShort: 'El CV es demasiado corto. Añade más contenido.',
+    approved: '¡Aprobado! +{{points}} puntos 🎉',
+    screenshotRejected: 'Captura rechazada',
+    rejected: 'Prueba rechazada',
+    screenshotHintDefault: 'Sube una captura de tu app de fitness que muestre la actividad de hoy.',
+    proofPlaceholder: 'Ej: Caminé 35 minutos en el parque después de clases...',
   },
 
   cvPanel: {
@@ -559,6 +573,7 @@ const es = {
       },
     },
     chat: {
+      cityFallback: 'ciudad',
       title: 'Asistente IA Ciudad',
       online: 'En línea',
       errorMsg: 'No puedo responder ahora.',
@@ -885,6 +900,22 @@ const es = {
     initialProfessor: 'Hola, soy el asistente del portal del profesor. Puedo ayudarte con solicitudes de tesis, recuperaciones, mensajes, notificaciones en vivo y tu perfil académico.',
     copied: '¡Copiado!',
     copy: 'Copiar',
+    navigatedTo: '{{icon}} ¡Te llevo a **{{label}}** ahora!',
+    arrivedAt: 'Navegado a {{label}}. ¿En qué puedo ayudarte?',
+    slashLabels: {
+      campusMap: 'Mapa del campus',
+      schedule: 'Horario',
+      messages: 'Mensajes',
+      careerCv: 'Carrera & CV',
+      community: 'Comunidad',
+      events: 'Eventos',
+      toolsBudget: 'Herramientas & Presupuesto',
+      challenges: 'Desafíos',
+      thesisRequests: 'Solicitudes de tesis',
+      recovery: 'Recuperación',
+      studentMessages: 'Mensajes de estudiantes',
+      academicProfile: 'Perfil académico',
+    },
   },
 
   search: {

@@ -182,6 +182,15 @@ const it = {
       weeklyDesc: 'Si reimposta il lunedì',
       monthlyDesc: "Si reimposta l'1 del mese",
     },
+    card: {
+      appOne: 'app',
+      appMany: 'app',
+      processing: '✓ Elaborazione…',
+      inProgress: 'In corso',
+      careerHintBefore: 'Candidati agli stage dalla sezione ',
+      careerHintSection: 'Carriera',
+      careerHintAfter: ' — si completa automaticamente.',
+    },
   },
 
   career: {
@@ -251,6 +260,11 @@ const it = {
     errorOnlyImages: 'Sono accettate solo immagini (JPG, PNG, WebP).',
     errorFileTooLarge: "L'immagine è troppo grande. Massimo {{max}}MB.",
     errorCVTooShort: 'Il CV è troppo breve. Aggiungi più contenuto.',
+    approved: 'Approvato! +{{points}} punti 🎉',
+    screenshotRejected: 'Screenshot rifiutato',
+    rejected: 'Prova rifiutata',
+    screenshotHintDefault: "Carica uno screenshot dall'app di fitness che mostra l'attività di oggi.",
+    proofPlaceholder: 'Es: Ho camminato 35 minuti nel parco dopo le lezioni, sono uscito dall\'università alle 17:30 e ho percorso il viale principale fino al lago e ritorno...',
   },
 
   cvPanel: {
@@ -561,6 +575,7 @@ const it = {
     chat: {
       title: 'Assistente AI Città',
       online: 'Online',
+      cityFallback: 'città',
       errorMsg: 'Non posso rispondere ora.',
       retryMsg: 'Riprova.',
       placeholder: 'Chiedi qualcosa sulla vita studentesca...',
@@ -885,6 +900,22 @@ const it = {
     initialProfessor: "Ciao, sono l'assistente del portale professore. Posso aiutarti con richieste di tesi, recuperi, messaggi, notifiche live e il tuo profilo accademico.",
     copied: 'Copiato!',
     copy: 'Copia',
+    navigatedTo: '{{icon}} Ti porto a **{{label}}** ora!',
+    arrivedAt: 'Navigato a {{label}}. Come posso aiutarti?',
+    slashLabels: {
+      campusMap: 'Mappa campus',
+      schedule: 'Orario',
+      messages: 'Messaggi',
+      careerCv: 'Carriera & CV',
+      community: 'Comunità',
+      events: 'Eventi',
+      toolsBudget: 'Strumenti & Budget',
+      challenges: 'Sfide',
+      thesisRequests: 'Richieste di tesi',
+      recovery: 'Recupero',
+      studentMessages: 'Messaggi studenti',
+      academicProfile: 'Profilo accademico',
+    },
   },
 
   search: {

@@ -30,7 +30,7 @@ const VIEW_LABELS = {
   career:     'Career',
   community:  'Community',
   citylife:   'City Adaptation',
-  challenges: 'Provocări',
+  challenges: 'Challenges',
   professor:  'Professor Portal',
 }
 
@@ -54,26 +54,26 @@ const NAVIGATION_ACTIONS = [
 ]
 
 const SLASH_COMMANDS_STUDENT = [
-  { cmd: '/harta',      label: 'Hartă campus',       icon: '🗺️', view: 'navigator',  mode: 'academic' },
-  { cmd: '/orar',       label: 'Orar',               icon: '📅', view: 'schedule',   mode: 'academic' },
+  { cmd: '/harta',      label: 'Hartă campus',       labelKey: 'assistant.slashLabels.campusMap',        icon: '🗺️', view: 'navigator',  mode: 'academic' },
+  { cmd: '/orar',       label: 'Orar',               labelKey: 'assistant.slashLabels.schedule',          icon: '📅', view: 'schedule',   mode: 'academic' },
   { cmd: '/licenta',    label: 'Thesis Finder',      icon: '🎓', view: 'thesis',     mode: 'academic' },
   { cmd: '/tutoring',   label: 'Peer Tutoring',      icon: '🧑‍🏫', view: 'tutoring',  mode: 'academic' },
-  { cmd: '/mesaje',     label: 'Mesaje',             icon: '💬', view: 'messages',   mode: 'academic' },
+  { cmd: '/mesaje',     label: 'Mesaje',             labelKey: 'assistant.slashLabels.messages',          icon: '💬', view: 'messages',   mode: 'academic' },
   { cmd: '/dashboard',  label: 'Dashboard',          icon: '🏠', view: 'dashboard',  mode: 'academic' },
   { cmd: '/viata',      label: 'Student Life',       icon: '✨', view: 'discounts',  mode: 'life' },
-  { cmd: '/cariera',    label: 'Carieră & CV',       icon: '💼', view: 'career',     mode: 'life' },
+  { cmd: '/cariera',    label: 'Carieră & CV',       labelKey: 'assistant.slashLabels.careerCv',          icon: '💼', view: 'career',     mode: 'life' },
   { cmd: '/wellness',   label: 'Wellness & Focus',   icon: '🌿', view: 'wellness',   mode: 'life' },
   { cmd: '/oras',       label: 'City Adaptation',    icon: '🏙️', view: 'citylife',   mode: 'life' },
-  { cmd: '/comunitate', label: 'Comunitate',         icon: '👥', view: 'community',  mode: 'life' },
-  { cmd: '/evenimente', label: 'Evenimente',         icon: '📆', view: 'events',     mode: 'life' },
-  { cmd: '/tools',      label: 'Tools & Buget',      icon: '🛠️', view: 'tools',      mode: 'life' },
+  { cmd: '/comunitate', label: 'Comunitate',         labelKey: 'assistant.slashLabels.community',         icon: '👥', view: 'community',  mode: 'life' },
+  { cmd: '/evenimente', label: 'Evenimente',         labelKey: 'assistant.slashLabels.events',            icon: '📆', view: 'events',     mode: 'life' },
+  { cmd: '/tools',      label: 'Tools & Buget',      labelKey: 'assistant.slashLabels.toolsBudget',       icon: '🛠️', view: 'tools',      mode: 'life' },
 ]
 
 const SLASH_COMMANDS_PROFESSOR = [
-  { cmd: '/licente',    label: 'Cereri licență',     icon: '🎓', view: 'thesis',     mode: 'professor' },
-  { cmd: '/recuperari', label: 'Recuperări',         icon: '📋', view: 'recovery',   mode: 'professor' },
-  { cmd: '/mesaje',     label: 'Mesaje studenți',    icon: '💬', view: 'messages',   mode: 'professor' },
-  { cmd: '/profil',     label: 'Profil academic',    icon: '👤', view: 'profile',    mode: 'professor' },
+  { cmd: '/licente',    label: 'Cereri licență',     labelKey: 'assistant.slashLabels.thesisRequests',    icon: '🎓', view: 'thesis',     mode: 'professor' },
+  { cmd: '/recuperari', label: 'Recuperări',         labelKey: 'assistant.slashLabels.recovery',          icon: '📋', view: 'recovery',   mode: 'professor' },
+  { cmd: '/mesaje',     label: 'Mesaje studenți',    labelKey: 'assistant.slashLabels.studentMessages',   icon: '💬', view: 'messages',   mode: 'professor' },
+  { cmd: '/profil',     label: 'Profil academic',    labelKey: 'assistant.slashLabels.academicProfile',   icon: '👤', view: 'profile',    mode: 'professor' },
   { cmd: '/dashboard',  label: 'Dashboard',          icon: '🏠', view: 'dashboard',  mode: 'professor' },
 ]
 
@@ -307,7 +307,7 @@ export default function VirtualAssistant({
     year: profile?.year || '',
     platformMode,
     currentView,
-    currentLabel: currentLabel || VIEW_LABELS[currentView] || currentView,
+    currentLabel: currentLabel || t('nav.' + currentView, { defaultValue: VIEW_LABELS[currentView] || currentView }),
   }
   const brand = assistantBrand(context.role)
 
@@ -339,7 +339,7 @@ export default function VirtualAssistant({
         setMessages(prev => [
           ...prev,
           { role: 'user', text },
-          { role: 'assistant', text: `${matched.icon} Te duc la **${matched.label}** acum!` },
+          { role: 'assistant', text: t('assistant.navigatedTo', { icon: matched.icon, label: matched.labelKey ? t(matched.labelKey) : matched.label }) },
         ])
         setInput('')
         onNavigate(matched.view, matched.mode)
@@ -355,8 +355,8 @@ export default function VirtualAssistant({
 
     if (navAction && onNavigate) {
       onNavigate(navAction.view, navAction.mode)
-      const label = VIEW_LABELS[navAction.view] || navAction.view
-      const confirmMsg = `Te-am dus la ${label}. Cu ce te pot ajuta acolo?`
+      const label = t('nav.' + navAction.view, { defaultValue: VIEW_LABELS[navAction.view] || navAction.view })
+      const confirmMsg = t('assistant.arrivedAt', { label })
       setMessages(prev => [...prev, { role: 'assistant', text: confirmMsg }])
       setSuggestions(defaultSuggestions(context))
       if (!open) setUnread(value => value + 1)
@@ -526,7 +526,7 @@ export default function VirtualAssistant({
                       >
                         <span className="text-base leading-none">{c.icon}</span>
                         <span className="font-mono text-[12px] text-violet-400">{c.cmd}</span>
-                        <span className="text-[12px] text-slate-400">{c.label}</span>
+                        <span className="text-[12px] text-slate-400">{c.labelKey ? t(c.labelKey) : c.label}</span>
                       </button>
                     ))}
                   </div>

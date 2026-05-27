@@ -176,6 +176,15 @@ const en = {
       weeklyDesc: 'Resets on Monday',
       monthlyDesc: 'Resets on the 1st',
     },
+    card: {
+      appOne: 'app',
+      appMany: 'apps',
+      processing: '✓ Processing…',
+      inProgress: 'In progress',
+      careerHintBefore: 'Apply to internships in the ',
+      careerHintSection: 'Career',
+      careerHintAfter: ' section — tracked automatically.',
+    },
   },
 
   career: {
@@ -245,6 +254,11 @@ const en = {
     errorOnlyImages: 'Only images are accepted (JPG, PNG, WebP).',
     errorFileTooLarge: 'Image is too large. Maximum {{max}}MB.',
     errorCVTooShort: 'CV is too short. Add more content.',
+    approved: 'Approved! +{{points}} points 🎉',
+    screenshotRejected: 'Screenshot rejected',
+    rejected: 'Proof rejected',
+    screenshotHintDefault: 'Upload a screenshot from your fitness app showing today\'s activity.',
+    proofPlaceholder: 'e.g. I walked for 35 minutes in the park after classes, left the faculty at 5:30 PM and walked to the lake and back...',
   },
 
   cvPanel: {
@@ -551,6 +565,7 @@ const en = {
       },
     },
     chat: {
+      cityFallback: 'city',
       title: 'City AI Assistant',
       online: 'Online',
       errorMsg: 'Cannot respond right now.',
@@ -882,6 +897,22 @@ const en = {
     initialProfessor: 'Hi, I\'m the professor portal assistant. I can help with thesis requests, makeups, messages, live notifications and your academic profile.',
     copied: 'Copied!',
     copy: 'Copy',
+    navigatedTo: '{{icon}} Taking you to **{{label}}** now!',
+    arrivedAt: 'Navigated to {{label}}. How can I help you there?',
+    slashLabels: {
+      campusMap: 'Campus Map',
+      schedule: 'Schedule',
+      messages: 'Messages',
+      careerCv: 'Career & CV',
+      community: 'Community',
+      events: 'Events',
+      toolsBudget: 'Tools & Budget',
+      challenges: 'Challenges',
+      thesisRequests: 'Thesis Requests',
+      recovery: 'Recovery',
+      studentMessages: 'Student Messages',
+      academicProfile: 'Academic Profile',
+    },
   },
 
   search: {
