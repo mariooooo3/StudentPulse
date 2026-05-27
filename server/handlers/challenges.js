@@ -1,5 +1,5 @@
 import Groq from 'groq-sdk'
-import { db, nowIso } from '../db/database.js'
+import { query, nowIso } from '../db/database.js'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
@@ -26,10 +26,6 @@ const TEXT_MODEL  = 'llama-3.3-70b-versatile'
 const VISION_MODEL = 'meta-llama/llama-4-scout-17b-16e-instruct'
 
 // ─── Challenge definitions ────────────────────────────────────────────────────
-// verifyType:
-//   'screenshot' → user uploads fitness app screenshot → AI vision verifies
-//   'text'       → user writes what they did → AI text verifies
-
 const DAILY_POOL = [
   {
     id: 'd1', title: 'Mers pe jos 30 de minute',
@@ -266,11 +262,9 @@ function getActiveChallenges() {
   const monthlyKey = getMonthlyKey(now)
   const seed = dateSeed(dailyKey)
 
-  // Slot 0: always a screenshot task (physical) — rotates among screenshot-only daily tasks
   const screenshotDailyPool = DAILY_POOL.filter(c => c.verifyType === 'screenshot')
   const textDailyPool       = DAILY_POOL.filter(c => c.verifyType !== 'screenshot')
 
-  // FIX: guard against empty screenshotDailyPool to prevent TypeError on spread
   const screenshotPicked = screenshotDailyPool.length > 0
     ? seededPick(screenshotDailyPool, 1, seed)
     : []
@@ -283,13 +277,12 @@ function getActiveChallenges() {
   return { daily, weekly, monthly }
 }
 
-// ─── Lookup helper — find a challenge by id from the active pool ──────────────
 function findActiveChallenge(challengeId) {
   const { daily, weekly, monthly } = getActiveChallenges()
   return [...daily, ...weekly, ...monthly].find(c => c.id === challengeId) || null
 }
 
-// ─── Text proof verification (AI text model) ─────────────────────────────────
+// ─── Text proof verification ──────────────────────────────────────────────────
 async function verifyWithText(challengeTitle, challengeDescription, proofText) {
   const prompt = `Ești un verificator strict de provocări studențești. Studentul descrie ce a făcut.
 
@@ -333,9 +326,9 @@ Reguli stricte:
   }
 }
 
-// ─── Screenshot verification (AI vision model) ───────────────────────────────
+// ─── Screenshot verification ──────────────────────────────────────────────────
 async function verifyWithScreenshot(challengeTitle, challengeDescription, screenshotBase64, mimeType, requiresDate = true) {
-  const today = getDailyKey()  // e.g. "2026-05-25"
+  const today = getDailyKey()
 
   const dateInstruction = requiresDate
     ? `2. Verifică dacă data activității din screenshot corespunde cu data de azi (${today}) sau este din ziua curentă — OBLIGATORIU`
@@ -425,21 +418,25 @@ export function createChallengesHandler() {
       const allChallenges = [...daily, ...weekly, ...monthly]
 
       const periodKeys = [...new Set(allChallenges.map(c => c.periodKey))]
-      const placeholders = periodKeys.map(() => '?').join(',')
       const completions = periodKeys.length > 0
-        ? db.prepare(`SELECT challenge_id, period_key, status, ai_feedback, points, submitted_at FROM challenge_completions WHERE user_id = ? AND period_key IN (${placeholders})`).all(userId, ...periodKeys)
+        ? (await query(
+            `SELECT challenge_id, period_key, status, ai_feedback, points, submitted_at
+             FROM challenge_completions WHERE user_id = $1 AND period_key = ANY($2)`,
+            [userId, periodKeys]
+          )).rows
         : []
 
       const completionMap = new Map(completions.map(r => [`${r.period_key}:${r.challenge_id}`, r]))
 
-      const enrich = (c) => {
+      const enrich = async (c) => {
         const comp = completionMap.get(`${c.periodKey}:${c.id}`)
         let progress = undefined
         if (c.verifyType === 'in-app' && c.inAppAction) {
-          const row = db.prepare(
-            'SELECT count FROM challenge_progress WHERE user_id = ? AND action_type = ? AND period_key = ?'
-          ).get(userId, c.inAppAction, c.periodKey)
-          progress = row?.count || 0
+          const { rows } = await query(
+            'SELECT count FROM challenge_progress WHERE user_id = $1 AND action_type = $2 AND period_key = $3',
+            [userId, c.inAppAction, c.periodKey]
+          )
+          progress = rows[0]?.count || 0
         }
         return {
           ...c,
@@ -451,14 +448,23 @@ export function createChallengesHandler() {
         }
       }
 
-      const totalRow = db.prepare('SELECT COALESCE(SUM(points), 0) as total FROM challenge_completions WHERE user_id = ? AND status = ?').get(userId, 'approved')
+      const { rows: totalRows } = await query(
+        `SELECT COALESCE(SUM(points), 0) as total FROM challenge_completions WHERE user_id = $1 AND status = $2`,
+        [userId, 'approved']
+      )
+
+      const [enrichedDaily, enrichedWeekly, enrichedMonthly] = await Promise.all([
+        Promise.all(daily.map(enrich)),
+        Promise.all(weekly.map(enrich)),
+        Promise.all(monthly.map(enrich)),
+      ])
 
       res.writeHead(200)
       res.end(JSON.stringify({
-        daily: daily.map(enrich),
-        weekly: weekly.map(enrich),
-        monthly: monthly.map(enrich),
-        totalPoints: totalRow?.total || 0,
+        daily: enrichedDaily,
+        weekly: enrichedWeekly,
+        monthly: enrichedMonthly,
+        totalPoints: parseInt(totalRows[0]?.total) || 0,
         periods: { daily: getDailyKey(), weekly: getWeeklyKey(), monthly: getMonthlyKey() },
       }))
       return
@@ -466,7 +472,6 @@ export function createChallengesHandler() {
 
     // POST /api/challenges/submit
     if (req.method === 'POST' && req.url === '/api/challenges/submit') {
-      // FIX: body size limit — max 12 MB (base64 image ~8MB → ~10.7MB JSON)
       const MAX_BODY_BYTES = 12 * 1024 * 1024
       let body = ''
       let bodyBytes = 0
@@ -489,7 +494,6 @@ export function createChallengesHandler() {
         res.writeHead(400); res.end(JSON.stringify({ error: 'userId și challengeId sunt necesare' })); return
       }
 
-      // FIX: look up challenge server-side — never trust type/points/verifyType from client
       const challenge = findActiveChallenge(challengeId)
       if (!challenge) {
         res.writeHead(400); res.end(JSON.stringify({ error: 'Provocare inexistentă sau expirată.' })); return
@@ -505,54 +509,49 @@ export function createChallengesHandler() {
       if (verifyType === 'text' && !proofText?.trim()) {
         res.writeHead(400); res.end(JSON.stringify({ error: 'Descrierea dovezii este necesară.' })); return
       }
-
-      // FIX: validate periodKey is present (NULL bypass protection)
       if (!periodKey) {
         res.writeHead(400); res.end(JSON.stringify({ error: 'Perioadă invalidă.' })); return
       }
 
-      // Already approved → block
-      const existing = db.prepare('SELECT status FROM challenge_completions WHERE user_id = ? AND period_key = ? AND challenge_id = ?').get(userId, periodKey, challengeId)
-      if (existing?.status === 'approved') {
+      const { rows: existingRows } = await query(
+        'SELECT status FROM challenge_completions WHERE user_id = $1 AND period_key = $2 AND challenge_id = $3',
+        [userId, periodKey, challengeId]
+      )
+      if (existingRows[0]?.status === 'approved') {
         res.writeHead(409); res.end(JSON.stringify({ error: 'Provocarea a fost deja completată.' })); return
       }
 
-      // Verify based on type — use server-side requiresDate flag
       let verifyResult
       if (verifyType === 'screenshot') {
         verifyResult = await verifyWithScreenshot(
-          challengeTitle,
-          challengeDescription,
-          proofImage,
-          proofImageMime || 'image/jpeg',
-          requiresDate,
+          challengeTitle, challengeDescription,
+          proofImage, proofImageMime || 'image/jpeg', requiresDate,
         )
       } else {
-        verifyResult = await verifyWithText(
-          challengeTitle,
-          challengeDescription,
-          proofText?.trim() || '',
-        )
+        verifyResult = await verifyWithText(challengeTitle, challengeDescription, proofText?.trim() || '')
       }
 
       const { approved, feedback } = verifyResult
-      const id = `chal-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+      const entryId = `chal-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
       const status = approved ? 'approved' : 'rejected'
       const points = approved ? basePoints : 0
       const storedProof = verifyType === 'screenshot' ? '[screenshot]' : (proofText?.trim() || '')
 
-      db.prepare(`
+      await query(`
         INSERT INTO challenge_completions (id, user_id, period_key, challenge_id, status, proof_text, ai_feedback, points, submitted_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(user_id, period_key, challenge_id) DO UPDATE SET
-          status = excluded.status, proof_text = excluded.proof_text,
-          ai_feedback = excluded.ai_feedback, points = excluded.points, submitted_at = excluded.submitted_at
-      `).run(id, userId, periodKey, challengeId, status, storedProof, feedback, points, nowIso())
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        ON CONFLICT (user_id, period_key, challenge_id) DO UPDATE SET
+          status = EXCLUDED.status, proof_text = EXCLUDED.proof_text,
+          ai_feedback = EXCLUDED.ai_feedback, points = EXCLUDED.points, submitted_at = EXCLUDED.submitted_at
+      `, [entryId, userId, periodKey, challengeId, status, storedProof, feedback, points, nowIso()])
 
-      const totalRow = db.prepare('SELECT COALESCE(SUM(points), 0) as total FROM challenge_completions WHERE user_id = ? AND status = ?').get(userId, 'approved')
+      const { rows: totalRows } = await query(
+        `SELECT COALESCE(SUM(points), 0) as total FROM challenge_completions WHERE user_id = $1 AND status = $2`,
+        [userId, 'approved']
+      )
 
       res.writeHead(200)
-      res.end(JSON.stringify({ approved, feedback, points, totalPoints: totalRow?.total || 0 }))
+      res.end(JSON.stringify({ approved, feedback, points, totalPoints: parseInt(totalRows[0]?.total) || 0 }))
       return
     }
 
@@ -570,7 +569,6 @@ export function createChallengesHandler() {
         return
       }
 
-      // Find active in-app challenges matching this action
       const { daily, weekly, monthly } = getActiveChallenges()
       const inAppChallenges = [...daily, ...weekly, ...monthly].filter(
         c => c.verifyType === 'in-app' && c.inAppAction === actionType
@@ -581,23 +579,23 @@ export function createChallengesHandler() {
       for (const challenge of inAppChallenges) {
         const { id: challengeId, periodKey, points: basePoints, title, requiredCount = 1 } = challenge
 
-        // Skip if already approved
-        const existing = db.prepare(
-          'SELECT status FROM challenge_completions WHERE user_id = ? AND period_key = ? AND challenge_id = ?'
-        ).get(userId, periodKey, challengeId)
-        if (existing?.status === 'approved') continue
+        const { rows: existingRows } = await query(
+          'SELECT status FROM challenge_completions WHERE user_id = $1 AND period_key = $2 AND challenge_id = $3',
+          [userId, periodKey, challengeId]
+        )
+        if (existingRows[0]?.status === 'approved') continue
 
-        // Increment progress count
-        db.prepare(`
+        await query(`
           INSERT INTO challenge_progress (user_id, action_type, period_key, count)
-          VALUES (?, ?, ?, 1)
-          ON CONFLICT(user_id, action_type, period_key) DO UPDATE SET count = count + 1
-        `).run(userId, actionType, periodKey)
+          VALUES ($1, $2, $3, 1)
+          ON CONFLICT (user_id, action_type, period_key) DO UPDATE SET count = challenge_progress.count + 1
+        `, [userId, actionType, periodKey])
 
-        const progressRow = db.prepare(
-          'SELECT count FROM challenge_progress WHERE user_id = ? AND action_type = ? AND period_key = ?'
-        ).get(userId, actionType, periodKey)
-        const count = progressRow?.count || 0
+        const { rows: progressRows } = await query(
+          'SELECT count FROM challenge_progress WHERE user_id = $1 AND action_type = $2 AND period_key = $3',
+          [userId, actionType, periodKey]
+        )
+        const count = progressRows[0]?.count || 0
 
         if (count >= requiredCount) {
           const compId = `chal-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
@@ -605,25 +603,25 @@ export function createChallengesHandler() {
             ? `Provocare completată automat — ai aplicat la un internship din aplicație!`
             : `Provocare completată automat — ai aplicat la ${count} oportunități de carieră din aplicație!`
 
-          db.prepare(`
+          await query(`
             INSERT INTO challenge_completions (id, user_id, period_key, challenge_id, status, proof_text, ai_feedback, points, submitted_at)
-            VALUES (?, ?, ?, ?, 'approved', ?, ?, ?, ?)
-            ON CONFLICT(user_id, period_key, challenge_id) DO UPDATE SET
-              status = 'approved', proof_text = excluded.proof_text,
-              ai_feedback = excluded.ai_feedback, points = excluded.points, submitted_at = excluded.submitted_at
-          `).run(compId, userId, periodKey, challengeId, `[in-app: ${actionType} ×${count}]`, feedback, basePoints, nowIso())
+            VALUES ($1, $2, $3, $4, 'approved', $5, $6, $7, $8)
+            ON CONFLICT (user_id, period_key, challenge_id) DO UPDATE SET
+              status = 'approved', proof_text = EXCLUDED.proof_text,
+              ai_feedback = EXCLUDED.ai_feedback, points = EXCLUDED.points, submitted_at = EXCLUDED.submitted_at
+          `, [compId, userId, periodKey, challengeId, `[in-app: ${actionType} ×${count}]`, feedback, basePoints, nowIso()])
 
           completed.push({ id: challengeId, title, points: basePoints, count, requiredCount })
         }
       }
 
-      // Return progress map for all active in-app challenges of this action
       const progressMap = {}
       for (const c of inAppChallenges) {
-        const row = db.prepare(
-          'SELECT count FROM challenge_progress WHERE user_id = ? AND action_type = ? AND period_key = ?'
-        ).get(userId, c.inAppAction, c.periodKey)
-        progressMap[c.id] = { count: row?.count || 0, requiredCount: c.requiredCount || 1 }
+        const { rows } = await query(
+          'SELECT count FROM challenge_progress WHERE user_id = $1 AND action_type = $2 AND period_key = $3',
+          [userId, c.inAppAction, c.periodKey]
+        )
+        progressMap[c.id] = { count: rows[0]?.count || 0, requiredCount: c.requiredCount || 1 }
       }
 
       res.writeHead(200)

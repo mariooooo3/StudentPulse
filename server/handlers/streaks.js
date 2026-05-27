@@ -1,4 +1,4 @@
-import { db } from '../db/database.js'
+import { query } from '../db/database.js'
 
 function todayDate() {
   return new Date().toISOString().slice(0, 10)
@@ -10,13 +10,21 @@ function yesterdayDate() {
   return d.toISOString().slice(0, 10)
 }
 
-function incrementStreak(userId, type) {
+async function incrementStreak(userId, type) {
   const today = todayDate()
   const yesterday = yesterdayDate()
-  const row = db.prepare('SELECT count, last_date FROM streaks WHERE user_id = ? AND type = ?').get(userId, type)
+
+  const { rows } = await query(
+    'SELECT count, last_date FROM streaks WHERE user_id = $1 AND type = $2',
+    [userId, type]
+  )
+  const row = rows[0]
 
   if (!row) {
-    db.prepare('INSERT INTO streaks (user_id, type, count, last_date) VALUES (?, ?, 1, ?)').run(userId, type, today)
+    await query(
+      'INSERT INTO streaks (user_id, type, count, last_date) VALUES ($1, $2, 1, $3)',
+      [userId, type, today]
+    )
     return { count: 1, lastDate: today, alreadyDoneToday: false }
   }
 
@@ -25,12 +33,18 @@ function incrementStreak(userId, type) {
   }
 
   const newCount = row.last_date === yesterday ? row.count + 1 : 1
-  db.prepare('UPDATE streaks SET count = ?, last_date = ? WHERE user_id = ? AND type = ?').run(newCount, today, userId, type)
+  await query(
+    'UPDATE streaks SET count = $1, last_date = $2 WHERE user_id = $3 AND type = $4',
+    [newCount, today, userId, type]
+  )
   return { count: newCount, lastDate: today, alreadyDoneToday: false }
 }
 
-function getStreaks(userId) {
-  const rows = db.prepare('SELECT type, count, last_date FROM streaks WHERE user_id = ?').all(userId)
+async function getStreaks(userId) {
+  const { rows } = await query(
+    'SELECT type, count, last_date FROM streaks WHERE user_id = $1',
+    [userId]
+  )
   const result = { focus: { count: 0, lastDate: null }, pulse: { count: 0, lastDate: null } }
   for (const row of rows) {
     if (row.type === 'focus' || row.type === 'pulse') {
@@ -49,7 +63,7 @@ export function createStreaksHandler() {
     if (req.method === 'GET' && getMatch) {
       const userId = decodeURIComponent(getMatch[1])
       res.writeHead(200)
-      res.end(JSON.stringify(getStreaks(userId)))
+      res.end(JSON.stringify(await getStreaks(userId)))
       return
     }
 
@@ -68,7 +82,7 @@ export function createStreaksHandler() {
         return
       }
       res.writeHead(200)
-      res.end(JSON.stringify(incrementStreak(userId, type)))
+      res.end(JSON.stringify(await incrementStreak(userId, type)))
       return
     }
 

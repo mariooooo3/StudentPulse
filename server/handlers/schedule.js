@@ -91,8 +91,8 @@ export function createScheduleHandler(store, pubsub, notifications) {
 }
 
 export function createPersistentScheduleHandler(repository, pubsub, notifications) {
-  function submitSwap(request) {
-    const pending = repository.listPendingSwaps()
+  async function submitSwap(request) {
+    const pending = await repository.listPendingSwaps()
     const match = pending.find(r =>
       r.course === request.course &&
       r.offerSlot === request.needSlot &&
@@ -101,7 +101,7 @@ export function createPersistentScheduleHandler(repository, pubsub, notification
     )
 
     if (match) {
-      repository.deletePendingSwap(match.id)
+      await repository.deletePendingSwap(match.id)
       const matchData = {
         id: `match-${Date.now()}`,
         course: request.course,
@@ -131,7 +131,7 @@ export function createPersistentScheduleHandler(repository, pubsub, notification
       return { matched: true, match: matchData }
     }
 
-    const entry = repository.addPendingSwap(request)
+    const entry = await repository.addPendingSwap(request)
     notifications?.push(request.userId, {
       title: 'Cerere swap publicata',
       body: `Cautam automat un coleg compatibil pentru ${request.course}.`,
@@ -142,8 +142,8 @@ export function createPersistentScheduleHandler(repository, pubsub, notification
     return { matched: false, swapId: entry.id }
   }
 
-  function cancelSwap(swapId) {
-    repository.deletePendingSwap(swapId)
+  async function cancelSwap(swapId) {
+    await repository.deletePendingSwap(swapId)
     return true
   }
 

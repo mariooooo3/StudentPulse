@@ -56,7 +56,7 @@ export class WSBridge {
     ws.on('message', raw => {
       let msg
       try { msg = JSON.parse(raw) } catch { return }
-      this.#route(ws, msg)
+      this.#route(ws, msg).catch(err => console.error('[WS] route error:', err))
     })
 
     ws.on('close', () => this.#disconnect(ws))
@@ -73,7 +73,7 @@ export class WSBridge {
     }
   }
 
-  #route(ws, msg) {
+  async #route(ws, msg) {
     const { type, reqId, channel, data, key, value, ttl, userId, name, profile } = msg
 
     const reply = (payload) => {
@@ -128,7 +128,7 @@ export class WSBridge {
         }
         const isChatMessage = this.#isChatMessage(channel, data)
         const message = isChatMessage
-          ? this.#handlers.messages.addMessage(channel, { ...data, senderName: data.senderName || ws.userName })
+          ? await this.#handlers.messages.addMessage(channel, { ...data, senderName: data.senderName || ws.userName })
           : data
         const delivered = this.#pubsub.publish(channel, message)
         if (isChatMessage) this.#notifyChatParticipants(channel, message)
@@ -213,7 +213,7 @@ export class WSBridge {
           reply({ ok: false, error: 'Direct messages are limited to the same university and faculty' })
           break
         }
-        const history = this.#handlers.messages.getHistory(channel)
+        const history = await this.#handlers.messages.getHistory(channel)
         reply({ ok: true, messages: history })
         break
       }
@@ -223,7 +223,7 @@ export class WSBridge {
           reply({ ok: false, error: 'Cannot access notifications for another user' })
           break
         }
-        reply({ ok: true, notifications: this.#handlers.notifications.getNotifications(userId) })
+        reply({ ok: true, notifications: await this.#handlers.notifications.getNotifications(userId) })
         break
       }
 
@@ -232,7 +232,7 @@ export class WSBridge {
           reply({ ok: false, error: 'Cannot create notifications for another user' })
           break
         }
-        const notification = this.#handlers.notifications.push(userId, data)
+        const notification = await this.#handlers.notifications.push(userId, data)
         reply({ ok: true, notification })
         break
       }
@@ -242,7 +242,7 @@ export class WSBridge {
           reply({ ok: false, error: 'Cannot update notifications for another user' })
           break
         }
-        reply({ ok: true, updated: this.#handlers.notifications.markRead(userId, data?.notifId) })
+        reply({ ok: true, updated: await this.#handlers.notifications.markRead(userId, data?.notifId) })
         break
       }
 
@@ -251,7 +251,7 @@ export class WSBridge {
           reply({ ok: false, error: 'Cannot update notifications for another user' })
           break
         }
-        this.#handlers.notifications.markAllRead(userId)
+        await this.#handlers.notifications.markAllRead(userId)
         reply({ ok: true })
         break
       }
@@ -261,7 +261,7 @@ export class WSBridge {
           reply({ ok: false, error: 'Authentication required' })
           break
         }
-        const result = this.#handlers.schedule.submitSwap({ ...data, userId: ws.userId }, ws)
+        const result = await this.#handlers.schedule.submitSwap({ ...data, userId: ws.userId }, ws)
         reply({ ok: true, ...result })
         break
       }
