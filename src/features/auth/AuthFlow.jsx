@@ -36,7 +36,7 @@ export default function AuthFlow() {
   const [loading,           setLoading]           = useState(false)
 
   // ── Login success (existing student) ────────────────────────────────────────
-  function handleLoginSuccess(user) {
+  function handleLoginSuccess(user, rememberMe) {
     const returning = !!getUserProfile(user.email)
     setIsReturning(returning)
     setPendingUser(user)
@@ -52,7 +52,7 @@ export default function AuthFlow() {
       university:      uni,
       detectedFaculty: fac,
       isNewUser:       !returning,
-    })
+    }, rememberMe)
   }
 
   // ── Register: university selected → go to details ────────────────────────
