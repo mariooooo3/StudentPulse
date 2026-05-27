@@ -119,6 +119,10 @@ export function createAuthHandler() {
       const normalizedEmail    = email.trim().toLowerCase()
       const normalizedUsername = username.trim().toLowerCase()
 
+      const emailLocal = normalizedEmail.split('@')[0]
+      if (!emailLocal.includes('.') || emailLocal.startsWith('.') || emailLocal.endsWith('.'))
+        return json(res, 400, { error: 'Email-ul trebuie să fie în format prenume.nume@domeniu' })
+
       if (db.prepare('SELECT id FROM users WHERE email = ?').get(normalizedEmail))
         return json(res, 409, { error: 'Există deja un cont cu acest email' })
 
