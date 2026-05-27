@@ -3,12 +3,14 @@ import { ArrowRight, Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import clsx from 'clsx'
 
 const BASE = import.meta.env.VITE_API_URL || ''
-const REMEMBER_KEY = 'sp_remember_identifier'
+
+// Clear any old remember-me username keys left from previous implementation
+localStorage.removeItem('sp_remember_identifier')
 
 export default function LoginStep({ onSuccess, onGoRegister }) {
-  const [identifier, setIdentifier] = useState(() => localStorage.getItem(REMEMBER_KEY) || '')
+  const [identifier, setIdentifier] = useState('')
   const [password,   setPassword]   = useState('')
-  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem(REMEMBER_KEY))
+  const [rememberMe, setRememberMe] = useState(false)
   const [showPwd,    setShowPwd]    = useState(false)
   const [loading,    setLoading]    = useState(false)
   const [error,      setError]      = useState('')
@@ -25,12 +27,7 @@ export default function LoginStep({ onSuccess, onGoRegister }) {
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Eroare la autentificare'); return }
-      if (rememberMe) {
-        localStorage.setItem(REMEMBER_KEY, identifier.trim())
-      } else {
-        localStorage.removeItem(REMEMBER_KEY)
-      }
-      onSuccess(data.user)
+      onSuccess(data.user, rememberMe)
     } catch {
       setError('Nu s-a putut conecta la server')
     } finally {
@@ -124,7 +121,7 @@ export default function LoginStep({ onSuccess, onGoRegister }) {
         className={clsx(
           'w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-[13px] transition-all duration-200',
           canSubmit
-            ? 'bg-indigo-600 hover:bg-indigo-500 text-white active:scale-[0-98] shadow-[0_0_0_1px_rgba(99,102,241,0.3)]'
+            ? 'bg-indigo-600 hover:bg-indigo-500 text-white active:scale-[0.98] shadow-[0_0_0_1px_rgba(99,102,241,0.3)]'
             : 'bg-white/[0.03] text-slate-600 cursor-not-allowed border border-white/[0.06]',
         )}
       >

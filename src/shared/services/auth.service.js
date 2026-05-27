@@ -55,20 +55,24 @@ export async function verifyOTP(email, otp, university) {
 
 // Simulates restoring session from localStorage / Supabase session
 export async function restoreSession() {
-  // sessionStorage = per-tab isolation, so two tabs can be two different users
-  const raw = sessionStorage.getItem('sc_session')
+  // sessionStorage first (per-tab), then localStorage (remember me)
+  const raw = sessionStorage.getItem('sc_session') || localStorage.getItem('sc_session_persistent')
   if (!raw) return null
   try { return JSON.parse(raw) } catch { return null }
 }
 
-export function persistSession(session) {
+export function persistSession(session, remember = false) {
   sessionStorage.setItem('sc_session', JSON.stringify(session))
+  if (remember) {
+    localStorage.setItem('sc_session_persistent', JSON.stringify(session))
+  }
 }
 
 export function clearSession() {
   sessionStorage.removeItem('sc_session')
   sessionStorage.removeItem('sc_profile')
   sessionStorage.removeItem('sc_view_state')
+  localStorage.removeItem('sc_session_persistent')
 }
 
 export async function signOut() {

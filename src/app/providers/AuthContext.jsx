@@ -47,8 +47,8 @@ export function AuthProvider({ children }) {
     init()
   }, [])
 
-  function login(sessionData) {
-    persistSession(sessionData)
+  function login(sessionData, remember = false) {
+    persistSession(sessionData, remember)
     setSession(sessionData)
 
     if (sessionData.role === 'professor') {
