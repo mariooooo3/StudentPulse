@@ -15,11 +15,15 @@ export function speak(text, enabled) {
   }, 80)
 }
 
-export function buildIndoorCinematicSteps(nodePath, indRooms) {
+export function buildIndoorCinematicSteps(nodePath, indRooms, t) {
   const steps = []
   const startRoom = indRooms.find(r => r.id === nodePath[0])
+  const floorLabel = (floor) => floor === 0 ? t('navigation.indoor.ground') : t('navigation.indoor.floor', { n: floor })
   steps.push({
-    instruction: `Ești la ${startRoom?.label || nodePath[0]}${startRoom ? ` — ${startRoom.floor === 0 ? 'Parter' : 'Etaj ' + startRoom.floor}` : ''}`,
+    instruction: t('navigation.cinematic.stepStartAt', {
+      label: startRoom?.label || nodePath[0],
+      floor: startRoom ? floorLabel(startRoom.floor) : '',
+    }),
     icon: '📍',
     highlightRoom: nodePath[0],
   })
@@ -31,18 +35,21 @@ export function buildIndoorCinematicSteps(nodePath, indRooms) {
       const prevRoom = indRooms.find(r => r.id === nodePath[i - 1])
       const nextRoom = indRooms.find(r => r.id === nodePath[i + 1])
       const goingUp = nextRoom && prevRoom && nextRoom.floor > prevRoom.floor
+      const nextFloor = nextRoom?.floor ?? ''
       steps.push({
         instruction: goingUp
-          ? `Mergi la scări și urcă la etajul ${nextRoom?.floor ?? ''}`
-          : `Mergi la scări și coboară la etajul ${nextRoom?.floor === 0 ? 'parter' : nextRoom?.floor ?? ''}`,
+          ? t('navigation.cinematic.stepGoUpStairs', { floor: nextFloor })
+          : nextFloor === 0
+            ? t('navigation.cinematic.stepGoDownToGround')
+            : t('navigation.cinematic.stepGoDownStairs', { floor: nextFloor }),
         icon: '🪜',
         highlightRoom: id,
       })
     } else if (room) {
       steps.push({
         instruction: isLast
-          ? `${room.label} — ai ajuns la destinație!`
-          : `Continuă prin ${room.label} (${room.floor === 0 ? 'Parter' : 'Etaj ' + room.floor})`,
+          ? t('navigation.cinematic.stepArrived', { label: room.label })
+          : t('navigation.cinematic.stepContinue', { label: room.label, floor: floorLabel(room.floor) }),
         icon: isLast ? '✅' : '🚪',
         highlightRoom: id,
         isFinal: isLast,
@@ -52,10 +59,10 @@ export function buildIndoorCinematicSteps(nodePath, indRooms) {
   return steps
 }
 
-export function buildOutdoorCinematicSteps(pathData, actions, fromBuilding, toBuilding) {
+export function buildOutdoorCinematicSteps(pathData, actions, fromBuilding, toBuilding, t) {
   const steps = []
   steps.push({
-    instruction: `Pornești din ${fromBuilding?.name || 'locația ta actuală'}`,
+    instruction: t('navigation.cinematic.outdoorStart', { name: fromBuilding?.name || '' }),
     icon: '📍',
     pathSlice: pathData.slice(0, Math.max(1, Math.floor(pathData.length * 0.05))),
   })
@@ -66,7 +73,7 @@ export function buildOutdoorCinematicSteps(pathData, actions, fromBuilding, toBu
     steps.push({ instruction: action, icon: '🚶', pathSlice: pathData.slice(0, idx) })
   })
   steps.push({
-    instruction: `Ai ajuns!\n${toBuilding?.name || 'Destinație'}`,
+    instruction: t('navigation.cinematic.outdoorArrived', { name: toBuilding?.name || '' }),
     icon: '✅',
     pathSlice: pathData,
     isFinal: true,
@@ -74,13 +81,14 @@ export function buildOutdoorCinematicSteps(pathData, actions, fromBuilding, toBu
   return steps
 }
 
-export function confidenceLabel(value) {
-  if (!value) return 'neconfirmat'
+export function confidenceLabel(value, t) {
+  if (!value) return t('navigation.helpers.unconfirmed')
   return `${Math.round(value * 100)}%`
 }
 
-export function withDestinationQuestion(text) {
+export function withDestinationQuestion(text, t) {
   const cleanText = String(text || '').trim()
   if (/unde\s+vrei\s+sa\s+ajungi/i.test(cleanText)) return cleanText
-  return `${cleanText || 'Am analizat poza.'}\n\nUnde vrei sa ajungi de aici?`
+  const base = cleanText || t('navigation.helpers.analyzedPhoto')
+  return `${base}\n\n${t('navigation.helpers.destinationQuestion')}`
 }

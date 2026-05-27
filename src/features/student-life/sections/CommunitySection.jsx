@@ -21,8 +21,22 @@ import AccentLine from '../components/AccentLine'
 import EmptyState from '../components/EmptyState'
 import { getScopeLabel } from '../../../shared/utils/tenantScope'
 
+function buildEventLabel(event, t, locale) {
+  const { date, days, hour } = event
+  const timeStr = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(date)
+  let dayLabel
+  if (days === 0) {
+    dayLabel = hour >= 18 ? t('communitySection.tonight') : t('communitySection.today')
+  } else if (days === 1) {
+    dayLabel = t('communitySection.tomorrow')
+  } else {
+    dayLabel = new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(date)
+  }
+  return t('communitySection.eventStarts', { day: dayLabel, time: timeStr })
+}
+
 export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const accent = SECTION_ACCENTS.community
   const [type, setType] = useState('Toate')
   const [query, setQuery] = useState('')
@@ -66,7 +80,13 @@ export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
         <SearchField value={query} onChange={setQuery} placeholder={t('communitySection.searchPlaceholder')} />
-        <FilterPills items={GROUP_TYPES} value={type} onChange={setType} accent={accent} />
+        <FilterPills
+          items={GROUP_TYPES}
+          labels={[t('communitySection.filterAll'), t('communitySection.filterSport'), t('communitySection.filterTech'), t('communitySection.filterSocial'), t('communitySection.filterStudy'), t('communitySection.filterGaming'), t('communitySection.filterOutdoor')]}
+          value={type}
+          onChange={setType}
+          accent={accent}
+        />
         <span className="shrink-0 font-mono text-xs font-semibold text-slate-500">{t('communitySection.groups', { count: groups.length })}</span>
       </div>
 
@@ -107,7 +127,7 @@ export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
               </div>
               <p className="mt-3 text-sm leading-relaxed text-slate-400">{group.description}</p>
               <p className="mt-3 flex items-center gap-1 font-mono text-xs font-semibold text-slate-600">
-                <Clock size={11} /> {group.event.label}
+                <Clock size={11} /> {buildEventLabel(group.event, t, i18n.language)}
               </p>
               <div className="gradient-separator mt-4 mb-4" />
               <div className="flex items-center justify-between gap-2">

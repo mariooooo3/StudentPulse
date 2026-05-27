@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, Send, X, Loader2, Lightbulb } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export default function RecoTab({
   totalUsers,
@@ -15,6 +16,7 @@ export default function RecoTab({
   onSendRecoChat,
   onRefreshPulse,
 }) {
+  const { t, i18n } = useTranslation()
   const recoChatBottomRef = useRef(null)
 
   useEffect(() => {
@@ -23,9 +25,9 @@ export default function RecoTab({
 
   const now = new Date()
   const h = now.getHours()
-  const timeLabel = now.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })
-  const dayLabel = now.toLocaleDateString('ro-RO', { weekday: 'long' })
-  const dateLabel = now.toLocaleDateString('ro-RO', { day: 'numeric', month: 'long' })
+  const timeLabel = now.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })
+  const dayLabel = now.toLocaleDateString(i18n.language, { weekday: 'long' })
+  const dateLabel = now.toLocaleDateString(i18n.language, { day: 'numeric', month: 'long' })
   const crowdLabel = totalUsers === 0 ? '–' : totalUsers < 80 ? t('navigation.reco.crowdQuiet') : totalUsers < 160 ? t('navigation.reco.crowdModerate') : t('navigation.reco.crowdBusy')
   const crowdColor = totalUsers === 0 ? 'text-slate-400' : totalUsers < 80 ? 'text-emerald-400' : totalUsers < 160 ? 'text-amber-400' : 'text-red-400'
   const periodEmoji = h < 7 ? '🌙' : h < 10 ? '🌅' : h < 13 ? '☀️' : h < 17 ? '🌤️' : h < 20 ? '🌆' : '🌙'

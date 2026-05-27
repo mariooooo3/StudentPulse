@@ -22,7 +22,7 @@ export default function VisualCopilotCard({ result, onStartRoute, onStartPresent
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.04] p-3">
           <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">{t('navigation.copilot.whereYouAre')}</p>
           <p className="text-xs text-white font-semibold mt-1">{result.detectedLocation?.label || t('navigation.copilot.locationUnconfirmed')}</p>
-          <p className="text-[11px] text-slate-500 mt-0.5">{t('navigation.copilot.confidence')} {confidenceLabel(result.detectedLocation?.confidence)}</p>
+          <p className="text-[11px] text-slate-500 mt-0.5">{t('navigation.copilot.confidence')} {confidenceLabel(result.detectedLocation?.confidence, t)}</p>
         </div>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.04] p-3">
           <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">{t('navigation.copilot.destination')}</p>

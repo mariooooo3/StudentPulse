@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MapPin, Sparkles, Lightbulb, Route, Users, LocateFixed, Building2, Activity } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useCrowdSocket } from '../../hooks/navigation/useCrowdSocket'
 import { useAuth } from '../../app/providers/AuthContext'
 import L from 'leaflet'
@@ -70,6 +71,7 @@ export default function CampusNavigator() {
     setCameraStream,
     setCameraFacing,
   })
+  const { t } = useTranslation()
   const { profile, session } = useAuth()
   const firstName = profile?.name?.split(' ')[0] ?? 'Student'
   const universityId = session?.university?.id || 'tuiasi'
@@ -90,15 +92,15 @@ export default function CampusNavigator() {
   const { zones, totalUsers, connected, mode } = useCrowdSocket(showCrowd, campusCenter, heatmapHotspots)
   const visibleDestinations = buildings
   const campusStats = [
-    { label: 'Cladiri', value: buildings.length, icon: Building2, color: '#6366f1' },
-    { label: 'Puncte utile', value: POIS.length, icon: MapPin, color: '#10b981' },
-    { label: 'Studenti live', value: totalUsers || '-', icon: Users, color: '#f59e0b' },
+    { label: t('navigation.statBuildings'), value: buildings.length, icon: Building2, color: '#6366f1' },
+    { label: t('navigation.statPoints'), value: POIS.length, icon: MapPin, color: '#10b981' },
+    { label: t('navigation.statLiveStudents'), value: totalUsers || '-', icon: Users, color: '#f59e0b' },
   ]
   const navigatorTabs = [
-    { id: 'map', label: 'Harta', desc: 'trasee live', icon: MapPin },
-    { id: 'chat', label: 'AI Compass', desc: 'ghid conversational', icon: Sparkles },
-    { id: 'reco', label: 'Recomandari', desc: 'context campus', icon: Lightbulb },
-    { id: 'indoor', label: 'Plan interior', desc: 'sali si etaje', icon: Route },
+    { id: 'map', label: t('navigation.tabMap'), desc: t('navigation.tabMapDesc'), icon: MapPin },
+    { id: 'chat', label: t('navigation.tabChat'), desc: t('navigation.tabChatDesc'), icon: Sparkles },
+    { id: 'reco', label: t('navigation.tabReco'), desc: t('navigation.tabRecoDesc'), icon: Lightbulb },
+    { id: 'indoor', label: t('navigation.tabIndoor'), desc: t('navigation.tabIndoorDesc'), icon: Route },
   ]
 
   useEffect(() => {
@@ -131,7 +133,7 @@ export default function CampusNavigator() {
       setPulseData(result)
       setPulseLoaded(true)
     } catch {
-      setPulseData({ briefing: 'Nu am putut genera recomandari acum.', cards: [] })
+      setPulseData({ briefing: t('navigation.errorReco'), cards: [] })
     }
     setPulseLoading(false)
   }
@@ -151,7 +153,7 @@ export default function CampusNavigator() {
       ]
       setRecoMessages(prev => [...prev, { role: 'model', text: response }])
     } catch {
-      setRecoMessages(prev => [...prev, { role: 'model', text: 'Momentan nu pot raspunde. Incearca din nou.' }])
+      setRecoMessages(prev => [...prev, { role: 'model', text: t('navigation.errorChat') }])
     }
     setRecoLoading(false)
   }
@@ -248,7 +250,7 @@ export default function CampusNavigator() {
       const from = resolveOutdoorRouteId(routeSuggestion.from, '1')
       const to = resolveOutdoorRouteId(routeSuggestion.to)
       if (!to) {
-        setChatMessages(prev => [...prev, { role: 'model', text: 'Nu am gasit destinatia pe harta campusului. Alege una dintre destinatiile rapide si calculez ruta.' }])
+        setChatMessages(prev => [...prev, { role: 'model', text: t('navigation.errorRoute') }])
         return
       }
       setRouteFrom(from)
@@ -318,7 +320,7 @@ export default function CampusNavigator() {
           setRouteInfo(fallbackRouteInfo(fromB, toB, profile))
         }
       }
-      if (pathData) steps = buildOutdoorCinematicSteps(pathData, actions, fromB, toB)
+      if (pathData) steps = buildOutdoorCinematicSteps(pathData, actions, fromB, toB, t)
     } else if (routeSuggestion?.type === 'indoor') {
       const start = routeSuggestion.from || campus.indoorDefault
       const end = routeSuggestion.to
@@ -327,7 +329,7 @@ export default function CampusNavigator() {
       setToRoom(end && IND_ROOMS.find(r => r.id === end) ? end : '')
       setIndoorPath(path || null)
       setActiveTab('indoor')
-      if (path) steps = buildIndoorCinematicSteps(path, IND_ROOMS)
+      if (path) steps = buildIndoorCinematicSteps(path, IND_ROOMS, t)
     }
 
     if (steps.length === 0) return
@@ -351,7 +353,7 @@ export default function CampusNavigator() {
     if ((!message.trim() && !attachment) || chatLoading) return
 
     const hasTypedMessage = Boolean(message.trim())
-    const userMsg = hasTypedMessage ? message.trim() : 'Analizeaza poza'
+    const userMsg = hasTypedMessage ? message.trim() : t('navigation.analyzePhoto')
     const apiMessage = hasTypedMessage ? userMsg : ''
     setChatInput('')
     if (!attachment || attachment === chatAttachment) setChatAttachment(null)
@@ -370,7 +372,7 @@ export default function CampusNavigator() {
             )
           })
           const photoAnswer = await analyzePhoto(attachment.base64, attachment.mimeType, universityId, coords)
-          const answer = withDestinationQuestion(photoAnswer)
+          const answer = withDestinationQuestion(photoAnswer, t)
           setLastPhotoContext({ image: attachment, visualAnswer: photoAnswer })
           chatHistory.current = [
             ...chatHistory.current,
@@ -417,7 +419,7 @@ export default function CampusNavigator() {
         }
       }
     } catch (err) {
-      setChatMessages((prev) => [...prev, { role: 'model', text: `Eroare: ${err.message}` }])
+      setChatMessages((prev) => [...prev, { role: 'model', text: t('navigation.errorGeneric', { message: err.message }) }])
     }
     setChatLoading(false)
   }
@@ -437,7 +439,7 @@ export default function CampusNavigator() {
       ...prev,
       {
         role: 'model',
-        text: 'Ok, intrăm în modul de orientare rapidă. Trimite o poză din jur sau alege direct un reper important și îți propun ruta.',
+        text: t('navigation.lostModeMsg'),
         destinationOptions: AI_COMPASS_DESTINATIONS,
       },
     ])
@@ -471,7 +473,7 @@ export default function CampusNavigator() {
               Campus Navigator
             </h1>
             <p className="mt-3 max-w-[56ch] text-[13px] font-medium leading-relaxed text-slate-500">
-              Harta campusului, trasee pietonale, AI Compass si plan interior pentru sali. Salut, {firstName}.
+              {t('navigation.campusNavDesc', { firstName })}
             </p>
           </div>
 
@@ -494,10 +496,10 @@ export default function CampusNavigator() {
 
       <div className="hidden">
         {[
-          { id: 'map', label: 'Hartă', icon: MapPin },
-          { id: 'chat', label: 'AI Compass', icon: Sparkles },
-          { id: 'reco', label: 'Recomandări Smart', icon: Lightbulb },
-          { id: 'indoor', label: 'Plan Interior', icon: Route },
+          { id: 'map', label: t('navigation.tabMap'), icon: MapPin },
+          { id: 'chat', label: t('navigation.tabChat'), icon: Sparkles },
+          { id: 'reco', label: t('navigation.tabReco'), icon: Lightbulb },
+          { id: 'indoor', label: t('navigation.tabIndoor'), icon: Route },
         ].map((tab) => (
           <Button
             key={tab.id}
@@ -545,7 +547,7 @@ export default function CampusNavigator() {
         className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-rose-400/25 bg-rose-500/[0.09] px-4 text-sm font-bold text-rose-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-all hover:bg-rose-500/[0.14] active:scale-[0.98] sm:w-auto"
       >
         <LocateFixed size={16} strokeWidth={2} />
-        M-am rătăcit
+        {t('navigation.lostBtn')}
       </button>
       </div>
 

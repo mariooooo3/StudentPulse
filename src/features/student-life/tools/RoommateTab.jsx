@@ -47,7 +47,7 @@ export default function RoommateTab({ lifeProfile }) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-white">{r.name}</p>
-                <p className="text-xs text-slate-500">{r.faculty} · An {r.year}</p>
+                <p className="text-xs text-slate-500">{r.faculty} · {t('roommateTab.year')} {r.year}</p>
               </div>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">{r.bio}</p>

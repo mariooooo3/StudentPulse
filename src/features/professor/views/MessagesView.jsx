@@ -6,7 +6,7 @@ import { socketService } from '../../../shared/services/socket.service'
 import { DEMO_PROFESSOR } from '../../../shared/services/professorPortal.service'
 
 export default function MessagesView({ threads, onSend, selectedThreadId, onThreadSelect, professor }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [activeId, setActiveId] = useState(threads[0]?.id || null)
   const [text, setText] = useState('')
   const [typingUsers, setTypingUsers] = useState({})
@@ -160,7 +160,7 @@ export default function MessagesView({ threads, onSend, selectedThreadId, onThre
                         </div>
                         <div className={clsx('mt-1 flex items-center gap-1', isMe ? 'justify-end' : 'justify-start')}>
                           <p className="text-[10px] text-slate-600">
-                            {new Date(message.timestamp).toLocaleTimeString('ro', { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(message.timestamp).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
                           </p>
                           {isMe && (
                             isSeen

@@ -1,5 +1,6 @@
 import { memo, useMemo, Fragment } from 'react'
 import { Circle, Tooltip } from 'react-leaflet'
+import { useTranslation } from 'react-i18next'
 
 const PALETTE = {
   low:    { fill: '#22c55e', stroke: '#16a34a' },
@@ -53,6 +54,7 @@ function clusterZones(rawZones) {
 }
 
 function HeatmapLayer({ zones }) {
+  const { t } = useTranslation()
   const clustered = useMemo(() => clusterZones(zones), [zones])
 
   const circles = useMemo(() => {
@@ -84,7 +86,7 @@ function HeatmapLayer({ zones }) {
           >
             <Tooltip>
               <span style={{ fontSize: 12, fontWeight: 500 }}>
-                {zone.count} {zone.count === 1 ? 'persoană' : 'persoane'} în zonă
+                {zone.count === 1 ? t('navigation.map.personInZone', { count: zone.count }) : t('navigation.map.personsInZone', { count: zone.count })}
               </span>
             </Tooltip>
           </Circle>
