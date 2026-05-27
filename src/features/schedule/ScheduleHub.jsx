@@ -31,7 +31,7 @@ export default function ScheduleHub({ profile, session }) {
           <div className="mr-2">
             <p className="section-label">{t('schedule.title')}</p>
             <h1 className="text-base font-bold text-gradient-indigo leading-tight">
-              Schedule Hub
+              {t('nav.schedule')}
             </h1>
           </div>
 
