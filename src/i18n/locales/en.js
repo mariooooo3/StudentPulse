@@ -87,6 +87,31 @@ const en = {
 
   streaks: { title: 'Daily streaks' },
 
+  focusForest: {
+    eyebrowTimer: 'timed session',
+    eyebrowEndless: 'no limit',
+    titleTimer: 'Grow the pi sequence in clear bursts.',
+    titleEndless: 'Stay as long as you want and push the record further.',
+    metricTimer: '% of session',
+    metricEndless: 'next digit in {{n}}s',
+    labelRemaining: 'remaining',
+    labelTotal: 'total focus',
+    decimalsRevealed: 'decimals revealed',
+    nextDigit: 'next digit',
+    maxPossible: '{{n}} dec. possible',
+    unlimited: 'no practical limit',
+    sessionControl: 'session control',
+    withTimer: 'With timer',
+    withoutTimer: 'No timer',
+    infoText: 'A new digit appears every <b>{{n}}s</b>. If you switch tabs or lose window focus, the session stops.',
+    record: 'Record',
+    sessions: 'Sessions',
+    streak: 'Streak',
+    stop: 'Stop',
+    start: 'Start',
+    interrupted: 'Session interrupted — window lost focus.',
+  },
+
   profile: {
     title: 'My profile',
     name: 'Name',

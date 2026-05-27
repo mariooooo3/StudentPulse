@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
 import { Flame, RotateCcw, Sparkles, Sprout, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { PI_DECIMALS } from '../../../shared/data/piDigits'
 import { SECS_PER_DIGIT } from '../constants/sectionConfig'
 import { useAuth } from '../../../app/providers/AuthContext'
 import { useStreaks } from '../../../shared/hooks/useStreaks'
 
 export default function FocusForest() {
+  const { t } = useTranslation()
   const { session } = useAuth()
   const { focusStreak, incrementFocus } = useStreaks(session?.userId)
   const [mode, setMode] = useState('timer')
@@ -128,8 +130,8 @@ export default function FocusForest() {
   const maxPossible  = hasTimer ? Math.min(PI_DECIMALS.length, 2 + Math.floor(targetSeconds / SECS_PER_DIGIT)) : PI_DECIMALS.length
   const nextDigitIn  = SECS_PER_DIGIT - (elapsed % SECS_PER_DIGIT)
   const modeCopy     = hasTimer
-    ? { eyebrow: 'sesiune cronometrata', title: 'Creste sirul lui pi in reprize clare.', metric: Math.round((elapsed / targetSeconds) * 100) + '% din sesiune' }
-    : { eyebrow: 'fara limita', title: 'Stai cat vrei si impinge recordul cat mai departe.', metric: 'urmatoarea cifra in ' + nextDigitIn + 's' }
+    ? { eyebrow: t('focusForest.eyebrowTimer'), title: t('focusForest.titleTimer'), metric: Math.round((elapsed / targetSeconds) * 100) + t('focusForest.metricTimer') }
+    : { eyebrow: t('focusForest.eyebrowEndless'), title: t('focusForest.titleEndless'), metric: t('focusForest.metricEndless', { n: nextDigitIn }) }
 
   return (
     <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-[#080d18] shadow-[0_22px_80px_-42px_rgba(0,0,0,0.9)]">
@@ -144,14 +146,14 @@ export default function FocusForest() {
             </div>
             <div className="rounded-2xl border border-white/[0.08] bg-black/20 px-4 py-3 text-right backdrop-blur">
               <p className="font-mono text-2xl font-black tabular-nums text-white">{mins}:{secs}</p>
-              <p className="mt-0.5 section-label">{hasTimer ? 'ramas' : 'focus total'}</p>
+              <p className="mt-0.5 section-label">{hasTimer ? t('focusForest.labelRemaining') : t('focusForest.labelTotal')}</p>
             </div>
           </div>
 
           <div className="relative z-10 mt-10 rounded-2xl border border-white/[0.08] bg-black/20 p-5 backdrop-blur-sm">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1 text-[11px] font-bold text-teal-100">
-                <Sparkles size={12} /> {revealedDecimals} zecimale descoperite
+                <Sparkles size={12} /> {revealedDecimals} {t('focusForest.decimalsRevealed')}
               </div>
               <span className="font-mono text-xs font-semibold text-slate-500">{modeCopy.metric}</span>
             </div>
@@ -188,8 +190,8 @@ export default function FocusForest() {
           <div className="relative z-10 mt-6">
             <div className="mb-2 flex justify-between section-label">
               <span>3.14</span>
-              <span>{hasTimer ? Math.round(progress * 100) + '%' : 'cifra urmatoare'}</span>
-              <span>{hasTimer ? maxPossible + ' zec. posibile' : 'fara limita practica'}</span>
+              <span>{hasTimer ? Math.round(progress * 100) + '%' : t('focusForest.nextDigit')}</span>
+              <span>{hasTimer ? t('focusForest.maxPossible', { n: maxPossible }) : t('focusForest.unlimited')}</span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
               <div
@@ -202,11 +204,11 @@ export default function FocusForest() {
 
         {/* ── Control panel ─────────────────────────────────────── */}
         <div className="p-5 space-y-4">
-          <p className="section-label">control sesiune</p>
+          <p className="section-label">{t('focusForest.sessionControl')}</p>
 
           {/* Timer / endless toggle */}
           <div className="grid grid-cols-2 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-1">
-            {[['timer', 'Cu timer'], ['endless', 'Fara timer']].map(([value, label]) => (
+            {[['timer', t('focusForest.withTimer')], ['endless', t('focusForest.withoutTimer')]].map(([value, label]) => (
               <button
                 key={value}
                 onClick={() => switchMode(value)}
@@ -244,21 +246,23 @@ export default function FocusForest() {
 
           {/* Stats */}
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 space-y-3">
-            <p className="text-xs font-semibold leading-relaxed text-slate-400">
-              O cifra noua apare la fiecare <span className="font-bold text-teal-200">{SECS_PER_DIGIT}s</span>. Daca schimbi tabul sau pierzi focusul ferestrei, sesiunea se opreste.
-            </p>
+            <p className="text-xs font-semibold leading-relaxed text-slate-400"
+              dangerouslySetInnerHTML={{ __html: t('focusForest.infoText', { n: SECS_PER_DIGIT })
+                .replace('<b>', '<span class="font-bold text-teal-200">')
+                .replace('</b>', '</span>') }}
+            />
             <div className={clsx('grid gap-2', focusStreak > 0 ? 'grid-cols-3' : 'grid-cols-2')}>
               <div className="rounded-xl bg-black/20 p-3">
-                <p className="section-label">Record</p>
+                <p className="section-label">{t('focusForest.record')}</p>
                 <p className="mt-1 font-mono text-xl font-black text-white">{bestDigits}</p>
               </div>
               <div className="rounded-xl bg-black/20 p-3">
-                <p className="section-label">Sesiuni</p>
+                <p className="section-label">{t('focusForest.sessions')}</p>
                 <p className="mt-1 font-mono text-xl font-black text-white">{completed}</p>
               </div>
               {focusStreak > 0 && (
                 <div className="rounded-xl bg-orange-400/10 border border-orange-400/20 p-3">
-                  <p className="section-label text-orange-300/60">Streak</p>
+                  <p className="section-label text-orange-300/60">{t('focusForest.streak')}</p>
                   <p className="mt-1 font-mono text-xl font-black text-orange-300 flex items-center gap-1">
                     <Flame size={14} /> {focusStreak}
                   </p>
@@ -279,7 +283,7 @@ export default function FocusForest() {
               )}
             >
               {running ? <X size={15} /> : <Sprout size={15} />}
-              {running ? 'Opreste' : 'Porneste'}
+              {running ? t('focusForest.stop') : t('focusForest.start')}
             </button>
             <button onClick={reset} className="btn-ghost h-11 px-3">
               <RotateCcw size={15} />
@@ -288,7 +292,7 @@ export default function FocusForest() {
 
           {failed && (
             <div className="rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs font-semibold text-amber-200">
-              Sesiunea a fost intrerupta — fereastra nu a mai fost activa.
+              {t('focusForest.interrupted')}
             </div>
           )}
         </div>

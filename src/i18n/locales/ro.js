@@ -87,6 +87,31 @@ const ro = {
 
   streaks: { title: 'Streaks zilnice' },
 
+  focusForest: {
+    eyebrowTimer: 'sesiune cronometrata',
+    eyebrowEndless: 'fara limita',
+    titleTimer: 'Creste sirul lui pi în reprize clare.',
+    titleEndless: 'Stai cat vrei și impinge recordul cât mai departe.',
+    metricTimer: '% din sesiune',
+    metricEndless: 'urmatoarea cifra în {{n}}s',
+    labelRemaining: 'ramas',
+    labelTotal: 'focus total',
+    decimalsRevealed: 'zecimale descoperite',
+    nextDigit: 'cifra urmatoare',
+    maxPossible: '{{n}} zec. posibile',
+    unlimited: 'fara limita practica',
+    sessionControl: 'control sesiune',
+    withTimer: 'Cu timer',
+    withoutTimer: 'Fara timer',
+    infoText: 'O cifra noua apare la fiecare <b>{{n}}s</b>. Daca schimbi tabul sau pierzi focusul ferestrei, sesiunea se opreste.',
+    record: 'Record',
+    sessions: 'Sesiuni',
+    streak: 'Streak',
+    stop: 'Opreste',
+    start: 'Porneste',
+    interrupted: 'Sesiunea a fost intrerupta — fereastra nu a mai fost activa.',
+  },
+
   profile: {
     title: 'Profilul meu',
     name: 'Nume',

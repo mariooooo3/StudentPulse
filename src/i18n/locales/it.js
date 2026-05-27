@@ -87,6 +87,31 @@ const it = {
 
   streaks: { title: 'Streak giornalieri' },
 
+  focusForest: {
+    eyebrowTimer: 'sessione a tempo',
+    eyebrowEndless: 'senza limiti',
+    titleTimer: 'Fai crescere la sequenza di pi in sessioni chiare.',
+    titleEndless: 'Resta quanto vuoi e spingi il record sempre più lontano.',
+    metricTimer: '% della sessione',
+    metricEndless: 'prossima cifra tra {{n}}s',
+    labelRemaining: 'rimanente',
+    labelTotal: 'focus totale',
+    decimalsRevealed: 'decimali scoperti',
+    nextDigit: 'prossima cifra',
+    maxPossible: '{{n}} dec. possibili',
+    unlimited: 'nessun limite pratico',
+    sessionControl: 'controllo sessione',
+    withTimer: 'Con timer',
+    withoutTimer: 'Senza timer',
+    infoText: 'Una nuova cifra appare ogni <b>{{n}}s</b>. Se cambi scheda o perdi il focus, la sessione si interrompe.',
+    record: 'Record',
+    sessions: 'Sessioni',
+    streak: 'Streak',
+    stop: 'Ferma',
+    start: 'Inizia',
+    interrupted: 'Sessione interrotta — la finestra ha perso il focus.',
+  },
+
   profile: {
     title: 'Il mio profilo',
     name: 'Nome',
