@@ -178,6 +178,43 @@ function migrate() {
     CREATE INDEX IF NOT EXISTS idx_carpool_rides_driver ON carpool_rides(driver_id);
     CREATE INDEX IF NOT EXISTS idx_carpool_requests_ride ON carpool_requests(ride_id);
     CREATE INDEX IF NOT EXISTS idx_carpool_requests_passenger ON carpool_requests(passenger_id);
+
+    CREATE TABLE IF NOT EXISTS book_listings (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      user_name TEXT NOT NULL,
+      title TEXT NOT NULL,
+      author TEXT,
+      subject TEXT NOT NULL,
+      year_needed INTEGER,
+      condition TEXT,
+      price INTEGER NOT NULL DEFAULT 0,
+      type TEXT NOT NULL DEFAULT 'vând',
+      contact TEXT NOT NULL,
+      faculty TEXT,
+      created_at TEXT NOT NULL,
+      expires_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS roommate_listings (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      faculty TEXT,
+      year INTEGER,
+      budget TEXT,
+      zone TEXT NOT NULL,
+      smoking INTEGER NOT NULL DEFAULT 0,
+      pets INTEGER NOT NULL DEFAULT 0,
+      schedule TEXT,
+      bio TEXT,
+      contact TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      expires_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_book_listings_expires ON book_listings(expires_at);
+    CREATE INDEX IF NOT EXISTS idx_roommate_listings_expires ON roommate_listings(expires_at);
   `)
 }
 

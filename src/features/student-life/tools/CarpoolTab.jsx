@@ -99,24 +99,22 @@ function RideCard({ ride, onJoin, onCancel, onAccept, onReject }) {
       )}
 
       {/* Actions */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-
-        {/* Contact (always visible) */}
+      <div className="mt-1 space-y-2">
+        {/* Contact */}
         {ride.contact && (
           <span className="flex items-center gap-1.5 text-xs text-slate-400">
             <Phone size={11} /> {ride.contact}
           </span>
         )}
 
-        <div className="flex items-center gap-2 ml-auto">
-
-          {/* Own ride — cancel button */}
-          {ride.isOwn && ride.status !== 'cancelled' && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Own ride — delete button */}
+          {ride.isOwn && (
             <button
               onClick={() => onCancel(ride.id)}
               className="h-8 px-3 rounded-xl border border-rose-400/20 bg-rose-400/[0.07] text-rose-400 text-xs font-bold hover:bg-rose-400/[0.14] transition-all active:scale-[0.97]"
             >
-              Anulează
+              Șterge
             </button>
           )}
 
@@ -125,11 +123,11 @@ function RideCard({ ride, onJoin, onCancel, onAccept, onReject }) {
             <Badge status={ride.myRequest.status} />
           )}
 
-          {/* Join button */}
+          {/* Join button — flex-1 so it fills available width and stays clickable */}
           {canJoin && (
             <button
               onClick={() => onJoin(ride)}
-              className="h-8 px-4 rounded-xl text-xs font-bold transition-all active:scale-[0.97]"
+              className="flex-1 h-8 px-4 rounded-xl text-xs font-bold transition-all active:scale-[0.97]"
               style={{ background: accent.bg, border: `1px solid ${accent.border}`, color: accent.color }}
             >
               Vreau să merg
@@ -471,7 +469,8 @@ export default function CarpoolTab() {
   async function handleCancel(rideId) {
     try {
       await carpoolApi.cancelRide(rideId, userId)
-      load()
+      setRides(prev => prev.filter(r => r.id !== rideId))
+      setMyRides(prev => prev.filter(r => r.id !== rideId))
     } catch (e) { alert(e.message) }
   }
 
