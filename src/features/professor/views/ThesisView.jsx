@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 import { Check, FileText, X } from 'lucide-react'
-import { statusLabel } from '../utils/professorUtils'
 
 export default function ThesisView({ requests, onDecision }) {
+  const { t } = useTranslation()
   const [noteById, setNoteById] = useState({})
 
   return (
@@ -11,8 +12,8 @@ export default function ThesisView({ requests, onDecision }) {
       {requests.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/[0.08] p-12 text-center">
           <FileText size={32} className="mx-auto text-slate-700 mb-3" />
-          <p className="text-sm font-semibold text-slate-400">Nu exista cereri de licenta.</p>
-          <p className="text-xs text-slate-700 mt-1">Trimite o cerere din contul de student si va aparea aici.</p>
+          <p className="text-sm font-semibold text-slate-400">{t('professor.thesis.noRequests')}</p>
+          <p className="text-xs text-slate-700 mt-1">{t('professor.thesis.noRequestsHint')}</p>
         </div>
       ) : (
         requests.map(request => (
@@ -34,18 +35,18 @@ export default function ThesisView({ requests, onDecision }) {
                       : request.status === 'accepted' ? 'bg-emerald-500/15 text-emerald-300'
                       : 'bg-red-500/15 text-red-300',
                   )}>
-                    {statusLabel(request.status)}
+                    {t(`thesis.status.${request.status}`, { defaultValue: request.status })}
                   </span>
                 </div>
                 <p className="text-xs text-slate-600 mb-4 ml-10">{request.studentEmail}</p>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                   <div className="rounded-xl border border-white/[0.05] bg-[#070b14]/60 p-3">
-                    <p className="section-label mb-2">Idee tema</p>
+                    <p className="section-label mb-2">{t('professor.thesis.ideaLabel')}</p>
                     <p className="text-sm text-slate-300 leading-relaxed">{request.idea}</p>
                   </div>
                   <div className="rounded-xl border border-white/[0.05] bg-[#070b14]/60 p-3">
-                    <p className="section-label mb-2">Motivatie</p>
+                    <p className="section-label mb-2">{t('professor.thesis.motivationLabel')}</p>
                     <p className="text-sm text-slate-300 leading-relaxed">{request.motivation}</p>
                   </div>
                 </div>
@@ -64,31 +65,31 @@ export default function ThesisView({ requests, onDecision }) {
                   <textarea
                     value={noteById[request.id] || ''}
                     onChange={e => setNoteById(prev => ({ ...prev, [request.id]: e.target.value }))}
-                    placeholder="Nota optionala pentru student..."
+                    placeholder={t('professor.thesis.optionalNote')}
                     rows={3}
                     className="input-base w-full resize-none text-sm focus:border-amber-500/40"
                   />
                   <div className="grid grid-cols-2 gap-2">
                     <button
-                      onClick={() => onDecision(request.id, 'accepted', noteById[request.id] || 'Te astept la o discutie initiala saptamana aceasta.')}
+                      onClick={() => onDecision(request.id, 'accepted', noteById[request.id] || t('professor.thesis.defaultAcceptNote'))}
                       className="h-10 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold flex items-center justify-center gap-2 hover:bg-emerald-600/30 hover:-translate-y-px transition-all duration-150"
                     >
                       <Check size={13} />
-                      Accepta
+                      {t('professor.thesis.accept')}
                     </button>
                     <button
-                      onClick={() => onDecision(request.id, 'rejected', noteById[request.id] || 'Tema nu se potriveste directiei mele curente de cercetare.')}
+                      onClick={() => onDecision(request.id, 'rejected', noteById[request.id] || t('professor.thesis.defaultRejectNote'))}
                       className="h-10 rounded-xl bg-red-600/20 border border-red-500/30 text-red-300 text-xs font-bold flex items-center justify-center gap-2 hover:bg-red-600/30 hover:-translate-y-px transition-all duration-150"
                     >
                       <X size={13} />
-                      Respinge
+                      {t('professor.thesis.reject')}
                     </button>
                   </div>
                 </div>
               ) : (
                 <div className="lg:w-72 rounded-xl border border-white/[0.05] bg-[#070b14]/60 p-3">
-                  <p className="section-label mb-2">Raspuns transmis</p>
-                  <p className="text-sm text-slate-300">{request.professorNote || 'Fara nota suplimentara.'}</p>
+                  <p className="section-label mb-2">{t('professor.thesis.responseLabel')}</p>
+                  <p className="text-sm text-slate-300">{request.professorNote || t('professor.thesis.noNote')}</p>
                 </div>
               )}
             </div>

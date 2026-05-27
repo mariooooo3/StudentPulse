@@ -27,7 +27,7 @@ const DEMO_THESIS_PROFESSOR = {
   contact: 'Email / Teams',
   avatar: DEMO_PROFESSOR.avatar,
   color: 'from-amber-600 to-orange-600',
-  requirementsNote: 'Pentru demo, acest profesor este conectat cu portalul Profesor. Cererile trimise aici apar direct in contul lui.',
+  requirementsNote: 'thesis.demoNote',
 }
 
 /* ── Animation variants ──────────────────────────────────── */
@@ -164,7 +164,7 @@ function ProfessorCard({ p, onBook }) {
         {p.requirementsNote && (
           <div className="flex gap-2 bg-indigo-500/[0.07] border border-indigo-500/20 rounded-xl px-3 py-2.5 mb-3">
             <Sparkles size={12} className="text-indigo-400 shrink-0 mt-0.5" strokeWidth={1.75} />
-            <p className="text-[11px] text-indigo-200/70 leading-relaxed">{p.requirementsNote}</p>
+            <p className="text-[11px] text-indigo-200/70 leading-relaxed">{t(p.requirementsNote, { defaultValue: p.requirementsNote })}</p>
           </div>
         )}
 
