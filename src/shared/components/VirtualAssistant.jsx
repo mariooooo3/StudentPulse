@@ -95,11 +95,11 @@ function findNavigationAction(label, role) {
   return actions.find(action => action.match.some(token => normalized.includes(token)))
 }
 
-function assistantBrand(role) {
+function assistantBrand(role, t) {
   if (role === 'professor') {
     return {
       title: 'ProfessorPulse Assistant',
-      subtitle: 'Cereri, mesaje, profil',
+      subtitle: t('assistant.brandProfessorSubtitle'),
       badge: 'Professor help',
       footer: 'Professor-aware help',
     }
@@ -309,7 +309,7 @@ export default function VirtualAssistant({
     currentView,
     currentLabel: currentLabel || t('nav.' + currentView, { defaultValue: VIEW_LABELS[currentView] || currentView }),
   }
-  const brand = assistantBrand(context.role)
+  const brand = assistantBrand(context.role, t)
 
   useEffect(() => {
     setSuggestions(defaultSuggestions(context))

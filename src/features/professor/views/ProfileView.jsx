@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Clock, Edit3, Layers, Save } from 'lucide-react'
 import { consultationHoursFor } from '../utils/professorUtils'
 
 export default function ProfileView({ professor, onSave }) {
+  const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState({
     domain: professor.domain || '',
@@ -46,7 +48,7 @@ export default function ProfileView({ professor, onSave }) {
             className="btn-primary inline-flex items-center gap-2 text-sm self-start"
           >
             {editing ? <Save size={14} /> : <Edit3 size={14} />}
-            {editing ? 'Salveaza' : 'Editeaza'}
+            {editing ? t('professor.profile.save') : t('professor.profile.edit')}
           </button>
         </div>
       </section>
@@ -55,10 +57,10 @@ export default function ProfileView({ professor, onSave }) {
         {/* Form fields */}
         <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 space-y-4">
           {[
-            ['domain', 'Domeniu coordonare'],
-            ['room', 'Birou'],
-            ['phone', 'Telefon secretariat/birou'],
-            ['assistant', 'Asistent / colaborator'],
+            ['domain', t('professor.profile.coordinationDomain')],
+            ['room', t('professor.profile.office')],
+            ['phone', t('professor.profile.phone')],
+            ['assistant', t('professor.profile.assistant')],
           ].map(([key, label]) => (
             <div key={key}>
               <label className="section-label block mb-2">{label}</label>
@@ -70,19 +72,19 @@ export default function ProfileView({ professor, onSave }) {
                 />
               ) : (
                 <p className="text-sm text-slate-300 rounded-xl border border-white/[0.05] bg-[#070b14]/60 px-3 py-2.5">
-                  {professor[key] || <span className="text-slate-600 italic">Necompletat</span>}
+                  {professor[key] || <span className="text-slate-600 italic">{t('professor.profile.notFilled')}</span>}
                 </p>
               )}
             </div>
           ))}
           <div>
-            <label className="section-label block mb-2">Directii cercetare</label>
+            <label className="section-label block mb-2">{t('professor.profile.researchDirections')}</label>
             {editing ? (
               <input
                 value={form.research}
                 onChange={e => setForm(prev => ({ ...prev, research: e.target.value }))}
                 className="input-base w-full text-sm focus:border-amber-500/40"
-                placeholder="Separa cu virgula"
+                placeholder={t('professor.profile.separateComma')}
               />
             ) : (
               <div className="flex flex-wrap gap-2">
@@ -101,7 +103,7 @@ export default function ProfileView({ professor, onSave }) {
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
             <p className="text-sm font-bold text-white mb-3 flex items-center gap-2">
               <Clock size={14} className="text-amber-400" />
-              Program public de consultatii
+              {t('professor.profile.consultationSchedule')}
             </p>
             {consultationHoursFor(professor).map(slot => (
               <div key={slot.id} className="rounded-xl border border-white/[0.05] bg-[#070b14]/60 px-3 py-2 mb-2 last:mb-0">
@@ -113,7 +115,7 @@ export default function ProfileView({ professor, onSave }) {
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
             <p className="text-sm font-bold text-white mb-3 flex items-center gap-2">
               <Layers size={14} className="text-amber-400" />
-              Cursuri publicate
+              {t('professor.profile.publishedCourses')}
             </p>
             {professor.courses?.map(course => (
               <div key={course.id} className="rounded-xl border border-white/[0.05] bg-[#070b14]/60 px-3 py-2 mb-2 last:mb-0">

@@ -132,7 +132,7 @@ export default function BookingModal({ professor, onClose, session }) {
                   {professor.requirementsNote && (
                     <div className="flex gap-2.5 bg-indigo-500/[0.08] border border-indigo-500/20 rounded-xl px-4 py-3">
                       <Info size={13} className="text-indigo-400 shrink-0 mt-0.5" strokeWidth={1.75} />
-                      <p className="text-[11px] text-indigo-200/80 leading-relaxed">{professor.requirementsNote}</p>
+                      <p className="text-[11px] text-indigo-200/80 leading-relaxed">{t(professor.requirementsNote, { defaultValue: professor.requirementsNote })}</p>
                     </div>
                   )}
 

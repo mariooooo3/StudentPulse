@@ -1,8 +1,10 @@
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 import { LogOut } from 'lucide-react'
 import { NAV } from '../constants/nav'
 
 export default function ProfessorSidebar({ current, onNavigate, onLogout, profile }) {
+  const { t } = useTranslation()
   return (
     <aside className="hidden sm:flex w-64 shrink-0 flex-col border-r border-white/[0.06] bg-[#070b14]">
       {/* Brand */}
@@ -15,15 +17,15 @@ export default function ProfessorSidebar({ current, onNavigate, onLogout, profil
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-500 border-2 border-[#070b14]" />
           </div>
           <div className="min-w-0">
-            <p className="text-[13px] font-bold text-white truncate">Portal Profesor</p>
-            <p className="text-[11px] text-slate-600 truncate">AC · TUIASI</p>
+            <p className="text-[13px] font-bold text-white truncate">{t('professor.portalTitle')}</p>
+            <p className="text-[11px] text-slate-600 truncate">{t('professor.portalSubtitle')}</p>
           </div>
         </div>
       </div>
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-3 space-y-0.5">
-        {NAV.map(({ id, label, icon: Icon }) => (
+        {NAV.map(({ id, labelKey, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => onNavigate(id)}
@@ -35,7 +37,7 @@ export default function ProfessorSidebar({ current, onNavigate, onLogout, profil
             )}
           >
             <Icon size={15} className={current === id ? 'text-amber-400' : ''} />
-            {label}
+            {labelKey ? t(labelKey) : label}
           </button>
         ))}
       </nav>
@@ -51,7 +53,7 @@ export default function ProfessorSidebar({ current, onNavigate, onLogout, profil
             className="h-8 w-full rounded-lg border border-white/[0.07] bg-white/[0.03] text-[12px] font-semibold text-slate-500 hover:text-white hover:bg-white/[0.06] flex items-center justify-center gap-2 transition-all duration-150"
           >
             <LogOut size={12} />
-            Iesire
+            {t('professor.logout')}
           </button>
         </div>
       </div>
