@@ -26,7 +26,7 @@ export default function RecoTab({
   const timeLabel = now.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' })
   const dayLabel = now.toLocaleDateString('ro-RO', { weekday: 'long' })
   const dateLabel = now.toLocaleDateString('ro-RO', { day: 'numeric', month: 'long' })
-  const crowdLabel = totalUsers === 0 ? '–' : totalUsers < 80 ? 'Liniștit' : totalUsers < 160 ? 'Moderat' : 'Aglomerat'
+  const crowdLabel = totalUsers === 0 ? '–' : totalUsers < 80 ? t('navigation.reco.crowdQuiet') : totalUsers < 160 ? t('navigation.reco.crowdModerate') : t('navigation.reco.crowdBusy')
   const crowdColor = totalUsers === 0 ? 'text-slate-400' : totalUsers < 80 ? 'text-emerald-400' : totalUsers < 160 ? 'text-amber-400' : 'text-red-400'
   const periodEmoji = h < 7 ? '🌙' : h < 10 ? '🌅' : h < 13 ? '☀️' : h < 17 ? '🌤️' : h < 20 ? '🌆' : '🌙'
   const urgencyStyle = {
@@ -35,12 +35,12 @@ export default function RecoTab({
     low:    { border: 'border-emerald-500/30', bg: 'bg-emerald-500/5', dot: 'bg-emerald-400', text: 'text-emerald-400' },
   }
   const QUICK_CHIPS = [
-    { label: 'Unde mănânc?',        icon: '🍽️', q: 'Unde pot mânca acum pe campus? Ce opțiuni am?' },
-    { label: 'Săli libere?',         icon: '🚪', q: 'Ce săli sunt disponibile acum în Corp C?' },
-    { label: 'Secretariatul?',       icon: '📋', q: 'Secretariatul AC e deschis acum? Unde se afla?' },
-    { label: 'O cafea rapidă',       icon: '☕', q: 'Unde fac o cafea rapidă lângă campus?' },
-    { label: 'Studiu azi?',          icon: '📚', q: 'Ce zone de studiu sunt disponibile acum pe campus? Biblioteca e aglomerată?' },
-    { label: 'Examene în sesiune',   icon: '🎓', q: 'Cum mă pregătesc eficient pentru sesiunea de examene? Sfaturi practice.' },
+    { label: t('navigation.reco.chips.eat'),       icon: '🍽️', q: t('navigation.reco.chips.eatQ') },
+    { label: t('navigation.reco.chips.rooms'),      icon: '🚪', q: t('navigation.reco.chips.roomsQ') },
+    { label: t('navigation.reco.chips.secretary'),  icon: '📋', q: t('navigation.reco.chips.secretaryQ') },
+    { label: t('navigation.reco.chips.coffee'),     icon: '☕', q: t('navigation.reco.chips.coffeeQ') },
+    { label: t('navigation.reco.chips.study'),      icon: '📚', q: t('navigation.reco.chips.studyQ') },
+    { label: t('navigation.reco.chips.exams'),      icon: '🎓', q: t('navigation.reco.chips.examsQ') },
   ]
 
   return (
@@ -64,14 +64,14 @@ export default function RecoTab({
             className="flex items-center gap-1.5 text-xs bg-white/15 hover:bg-white/25 disabled:opacity-50 transition-colors px-3 py-1.5 rounded-xl font-medium cursor-pointer disabled:cursor-not-allowed"
           >
             {pulseLoading ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
-            {pulseLoading ? 'Analizez...' : 'Actualizează'}
+            {pulseLoading ? t('navigation.reco.analyzing') : t('navigation.reco.refresh')}
           </button>
         </div>
         <div className="relative grid grid-cols-3 gap-2">
           {[
-            { label: 'Ora', value: timeLabel, emoji: '⏰' },
-            { label: 'Trafic', value: crowdLabel, emoji: '👥', valueClass: crowdColor },
-            { label: 'Activi', value: totalUsers > 0 ? `${totalUsers}` : '–', emoji: '🏃' },
+            { label: t('navigation.reco.timeLabel'),    value: timeLabel, emoji: '⏰' },
+            { label: t('navigation.reco.trafficLabel'), value: crowdLabel, emoji: '👥', valueClass: crowdColor },
+            { label: t('navigation.reco.activeLabel'),  value: totalUsers > 0 ? `${totalUsers}` : '–', emoji: '🏃' },
           ].map(s => (
             <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-xl p-2.5 text-center">
               <div className="text-base mb-0.5">{s.emoji}</div>
@@ -85,7 +85,7 @@ export default function RecoTab({
       {/* Quick chips */}
       <div>
         <p className="text-[11px] text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-          <Sparkles size={10} /> Întreabă rapid
+          <Sparkles size={10} /> {t('navigation.reco.askQuick')}
         </p>
         <div className="flex gap-2 flex-wrap">
           {QUICK_CHIPS.map(chip => (
@@ -100,7 +100,7 @@ export default function RecoTab({
       {/* AI Cards */}
       <div>
         <p className="text-[11px] text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-          <Lightbulb size={10} className="text-amber-400" /> Recomandări acum
+          <Lightbulb size={10} className="text-amber-400" /> {t('navigation.reco.recommendations')}
         </p>
 
         {pulseLoading && (
@@ -152,7 +152,7 @@ export default function RecoTab({
 
         {!pulseLoading && !pulseData && (
           <div className="text-center py-8 text-slate-600 text-sm">
-            Nu s-au putut genera recomandări.
+            {t('navigation.reco.noRecs')}
           </div>
         )}
       </div>
@@ -164,14 +164,14 @@ export default function RecoTab({
             <Sparkles size={13} className="text-indigo-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-semibold text-white">Asistent Campus</p>
-            <p className="text-[10px] text-slate-600 truncate">Întreabă despre campus, sesiune, viața studențească</p>
+            <p className="text-[12px] font-semibold text-white">{t('navigation.reco.assistantTitle')}</p>
+            <p className="text-[10px] text-slate-600 truncate">{t('navigation.reco.assistantSub')}</p>
           </div>
           {recoMessages.length > 0 && (
             <button
               onClick={() => { setRecoMessages([]); recoHistoryRef.current = [] }}
               className="text-slate-700 hover:text-slate-400 transition-colors shrink-0"
-              title="Șterge conversația"
+              title={t('navigation.reco.clearChat')}
             >
               <X size={13} />
             </button>
@@ -195,7 +195,7 @@ export default function RecoTab({
               <div className="flex justify-start">
                 <div className="bg-white/[0.05] border border-white/[0.07] rounded-2xl rounded-bl-sm px-3.5 py-2.5 flex items-center gap-2">
                   <Loader2 size={12} className="animate-spin text-indigo-400" />
-                  <span className="text-[12px] text-slate-500">Analizez...</span>
+                  <span className="text-[12px] text-slate-500">{t('navigation.reco.analyzing')}</span>
                 </div>
               </div>
             )}
@@ -211,7 +211,7 @@ export default function RecoTab({
             value={recoInput}
             onChange={e => setRecoInput(e.target.value)}
             disabled={recoLoading}
-            placeholder="Întreabă ceva despre campus sau sesiune..."
+            placeholder={t('navigation.reco.inputPlaceholder')}
             className="flex-1 bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2 text-[13px] text-slate-300 placeholder-slate-700 outline-none focus:border-indigo-500/40 transition-colors disabled:opacity-50 min-w-0"
           />
           <button

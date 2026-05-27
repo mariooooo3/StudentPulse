@@ -1,7 +1,9 @@
 import { Sparkles, Route, Play } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { confidenceLabel } from '../utils/navigationHelpers'
 
 export default function VisualCopilotCard({ result, onStartRoute, onStartPresentation }) {
+  const { t } = useTranslation()
   if (!result) return null
   const canRoute = result.routeSuggestion?.type !== 'none' && result.routeSuggestion?.to
   return (
@@ -18,15 +20,15 @@ export default function VisualCopilotCard({ result, onStartRoute, onStartPresent
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.04] p-3">
-          <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Unde esti</p>
-          <p className="text-xs text-white font-semibold mt-1">{result.detectedLocation?.label || 'Locatie neconfirmata'}</p>
-          <p className="text-[11px] text-slate-500 mt-0.5">Incredere: {confidenceLabel(result.detectedLocation?.confidence)}</p>
+          <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">{t('navigation.copilot.whereYouAre')}</p>
+          <p className="text-xs text-white font-semibold mt-1">{result.detectedLocation?.label || t('navigation.copilot.locationUnconfirmed')}</p>
+          <p className="text-[11px] text-slate-500 mt-0.5">{t('navigation.copilot.confidence')} {confidenceLabel(result.detectedLocation?.confidence)}</p>
         </div>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.04] p-3">
-          <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Destinatie</p>
-          <p className="text-xs text-white font-semibold mt-1">{result.destination?.label || 'Nespecificata'}</p>
+          <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">{t('navigation.copilot.destination')}</p>
+          <p className="text-xs text-white font-semibold mt-1">{result.destination?.label || t('navigation.copilot.noDestination')}</p>
           <p className="text-[11px] text-slate-500 mt-0.5">
-            {result.routeSuggestion?.type === 'indoor' ? 'Ruta interioara' : result.routeSuggestion?.type === 'outdoor' ? 'Ruta pe harta' : 'Fara ruta'}
+            {result.routeSuggestion?.type === 'indoor' ? t('navigation.copilot.routeIndoor') : result.routeSuggestion?.type === 'outdoor' ? t('navigation.copilot.routeOutdoor') : t('navigation.copilot.noRoute')}
           </p>
         </div>
       </div>
@@ -51,7 +53,7 @@ export default function VisualCopilotCard({ result, onStartRoute, onStartPresent
           className="flex-1 h-10 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 disabled:bg-white/[0.04] border border-sky-400/20 disabled:border-white/[0.06] text-sky-200 disabled:text-slate-600 text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
         >
           <Route size={14} />
-          Ghidează-mă
+          {t('navigation.copilot.guide')}
         </button>
         {canRoute && (
           <button
@@ -59,7 +61,7 @@ export default function VisualCopilotCard({ result, onStartRoute, onStartPresent
             className="flex-1 h-10 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-indigo-500/25"
           >
             <Play size={13} fill="white" />
-            Start Prezentare
+            {t('navigation.copilot.startPresentation')}
           </button>
         )}
       </div>

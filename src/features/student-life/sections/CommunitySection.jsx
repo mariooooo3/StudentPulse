@@ -75,7 +75,7 @@ export default function CommunitySection({ lifeProfile, joined, joinedOps }) {
           icon={noScopedData ? Building2 : Users}
           title={noScopedData ? t('communitySection.noGroups') : t('communitySection.noGroups')}
           text={noScopedData
-            ? `Nu am găsit grupuri pentru ${scopeLabel || 'profilul tău academic'}. Poți crea primul grup pentru colegii tăi.`
+            ? t('communitySection.noGroupsScoped', { scope: scopeLabel || t('communitySection.defaultScope') })
             : t('communitySection.noGroupsText')}
           accent={accent}
         />
