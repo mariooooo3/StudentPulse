@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { staggerContainer, staggerItem } from '../schedule.constants'
 
 export default function ExamMapView({ exams }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const now = new Date()
   const sorted = [...exams].sort((a, b) => a.date - b.date)
 
@@ -65,7 +65,7 @@ export default function ExamMapView({ exams }) {
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/[0.06] text-slate-400">{exam.type}</span>
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1.5 text-xs text-slate-500">
-                  <span>{exam.date.toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+                  <span>{exam.date.toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' })}</span>
                   <span>{t('schedule.examMap.timePrefix')} {exam.time}</span>
                   <span>{exam.room}</span>
                   <span className="hidden sm:inline">{exam.professor}</span>

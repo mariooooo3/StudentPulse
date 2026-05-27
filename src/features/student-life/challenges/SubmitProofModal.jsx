@@ -126,7 +126,7 @@ export default function SubmitProofModal({ challenge, onClose, onSubmit }) {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-[10px] font-bold uppercase tracking-widest"
                         style={{ color: accent.color + 'bb' }}>
-                    {t(`submitProof.typeLabels.${challenge.type}`)} · {challenge.points} pct
+                    {t(`submitProof.typeLabels.${challenge.type}`)} · {challenge.points} {t('career.challengePoints')}
                   </span>
                   {/* Verify type badge */}
                   <span className={clsx(

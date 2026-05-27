@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import { motion } from 'framer-motion'
 import { Route } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import Button from '../../ui/Button'
 import { bfsIndoor, indoorPathPoints, FLOOR_Y } from '../utils/mapHelpers'
 
@@ -15,6 +16,7 @@ function IndoorTab({
   setToRoom,
   setIndoorPath,
 }) {
+  const { t } = useTranslation()
   return (
     <motion.div key="indoor" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
       className="space-y-4">
@@ -22,34 +24,34 @@ function IndoorTab({
         <h2 className="text-sm font-semibold text-white">{campus.indoorLabel}</h2>
         <div className="flex flex-wrap gap-3 items-end">
           <div className="flex-1 min-w-36">
-            <label className="text-xs text-slate-400 mb-1 block">De la</label>
+            <label className="text-xs text-slate-400 mb-1 block">{t('navigation.map.from')}</label>
             <select value={fromRoom} onChange={e => { setFromRoom(e.target.value); setIndoorPath(null) }}
               className="w-full px-3 py-2 rounded-xl bg-white/[0.03] text-slate-200 text-sm border border-white/[0.07] focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-              <option value="">Alege sala...</option>
+              <option value="">{t('navigation.indoor.chooseRoom')}</option>
               {IND_ROOMS.map(r => (
-                <option key={r.id} value={r.id} className="bg-slate-900">{r.label} ({r.floor === 0 ? 'Parter' : `Etaj ${r.floor}`})</option>
+                <option key={r.id} value={r.id} className="bg-slate-900">{r.label} ({r.floor === 0 ? t('navigation.indoor.ground') : t('navigation.indoor.floor', { n: r.floor })})</option>
               ))}
             </select>
           </div>
           <div className="flex-1 min-w-36">
-            <label className="text-xs text-slate-400 mb-1 block">La</label>
+            <label className="text-xs text-slate-400 mb-1 block">{t('navigation.map.to')}</label>
             <select value={toRoom} onChange={e => { setToRoom(e.target.value); setIndoorPath(null) }}
               className="w-full px-3 py-2 rounded-xl bg-white/[0.03] text-slate-200 text-sm border border-white/[0.07] focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-              <option value="">Alege sala...</option>
+              <option value="">{t('navigation.indoor.chooseRoom')}</option>
               {IND_ROOMS.map(r => (
-                <option key={r.id} value={r.id} className="bg-slate-900">{r.label} ({r.floor === 0 ? 'Parter' : `Etaj ${r.floor}`})</option>
+                <option key={r.id} value={r.id} className="bg-slate-900">{r.label} ({r.floor === 0 ? t('navigation.indoor.ground') : t('navigation.indoor.floor', { n: r.floor })})</option>
               ))}
             </select>
           </div>
           <Button onClick={() => { if (fromRoom && toRoom) setIndoorPath(bfsIndoor(fromRoom, toRoom, IND_GRAPH)) }}
             disabled={!fromRoom || !toRoom}>
             <Route size={15} />
-            Calculează
+            {t('navigation.map.calculate')}
           </Button>
           {(fromRoom || toRoom) && (
             <button onClick={() => { setFromRoom(''); setToRoom(''); setIndoorPath(null) }}
               className="text-xs text-slate-400 hover:text-red-400 cursor-pointer transition-colors">
-              Resetează
+              {t('navigation.map.reset')}
             </button>
           )}
         </div>
@@ -60,7 +62,7 @@ function IndoorTab({
             {indoorPath.map((id, i) => {
               const room = IND_ROOMS.find(r => r.id === id)
               const floorPart = typeof id === 'string' && id.includes('_') ? id.split('_')[1] : null
-              const label = room?.label ?? (floorPart != null ? `Scară Et.${floorPart === '0' ? 'P' : floorPart}` : 'Scară')
+              const label = room?.label ?? (floorPart != null ? `${t('navigation.indoor.stairs')} ${floorPart === '0' ? t('navigation.indoor.ground') : t('navigation.indoor.floor', { n: floorPart })}` : t('navigation.indoor.stairs'))
               return (
                 <span key={id} className="flex items-center gap-1">
                   {i > 0 && <span className="text-slate-600">→</span>}
@@ -198,10 +200,10 @@ function IndoorTab({
       </div>
 
       <div className="flex gap-4 flex-wrap text-xs text-slate-500">
-        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-indigo-600" /><span>Start</span></div>
-        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-green-600" /><span>Destinație</span></div>
-        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-blue-900 border border-blue-500/40" /><span>Pe traseu</span></div>
-        <span className="ml-auto italic">Click pe sală = selectare rapidă</span>
+        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-indigo-600" /><span>{t('navigation.indoor.startLabel')}</span></div>
+        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-green-600" /><span>{t('navigation.indoor.destLabel')}</span></div>
+        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-blue-900 border border-blue-500/40" /><span>{t('navigation.indoor.onPath')}</span></div>
+        <span className="ml-auto italic">{t('navigation.indoor.clickHint')}</span>
       </div>
     </motion.div>
   )

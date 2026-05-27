@@ -1,22 +1,24 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Users, Plus, X, Loader2, AlertCircle, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../../app/providers/AuthContext'
 import { SECTION_ACCENTS } from '../constants/sectionConfig'
 import { roommatesApi } from './roommatesService'
 
 const accent = SECTION_ACCENTS.community
 
-function formatExpiry(expiresAt) {
+function formatExpiry(expiresAt, t) {
   const diff = new Date(expiresAt) - Date.now()
-  if (diff <= 0) return 'Expirat'
+  if (diff <= 0) return t('roommateTab.expired')
   const h = Math.floor(diff / 3600000)
   const m = Math.floor((diff % 3600000) / 60000)
-  if (h > 0) return `Expiră în ${h}h ${m}m`
-  return `Expiră în ${m}m`
+  if (h > 0) return t('roommateTab.expiresInHM', { h, m })
+  return t('roommateTab.expiresInM', { m })
 }
 
 function RoommateCard({ r, onDelete }) {
+  const { t } = useTranslation()
   const initials = r.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
   return (
@@ -40,10 +42,10 @@ function RoommateCard({ r, onDelete }) {
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-white">{r.name}</p>
           <p className="text-xs text-slate-500">
-            {r.faculty ? `${r.faculty} · ` : ''}{r.year ? `An ${r.year}` : ''}
+            {r.faculty ? `${r.faculty} · ` : ''}{r.year ? `${t('roommateTab.yearLabel')} ${r.year}` : ''}
           </p>
         </div>
-        <span className="text-[10px] text-slate-600 shrink-0">{formatExpiry(r.expires_at)}</span>
+        <span className="text-[10px] text-slate-600 shrink-0">{formatExpiry(r.expires_at, t)}</span>
       </div>
 
       {r.bio && (
@@ -51,11 +53,11 @@ function RoommateCard({ r, onDelete }) {
       )}
 
       <div className="flex flex-wrap gap-1.5 mb-4">
-        {r.zone    && <span className="tag">{r.zone}</span>}
-        {r.budget  && <span className="tag">{r.budget}</span>}
+        {r.zone     && <span className="tag">{r.zone}</span>}
+        {r.budget   && <span className="tag">{r.budget}</span>}
         {r.schedule && <span className="tag">{r.schedule}</span>}
-        {!r.smoking && <span className="tag">Non-fumător</span>}
-        {!!r.pets   && <span className="tag">Animale ok</span>}
+        {!r.smoking && <span className="tag">{t('roommateTab.nonSmoker')}</span>}
+        {!!r.pets   && <span className="tag">{t('roommateTab.petsOk')}</span>}
       </div>
 
       <div className="gradient-separator mb-4" />
@@ -66,14 +68,14 @@ function RoommateCard({ r, onDelete }) {
           className="flex-1 h-9 rounded-xl text-xs font-bold transition-all active:scale-[0.97]"
           style={{ background: accent.bg, border: `1px solid ${accent.border}`, color: accent.color }}
         >
-          Contactează {r.contact}
+          {t('roommateTab.contact')} {r.contact}
         </button>
         {r.isOwn && (
           <button
             onClick={() => onDelete(r.id)}
             className="h-9 px-3 rounded-xl border border-rose-400/20 bg-rose-400/[0.07] text-rose-400 text-xs font-bold hover:bg-rose-400/[0.14] transition-all active:scale-[0.97] flex items-center gap-1 shrink-0"
           >
-            <Trash2 size={12} /> Șterge
+            <Trash2 size={12} /> {t('roommateTab.delete')}
           </button>
         )}
       </div>
@@ -82,6 +84,7 @@ function RoommateCard({ r, onDelete }) {
 }
 
 function PostRoommateModal({ onClose, onPosted, userId, userName, lifeProfile }) {
+  const { t } = useTranslation()
   const [form, setForm] = useState({
     budget: '', zone: '', smoking: false, pets: false,
     schedule: 'Flexibil', bio: '', contact: '',
@@ -136,7 +139,7 @@ function PostRoommateModal({ onClose, onPosted, userId, userName, lifeProfile })
                      style={{ background: accent.bg, border: `1px solid ${accent.border}` }}>
                   <Users size={15} style={{ color: accent.color }} />
                 </div>
-                <p className="text-[14px] font-bold text-white">Postează anunț coleg de cameră</p>
+                <p className="text-[14px] font-bold text-white">{t('roommateTab.postTitle')}</p>
               </div>
               <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-600 hover:text-slate-300 hover:bg-white/[0.05] transition-colors">
                 <X size={15} />
@@ -146,69 +149,62 @@ function PostRoommateModal({ onClose, onPosted, userId, userName, lifeProfile })
             <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="label-xs">An de studiu</label>
+                  <label className="label-xs">{t('roommateTab.studyYear')}</label>
                   <select className="input-base w-full mt-1" value={form.year} onChange={e => set('year', e.target.value)}>
                     <option value="">-</option>
-                    {[1,2,3,4].map(y => <option key={y} value={y}>An {y}</option>)}
+                    {[1,2,3,4].map(y => <option key={y} value={y}>{t('roommateTab.yearOption', { n: y })}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="label-xs">Program preferat</label>
+                  <label className="label-xs">{t('roommateTab.preferredSchedule')}</label>
                   <select className="input-base w-full mt-1" value={form.schedule} onChange={e => set('schedule', e.target.value)}>
-                    {['Matinal', 'Variabil', 'Nocturn', 'Flexibil'].map(s => (
-                      <option key={s} value={s}>{s}</option>
+                    {[
+                      { val: 'Matinal', label: t('roommateTab.scheduleMorning') },
+                      { val: 'Variabil', label: t('roommateTab.scheduleVariable') },
+                      { val: 'Nocturn', label: t('roommateTab.scheduleNight') },
+                      { val: 'Flexibil', label: t('roommateTab.scheduleFlexible') },
+                    ].map(s => (
+                      <option key={s.val} value={s.val}>{s.label}</option>
                     ))}
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="label-xs">Zonă preferată *</label>
-                <input className="input-base w-full mt-1" placeholder="ex: Tătărași, Copou, Tudor Vladimirescu"
+                <label className="label-xs">{t('roommateTab.preferredZone')}</label>
+                <input className="input-base w-full mt-1" placeholder={t('roommateTab.zonePlaceholder')}
                   value={form.zone} onChange={e => set('zone', e.target.value)} required />
               </div>
 
               <div>
-                <label className="label-xs">Buget lunar</label>
-                <input className="input-base w-full mt-1" placeholder="ex: 600-800 RON/lună"
+                <label className="label-xs">{t('roommateTab.monthlyBudget')}</label>
+                <input className="input-base w-full mt-1" placeholder={t('roommateTab.budgetPlaceholder')}
                   value={form.budget} onChange={e => set('budget', e.target.value)} />
               </div>
 
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={form.smoking}
-                    onChange={e => set('smoking', e.target.checked)}
-                    className="w-4 h-4 rounded accent-indigo-500"
-                  />
-                  <span className="text-xs text-slate-400">Fumător</span>
+                  <input type="checkbox" checked={form.smoking} onChange={e => set('smoking', e.target.checked)}
+                    className="w-4 h-4 rounded accent-indigo-500" />
+                  <span className="text-xs text-slate-400">{t('roommateTab.smoker')}</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={form.pets}
-                    onChange={e => set('pets', e.target.checked)}
-                    className="w-4 h-4 rounded accent-indigo-500"
-                  />
-                  <span className="text-xs text-slate-400">Animale de companie ok</span>
+                  <input type="checkbox" checked={form.pets} onChange={e => set('pets', e.target.checked)}
+                    className="w-4 h-4 rounded accent-indigo-500" />
+                  <span className="text-xs text-slate-400">{t('roommateTab.petsAllowed')}</span>
                 </label>
               </div>
 
               <div>
-                <label className="label-xs">Despre tine</label>
-                <textarea
-                  className="input-base resize-none w-full mt-1"
-                  rows={3}
-                  placeholder="ex: Student liniștit, prefer să studiez seara..."
-                  value={form.bio}
-                  onChange={e => set('bio', e.target.value)}
-                />
+                <label className="label-xs">{t('roommateTab.aboutYou')}</label>
+                <textarea className="input-base resize-none w-full mt-1" rows={3}
+                  placeholder={t('roommateTab.bioPlaceholder')}
+                  value={form.bio} onChange={e => set('bio', e.target.value)} />
               </div>
 
               <div>
-                <label className="label-xs">Contact Telegram *</label>
-                <input className="input-base w-full mt-1" placeholder="ex: @username"
+                <label className="label-xs">{t('roommateTab.telegramContact')}</label>
+                <input className="input-base w-full mt-1" placeholder={t('roommateTab.telegramPlaceholder')}
                   value={form.contact} onChange={e => set('contact', e.target.value)} required />
               </div>
 
@@ -226,8 +222,8 @@ function PostRoommateModal({ onClose, onPosted, userId, userName, lifeProfile })
                 style={{ background: accent.bg, border: `1px solid ${accent.border}`, color: accent.color }}
               >
                 {loading
-                  ? <><Loader2 size={14} className="animate-spin" /> Se postează...</>
-                  : <><Users size={14} /> Postează anunțul</>}
+                  ? <><Loader2 size={14} className="animate-spin" /> {t('roommateTab.posting')}</>
+                  : <><Users size={14} /> {t('roommateTab.postSubmit')}</>}
               </button>
             </form>
           </div>
@@ -238,6 +234,7 @@ function PostRoommateModal({ onClose, onPosted, userId, userName, lifeProfile })
 }
 
 export default function RoommateTab({ lifeProfile }) {
+  const { t } = useTranslation()
   const { session } = useAuth()
   const userId   = session?.userId || ''
   const userName = session?.name || session?.email?.split('@')[0] || 'Student'
@@ -283,11 +280,10 @@ export default function RoommateTab({ lifeProfile }) {
 
   return (
     <div className="space-y-4">
-      {/* Search + post button */}
       <div className="flex items-center gap-3">
         <input
           className="input-base flex-1 py-2 text-xs"
-          placeholder="Caută zonă, facultate, nume..."
+          placeholder={t('roommateTab.searchPlaceholder')}
           value={query}
           onChange={e => setQuery(e.target.value)}
         />
@@ -296,23 +292,22 @@ export default function RoommateTab({ lifeProfile }) {
           className="h-9 px-4 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-[0.97] shrink-0"
           style={{ background: accent.bg, border: `1px solid ${accent.border}`, color: accent.color }}
         >
-          <Plus size={13} /> Postează
+          <Plus size={13} /> {t('roommateTab.postBtn')}
         </button>
       </div>
 
-      {/* Content */}
       <AnimatePresence mode="wait">
         {loading ? (
           <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                       className="flex flex-col items-center justify-center py-16 gap-3">
             <Loader2 size={22} className="animate-spin" style={{ color: accent.color }} />
-            <p className="text-sm text-slate-500">Se încarcă anunțurile...</p>
+            <p className="text-sm text-slate-500">{t('roommateTab.loading')}</p>
           </motion.div>
         ) : error ? (
           <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                       className="rounded-2xl border border-rose-400/20 bg-rose-400/[0.07] p-6 text-center">
             <p className="text-sm text-rose-300">{error}</p>
-            <button onClick={load} className="mt-3 text-xs text-rose-400 underline">Încearcă din nou</button>
+            <button onClick={load} className="mt-3 text-xs text-rose-400 underline">{t('roommateTab.retry')}</button>
           </motion.div>
         ) : filtered.length === 0 ? (
           <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
@@ -321,12 +316,10 @@ export default function RoommateTab({ lifeProfile }) {
               <Users size={20} className="text-slate-600" />
             </div>
             <p className="text-sm font-bold text-white">
-              {roommates.length === 0 ? 'Niciun anunț de coleg de cameră' : 'Niciun rezultat'}
+              {roommates.length === 0 ? t('roommateTab.noAnnouncements') : t('roommateTab.noResults')}
             </p>
             <p className="text-xs text-slate-500">
-              {roommates.length === 0
-                ? 'Fii primul care postează un anunț!'
-                : 'Încearcă altă zonă sau facultate.'}
+              {roommates.length === 0 ? t('roommateTab.noAnnouncementsText') : t('roommateTab.noResultsText')}
             </p>
             {roommates.length === 0 && (
               <button
@@ -334,7 +327,7 @@ export default function RoommateTab({ lifeProfile }) {
                 className="mt-1 h-9 px-5 rounded-xl text-xs font-bold transition-all active:scale-[0.97]"
                 style={{ background: accent.bg, border: `1px solid ${accent.border}`, color: accent.color }}
               >
-                Postează anunț
+                {t('roommateTab.postAnnouncementBtn')}
               </button>
             )}
           </motion.div>

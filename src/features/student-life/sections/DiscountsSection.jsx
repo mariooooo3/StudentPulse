@@ -57,7 +57,13 @@ export default function DiscountsSection({ lifeProfile, saved, savedOps }) {
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
         <SearchField value={query} onChange={setQuery} placeholder={t('discountsSection.searchPlaceholder')} />
-        <FilterPills items={studentLifeData.discounts.categories} value={category} onChange={setCategory} accent={accent} />
+        <FilterPills
+          items={studentLifeData.discounts.categories}
+          labels={[t('discountsSection.filterAll'), t('discountsSection.filterTransport'), t('discountsSection.filterDivertisment'), t('discountsSection.filterTechApps'), t('discountsSection.filterMuzicaMedia'), t('discountsSection.filterRestaurant'), t('discountsSection.filterCultura'), t('discountsSection.filterProductivitate')]}
+          value={category}
+          onChange={setCategory}
+          accent={accent}
+        />
         <span className="shrink-0 font-mono text-xs font-semibold text-slate-500">{t('discountsSection.results', { count: offers.length })}</span>
       </div>
 

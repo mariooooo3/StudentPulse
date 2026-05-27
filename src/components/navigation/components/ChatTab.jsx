@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, Send, X, Loader2, LocateFixed, Camera, ImagePlus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import VisualCopilotCard from './CopilotCard'
 
 export default function ChatTab({
@@ -18,6 +19,7 @@ export default function ChatTab({
   onApplyRoute,
   onStartPresentation,
 }) {
+  const { t } = useTranslation()
   const chatFileInputRef = useRef(null)
   const chatBottomRef = useRef(null)
 
@@ -84,7 +86,7 @@ export default function ChatTab({
                 {msg.imagePreview && (
                   <img
                     src={msg.imagePreview}
-                    alt="Poza atasata pentru analiza de navigatie"
+                    alt={t('navigation.chat.imageAlt')}
                     className="mb-2 max-h-44 w-full rounded-xl object-cover border border-white/[0.12]"
                   />
                 )}
@@ -118,7 +120,7 @@ export default function ChatTab({
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
               <div className="bg-white/[0.05] px-4 py-3 rounded-2xl rounded-bl-md flex items-center gap-2">
                 <Loader2 size={14} className="animate-spin text-indigo-400" />
-                <span className="text-sm text-slate-400">Gândesc...</span>
+                <span className="text-sm text-slate-400">{t('navigation.chat.thinking')}</span>
               </div>
             </motion.div>
           )}
@@ -131,12 +133,12 @@ export default function ChatTab({
           <div className="mb-3 flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.03] p-2">
             <img
               src={chatAttachment.preview}
-              alt="Preview poza atasata"
+              alt={t('navigation.chat.previewAlt')}
               className="h-14 w-20 rounded-lg object-cover border border-white/[0.08]"
             />
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-slate-200">Poza atasata pentru Copilot</p>
-              <p className="text-[11px] text-slate-500">Scrie destinatia sau intreaba unde esti.</p>
+              <p className="text-xs font-semibold text-slate-200">{t('navigation.chat.attachedPhoto')}</p>
+              <p className="text-[11px] text-slate-500">{t('navigation.chat.attachedHint')}</p>
             </div>
             <button
               type="button"
@@ -153,7 +155,7 @@ export default function ChatTab({
             type="button"
             onClick={() => chatFileInputRef.current?.click()}
             className="p-2.5 rounded-xl bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] border border-white/[0.07] transition-colors cursor-pointer"
-            title="Ataseaza poza"
+            title={t('navigation.chat.attachTitle')}
           >
             <ImagePlus size={18} />
           </button>
@@ -161,13 +163,13 @@ export default function ChatTab({
             type="button"
             onClick={() => onOpenCamera('environment')}
             className="p-2.5 rounded-xl bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] border border-white/[0.07] transition-colors cursor-pointer"
-            title="Fa poza"
+            title={t('navigation.chat.cameraTitle')}
           >
             <Camera size={18} />
           </button>
           <input
             type="text"
-            placeholder="Unde e sala C310? Cum ajung la cantină?..."
+            placeholder={t('navigation.chat.placeholder')}
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
             className="min-w-0 flex-1 px-3 sm:px-4 py-2.5 rounded-xl bg-white/[0.03] text-slate-200 border border-white/[0.07] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm placeholder:text-slate-600"

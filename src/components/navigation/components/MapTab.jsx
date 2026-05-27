@@ -1,4 +1,5 @@
 import { memo, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { MapPin, Route, ArrowRight, Loader2, Navigation as NavIcon, Wifi, WifiOff, Users, LocateFixed, X } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
@@ -43,6 +44,7 @@ function MapTab({
   onOpenExternalMap,
   onOpenExternalRoute,
 }) {
+  const { t } = useTranslation()
   const poiIcons = useRef({})
   function getPoiIcon(poi) {
     if (!poiIcons.current[poi.id]) {
@@ -65,18 +67,18 @@ function MapTab({
         <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/35 to-transparent" />
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="section-label mb-1">Traseu outdoor</p>
+            <p className="section-label mb-1">{t('navigation.map.outdoorRoute')}</p>
             <h2 className="flex items-center gap-2 text-sm font-bold text-white">
-              <Route size={15} className="text-indigo-400" /> Calculeaza ruta
+              <Route size={15} className="text-indigo-400" /> {t('navigation.map.calcRoute')}
             </h2>
           </div>
           <Badge variant="primary">{activeRouteProfile.label}</Badge>
         </div>
         <h2 className="hidden text-sm font-semibold text-white mb-3 items-center gap-2">
-          <Route size={15} className="text-indigo-400" /> Calculează traseu
+          <Route size={15} className="text-indigo-400" /> {t('navigation.map.calcRoute')}
         </h2>
         <div className="mb-3 grid grid-cols-3 gap-2 sm:inline-grid sm:min-w-[360px]">
-          {[{ id: 'foot', label: '🚶 Pe jos' }, { id: 'bike', label: '🚲 Bicicletă' }, { id: 'car', label: '🚗 Mașină' }].map(m => (
+          {[{ id: 'foot', label: t('navigation.map.modeWalk') }, { id: 'bike', label: t('navigation.map.modeBike') }, { id: 'car', label: t('navigation.map.modeCar') }].map(m => (
             <button key={m.id} onClick={() => {
               setRouteMode(m.id)
               if (routeFrom && routeTo) { onCalculateRoute(routeFrom, routeTo, m.id) }
@@ -89,30 +91,30 @@ function MapTab({
         </div>
         <div className="flex flex-wrap gap-3 items-end">
           <div className="flex-1 min-w-36">
-            <label className="text-xs text-slate-400 mb-1 block">De la</label>
+            <label className="text-xs text-slate-400 mb-1 block">{t('navigation.map.from')}</label>
             <select value={routeFrom} onChange={e => { setRouteFrom(e.target.value); setRoutePath(null) }}
               className="input-base">
-              <option value="">Alege punct de start...</option>
+              <option value="">{t('navigation.map.chooseStart')}</option>
               {buildings.map(b => <option key={b.id} value={b.id} className="bg-slate-900">{b.name}</option>)}
             </select>
           </div>
           <ArrowRight size={16} className="hidden sm:block text-slate-400 mb-2 shrink-0" />
           <div className="flex-1 min-w-36">
-            <label className="text-xs text-slate-400 mb-1 block">La</label>
+            <label className="text-xs text-slate-400 mb-1 block">{t('navigation.map.to')}</label>
             <select value={routeTo} onChange={e => { setRouteTo(e.target.value); setRoutePath(null) }}
               className="input-base">
-              <option value="">Alege destinație...</option>
+              <option value="">{t('navigation.map.chooseDest')}</option>
               {buildings.map(b => <option key={b.id} value={b.id} className="bg-slate-900">{b.name}</option>)}
             </select>
           </div>
           <Button onClick={fetchRoute} disabled={!routeFrom || !routeTo || routeLoading}>
             {routeLoading ? <Loader2 size={15} className="animate-spin" /> : <Route size={15} />}
-            {routeLoading ? 'Se calculează...' : 'Calculează'}
+            {routeLoading ? t('navigation.map.calculating') : t('navigation.map.calculate')}
           </Button>
           {(routeFrom || routeTo) && (
             <button onClick={() => { setRouteFrom(''); setRouteTo(''); setRoutePath(null); setRouteInfo(null) }}
               className="text-xs text-slate-400 hover:text-red-400 cursor-pointer transition-colors">
-              Resetează
+              {t('navigation.map.reset')}
             </button>
           )}
         </div>
@@ -130,7 +132,7 @@ function MapTab({
                 ? 'text-amber-300 bg-amber-500/10'
                 : 'text-green-400 bg-green-900/20'
             }`}>
-              {routeInfo.source === 'direct-estimate' ? 'Estimare directa' : 'Traseu calculat'}
+              {routeInfo.source === 'direct-estimate' ? t('navigation.map.sourceEstimate') : t('navigation.map.sourceCalculated')}
             </span>
             </div>
             {routeFrom && routeTo && (() => {
@@ -139,7 +141,7 @@ function MapTab({
               if (!from || !to) return null
               return (
                 <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Extern</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('navigation.map.external')}</span>
                   <button type="button" onClick={() => onOpenExternalRoute(from, to, 'google', routeMode)}
                     className="h-8 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 text-xs font-bold text-slate-300 hover:border-indigo-400/30 hover:text-white">
                     Google Maps
@@ -164,7 +166,7 @@ function MapTab({
             <div className={`w-4 h-4 rounded-full bg-white absolute top-1 shadow transition-transform ${showCrowd ? 'translate-x-5' : 'translate-x-1'}`} />
           </div>
           <span className="text-sm font-medium text-slate-200">
-            Afișează aglomerația
+            {t('navigation.map.showCrowd')}
           </span>
         </button>
 
@@ -176,12 +178,12 @@ function MapTab({
                 : 'bg-slate-800 text-slate-500'
             }`}>
               {connected ? <Wifi size={11} /> : <WifiOff size={11} />}
-              {connected ? (mode === 'ws' ? 'WebSocket live' : 'Simulare locală') : 'Conectare...'}
+              {connected ? (mode === 'ws' ? t('navigation.map.wsLive') : t('navigation.map.wsLocal')) : t('navigation.map.connecting')}
             </span>
             {connected && (
               <span className="flex items-center gap-1.5 text-xs text-slate-400">
                 <Users size={12} />
-                <span className="font-semibold text-white">{totalUsers}</span> activi pe campus
+                <span className="font-semibold text-white">{totalUsers}</span> {t('navigation.map.activeOnCampus')}
               </span>
             )}
           </motion.div>
@@ -196,19 +198,19 @@ function MapTab({
             <div className={`w-4 h-4 rounded-full bg-white absolute top-1 shadow transition-transform ${showPOI ? 'translate-x-5' : 'translate-x-1'}`} />
           </div>
           <span className="text-sm font-medium text-slate-200 flex items-center gap-1.5">
-            <span>📍</span> Puncte de interes
+            <span>📍</span> {t('navigation.map.showPOI')}
           </span>
         </button>
 
         <div className="ml-auto flex items-center gap-4 text-xs text-slate-500">
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-green-500 opacity-80" /> Liber (0–15)
+            <span className="w-3 h-3 rounded-full bg-green-500 opacity-80" /> {t('navigation.map.crowdFree')}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-orange-500 opacity-80" /> Mediu (16–40)
+            <span className="w-3 h-3 rounded-full bg-orange-500 opacity-80" /> {t('navigation.map.crowdModerate')}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-red-500 opacity-80" /> Aglomerat (40+)
+            <span className="w-3 h-3 rounded-full bg-red-500 opacity-80" /> {t('navigation.map.crowdBusy')}
           </span>
         </div>
       </div>

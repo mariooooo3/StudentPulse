@@ -57,6 +57,7 @@ export function MessageInputBar({ value, onChange, onKeyDown, onSend, canSend, p
 
 /* ─── Chat header ────────────────────────────────────────────────────────── */
 export function ChatHeader({ onBack, avatar, name, subtitle, subtitleClass = 'text-slate-500', badge, connected }) {
+  const { t } = useTranslation()
   return (
     <div className="h-16 border-b border-white/[0.05] flex items-center px-5 gap-3 bg-[#070b14]/95 backdrop-blur-xl shrink-0">
       {onBack && (
@@ -84,7 +85,7 @@ export function ChatHeader({ onBack, avatar, name, subtitle, subtitleClass = 'te
         )}
       >
         {connected ? <Wifi size={11} /> : <WifiOff size={11} />}
-        {connected ? 'Live' : 'Offline'}
+        {connected ? t('notifications.connected') : t('notifications.offline')}
       </span>
     </div>
   )

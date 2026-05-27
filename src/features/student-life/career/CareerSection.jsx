@@ -84,7 +84,7 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
       .map((job) => {
         const cities = job.cities.map(normalizeCity)
         const warnings = []
-        if (lifeProfile.year < job.minYear) warnings.push(`Anul ${job.minYear}+`)
+        if (lifeProfile.year < job.minYear) warnings.push(`${t('career.year')} ${job.minYear}+`)
         if (!job.remote && !cities.includes('all') && !cities.includes(lifeProfile.city) && job.cities[0]) warnings.push(job.cities[0])
         const deadlineDays = rollingDays(job.id, 3, 21, now)
         const baseScore = jobMatch(job, lifeProfile)
@@ -110,7 +110,7 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
 
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-[13px] text-slate-500">
         <Award size={14} className="text-slate-400 shrink-0" strokeWidth={1.75} />
-        <span><b className="text-slate-300 font-semibold">{lifeProfile.facultyName}</b> · Anul {lifeProfile.year} · {lifeProfile.city}</span>
+        <span><b className="text-slate-300 font-semibold">{lifeProfile.facultyName}</b> · {t('career.year')} {lifeProfile.year} · {lifeProfile.city}</span>
         {cvAnalysis && (
           <span className="ml-auto flex items-center gap-1 text-blue-400 text-[11px] font-semibold">
             <Bot size={11} /> {t('career.cvMatch')}
@@ -120,7 +120,13 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
         <SearchField value={query} onChange={setQuery} placeholder={t('career.searchPlaceholder')} />
-        <FilterPills items={JOB_TYPES} value={type} onChange={setType} accent={accent} />
+        <FilterPills
+          items={JOB_TYPES}
+          labels={[t('career.filterAll'), t('career.filterInternship'), t('career.filterResearch'), t('career.filterVolunteer')]}
+          value={type}
+          onChange={setType}
+          accent={accent}
+        />
         <span className="shrink-0 font-mono text-xs font-semibold text-slate-500">{t('career.positions', { count: jobs.length })}</span>
       </div>
 

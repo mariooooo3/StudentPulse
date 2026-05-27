@@ -55,7 +55,7 @@ function isSameCalendarDay(a, b) {
 }
 
 export default function Dashboard({ profile, session, onNavigate }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const displayName = nameFromEmail(session?.email) || profile?.name || 'Student'
   const firstName = displayName.split(' ')[0]
   const dashboard = getDashboardData(profile, session)
@@ -78,7 +78,7 @@ export default function Dashboard({ profile, session, onNavigate }) {
     const tomorrow = new Date(now)
     tomorrow.setDate(now.getDate() + 1)
     if (isSameCalendarDay(target, tomorrow)) return t('dashboard.tomorrow')
-    return target.toLocaleDateString('ro-RO', { weekday: 'long' })
+    return target.toLocaleDateString(i18n.language, { weekday: 'long' })
   }
 
   function scheduleSectionLabel(items) {
@@ -166,7 +166,7 @@ export default function Dashboard({ profile, session, onNavigate }) {
                 <span className="text-slate-800">·</span>
                 <span>{profile?.year || 'Anul 2'}</span>
                 <span className="text-slate-800">·</span>
-                <span className="font-mono text-slate-600">{formatLiveDate(now)}</span>
+                <span className="font-mono text-slate-600">{formatLiveDate(now, i18n.language)}</span>
               </div>
             </div>
 

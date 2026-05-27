@@ -1,12 +1,11 @@
 const DAY_MS = 24 * 60 * 60 * 1000
-const WEEK_DAYS_RO = ['Duminica', 'Luni', 'Marti', 'Miercuri', 'Joi', 'Vineri', 'Sambata']
 
 export function getNow() {
   return new Date()
 }
 
-export function formatLiveDate(date = getNow()) {
-  return new Intl.DateTimeFormat('ro-RO', {
+export function formatLiveDate(date = getNow(), locale = 'ro') {
+  return new Intl.DateTimeFormat(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -14,8 +13,8 @@ export function formatLiveDate(date = getNow()) {
   }).format(date)
 }
 
-export function formatClock(date = getNow()) {
-  return new Intl.DateTimeFormat('ro-RO', {
+export function formatClock(date = getNow(), locale = 'ro') {
+  return new Intl.DateTimeFormat(locale, {
     hour: '2-digit',
     minute: '2-digit',
   }).format(date)
@@ -26,14 +25,14 @@ export function minutesUntil(target, now = getNow()) {
 }
 
 export function formatRelativeFromMinutes(minutes) {
-  if (minutes <= 0) return 'acum'
+  if (minutes <= 0) return '~0 min'
   if (minutes < 60) return `${minutes} min`
   const hours = Math.floor(minutes / 60)
   const mins = minutes % 60
   if (hours < 24) return mins ? `${hours}h ${mins}m` : `${hours}h`
   const days = Math.floor(hours / 24)
   const restHours = hours % 24
-  return restHours ? `${days} zile ${restHours}h` : `${days} zile`
+  return restHours ? `${days}d ${restHours}h` : `${days}d`
 }
 
 export function labelUntil(target, now = getNow()) {
@@ -97,9 +96,5 @@ export function eventTiming(seed, now = getNow()) {
   const hour = [10, 14, 17, 19][seed % 4]
   const date = dateInDays(days, now)
   date.setHours(hour, 0, 0, 0)
-  const dayLabel = days === 0 ? (hour >= 18 ? 'tonight' : 'today') : days === 1 ? 'tomorrow' : WEEK_DAYS_RO[date.getDay()]
-  return {
-    date,
-    label: `Starts ${dayLabel} at ${formatClock(date)}`,
-  }
+  return { date, days, hour }
 }

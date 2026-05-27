@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, FlipHorizontal } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export default function CameraModal({
   cameraOpen,
@@ -9,6 +10,7 @@ export default function CameraModal({
   onClose,
   onCapture,
 }) {
+  const { t } = useTranslation()
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
 
@@ -46,13 +48,13 @@ export default function CameraModal({
             <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-b from-black/80 to-transparent absolute top-0 inset-x-0 z-10">
               <div>
                 <p className="text-white font-semibold text-sm">AI Compass</p>
-                <p className="text-white/50 text-xs">Fotografia devine context pentru ghidare</p>
+                <p className="text-white/50 text-xs">{t('navigation.camera.subtitle')}</p>
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={onFlip}
                   className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 transition-colors flex items-center justify-center"
-                  title="Schimbă camera"
+                  title={t('navigation.camera.flipCamera')}
                 >
                   <FlipHorizontal size={18} className="text-white" />
                 </button>
@@ -86,7 +88,7 @@ export default function CameraModal({
 
             {/* Capture button */}
             <div className="absolute bottom-0 inset-x-0 pb-10 pt-6 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-center gap-3">
-              <p className="text-white/60 text-xs">Poziționează clădirea în cadru</p>
+              <p className="text-white/60 text-xs">{t('navigation.camera.positionHint')}</p>
               <button
                 onClick={capturePhoto}
                 className="w-18 h-18 rounded-full border-4 border-white bg-white/20 hover:bg-white/30 active:scale-95 transition-all flex items-center justify-center"

@@ -21,7 +21,7 @@ import EmptyState from '../components/EmptyState'
 import { getScopeLabel } from '../../../shared/utils/tenantScope'
 
 export default function EventsSection({ lifeProfile, going, goingOps }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const accent = SECTION_ACCENTS.events
   const [category, setCategory] = useState('Toate')
   const [query, setQuery] = useState('')
@@ -46,7 +46,13 @@ export default function EventsSection({ lifeProfile, going, goingOps }) {
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
         <SearchField value={query} onChange={setQuery} placeholder={t('eventsSection.searchPlaceholder')} />
-        <FilterPills items={EVENT_CATEGORIES} value={category} onChange={setCategory} accent={accent} />
+        <FilterPills
+          items={EVENT_CATEGORIES}
+          labels={[t('eventsSection.filterAll'), t('eventsSection.filterTech'), t('eventsSection.filterCareer'), t('eventsSection.filterScience'), t('eventsSection.filterSocial'), t('eventsSection.filterEntrepreneurship')]}
+          value={category}
+          onChange={setCategory}
+          accent={accent}
+        />
         <span className="shrink-0 font-mono text-xs font-semibold text-slate-500">{t('eventsSection.count', { count: events.length })}</span>
       </div>
 
@@ -80,7 +86,7 @@ export default function EventsSection({ lifeProfile, going, goingOps }) {
                   >
                     <span className="font-mono text-2xl font-black leading-none text-white">{d.getDate()}</span>
                     <span className="mt-0.5 text-[10px] font-bold uppercase" style={{ color: ev.color }}>
-                      {d.toLocaleString('ro', { month: 'short' })}
+                      {d.toLocaleString(i18n.language, { month: 'short' })}
                     </span>
                     <span className="mt-0.5 font-mono text-[10px] text-slate-500">{ev.time}</span>
                   </div>

@@ -100,15 +100,15 @@ function assistantBrand(role, t) {
     return {
       title: 'ProfessorPulse Assistant',
       subtitle: t('assistant.brandProfessorSubtitle'),
-      badge: 'Professor help',
-      footer: 'Professor-aware help',
+      badge: t('assistant.brandProfessorBadge'),
+      footer: t('assistant.brandProfessorFooter'),
     }
   }
   return {
     title: 'StudentPulse Assistant',
-    subtitle: 'Account, modules, quick help',
-    badge: 'Live help',
-    footer: 'Context-aware help',
+    subtitle: t('assistant.brandStudentSubtitle'),
+    badge: t('assistant.brandStudentBadge'),
+    footer: t('assistant.brandStudentFooter'),
   }
 }
 
@@ -462,7 +462,7 @@ export default function VirtualAssistant({
                     </span>
                   </div>
                   <p className="truncate text-[11px] text-slate-600">
-                    {context.currentLabel} · {context.role === 'professor' ? 'Professor' : 'Student'}
+                    {context.currentLabel} · {context.role === 'professor' ? t('assistant.roleProfessor') : t('assistant.roleStudent')}
                   </p>
                 </div>
                 <button

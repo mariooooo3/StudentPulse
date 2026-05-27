@@ -9,7 +9,7 @@ import { useSocket } from '../../../shared/hooks/useSocket'
 import { NAV } from '../constants/nav'
 
 export default function ProfessorHeader({ current, pendingCount, profile, requests, recoveryRequests, threads, onNavigate }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navItem = NAV.find(item => item.id === current)
   const title = navItem ? (navItem.labelKey ? t(navItem.labelKey) : navItem.label) : 'Dashboard'
   const [open, setOpen] = useState(false)
@@ -96,7 +96,7 @@ export default function ProfessorHeader({ current, pendingCount, profile, reques
       <div className="hidden md:flex items-center gap-1.5">
         <div className={clsx('w-1.5 h-1.5 rounded-full', connected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400')} />
         <span className={clsx('text-[11px] font-semibold', connected ? 'text-emerald-500' : 'text-amber-500')}>
-          {connected ? 'Live' : 'Offline'}
+          {connected ? t('professor.notifications.liveConnected') : t('professor.notifications.offlineSync')}
         </span>
       </div>
 
@@ -194,7 +194,7 @@ export default function ProfessorHeader({ current, pendingCount, profile, reques
                               </div>
                               <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-2">{item.body}</p>
                               <p className="text-[10px] font-mono text-slate-700 mt-1">
-                                {new Date(item.time || Date.now()).toLocaleTimeString('ro', { hour: '2-digit', minute: '2-digit' })}
+                                {new Date(item.time || Date.now()).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
                               </p>
                             </div>
                           </div>
