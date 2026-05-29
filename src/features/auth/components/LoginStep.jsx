@@ -17,7 +17,7 @@ export default function LoginStep({ onSuccess, onGoRegister }) {
 
   async function handleSubmit(e) {
     e?.preventDefault()
-    if (!identifier.trim() || !password) return
+    if (!identifier.trim() || !password || loading) return
     setLoading(true); setError('')
     try {
       const res  = await fetch(`${BASE}/api/auth/login`, {

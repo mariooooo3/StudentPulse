@@ -50,6 +50,7 @@ export default function RegisterDetailsStep({ university, onSuccess, onBack }) {
     if (password.length < 6) { setError('Parola trebuie să aibă minim 6 caractere'); return }
     if (password !== confirmPwd) { setError('Parolele nu coincid'); return }
 
+    if (loading) return
     setLoading(true); setError('')
     try {
       const res  = await fetch(`${BASE}/api/auth/register`, {

@@ -65,6 +65,8 @@ export function persistSession(session, remember = false) {
   sessionStorage.setItem('sc_session', JSON.stringify(session))
   if (remember) {
     localStorage.setItem('sc_session_persistent', JSON.stringify(session))
+  } else {
+    localStorage.removeItem('sc_session_persistent')
   }
 }
 

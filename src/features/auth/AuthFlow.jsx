@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Compass, Check, ChevronLeft, GraduationCap, Loader2 } from 'lucide-react'
+import { Check, ChevronLeft, GraduationCap, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { UNIVERSITIES } from '../../shared/config/universities'
 import UniversityGrid from './components/UniversityGrid'
@@ -152,7 +152,7 @@ export default function AuthFlow() {
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.2), 0 4px 20px rgba(99,102,241,0.4)',
                 }}
               >
-                <Compass size={26} className="text-white" strokeWidth={2} />
+                <img src="/icon-192.png" alt="StudentPulse" className="w-10 h-10 object-contain" />
               </div>
             </div>
           </div>
