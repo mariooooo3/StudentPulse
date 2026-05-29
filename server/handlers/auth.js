@@ -84,7 +84,8 @@ function verifyTotp(secret, token) {
   return false
 }
 
-const TOTP_SECRET = process.env.TOTP_SECRET || 'NZFG63DBMJQXIYLC'
+const TOTP_SECRET = process.env.TOTP_SECRET
+if (!TOTP_SECRET) console.warn('[Auth] TOTP_SECRET not set — professor demo login disabled')
 
 // ─── Handler ─────────────────────────────────────────────────────────────────
 export function createAuthHandler() {
@@ -184,6 +185,7 @@ export function createAuthHandler() {
       if (!code || !/^\d{6}$/.test(code)) {
         return json(res, 400, { valid: false, error: 'Codul trebuie să fie de 6 cifre' })
       }
+      if (!TOTP_SECRET) return json(res, 503, { valid: false, error: 'Professor login not configured' })
       return json(res, 200, { valid: verifyTotp(TOTP_SECRET, code) })
     }
 
