@@ -34,7 +34,7 @@ const ro = {
     career:     { title: 'Carieră & Internship-uri', sub: 'Oportunități personalizate pe facultate' },
     community:  { title: 'Comunitate', sub: 'Grupuri, mentori și evenimente studențești' },
     events:     { title: 'Evenimente', sub: 'Concerte, workshop-uri și activități studențești' },
-    wellness:   { title: 'Focus & Wellness', sub: 'Timer Pomodoro și concentrare maximă' },
+    wellness:   { title: 'Focus & Wellness', sub: 'π Focus și sfaturi de wellbeing' },
     tools:      { title: 'Unelte Studențești', sub: 'Cărți, carpool, colegi de cameră și buget' },
     citylife:   { title: 'Viața în Oraș', sub: 'Transport, locuire, siguranță și ghid urban' },
     challenges: { title: 'Provocări', sub: 'Zilnice · Săptămânale · Lunare — verificate de AI' },
@@ -575,7 +575,7 @@ const ro = {
     wellness: {
       kicker: 'Sănătate & Echilibru',
       title: 'Ai grijă de tine, nu doar de note.',
-      description: 'Resurse de sănătate mentală, sfaturi de wellbeing și timer Pomodoro integrat.',
+      description: 'Resurse de sănătate mentală, sfaturi de wellbeing și π Focus pentru concentrare maximă.',
     },
     tools: {
       kicker: 'Tools Practice',
