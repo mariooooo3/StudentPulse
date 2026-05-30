@@ -51,8 +51,14 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
     return () => clearTimeout(timer)
   }, [challengeToast])
 
+  function getJobUrl(job) {
+    if (job.url) return job.url
+    const q = encodeURIComponent(job.company)
+    return `https://www.ejobs.ro/joburi/?search=${q}`
+  }
+
   async function handleApply(job) {
-    if (job.url) window.open(job.url, '_blank', 'noopener,noreferrer')
+    window.open(getJobUrl(job), '_blank', 'noopener,noreferrer')
     appliedOps.add(job.id)
     if (!session?.userId) return
     try {

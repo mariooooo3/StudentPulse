@@ -40,7 +40,6 @@ const NAV_BY_MODE = {
     { id: 'dashboard', icon: Home },
     { id: 'navigator', icon: Map },
     { id: 'schedule',  icon: Calendar },
-    { id: 'thesis',    icon: BookOpen },
     { id: 'tutoring',  icon: Users },
     { id: 'messages',  icon: MessageSquare },
   ],

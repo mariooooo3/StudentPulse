@@ -156,6 +156,7 @@ export const studentLifeData = {
         city: 'all',
         popular: true,
         verified: true,
+        url: 'https://www.isic.ro/reduceri/',
         description: 'Card internațional de student (50 RON / 16 luni) — acces la 42.000+ reduceri în 130 de țări: H&M, IKEA, parteneri locali Iași și multe altele.',
       },
       // ── Muzică & Media ────────────────────────────────────────────────────────
@@ -169,6 +170,7 @@ export const studentLifeData = {
         city: 'all',
         popular: true,
         verified: true,
+        url: 'https://www.spotify.com/ro-ro/student/',
         description: 'Spotify Premium la 14 RON/lună (față de 26 RON). Valabil până la 4 ani în timpul studiilor. Verificare prin SheerID cu email instituțional.',
       },
       {
@@ -181,6 +183,7 @@ export const studentLifeData = {
         city: 'all',
         popular: true,
         verified: true,
+        url: 'https://support.apple.com/en-us/106008',
         description: 'Apple Music la 11,99 RON/lună + Apple TV+ gratuit inclus. Valabil până la 48 de luni. Verificare prin SheerID.',
       },
       {
@@ -193,6 +196,7 @@ export const studentLifeData = {
         city: 'all',
         popular: false,
         verified: true,
+        url: 'https://www.youtube.com/premium/student',
         description: 'YouTube Premium fără reclame la ~50% reducere față de planul standard. Include YouTube Music. Verificare prin SheerID.',
       },
       // ── Tech & Apps ───────────────────────────────────────────────────────────
@@ -206,7 +210,47 @@ export const studentLifeData = {
         city: 'all',
         popular: true,
         verified: true,
+        url: 'https://www.adobe.com/ro/creativecloud/buy/students.html',
         description: 'Adobe Creative Cloud complet (Photoshop, Illustrator, Premiere Pro etc.) la prețuri instituționale — până la 65% reducere față de planul individual.',
+      },
+      {
+        id: 'tech-figma',
+        brand: 'Figma Education',
+        initials: 'FG',
+        color: '#a855f7',
+        category: 'Tech & Apps',
+        discount: 100,
+        city: 'all',
+        popular: true,
+        verified: true,
+        url: 'https://www.figma.com/education/',
+        description: 'Figma Professional plan complet gratuit pentru studenți — 2 ani. UI/UX design, prototipare, colaborare în echipă. Verificare cu email instituțional.',
+      },
+      {
+        id: 'tech-samsung',
+        brand: 'Samsung Student',
+        initials: 'SS',
+        color: '#1d4ed8',
+        category: 'Tech & Apps',
+        discount: 10,
+        city: 'all',
+        popular: false,
+        verified: true,
+        url: 'https://www.samsung.com/ro/student/',
+        description: '10% reducere la telefoane, tablete și laptopuri Samsung Galaxy pentru studenți. Verificare cu email instituțional pe samsung.com/ro/student.',
+      },
+      {
+        id: 'tech-canva',
+        brand: 'Canva for Education',
+        initials: 'CA',
+        color: '#06b6d4',
+        category: 'Tech & Apps',
+        discount: 100,
+        city: 'all',
+        popular: false,
+        verified: true,
+        url: 'https://www.canva.com/education/',
+        description: 'Canva Pro gratuit pentru studenți — template-uri premium, brand kit, background remover. Aplici cu email instituțional la canva.com/education.',
       },
       {
         id: 9,
@@ -285,6 +329,7 @@ export const studentLifeData = {
         city: 'Iasi',
         popular: false,
         verified: true,
+        url: 'https://www.tnlasi.ro/bilete',
         description: 'Bilete la spectacole cu reducere de până la 75% pentru studenți (conform legislației privind instituțiile publice de cultură). Prezinți carnetul vizat.',
       },
       {
@@ -297,6 +342,7 @@ export const studentLifeData = {
         city: 'Iasi',
         popular: false,
         verified: true,
+        url: 'https://www.palatulculturii.ro/vizitare/tarife/',
         description: 'Intrare redusă la toate muzeele din Complexul Muzeal Moldova Iași (Palatul Culturii, Muzeul Unirii etc.) cu carnet de student vizat.',
       },
       // ── Restaurant / Cantina ──────────────────────────────────────────────────
@@ -331,6 +377,7 @@ export const studentLifeData = {
         type: 'Internship',
         minYear: 2,
         cities: ['Iași'],
+        url: 'https://www.amazon.jobs/en/search?base_query=intern&loc_query=Iasi%2C+Romania',
       },
       {
         id: 102,
@@ -390,6 +437,7 @@ export const studentLifeData = {
         type: 'Internship',
         minYear: 2,
         cities: ['Iași'],
+        url: 'https://www.ejobs.ro/companie/cegeka-romania/',
       },
       {
         id: 106,
@@ -404,6 +452,7 @@ export const studentLifeData = {
         type: 'Internship',
         minYear: 2,
         cities: ['Iași', 'all'],
+        url: 'https://www.evozon.com/careers/',
       },
       {
         id: 107,
@@ -418,6 +467,7 @@ export const studentLifeData = {
         type: 'Voluntariat',
         minYear: 1,
         cities: ['Iasi'],
+        url: 'https://lsac.ro/',
       },
     ],
     ENGINEERING_CS: [
@@ -449,6 +499,7 @@ export const studentLifeData = {
         type: 'Internship',
         minYear: 1,
         cities: ['Iași'],
+        url: 'https://careers.endava.com/en/jobs?location=Ia%C8%99i&category=Technology',
       },
       {
         id: 803,
@@ -463,7 +514,7 @@ export const studentLifeData = {
         type: 'Internship',
         minYear: 3,
         cities: ['Iași'],
-        url: 'https://www.consiliere.tuiasi.ro/',
+        url: 'https://careers.bitdefender.com/jobs',
       },
       {
         id: 804,
@@ -478,6 +529,7 @@ export const studentLifeData = {
         type: 'Internship',
         minYear: 2,
         cities: ['Iași'],
+        url: 'https://www.amazon.jobs/en/search?base_query=intern&loc_query=Iasi%2C+Romania',
       },
       {
         id: 805,
@@ -492,6 +544,7 @@ export const studentLifeData = {
         type: 'Internship',
         minYear: 2,
         cities: ['Iași'],
+        url: 'https://www.ejobs.ro/companie/cegeka-romania/',
       },
       {
         id: 806,
@@ -506,6 +559,7 @@ export const studentLifeData = {
         type: 'Voluntariat',
         minYear: 1,
         cities: ['Iasi'],
+        url: 'https://lsac.ro/',
       },
     ],
     MEDICINE: [
@@ -536,6 +590,7 @@ export const studentLifeData = {
         type: 'Internship',
         minYear: 3,
         cities: ['Iași'],
+        url: 'https://www.antibiotice.ro/cariere/',
       },
       {
         id: 203,
@@ -550,6 +605,7 @@ export const studentLifeData = {
         type: 'Cercetare',
         minYear: 3,
         cities: ['Iași'],
+        url: 'https://www.umfiasi.ro/ro/cercetare',
       },
       {
         id: 204,
@@ -564,6 +620,7 @@ export const studentLifeData = {
         type: 'Internship',
         minYear: 2,
         cities: ['Iași'],
+        url: 'https://www.synevo.ro/cariere/',
       },
     ],
     ECONOMICS: [
@@ -580,6 +637,7 @@ export const studentLifeData = {
         type: 'Internship',
         minYear: 2,
         cities: ['Iași'],
+        url: 'https://www2.deloitte.com/ro/ro/pages/careers/topics/student-programs.html',
       },
       {
         id: 302,
@@ -594,6 +652,7 @@ export const studentLifeData = {
         type: 'Internship',
         minYear: 1,
         cities: ['Iași'],
+        url: 'https://cariere.bcr.ro/',
       },
       {
         id: 303,
@@ -608,6 +667,7 @@ export const studentLifeData = {
         type: 'Internship',
         minYear: 1,
         cities: ['all'],
+        url: 'https://careers.emag.ro/',
       },
     ],
     LAW: [
