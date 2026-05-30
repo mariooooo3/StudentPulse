@@ -320,7 +320,7 @@ export function ChatThread({ contact, currentUserId, currentName, scope, onBack 
       fetch('/api/challenges/in-app-action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: currentUserId, actionType: 'message-sent' }),
+        body: JSON.stringify({ userId: currentUserId, actionType: 'message-sent', userName: currentName }),
       }).catch(() => {})
     }
   }

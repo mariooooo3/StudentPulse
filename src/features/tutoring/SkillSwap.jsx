@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ArrowLeftRight, Plus, Users, Calendar, Check, Zap, Repeat2, BookOpen, Sparkles, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { nameFromEmail } from '../messages/messages.utils'
 import { getGroupSessions, getSkillSwapUsers } from '../../shared/data/facultyCatalog'
 import clsx from 'clsx'
 import { useToast } from '../../shared/components/Toast'
@@ -218,10 +219,13 @@ function SkillSwapTab({ users, matchLoading, session }) {
                         onClick={() => {
                           setContacted(p => ({ ...p, [u.id]: true }))
                           if (session?.userId) {
+                            const userName = nameFromEmail(session.email)
+                            const userScope = session?.university?.id && session?.detectedFaculty?.code
+                              ? `${session.university.id}:${session.detectedFaculty.code}` : null
                             fetch('/api/challenges/in-app-action', {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ userId: session.userId, actionType: 'tutoring-booked' }),
+                              body: JSON.stringify({ userId: session.userId, actionType: 'tutoring-booked', userName, userScope }),
                             }).catch(() => {})
                           }
                         }}
@@ -368,10 +372,13 @@ function GroupSessionsTab({ sessions, session }) {
                     onClick={() => {
                       setJoined(p => ({ ...p, [s.id]: true }))
                       if (session?.userId) {
+                        const userName = nameFromEmail(session.email)
+                        const userScope = session?.university?.id && session?.detectedFaculty?.code
+                          ? `${session.university.id}:${session.detectedFaculty.code}` : null
                         fetch('/api/challenges/in-app-action', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ userId: session.userId, actionType: 'tutoring-booked' }),
+                          body: JSON.stringify({ userId: session.userId, actionType: 'tutoring-booked', userName, userScope }),
                         }).catch(() => {})
                       }
                     }}

@@ -278,6 +278,11 @@ async function migrate() {
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_roommate_listings_expires ON roommate_listings(expires_at)`)
   await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username)`)
   await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)`)
+
+  // Leaderboard columns — safe to run on existing tables
+  await pool.query(`ALTER TABLE challenge_completions ADD COLUMN IF NOT EXISTS user_name TEXT`)
+  await pool.query(`ALTER TABLE challenge_completions ADD COLUMN IF NOT EXISTS user_scope TEXT`)
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_challenge_completions_scope ON challenge_completions(user_scope, status)`)
 }
 
 migrate().catch(err => {

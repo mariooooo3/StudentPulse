@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Search, Star, Calendar, Clock, Check, MessageSquare, ArrowLeftRight, Users, GraduationCap, SlidersHorizontal } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { nameFromEmail } from '../messages/messages.utils'
 import { getSubjectFilters, getTutors } from '../../shared/data/facultyCatalog'
 import SkillSwap from './SkillSwap'
 import clsx from 'clsx'
@@ -87,10 +88,13 @@ function TutorCard({ t: tutor, session }) {
     saveTutorAction('booked', true)
     toast({ type: 'success', title: t('peerTutoring.toast.booked'), message: t('peerTutoring.toast.bookedMsg', { name: tutor.name }) })
     if (session?.userId) {
+      const userName = nameFromEmail(session.email)
+      const userScope = session?.university?.id && session?.detectedFaculty?.code
+        ? `${session.university.id}:${session.detectedFaculty.code}` : null
       fetch('/api/challenges/in-app-action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: session.userId, actionType: 'tutoring-booked' }),
+        body: JSON.stringify({ userId: session.userId, actionType: 'tutoring-booked', userName, userScope }),
       }).catch(() => {})
     }
   }

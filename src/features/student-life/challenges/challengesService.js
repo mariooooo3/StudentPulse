@@ -6,6 +6,15 @@ export async function fetchChallenges(userId) {
   return res.json()
 }
 
+export async function fetchLeaderboard(scope) {
+  const url = scope
+    ? `${BASE}/api/challenges/leaderboard?scope=${encodeURIComponent(scope)}`
+    : `${BASE}/api/challenges/leaderboard`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error('Failed to load leaderboard')
+  return res.json()
+}
+
 // Converts a File/Blob to base64 string
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
@@ -25,6 +34,7 @@ export async function submitChallenge({
   proofText, proofImageFile,
   verifyType,
   challengeTitle, challengeDescription, challengePoints,
+  userName, userScope,
 }) {
   let proofImage = null
   let proofImageMime = null
@@ -42,6 +52,7 @@ export async function submitChallenge({
       proofText, proofImage, proofImageMime,
       verifyType,
       challengeTitle, challengeDescription, challengePoints,
+      userName, userScope,
     }),
   })
 
