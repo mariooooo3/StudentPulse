@@ -174,8 +174,7 @@ export default function AuthFlow() {
             {/* Role switcher */}
             <div className="grid grid-cols-2 gap-2 mb-5">
               {[
-                ['student',   t('auth.student'),   Compass],
-                ['professor', t('auth.professor'), GraduationCap],
+                ['student', t('auth.student'), Compass],
               ].map(([id, label, Icon]) => (
                 <button
                   key={id}
