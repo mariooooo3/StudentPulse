@@ -5,10 +5,12 @@ import { useTranslation } from 'react-i18next'
 import { SECTION_ACCENTS } from '../constants/sectionConfig'
 import AccentLine from '../components/AccentLine'
 import { useStreaksContext } from '../../../app/providers/StreaksContext'
+import { useAuth } from '../../../app/providers/AuthContext'
 
 export default function PomodoroTimer() {
   const { t } = useTranslation()
   const { focusStreak, incrementFocus } = useStreaksContext()
+  const { session } = useAuth()
   const accent = SECTION_ACCENTS.wellness
   const [mode, setMode] = useState('work')
   const [timeLeft, setTimeLeft] = useState(25 * 60)
@@ -26,7 +28,17 @@ export default function PomodoroTimer() {
           if (t <= 1) {
             setRunning(false)
             clearInterval(intervalRef.current)
-            if (mode === 'work') { setSessions(s => s + 1); incrementFocus() }
+            if (mode === 'work') {
+              setSessions(s => s + 1)
+              incrementFocus()
+              if (session?.userId) {
+                fetch('/api/challenges/in-app-action', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ userId: session.userId, actionType: 'focus-session' }),
+                }).catch(() => {})
+              }
+            }
             return 0
           }
           return t - 1
