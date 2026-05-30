@@ -16,6 +16,7 @@ import { studentLifeData } from '../studentLifeData'
 import { SECTION_ACCENTS, SECTION_META, JOB_TYPES } from '../constants/sectionConfig'
 import { containerVariants, itemVariants } from '../utils/motionVariants'
 import { jobMatch } from '../utils/scoringUtils'
+import { reportInAppAction } from '../challenges/challengesService'
 import { normalizeCity } from '../utils/profileUtils'
 import SectionHeader from '../components/SectionHeader'
 import SearchField from '../components/SearchField'
@@ -55,13 +56,7 @@ export default function CareerSection({ lifeProfile, applied, appliedOps }) {
     appliedOps.add(job.id)
     if (!session?.userId) return
     try {
-      const res = await fetch('/api/challenges/in-app-action', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: session.userId, actionType: 'career-apply' }),
-      })
-      if (!res.ok) return
-      const data = await res.json()
+      const data = await reportInAppAction('career-apply')
       if (data.completed?.length > 0) {
         setChallengeToast(data.completed[0])
       }

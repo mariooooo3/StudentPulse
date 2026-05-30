@@ -1,17 +1,13 @@
+import { apiRequest } from '../api/session'
+
 const BASE = '/api/streaks'
 
+// userId is kept in the URL for routing only — the server derives the real
+// identity from the session token, so it is safe to pass the client's id here.
 export async function getStreaks(userId) {
-  const res = await fetch(`${BASE}/${encodeURIComponent(userId)}`)
-  if (!res.ok) throw new Error('Failed to fetch streaks')
-  return res.json()
+  return apiRequest(`${BASE}/${encodeURIComponent(userId)}`)
 }
 
 export async function incrementStreak(userId, type) {
-  const res = await fetch(`${BASE}/increment`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId, type }),
-  })
-  if (!res.ok) throw new Error('Failed to increment streak')
-  return res.json()
+  return apiRequest(`${BASE}/increment`, { method: 'POST', body: { type } })
 }

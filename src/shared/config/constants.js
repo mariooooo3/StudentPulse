@@ -1,4 +1,4 @@
-export const APP_NAME = 'StudentAcademic'
+export const APP_NAME = 'StudentPulse'
 export const APP_VERSION = '2.0.0'
 export const APP_TAGLINE = 'De la pierdut, la acasă.'
 

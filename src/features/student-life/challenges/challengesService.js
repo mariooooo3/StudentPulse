@@ -1,18 +1,28 @@
+import { apiRequest } from '../../../shared/api/session'
+
 const BASE = import.meta.env.VITE_API_URL || ''
 
 export async function fetchChallenges(userId) {
-  const res = await fetch(`${BASE}/api/challenges/${encodeURIComponent(userId)}`)
-  if (!res.ok) throw new Error('Failed to load challenges')
-  return res.json()
+  return apiRequest(`${BASE}/api/challenges/${encodeURIComponent(userId)}`)
 }
 
+// Leaderboard is public (read-only) — no token required, but apiRequest still
+// attaches one when available so logged-in users share a consistent path.
 export async function fetchLeaderboard(scope) {
   const url = scope
     ? `${BASE}/api/challenges/leaderboard?scope=${encodeURIComponent(scope)}`
     : `${BASE}/api/challenges/leaderboard`
-  const res = await fetch(url)
-  if (!res.ok) throw new Error('Failed to load leaderboard')
-  return res.json()
+  return apiRequest(url)
+}
+
+// Reports an in-app action (focus-session, message-sent, career-apply,
+// tutoring-booked) so the backend can auto-complete the matching challenges.
+// The acting identity comes from the session token; userId is no longer sent.
+export async function reportInAppAction(actionType, { userName, userScope } = {}) {
+  return apiRequest(`${BASE}/api/challenges/in-app-action`, {
+    method: 'POST',
+    body: { actionType, userName, userScope },
+  })
 }
 
 // Converts a File/Blob to base64 string
@@ -44,21 +54,14 @@ export async function submitChallenge({
     proofImageMime = proofImageFile.type || 'image/jpeg'
   }
 
-  const res = await fetch(`${BASE}/api/challenges/submit`, {
+  return apiRequest(`${BASE}/api/challenges/submit`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      userId, challengeId, challengeType, periodKey,
+    body: {
+      challengeId, challengeType, periodKey,
       proofText, proofImage, proofImageMime,
       verifyType,
       challengeTitle, challengeDescription, challengePoints,
       userName, userScope,
-    }),
+    },
   })
-
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.error || 'Submit failed')
-  }
-  return res.json()
 }

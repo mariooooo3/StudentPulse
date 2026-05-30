@@ -1,11 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowRight, Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import clsx from 'clsx'
 
 const BASE = import.meta.env.VITE_API_URL || ''
-
-// Clear any old remember-me username keys left from previous implementation
-localStorage.removeItem('sp_remember_identifier')
 
 export default function LoginStep({ onSuccess, onGoRegister }) {
   const [identifier, setIdentifier] = useState('')
@@ -14,6 +11,9 @@ export default function LoginStep({ onSuccess, onGoRegister }) {
   const [showPwd,    setShowPwd]    = useState(false)
   const [loading,    setLoading]    = useState(false)
   const [error,      setError]      = useState('')
+
+  // Clear any old remember-me username keys left from a previous implementation.
+  useEffect(() => { localStorage.removeItem('sp_remember_identifier') }, [])
 
   async function handleSubmit(e) {
     e?.preventDefault()
@@ -27,7 +27,7 @@ export default function LoginStep({ onSuccess, onGoRegister }) {
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Eroare la autentificare'); return }
-      onSuccess(data.user, rememberMe)
+      onSuccess({ ...data.user, token: data.token }, rememberMe)
     } catch {
       setError('Nu s-a putut conecta la server')
     } finally {

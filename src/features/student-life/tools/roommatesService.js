@@ -1,16 +1,9 @@
+import { apiRequest } from '../../../shared/api/session'
+
 const BASE = import.meta.env.VITE_API_URL || ''
 
-async function req(path, method = 'GET', body = null) {
-  const opts = { method, headers: {} }
-  if (body) {
-    opts.headers['Content-Type'] = 'application/json'
-    opts.body = JSON.stringify(body)
-  }
-  const res = await fetch(`${BASE}${path}`, opts)
-  const data = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(data.error || 'Eroare server')
-  return data
-}
+const req = (path, method = 'GET', body = null) =>
+  apiRequest(`${BASE}${path}`, { method, body })
 
 export const roommatesApi = {
   getAll: ({ userId } = {}) => {

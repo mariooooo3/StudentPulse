@@ -9,3 +9,9 @@ services:
         value: production
       - key: GROQ_API_KEY
         sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: TOTP_SECRET
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false

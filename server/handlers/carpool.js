@@ -1,25 +1,10 @@
+import { randomUUID } from 'node:crypto'
 import { query, nowIso } from '../db/database.js'
+import { sendJson, handlePreflight, readBody } from '../lib/http.js'
+import { requireAuth } from '../lib/sessions.js'
 
-function readBody(req, maxBytes = 64 * 1024) {
-  return new Promise((resolve, reject) => {
-    let body = ''
-    let size = 0
-    req.on('data', chunk => {
-      size += Buffer.byteLength(chunk)
-      if (size > maxBytes) { req.destroy(); reject(new Error('Body too large')); return }
-      body += chunk
-    })
-    req.on('end', () => resolve(body))
-    req.on('error', reject)
-  })
-}
-
-function jsonRes(res, status, data) {
-  res.writeHead(status, {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-  })
-  res.end(JSON.stringify(data))
+function jsonRes(req, res, status, data) {
+  return sendJson(req, res, status, data)
 }
 
 async function attachRequests(rides, userId) {
@@ -67,19 +52,18 @@ export function createCarpoolHandler() {
     const method = req.method
 
     // OPTIONS preflight
-    if (method === 'OPTIONS') {
-      res.writeHead(204, {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      })
-      res.end(); return
-    }
+    if (method === 'OPTIONS') return handlePreflight(req, res, 'GET,POST,DELETE,OPTIONS')
+
+    // All carpool routes require an authenticated student. The acting identity
+    // is taken from the session token, never trusted from the request body.
+    const session = requireAuth(req, res)
+    if (!session) return
+    const authUserId = session.userId
 
     // ── GET /api/carpool/rides?userId=&from=&to=&date= ───────────────────────
     if (method === 'GET' && url.startsWith('/api/carpool/rides')) {
       const params = new URL(url, 'http://localhost').searchParams
-      const userId = params.get('userId') || ''
+      const userId = authUserId
       const from   = params.get('from')?.toLowerCase() || ''
       const to     = params.get('to')?.toLowerCase() || ''
       const date   = params.get('date') || ''
@@ -95,25 +79,23 @@ export function createCarpoolHandler() {
 
       const sql = `SELECT * FROM carpool_rides WHERE ${conditions.join(' AND ')} ORDER BY date ASC, time ASC`
       const { rows: rides } = await query(sql, args)
-      return jsonRes(res, 200, { rides: await attachRequests(rides, userId) })
+      return jsonRes(req, res, 200, { rides: await attachRequests(rides, userId) })
     }
 
     // ── GET /api/carpool/my-rides?userId= ───────────────────────────────────
     if (method === 'GET' && url.startsWith('/api/carpool/my-rides')) {
-      const userId = new URL(url, 'http://localhost').searchParams.get('userId') || ''
-      if (!userId) return jsonRes(res, 400, { error: 'userId necesar' })
+      const userId = authUserId
 
       const { rows: rides } = await query(
         `SELECT * FROM carpool_rides WHERE driver_id = $1 ORDER BY date ASC, time ASC`,
         [userId]
       )
-      return jsonRes(res, 200, { rides: await attachRequests(rides, userId) })
+      return jsonRes(req, res, 200, { rides: await attachRequests(rides, userId) })
     }
 
     // ── GET /api/carpool/my-requests?userId= ────────────────────────────────
     if (method === 'GET' && url.startsWith('/api/carpool/my-requests')) {
-      const userId = new URL(url, 'http://localhost').searchParams.get('userId') || ''
-      if (!userId) return jsonRes(res, 400, { error: 'userId necesar' })
+      const userId = authUserId
 
       const { rows: requests } = await query(`
         SELECT cr.*, r.from_city, r.to_city, r.date, r.time, r.driver_name, r.price_per_person
@@ -123,29 +105,30 @@ export function createCarpoolHandler() {
         ORDER BY r.date ASC
       `, [userId])
 
-      return jsonRes(res, 200, { requests })
+      return jsonRes(req, res, 200, { requests })
     }
 
     // ── POST /api/carpool/rides — postează traseu nou ────────────────────────
     if (method === 'POST' && url === '/api/carpool/rides') {
       let parsed
       try { parsed = JSON.parse(await readBody(req)) } catch {
-        return jsonRes(res, 400, { error: 'JSON invalid' })
+        return jsonRes(req, res, 400, { error: 'JSON invalid' })
       }
 
-      const { userId, userName, fromCity, fromDetail, toCity, toDetail,
+      const { userName, fromCity, fromDetail, toCity, toDetail,
               date, time, seats, pricePerPerson, notes, contact } = parsed
+      const userId = authUserId
 
-      if (!userId || !userName)     return jsonRes(res, 400, { error: 'userId și userName necesare' })
-      if (!fromCity || !toCity)     return jsonRes(res, 400, { error: 'from și to necesare' })
-      if (!date || !time)           return jsonRes(res, 400, { error: 'Data și ora sunt necesare' })
-      if (!seats || seats < 1)      return jsonRes(res, 400, { error: 'Minim 1 loc' })
-      if (!contact?.trim())         return jsonRes(res, 400, { error: 'Contactul este necesar (telefon sau Telegram)' })
+      if (!userName)                return jsonRes(req, res, 400, { error: 'userName necesar' })
+      if (!fromCity || !toCity)     return jsonRes(req, res, 400, { error: 'from și to necesare' })
+      if (!date || !time)           return jsonRes(req, res, 400, { error: 'Data și ora sunt necesare' })
+      if (!seats || seats < 1)      return jsonRes(req, res, 400, { error: 'Minim 1 loc' })
+      if (!contact?.trim())         return jsonRes(req, res, 400, { error: 'Contactul este necesar (telefon sau Telegram)' })
 
       const today = new Date().toISOString().slice(0, 10)
-      if (date < today) return jsonRes(res, 400, { error: 'Data nu poate fi în trecut' })
+      if (date < today) return jsonRes(req, res, 400, { error: 'Data nu poate fi în trecut' })
 
-      const id = `ride-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+      const id = `ride-${randomUUID()}`
       await query(`
         INSERT INTO carpool_rides
           (id, driver_id, driver_name, from_city, from_detail, to_city, to_detail,
@@ -158,7 +141,7 @@ export function createCarpoolHandler() {
 
       const { rows } = await query('SELECT * FROM carpool_rides WHERE id = $1', [id])
       const ride = rows[0]
-      return jsonRes(res, 201, { ride: { ...ride, isOwn: true, myRequest: null, requests: [], seatsLeft: ride.seats } })
+      return jsonRes(req, res, 201, { ride: { ...ride, isOwn: true, myRequest: null, requests: [], seatsLeft: ride.seats } })
     }
 
     // ── DELETE /api/carpool/rides/:id ───────────────────────────────────────
@@ -169,11 +152,11 @@ export function createCarpoolHandler() {
       try { body = JSON.parse(await readBody(req)) } catch {}
 
       const { rows } = await query('SELECT * FROM carpool_rides WHERE id = $1', [rideId])
-      if (!rows[0]) return jsonRes(res, 404, { error: 'Traseu inexistent' })
-      if (rows[0].driver_id !== body.userId) return jsonRes(res, 403, { error: 'Nu poți șterge traseul altcuiva' })
+      if (!rows[0]) return jsonRes(req, res, 404, { error: 'Traseu inexistent' })
+      if (rows[0].driver_id !== authUserId) return jsonRes(req, res, 403, { error: 'Nu poți șterge traseul altcuiva' })
 
       await query('DELETE FROM carpool_rides WHERE id = $1', [rideId])
-      return jsonRes(res, 200, { ok: true })
+      return jsonRes(req, res, 200, { ok: true })
     }
 
     // ── POST /api/carpool/rides/:id/join ─────────────────────────────────────
@@ -182,38 +165,39 @@ export function createCarpoolHandler() {
       const rideId = joinMatch[1]
       let parsed
       try { parsed = JSON.parse(await readBody(req)) } catch {
-        return jsonRes(res, 400, { error: 'JSON invalid' })
+        return jsonRes(req, res, 400, { error: 'JSON invalid' })
       }
 
-      const { userId, userName, message } = parsed
-      if (!userId || !userName) return jsonRes(res, 400, { error: 'userId și userName necesare' })
+      const { userName, message } = parsed
+      const userId = authUserId
+      if (!userName) return jsonRes(req, res, 400, { error: 'userName necesar' })
 
       const { rows: rideRows } = await query('SELECT * FROM carpool_rides WHERE id = $1', [rideId])
       const ride = rideRows[0]
-      if (!ride) return jsonRes(res, 404, { error: 'Traseu inexistent' })
-      if (ride.status !== 'active') return jsonRes(res, 400, { error: 'Traseul nu mai este activ' })
-      if (ride.driver_id === userId) return jsonRes(res, 400, { error: 'Nu poți cere loc pe propriul traseu' })
+      if (!ride) return jsonRes(req, res, 404, { error: 'Traseu inexistent' })
+      if (ride.status !== 'active') return jsonRes(req, res, 400, { error: 'Traseul nu mai este activ' })
+      if (ride.driver_id === userId) return jsonRes(req, res, 400, { error: 'Nu poți cere loc pe propriul traseu' })
 
       const { rows: countRows } = await query(
         `SELECT COUNT(*) as c FROM carpool_requests WHERE ride_id = $1 AND status = 'accepted'`,
         [rideId]
       )
       const acceptedCount = parseInt(countRows[0].c)
-      if (acceptedCount >= ride.seats) return jsonRes(res, 400, { error: 'Nu mai sunt locuri disponibile' })
+      if (acceptedCount >= ride.seats) return jsonRes(req, res, 400, { error: 'Nu mai sunt locuri disponibile' })
 
       const { rows: existingRows } = await query(
         'SELECT * FROM carpool_requests WHERE ride_id = $1 AND passenger_id = $2',
         [rideId, userId]
       )
-      if (existingRows[0]) return jsonRes(res, 409, { error: 'Ai trimis deja o cerere pentru acest traseu' })
+      if (existingRows[0]) return jsonRes(req, res, 409, { error: 'Ai trimis deja o cerere pentru acest traseu' })
 
-      const reqId = `req-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+      const reqId = `req-${randomUUID()}`
       await query(`
         INSERT INTO carpool_requests (id, ride_id, passenger_id, passenger_name, message, status, created_at)
         VALUES ($1, $2, $3, $4, $5, 'pending', $6)
       `, [reqId, rideId, userId, userName, message?.trim() || null, nowIso()])
 
-      return jsonRes(res, 201, {
+      return jsonRes(req, res, 201, {
         request: { id: reqId, rideId, status: 'pending', message: message?.trim() || null }
       })
     }
@@ -230,15 +214,15 @@ export function createCarpoolHandler() {
         JOIN carpool_rides r ON r.id = cr.ride_id WHERE cr.id = $1
       `, [reqId])
       const request = reqRows[0]
-      if (!request) return jsonRes(res, 404, { error: 'Cerere inexistentă' })
-      if (request.driver_id !== body.userId) return jsonRes(res, 403, { error: 'Nu poți accepta cereri pe traseele altora' })
+      if (!request) return jsonRes(req, res, 404, { error: 'Cerere inexistentă' })
+      if (request.driver_id !== authUserId) return jsonRes(req, res, 403, { error: 'Nu poți accepta cereri pe traseele altora' })
 
       const { rows: countRows } = await query(
         `SELECT COUNT(*) as c FROM carpool_requests WHERE ride_id = $1 AND status = 'accepted'`,
         [request.ride_id]
       )
       const acceptedCount = parseInt(countRows[0].c)
-      if (acceptedCount >= request.seats) return jsonRes(res, 400, { error: 'Nu mai sunt locuri' })
+      if (acceptedCount >= request.seats) return jsonRes(req, res, 400, { error: 'Nu mai sunt locuri' })
 
       await query(`UPDATE carpool_requests SET status = 'accepted' WHERE id = $1`, [reqId])
 
@@ -246,7 +230,7 @@ export function createCarpoolHandler() {
         await query(`UPDATE carpool_rides SET status = 'full' WHERE id = $1`, [request.ride_id])
       }
 
-      return jsonRes(res, 200, { ok: true, status: 'accepted' })
+      return jsonRes(req, res, 200, { ok: true, status: 'accepted' })
     }
 
     // ── POST /api/carpool/requests/:reqId/reject ──────────────────────────────
@@ -261,15 +245,15 @@ export function createCarpoolHandler() {
         JOIN carpool_rides r ON r.id = cr.ride_id WHERE cr.id = $1
       `, [reqId])
       const request = reqRows[0]
-      if (!request) return jsonRes(res, 404, { error: 'Cerere inexistentă' })
-      if (request.driver_id !== body.userId) return jsonRes(res, 403, { error: 'Acces interzis' })
+      if (!request) return jsonRes(req, res, 404, { error: 'Cerere inexistentă' })
+      if (request.driver_id !== authUserId) return jsonRes(req, res, 403, { error: 'Acces interzis' })
 
       await query(`UPDATE carpool_requests SET status = 'rejected' WHERE id = $1`, [reqId])
       await query(`UPDATE carpool_rides SET status = 'active' WHERE id = $1 AND status = 'full'`, [request.ride_id])
 
-      return jsonRes(res, 200, { ok: true, status: 'rejected' })
+      return jsonRes(req, res, 200, { ok: true, status: 'rejected' })
     }
 
-    return jsonRes(res, 404, { error: 'Not found' })
+    return jsonRes(req, res, 404, { error: 'Not found' })
   }
 }

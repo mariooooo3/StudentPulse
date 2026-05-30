@@ -6,6 +6,15 @@ const BASE = import.meta.env.VITE_API_URL || ''
 
 const USERNAME_HINT = 'ex: prenume_nume — litere mici, cifre, _ (fără spații)'
 
+// Mirrors the server-side policy in server/handlers/auth.js (validatePassword).
+function validatePassword(pwd) {
+  if (!pwd || pwd.length < 8) return 'Parola trebuie să aibă minim 8 caractere'
+  if (pwd.length > 200)        return 'Parola este prea lungă'
+  if (!/[a-zA-Z]/.test(pwd))   return 'Parola trebuie să conțină cel puțin o literă'
+  if (!/[0-9]/.test(pwd))      return 'Parola trebuie să conțină cel puțin o cifră'
+  return null
+}
+
 function validateEmailPrefix(prefix) {
   if (!prefix) return null
   if (!prefix.includes('.')) return 'Formatul obligatoriu: prenume.nume (cu punct)'
@@ -47,7 +56,8 @@ export default function RegisterDetailsStep({ university, onSuccess, onBack }) {
     if (eErr) { setError(eErr); return }
     const uErr = validateUsername(username)
     if (uErr) { setError(uErr); return }
-    if (password.length < 6) { setError('Parola trebuie să aibă minim 6 caractere'); return }
+    const pErr = validatePassword(password)
+    if (pErr) { setError(pErr); return }
     if (password !== confirmPwd) { setError('Parolele nu coincid'); return }
 
     if (loading) return
@@ -66,7 +76,7 @@ export default function RegisterDetailsStep({ university, onSuccess, onBack }) {
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Eroare la înregistrare'); return }
-      onSuccess(data.user, detectedFaculty)
+      onSuccess({ ...data.user, token: data.token }, detectedFaculty)
     } catch {
       setError('Nu s-a putut conecta la server')
     } finally {
@@ -76,7 +86,7 @@ export default function RegisterDetailsStep({ university, onSuccess, onBack }) {
 
   const canSubmit = emailPrefix.trim() && !emailPrefixError &&
                     !usernameError && username.length >= 3 &&
-                    password.length >= 6 && password === confirmPwd && !loading
+                    !validatePassword(password) && password === confirmPwd && !loading
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -162,7 +172,7 @@ export default function RegisterDetailsStep({ university, onSuccess, onBack }) {
       {/* Parolă */}
       <div>
         <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block mb-2">
-          Parolă * <span className="normal-case font-normal">(minim 6 caractere)</span>
+          Parolă * <span className="normal-case font-normal">(minim 8 caractere, literă + cifră)</span>
         </label>
         <div className="flex items-center bg-white/[0.03] border border-white/[0.07] rounded-xl overflow-hidden focus-within:border-indigo-500/40 transition-colors">
           <Lock size={13} className="text-slate-600 ml-4 shrink-0" strokeWidth={1.75} />
