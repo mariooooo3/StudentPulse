@@ -442,6 +442,30 @@ export function createChallengesHandler() {
     res.setHeader('Content-Type', 'application/json')
     res.setHeader('Access-Control-Allow-Origin', '*')
 
+    // GET /api/challenges/leaderboard — must be checked before /:userId
+    if (req.method === 'GET' && req.url?.startsWith('/api/challenges/leaderboard')) {
+      const urlObj = new URL(req.url, 'http://localhost')
+      const scope = urlObj.searchParams.get('scope') || null
+
+      const { rows } = await query(`
+        SELECT
+          user_id,
+          COALESCE(MAX(user_name), 'Utilizator') AS display_name,
+          SUM(points)::int                        AS total_points,
+          COUNT(*)::int                           AS completed_count
+        FROM challenge_completions
+        WHERE status = 'approved'
+          AND ($1::text IS NULL OR user_scope = $1)
+        GROUP BY user_id
+        ORDER BY total_points DESC
+        LIMIT 10
+      `, [scope])
+
+      res.writeHead(200)
+      res.end(JSON.stringify({ leaderboard: rows, scope }))
+      return
+    }
+
     // GET /api/challenges/:userId
     const getMatch = req.url?.match(/^\/api\/challenges\/([^/?]+)$/)
     if (req.method === 'GET' && getMatch) {
@@ -672,30 +696,6 @@ export function createChallengesHandler() {
 
       res.writeHead(200)
       res.end(JSON.stringify({ completed, progressMap }))
-      return
-    }
-
-    // GET /api/challenges/leaderboard?scope=universityId:facultyCode
-    if (req.method === 'GET' && req.url?.startsWith('/api/challenges/leaderboard')) {
-      const urlObj = new URL(req.url, 'http://localhost')
-      const scope = urlObj.searchParams.get('scope') || null
-
-      const { rows } = await query(`
-        SELECT
-          user_id,
-          COALESCE(MAX(user_name), 'Utilizator') AS display_name,
-          SUM(points)::int                        AS total_points,
-          COUNT(*)::int                           AS completed_count
-        FROM challenge_completions
-        WHERE status = 'approved'
-          AND ($1::text IS NULL OR user_scope = $1)
-        GROUP BY user_id
-        ORDER BY total_points DESC
-        LIMIT 10
-      `, [scope])
-
-      res.writeHead(200)
-      res.end(JSON.stringify({ leaderboard: rows, scope }))
       return
     }
 
