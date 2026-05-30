@@ -134,7 +134,7 @@ export default function ChallengesSection() {
             className="overflow-hidden"
           >
             <LeaderboardPanel
-              scope={userScope}
+              scope={null}
               currentUserId={session?.userId}
               accent={accent}
             />

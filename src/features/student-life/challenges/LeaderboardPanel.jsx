@@ -53,8 +53,8 @@ export default function LeaderboardPanel({ scope, currentUserId, accent }) {
             <Trophy size={15} className="text-amber-400" />
           </div>
           <div>
-            <p className="text-sm font-bold text-white leading-tight">Clasament Facultate</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">Top 10 · puncte totale acumulate</p>
+            <p className="text-sm font-bold text-white leading-tight">Clasament Global</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Top 10 · toți utilizatorii aplicației</p>
           </div>
         </div>
         <button
