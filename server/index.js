@@ -1,8 +1,10 @@
 import { createServer } from 'node:http'
-import { existsSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, statSync, createReadStream } from 'node:fs'
 import { resolve, extname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Store } from './core/redis/Store.js'
+import { securityHeaders } from './lib/http.js'
+import { initSessions } from './lib/sessions.js'
 import { PubSub } from './core/redis/PubSub.js'
 import { eventBus } from './core/events/EventBus.js'
 import { createTCPServer } from './core/realtime/TCPServer.js'
@@ -58,7 +60,7 @@ function serveStatic(req, res) {
   }
 
   const mime = MIME[extname(filePath)] || 'application/octet-stream'
-  const headers = { 'Content-Type': mime }
+  const headers = { 'Content-Type': mime, ...securityHeaders() }
   const path = filePath.replaceAll('\\', '/')
   if (path.endsWith('/index.html') || path.endsWith('/sw.js')) {
     headers['Cache-Control'] = 'no-cache'
@@ -67,10 +69,13 @@ function serveStatic(req, res) {
   }
 
   res.writeHead(200, headers)
-  res.end(readFileSync(filePath))
+  const stream = createReadStream(filePath)
+  stream.on('error', () => { if (!res.headersSent) res.writeHead(500); res.end() })
+  stream.pipe(res)
 }
 
 const store = new Store()
+initSessions(store)
 const pubsub = new PubSub()
 const repository = createPortalRepository()
 const notifications = createNotificationsHandler(store, pubsub, repository)

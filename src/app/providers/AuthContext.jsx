@@ -96,6 +96,20 @@ export function AuthProvider({ children }) {
     setAuthState(AUTH_STATE.UNAUTHENTICATED)
   }
 
+  // Global session-expiry handling: any API call that gets a 401 dispatches
+  // `sc:unauthorized` (see shared/api/session.js), which forces a clean logout.
+  useEffect(() => {
+    function onUnauthorized() {
+      clearSession()
+      setSession(null)
+      setProfile(null)
+      setProfileStage(PROFILE_STAGE.NONE)
+      setAuthState(AUTH_STATE.UNAUTHENTICATED)
+    }
+    window.addEventListener('sc:unauthorized', onUnauthorized)
+    return () => window.removeEventListener('sc:unauthorized', onUnauthorized)
+  }, [])
+
   return (
     <AuthContext.Provider value={{ authState, session, profile, profileStage, login, completeOnboarding, updateProfile, logout }}>
       {children}

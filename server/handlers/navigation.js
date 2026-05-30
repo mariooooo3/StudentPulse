@@ -1,6 +1,7 @@
 import { createServer } from 'node:http'
 
 import { sendJson } from './navigation.http.js'
+import { checkRate } from '../lib/rateLimit.js'
 import { handleAssistant } from './navigation/assistant.handler.js'
 import { handlePhoto } from './navigation/photo.handler.js'
 import { handleCopilot } from './navigation/copilot.handler.js'
@@ -31,6 +32,14 @@ async function dispatchNavigationRoute(req, res, { allowAiRoutes = true } = {}) 
   const handler = ROUTE_HANDLERS[url]
   if (!handler) { sendJson(res, 404, { error: 'Not found' }); return }
   if (!allowAiRoutes && url.startsWith('/api/ai/')) { sendJson(res, 404, { error: 'Not found' }); return }
+
+  // These routes proxy expensive Groq calls — rate-limit per client IP so a
+  // single user cannot exhaust the upstream quota or run up the bill.
+  const rate = checkRate(req, 'ai-navigation', 30, 60_000)
+  if (!rate.ok) {
+    sendJson(res, 429, { error: `Prea multe cereri. Reîncearcă în ${rate.retryAfter}s.` })
+    return
+  }
 
   await handler(req, res)
 }

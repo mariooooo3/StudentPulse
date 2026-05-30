@@ -6,6 +6,7 @@ import { socketService } from '../../../shared/services/socket.service'
 import { listPortalThreadsForUser, sendPortalMessage } from '../../../shared/services/professorPortal.service'
 import { useNotifications } from '../../../shared/hooks/useNotifications'
 import { avatarLetters, colorFor, nameFromEmail } from '../messages.utils'
+import { reportInAppAction } from '../../student-life/challenges/challengesService'
 import clsx from 'clsx'
 
 export function TypingDots({ names, single }) {
@@ -317,11 +318,7 @@ export function ChatThread({ contact, currentUserId, currentName, scope, onBack 
     setInput('')
     setAttachment(null)
     if (currentUserId && !currentUserId.startsWith('guest-')) {
-      fetch('/api/challenges/in-app-action', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: currentUserId, actionType: 'message-sent', userName: currentName }),
-      }).catch(() => {})
+      reportInAppAction('message-sent', { userName: currentName }).catch(() => {})
     }
   }
 

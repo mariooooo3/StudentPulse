@@ -1,8 +1,12 @@
 import Groq from 'groq-sdk'
 import Exifr from 'exifr'
+import { randomUUID } from 'node:crypto'
 import { query, nowIso } from '../db/database.js'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { sendJson, handlePreflight, readBody } from '../lib/http.js'
+import { requireAuth } from '../lib/sessions.js'
+import { checkRate } from '../lib/rateLimit.js'
 
 // ─── Groq client ─────────────────────────────────────────────────────────────
 const KEY_FILES = [
@@ -439,13 +443,43 @@ Fii rezonabil cu conținutul — dacă imaginea corespunde clar provocării, apr
 // ─── Handler ──────────────────────────────────────────────────────────────────
 export function createChallengesHandler() {
   return async function handleChallenges(req, res) {
-    res.setHeader('Content-Type', 'application/json')
-    res.setHeader('Access-Control-Allow-Origin', '*')
+    const method = req.method
+    const url = req.url || ''
 
-    // GET /api/challenges/:userId
-    const getMatch = req.url?.match(/^\/api\/challenges\/([^/?]+)$/)
-    if (req.method === 'GET' && getMatch) {
-      const userId = decodeURIComponent(getMatch[1])
+    if (method === 'OPTIONS') return handlePreflight(req, res, 'GET,POST,OPTIONS')
+
+    // ── GET /api/challenges/leaderboard — public, read-only ──────────────────
+    if (method === 'GET' && url.startsWith('/api/challenges/leaderboard')) {
+      const urlObj = new URL(url, 'http://localhost')
+      const scope = urlObj.searchParams.get('scope') || null
+
+      const { rows } = await query(`
+        SELECT
+          user_id,
+          COALESCE(MAX(user_name), 'Utilizator') AS display_name,
+          SUM(points)::int                        AS total_points,
+          COUNT(*)::int                           AS completed_count
+        FROM challenge_completions
+        WHERE status = 'approved'
+          AND ($1::text IS NULL OR user_scope = $1)
+        GROUP BY user_id
+        ORDER BY total_points DESC
+        LIMIT 10
+      `, [scope])
+
+      return sendJson(req, res, 200, { leaderboard: rows, scope })
+    }
+
+    // Everything below acts on behalf of an authenticated student. The acting
+    // identity is taken from the session token, never trusted from URL/body.
+    const session = requireAuth(req, res)
+    if (!session) return
+    const userId = session.userId
+
+    // GET /api/challenges/:userId — the URL segment is ignored; identity comes
+    // from the session token so a user can only read their own progress.
+    const getMatch = url.match(/^\/api\/challenges\/([^/?]+)$/)
+    if (method === 'GET' && getMatch) {
       const { daily, weekly, monthly } = getActiveChallenges()
       const allChallenges = [...daily, ...weekly, ...monthly]
 
@@ -491,58 +525,57 @@ export function createChallengesHandler() {
         Promise.all(monthly.map(enrich)),
       ])
 
-      res.writeHead(200)
-      res.end(JSON.stringify({
+      return sendJson(req, res, 200, {
         daily: enrichedDaily,
         weekly: enrichedWeekly,
         monthly: enrichedMonthly,
         totalPoints: parseInt(totalRows[0]?.total) || 0,
         periods: { daily: getDailyKey(), weekly: getWeeklyKey(), monthly: getMonthlyKey() },
-      }))
-      return
+      })
     }
 
     // POST /api/challenges/submit
-    if (req.method === 'POST' && req.url === '/api/challenges/submit') {
-      const MAX_BODY_BYTES = 12 * 1024 * 1024
-      let body = ''
-      let bodyBytes = 0
-      for await (const chunk of req) {
-        bodyBytes += Buffer.byteLength(chunk)
-        if (bodyBytes > MAX_BODY_BYTES) {
-          res.writeHead(413); res.end(JSON.stringify({ error: 'Request prea mare. Maxim 8MB per imagine.' })); return
-        }
-        body += chunk
+    if (method === 'POST' && url === '/api/challenges/submit') {
+      const rate = checkRate(req, 'challenge-submit', 15, 60_000)
+      if (!rate.ok) {
+        return sendJson(req, res, 429, { error: `Prea multe încercări. Reîncearcă în ${rate.retryAfter}s.` })
+      }
+
+      let body
+      try {
+        body = await readBody(req, 12 * 1024 * 1024)
+      } catch {
+        return sendJson(req, res, 413, { error: 'Request prea mare. Maxim 8MB per imagine.' })
       }
 
       let parsed
       try { parsed = JSON.parse(body) } catch {
-        res.writeHead(400); res.end(JSON.stringify({ error: 'Invalid JSON' })); return
+        return sendJson(req, res, 400, { error: 'Invalid JSON' })
       }
 
-      const { userId, challengeId, proofText, proofImage, proofImageMime, userName, userScope } = parsed
+      const { challengeId, proofText, proofImage, proofImageMime, userName, userScope } = parsed
 
-      if (!userId || !challengeId) {
-        res.writeHead(400); res.end(JSON.stringify({ error: 'userId și challengeId sunt necesare' })); return
+      if (!challengeId) {
+        return sendJson(req, res, 400, { error: 'challengeId este necesar' })
       }
 
       const challenge = findActiveChallenge(challengeId)
       if (!challenge) {
-        res.writeHead(400); res.end(JSON.stringify({ error: 'Provocare inexistentă sau expirată.' })); return
+        return sendJson(req, res, 400, { error: 'Provocare inexistentă sau expirată.' })
       }
 
-      const { verifyType, periodKey, type: challengeType, points: basePoints,
+      const { verifyType, periodKey, points: basePoints,
               title: challengeTitle, description: challengeDescription,
               requiresDate = true } = challenge
 
       if (verifyType === 'screenshot' && !proofImage) {
-        res.writeHead(400); res.end(JSON.stringify({ error: 'Screenshot-ul este necesar pentru această provocare.' })); return
+        return sendJson(req, res, 400, { error: 'Screenshot-ul este necesar pentru această provocare.' })
       }
       if (verifyType === 'text' && !proofText?.trim()) {
-        res.writeHead(400); res.end(JSON.stringify({ error: 'Descrierea dovezii este necesară.' })); return
+        return sendJson(req, res, 400, { error: 'Descrierea dovezii este necesară.' })
       }
       if (!periodKey) {
-        res.writeHead(400); res.end(JSON.stringify({ error: 'Perioadă invalidă.' })); return
+        return sendJson(req, res, 400, { error: 'Perioadă invalidă.' })
       }
 
       const { rows: existingRows } = await query(
@@ -550,7 +583,7 @@ export function createChallengesHandler() {
         [userId, periodKey, challengeId]
       )
       if (existingRows[0]?.status === 'approved') {
-        res.writeHead(409); res.end(JSON.stringify({ error: 'Provocarea a fost deja completată.' })); return
+        return sendJson(req, res, 409, { error: 'Provocarea a fost deja completată.' })
       }
 
       let verifyResult
@@ -564,7 +597,7 @@ export function createChallengesHandler() {
       }
 
       const { approved, feedback } = verifyResult
-      const entryId = `chal-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+      const entryId = `chal-${randomUUID()}`
       const status = approved ? 'approved' : 'rejected'
       const points = approved ? basePoints : 0
       const storedProof = verifyType === 'screenshot' ? '[screenshot]' : (proofText?.trim() || '')
@@ -584,23 +617,17 @@ export function createChallengesHandler() {
         [userId, 'approved']
       )
 
-      res.writeHead(200)
-      res.end(JSON.stringify({ approved, feedback, points, totalPoints: parseInt(totalRows[0]?.total) || 0 }))
-      return
+      return sendJson(req, res, 200, { approved, feedback, points, totalPoints: parseInt(totalRows[0]?.total) || 0 })
     }
 
     // POST /api/challenges/in-app-action
-    if (req.method === 'POST' && req.url === '/api/challenges/in-app-action') {
-      let body = ''
-      for await (const chunk of req) body += chunk
+    if (method === 'POST' && url === '/api/challenges/in-app-action') {
       let parsed = {}
-      try { parsed = JSON.parse(body) } catch {}
-      const { userId, actionType, userName, userScope } = parsed
+      try { parsed = JSON.parse(await readBody(req)) } catch {}
+      const { actionType, userName, userScope } = parsed
 
-      if (!userId || !actionType) {
-        res.writeHead(400)
-        res.end(JSON.stringify({ error: 'userId și actionType necesare' }))
-        return
+      if (!actionType) {
+        return sendJson(req, res, 400, { error: 'actionType necesar' })
       }
 
       const { daily, weekly, monthly } = getActiveChallenges()
@@ -632,7 +659,7 @@ export function createChallengesHandler() {
         const count = progressRows[0]?.count || 0
 
         if (count >= requiredCount) {
-          const compId = `chal-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+          const compId = `chal-${randomUUID()}`
           const feedbackMap = {
             'career-apply': count === 1
               ? 'Provocare completată automat — ai aplicat la un internship din aplicație!'
@@ -670,36 +697,9 @@ export function createChallengesHandler() {
         progressMap[c.id] = { count: rows[0]?.count || 0, requiredCount: c.requiredCount || 1 }
       }
 
-      res.writeHead(200)
-      res.end(JSON.stringify({ completed, progressMap }))
-      return
+      return sendJson(req, res, 200, { completed, progressMap })
     }
 
-    // GET /api/challenges/leaderboard?scope=universityId:facultyCode
-    if (req.method === 'GET' && req.url?.startsWith('/api/challenges/leaderboard')) {
-      const urlObj = new URL(req.url, 'http://localhost')
-      const scope = urlObj.searchParams.get('scope') || null
-
-      const { rows } = await query(`
-        SELECT
-          user_id,
-          COALESCE(MAX(user_name), 'Utilizator') AS display_name,
-          SUM(points)::int                        AS total_points,
-          COUNT(*)::int                           AS completed_count
-        FROM challenge_completions
-        WHERE status = 'approved'
-          AND ($1::text IS NULL OR user_scope = $1)
-        GROUP BY user_id
-        ORDER BY total_points DESC
-        LIMIT 10
-      `, [scope])
-
-      res.writeHead(200)
-      res.end(JSON.stringify({ leaderboard: rows, scope }))
-      return
-    }
-
-    res.writeHead(404)
-    res.end(JSON.stringify({ error: 'Not found' }))
+    return sendJson(req, res, 404, { error: 'Not found' })
   }
 }

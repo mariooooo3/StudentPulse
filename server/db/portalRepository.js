@@ -1,9 +1,10 @@
+import { randomUUID } from 'node:crypto'
 import { query, json, nowIso, parseJson } from './database.js'
 
 const MAX_NOTIFICATIONS = 100
 
 function genId(prefix) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+  return `${prefix}-${randomUUID()}`
 }
 
 function mapThesis(row) {

@@ -7,6 +7,7 @@ import clsx from 'clsx'
 import { useToast } from '../../shared/components/Toast'
 import { motion, AnimatePresence } from 'framer-motion'
 import { findSmartMatches } from '../../shared/services/ai.service'
+import { reportInAppAction } from '../student-life/challenges/challengesService'
 
 const containerVariants = {
   hidden: {},
@@ -222,11 +223,7 @@ function SkillSwapTab({ users, matchLoading, session }) {
                             const userName = nameFromEmail(session.email)
                             const userScope = session?.university?.id && session?.detectedFaculty?.code
                               ? `${session.university.id}:${session.detectedFaculty.code}` : null
-                            fetch('/api/challenges/in-app-action', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ userId: session.userId, actionType: 'tutoring-booked', userName, userScope }),
-                            }).catch(() => {})
+                            reportInAppAction('tutoring-booked', { userName, userScope }).catch(() => {})
                           }
                         }}
                         className="btn-primary text-[11px] px-3 py-1.5 flex items-center gap-1.5"
@@ -375,11 +372,7 @@ function GroupSessionsTab({ sessions, session }) {
                         const userName = nameFromEmail(session.email)
                         const userScope = session?.university?.id && session?.detectedFaculty?.code
                           ? `${session.university.id}:${session.detectedFaculty.code}` : null
-                        fetch('/api/challenges/in-app-action', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ userId: session.userId, actionType: 'tutoring-booked', userName, userScope }),
-                        }).catch(() => {})
+                        reportInAppAction('tutoring-booked', { userName, userScope }).catch(() => {})
                       }
                     }}
                     className="btn-primary w-full text-xs py-2.5"

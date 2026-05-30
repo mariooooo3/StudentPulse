@@ -55,6 +55,7 @@ class SocketService extends EventTarget {
     this.#ws.onclose = () => {
       this.#connected = false
       this.#ws = null
+      this.#rejectAllPending()
       this.dispatchEvent(new Event('disconnect'))
       this.#scheduleReconnect()
     }
@@ -96,6 +97,17 @@ class SocketService extends EventTarget {
         this.dispatchEvent(Object.assign(new Event('swap_match'), { data: msg.data }))
         break
     }
+  }
+
+  // On disconnect, fail any in-flight requests immediately and clear their
+  // timers — otherwise the promises and timeouts leak until they fire on their
+  // own, and callers hang for the full request timeout for no reason.
+  #rejectAllPending() {
+    for (const { reject, timer } of this.#pending.values()) {
+      clearTimeout(timer)
+      reject(new Error('Connection lost'))
+    }
+    this.#pending.clear()
   }
 
   #scheduleReconnect() {

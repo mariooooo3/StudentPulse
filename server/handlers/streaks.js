@@ -1,4 +1,6 @@
 import { query } from '../db/database.js'
+import { sendJson, handlePreflight, readBody } from '../lib/http.js'
+import { requireAuth } from '../lib/sessions.js'
 
 function todayDate() {
   return new Date().toISOString().slice(0, 10)
@@ -56,37 +58,28 @@ async function getStreaks(userId) {
 
 export function createStreaksHandler() {
   return async function handleStreaks(req, res) {
-    res.setHeader('Content-Type', 'application/json')
-    res.setHeader('Access-Control-Allow-Origin', '*')
+    if (req.method === 'OPTIONS') return handlePreflight(req, res, 'GET,POST,OPTIONS')
 
-    const getMatch = req.url?.match(/^\/api\/streaks\/([^/?]+)$/)
-    if (req.method === 'GET' && getMatch) {
-      const userId = decodeURIComponent(getMatch[1])
-      res.writeHead(200)
-      res.end(JSON.stringify(await getStreaks(userId)))
-      return
+    // Identity is taken from the session token, never trusted from the URL/body.
+    const session = requireAuth(req, res)
+    if (!session) return
+    const userId = session.userId
+
+    if (req.method === 'GET' && /^\/api\/streaks\/([^/?]+)$/.test(req.url || '')) {
+      return sendJson(req, res, 200, await getStreaks(userId))
     }
 
     if (req.method === 'POST' && req.url === '/api/streaks/increment') {
-      let body = ''
-      for await (const chunk of req) body += chunk
-      let userId, type
-      try { ({ userId, type } = JSON.parse(body)) } catch {
-        res.writeHead(400)
-        res.end(JSON.stringify({ error: 'Invalid JSON' }))
-        return
+      let type
+      try { ({ type } = JSON.parse(await readBody(req))) } catch {
+        return sendJson(req, res, 400, { error: 'Invalid JSON' })
       }
-      if (!userId || !['focus', 'pulse'].includes(type)) {
-        res.writeHead(400)
-        res.end(JSON.stringify({ error: 'userId and type (focus|pulse) required' }))
-        return
+      if (!['focus', 'pulse'].includes(type)) {
+        return sendJson(req, res, 400, { error: 'type (focus|pulse) required' })
       }
-      res.writeHead(200)
-      res.end(JSON.stringify(await incrementStreak(userId, type)))
-      return
+      return sendJson(req, res, 200, await incrementStreak(userId, type))
     }
 
-    res.writeHead(404)
-    res.end(JSON.stringify({ error: 'Not found' }))
+    return sendJson(req, res, 404, { error: 'Not found' })
   }
 }

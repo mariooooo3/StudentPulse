@@ -1,25 +1,25 @@
-import { DEMO_PROFESSOR } from '../../src/shared/services/professorPortal.service.js'
+import { DEMO_PROFESSOR } from '../config/demoProfessor.js'
+import { sendJson as sendJsonHttp, handlePreflight, readBody } from '../lib/http.js'
 
 async function readJson(req) {
-  const chunks = []
-  for await (const chunk of req) chunks.push(chunk)
-  if (!chunks.length) return {}
   try {
-    return JSON.parse(Buffer.concat(chunks).toString('utf8'))
+    const body = await readBody(req)
+    return body ? JSON.parse(body) : {}
   } catch {
     return {}
   }
-}
-
-function sendJson(res, status, payload) {
-  res.writeHead(status, { 'Content-Type': 'application/json' })
-  res.end(JSON.stringify(payload))
 }
 
 export function createPortalRequestHandler(repository, notifications, pubsub = null) {
   return async function handlePortal(req, res) {
     const url = new URL(req.url, 'http://localhost')
     const path = url.pathname.replace('/api/portal', '') || '/'
+
+    // Local helper keeps the existing (res, status, payload) call sites intact
+    // while routing through the shared sender (CORS + security headers).
+    const sendJson = (res, status, payload) => sendJsonHttp(req, res, status, payload)
+
+    if (req.method === 'OPTIONS') return handlePreflight(req, res, 'GET,POST,OPTIONS')
 
     try {
       if (req.method === 'GET' && path === '/professor-profile') {

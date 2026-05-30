@@ -1,50 +1,29 @@
+import { randomUUID } from 'node:crypto'
 import { query, nowIso } from '../db/database.js'
+import { sendJson, handlePreflight, readBody } from '../lib/http.js'
+import { requireAuth } from '../lib/sessions.js'
 
-function readBody(req, maxBytes = 64 * 1024) {
-  return new Promise((resolve, reject) => {
-    let body = ''
-    let size = 0
-    req.on('data', chunk => {
-      size += Buffer.byteLength(chunk)
-      if (size > maxBytes) { req.destroy(); reject(new Error('Body too large')); return }
-      body += chunk
-    })
-    req.on('end', () => resolve(body))
-    req.on('error', reject)
-  })
-}
-
-function jsonRes(res, status, data) {
-  res.writeHead(status, {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-  })
-  res.end(JSON.stringify(data))
-}
+const LISTING_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
 
 export function createRoommatesHandler() {
   return async function handleRoommates(req, res) {
     const url = req.url || ''
     const method = req.method
 
-    if (method === 'OPTIONS') {
-      res.writeHead(204, {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      })
-      res.end(); return
-    }
+    if (method === 'OPTIONS') return handlePreflight(req, res, 'GET,POST,DELETE,OPTIONS')
 
-    // GET /api/roommates?userId=
+    const session = requireAuth(req, res)
+    if (!session) return
+    const userId = session.userId
+
+    // GET /api/roommates
     if (method === 'GET' && url.startsWith('/api/roommates')) {
-      const userId = new URL(url, 'http://localhost').searchParams.get('userId') || ''
       const now = new Date().toISOString()
       const { rows: listings } = await query(
         `SELECT * FROM roommate_listings WHERE expires_at > $1 ORDER BY created_at DESC`,
         [now]
       )
-      return jsonRes(res, 200, {
+      return sendJson(req, res, 200, {
         roommates: listings.map(r => ({ ...r, isOwn: r.user_id === userId })),
       })
     }
@@ -53,19 +32,19 @@ export function createRoommatesHandler() {
     if (method === 'POST' && url === '/api/roommates') {
       let parsed
       try { parsed = JSON.parse(await readBody(req)) } catch {
-        return jsonRes(res, 400, { error: 'JSON invalid' })
+        return sendJson(req, res, 400, { error: 'JSON invalid' })
       }
 
-      const { userId, name, faculty, year, budget, zone,
+      const { name, faculty, year, budget, zone,
               smoking, pets, schedule, bio, contact } = parsed
 
-      if (!userId || !name?.trim()) return jsonRes(res, 400, { error: 'userId și name necesare' })
-      if (!zone?.trim())            return jsonRes(res, 400, { error: 'Zona este necesară' })
-      if (!contact?.trim())         return jsonRes(res, 400, { error: 'Contactul este necesar' })
+      if (!name?.trim())    return sendJson(req, res, 400, { error: 'name necesar' })
+      if (!zone?.trim())    return sendJson(req, res, 400, { error: 'Zona este necesară' })
+      if (!contact?.trim()) return sendJson(req, res, 400, { error: 'Contactul este necesar' })
 
-      const id = `room-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+      const id = `room-${randomUUID()}`
       const now = nowIso()
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      const expiresAt = new Date(Date.now() + LISTING_TTL_MS).toISOString()
 
       await query(`
         INSERT INTO roommate_listings
@@ -80,24 +59,22 @@ export function createRoommatesHandler() {
       ])
 
       const { rows } = await query('SELECT * FROM roommate_listings WHERE id = $1', [id])
-      return jsonRes(res, 201, { roommate: { ...rows[0], isOwn: true } })
+      return sendJson(req, res, 201, { roommate: { ...rows[0], isOwn: true } })
     }
 
     // DELETE /api/roommates/:id
     const deleteMatch = url.match(/^\/api\/roommates\/([^/]+)$/)
     if (method === 'DELETE' && deleteMatch) {
       const id = deleteMatch[1]
-      let body = {}
-      try { body = JSON.parse(await readBody(req)) } catch {}
 
       const { rows } = await query('SELECT * FROM roommate_listings WHERE id = $1', [id])
-      if (!rows[0]) return jsonRes(res, 404, { error: 'Anunț inexistent' })
-      if (rows[0].user_id !== body.userId) return jsonRes(res, 403, { error: 'Nu poți șterge anunțul altcuiva' })
+      if (!rows[0]) return sendJson(req, res, 404, { error: 'Anunț inexistent' })
+      if (rows[0].user_id !== userId) return sendJson(req, res, 403, { error: 'Nu poți șterge anunțul altcuiva' })
 
       await query('DELETE FROM roommate_listings WHERE id = $1', [id])
-      return jsonRes(res, 200, { ok: true })
+      return sendJson(req, res, 200, { ok: true })
     }
 
-    return jsonRes(res, 404, { error: 'Not found' })
+    return sendJson(req, res, 404, { error: 'Not found' })
   }
 }

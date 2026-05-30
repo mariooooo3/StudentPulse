@@ -1,50 +1,29 @@
+import { randomUUID } from 'node:crypto'
 import { query, nowIso } from '../db/database.js'
+import { sendJson, handlePreflight, readBody } from '../lib/http.js'
+import { requireAuth } from '../lib/sessions.js'
 
-function readBody(req, maxBytes = 64 * 1024) {
-  return new Promise((resolve, reject) => {
-    let body = ''
-    let size = 0
-    req.on('data', chunk => {
-      size += Buffer.byteLength(chunk)
-      if (size > maxBytes) { req.destroy(); reject(new Error('Body too large')); return }
-      body += chunk
-    })
-    req.on('end', () => resolve(body))
-    req.on('error', reject)
-  })
-}
-
-function jsonRes(res, status, data) {
-  res.writeHead(status, {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-  })
-  res.end(JSON.stringify(data))
-}
+const LISTING_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
 
 export function createBooksHandler() {
   return async function handleBooks(req, res) {
     const url = req.url || ''
     const method = req.method
 
-    if (method === 'OPTIONS') {
-      res.writeHead(204, {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      })
-      res.end(); return
-    }
+    if (method === 'OPTIONS') return handlePreflight(req, res, 'GET,POST,DELETE,OPTIONS')
 
-    // GET /api/books?userId=
+    const session = requireAuth(req, res)
+    if (!session) return
+    const userId = session.userId
+
+    // GET /api/books
     if (method === 'GET' && url.startsWith('/api/books')) {
-      const userId = new URL(url, 'http://localhost').searchParams.get('userId') || ''
       const now = new Date().toISOString()
       const { rows: books } = await query(
         `SELECT * FROM book_listings WHERE expires_at > $1 ORDER BY created_at DESC`,
         [now]
       )
-      return jsonRes(res, 200, {
+      return sendJson(req, res, 200, {
         books: books.map(b => ({ ...b, isOwn: b.user_id === userId })),
       })
     }
@@ -53,21 +32,21 @@ export function createBooksHandler() {
     if (method === 'POST' && url === '/api/books') {
       let parsed
       try { parsed = JSON.parse(await readBody(req)) } catch {
-        return jsonRes(res, 400, { error: 'JSON invalid' })
+        return sendJson(req, res, 400, { error: 'JSON invalid' })
       }
 
-      const { userId, userName, title, author, subject, yearNeeded,
+      const { userName, title, author, subject, yearNeeded,
               condition, price, type, contact, faculty } = parsed
 
-      if (!userId || !userName)  return jsonRes(res, 400, { error: 'userId și userName necesare' })
-      if (!title?.trim())        return jsonRes(res, 400, { error: 'Titlul este necesar' })
-      if (!subject?.trim())      return jsonRes(res, 400, { error: 'Materia este necesară' })
-      if (!contact?.trim())      return jsonRes(res, 400, { error: 'Contactul este necesar' })
-      if (!['vând', 'donez'].includes(type)) return jsonRes(res, 400, { error: 'Tip invalid' })
+      if (!userName)             return sendJson(req, res, 400, { error: 'userName necesar' })
+      if (!title?.trim())        return sendJson(req, res, 400, { error: 'Titlul este necesar' })
+      if (!subject?.trim())      return sendJson(req, res, 400, { error: 'Materia este necesară' })
+      if (!contact?.trim())      return sendJson(req, res, 400, { error: 'Contactul este necesar' })
+      if (!['vând', 'donez'].includes(type)) return sendJson(req, res, 400, { error: 'Tip invalid' })
 
-      const id = `book-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+      const id = `book-${randomUUID()}`
       const now = nowIso()
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      const expiresAt = new Date(Date.now() + LISTING_TTL_MS).toISOString()
 
       await query(`
         INSERT INTO book_listings
@@ -81,24 +60,22 @@ export function createBooksHandler() {
       ])
 
       const { rows } = await query('SELECT * FROM book_listings WHERE id = $1', [id])
-      return jsonRes(res, 201, { book: { ...rows[0], isOwn: true } })
+      return sendJson(req, res, 201, { book: { ...rows[0], isOwn: true } })
     }
 
     // DELETE /api/books/:id
     const deleteMatch = url.match(/^\/api\/books\/([^/]+)$/)
     if (method === 'DELETE' && deleteMatch) {
       const id = deleteMatch[1]
-      let body = {}
-      try { body = JSON.parse(await readBody(req)) } catch {}
 
       const { rows } = await query('SELECT * FROM book_listings WHERE id = $1', [id])
-      if (!rows[0]) return jsonRes(res, 404, { error: 'Anunț inexistent' })
-      if (rows[0].user_id !== body.userId) return jsonRes(res, 403, { error: 'Nu poți șterge anunțul altcuiva' })
+      if (!rows[0]) return sendJson(req, res, 404, { error: 'Anunț inexistent' })
+      if (rows[0].user_id !== userId) return sendJson(req, res, 403, { error: 'Nu poți șterge anunțul altcuiva' })
 
       await query('DELETE FROM book_listings WHERE id = $1', [id])
-      return jsonRes(res, 200, { ok: true })
+      return sendJson(req, res, 200, { ok: true })
     }
 
-    return jsonRes(res, 404, { error: 'Not found' })
+    return sendJson(req, res, 404, { error: 'Not found' })
   }
 }

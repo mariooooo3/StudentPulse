@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, ChevronLeft, GraduationCap, Loader2 } from 'lucide-react'
+import { Check, ChevronLeft, GraduationCap, Loader2, Compass } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { UNIVERSITIES } from '../../shared/config/universities'
 import UniversityGrid from './components/UniversityGrid'
@@ -49,6 +49,7 @@ export default function AuthFlow() {
       userId:          user.id,
       email:           user.email,
       name:            user.username,
+      token:           user.token,
       university:      uni,
       detectedFaculty: fac,
       isNewUser:       !returning,
@@ -77,6 +78,7 @@ export default function AuthFlow() {
       userId:          pendingUser.id,
       email:           pendingUser.email,
       name:            pendingUser.username,
+      token:           pendingUser.token,
       university:      uni,
       detectedFaculty: fac,
       isNewUser:       true,
