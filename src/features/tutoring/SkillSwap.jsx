@@ -21,7 +21,7 @@ const itemVariants = {
 }
 
 /* ─── Skill Swap 1-la-1 ─── */
-function SkillSwapTab({ users, matchLoading }) {
+function SkillSwapTab({ users, matchLoading, session }) {
   const { t } = useTranslation()
   const [contacted, setContacted] = useState({})
   const [skills, setSkills] = useState(() => JSON.parse(localStorage.getItem('sc_swap_skills') || '[]'))
@@ -215,7 +215,16 @@ function SkillSwapTab({ users, matchLoading }) {
                       </div>
                     ) : (
                       <button
-                        onClick={() => setContacted(p => ({ ...p, [u.id]: true }))}
+                        onClick={() => {
+                          setContacted(p => ({ ...p, [u.id]: true }))
+                          if (session?.userId) {
+                            fetch('/api/challenges/in-app-action', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ userId: session.userId, actionType: 'tutoring-booked' }),
+                            }).catch(() => {})
+                          }
+                        }}
                         className="btn-primary text-[11px] px-3 py-1.5 flex items-center gap-1.5"
                       >
                         <Repeat2 size={11} /> {t('skillSwap.proposeSwap')}
@@ -233,7 +242,7 @@ function SkillSwapTab({ users, matchLoading }) {
 }
 
 /* ─── Group Sessions ─── */
-function GroupSessionsTab({ sessions }) {
+function GroupSessionsTab({ sessions, session }) {
   const { t } = useTranslation()
   const [joined, setJoined] = useState({})
   const [created, setCreated] = useState([])
@@ -356,7 +365,16 @@ function GroupSessionsTab({ sessions }) {
 
                 {!joined[s.id] && s.spots > 0 && (
                   <button
-                    onClick={() => setJoined(p => ({ ...p, [s.id]: true }))}
+                    onClick={() => {
+                      setJoined(p => ({ ...p, [s.id]: true }))
+                      if (session?.userId) {
+                        fetch('/api/challenges/in-app-action', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ userId: session.userId, actionType: 'tutoring-booked' }),
+                        }).catch(() => {})
+                      }
+                    }}
                     className="btn-primary w-full text-xs py-2.5"
                   >
                     {t('skillSwap.joinSession')}
@@ -431,8 +449,8 @@ export default function SkillSwap({ profile, session }) {
           transition={{ type: 'spring', stiffness: 200, damping: 26 }}
         >
           {tab === 0
-            ? <SkillSwapTab users={users} matchLoading={matchLoading} />
-            : <GroupSessionsTab sessions={sessions} />
+            ? <SkillSwapTab users={users} matchLoading={matchLoading} session={session} />
+            : <GroupSessionsTab sessions={sessions} session={session} />
           }
         </motion.div>
       </AnimatePresence>

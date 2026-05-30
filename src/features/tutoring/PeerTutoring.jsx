@@ -62,7 +62,7 @@ function TutorSkeleton() {
   )
 }
 
-function TutorCard({ t: tutor }) {
+function TutorCard({ t: tutor, session }) {
   const { t } = useTranslation()
   const storageKey = 'sc_tutor_actions'
   const [booked, setBooked] = useState(() => {
@@ -86,6 +86,13 @@ function TutorCard({ t: tutor }) {
     setBooked(true)
     saveTutorAction('booked', true)
     toast({ type: 'success', title: t('peerTutoring.toast.booked'), message: t('peerTutoring.toast.bookedMsg', { name: tutor.name }) })
+    if (session?.userId) {
+      fetch('/api/challenges/in-app-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: session.userId, actionType: 'tutoring-booked' }),
+      }).catch(() => {})
+    }
   }
 
   function handleContact() {
@@ -369,7 +376,7 @@ export default function PeerTutoring({ profile, session }) {
               >
                 {loading
                   ? Array.from({ length: 6 }).map((_, i) => <TutorSkeleton key={i} />)
-                  : filtered.map(tutor => <TutorCard key={tutor.id} t={tutor} />)
+                  : filtered.map(tutor => <TutorCard key={tutor.id} t={tutor} session={session} />)
                 }
               </motion.div>
             )}

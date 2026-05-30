@@ -316,6 +316,13 @@ export function ChatThread({ contact, currentUserId, currentName, scope, onBack 
     sendMessage(input.trim(), currentName, attachment)
     setInput('')
     setAttachment(null)
+    if (currentUserId && !currentUserId.startsWith('guest-')) {
+      fetch('/api/challenges/in-app-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentUserId, actionType: 'message-sent' }),
+      }).catch(() => {})
+    }
   }
 
   const myMsgs = messages.filter(m => m.senderId === currentUserId)

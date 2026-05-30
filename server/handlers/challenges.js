@@ -1,4 +1,5 @@
 import Groq from 'groq-sdk'
+import Exifr from 'exifr'
 import { query, nowIso } from '../db/database.js'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -38,7 +39,7 @@ const DAILY_POOL = [
     id: 'd2', title: 'Sesiune Focus de 25 minute',
     description: 'Completează o sesiune de studiu în Focus Mode din aplicație fără întreruperi.',
     category: 'academic', points: 50, icon: 'focus',
-    verifyType: 'text',
+    verifyType: 'in-app', inAppAction: 'focus-session', requiredCount: 1,
   },
   {
     id: 'd3', title: 'Hidratare zilnică',
@@ -68,7 +69,7 @@ const DAILY_POOL = [
     id: 'd7', title: 'Contactează un coleg',
     description: 'Trimite un mesaj util unui coleg — o resursă, un sfat sau o întrebare pentru un proiect comun.',
     category: 'social', points: 40, icon: 'message',
-    verifyType: 'text',
+    verifyType: 'in-app', inAppAction: 'message-sent', requiredCount: 1,
   },
   {
     id: 'd8', title: 'Organizează-ți notițele',
@@ -94,9 +95,9 @@ const DAILY_POOL = [
 const WEEKLY_POOL = [
   {
     id: 'w1', title: 'Sesiune de tutoring sau Skill Swap',
-    description: 'Participă la o sesiune de Peer Tutoring sau Skill Swap din aplicație cu un coleg.',
+    description: 'Rezervă o sesiune de Peer Tutoring sau Skill Swap din aplicație cu un coleg.',
     category: 'academic', points: 150, icon: 'tutoring',
-    verifyType: 'text',
+    verifyType: 'in-app', inAppAction: 'tutoring-booked', requiredCount: 1,
   },
   {
     id: 'w2', title: 'Aplică la un internship',
@@ -212,7 +213,7 @@ const MONTHLY_POOL = [
     id: 'm4', title: '10 sesiuni Focus în aceeași lună',
     description: 'Completează 10 sesiuni de Focus Mode în această lună calendaristică.',
     category: 'academic', points: 500, icon: 'streak',
-    verifyType: 'text',
+    verifyType: 'in-app', inAppAction: 'focus-session', requiredCount: 10,
   },
 ]
 
@@ -326,9 +327,40 @@ Reguli stricte:
   }
 }
 
-// ─── Screenshot verification ──────────────────────────────────────────────────
+// ─── EXIF extraction from base64 image ───────────────────────────────────────
+async function extractExif(base64Image) {
+  try {
+    const buffer = Buffer.from(base64Image, 'base64')
+    const exif = await Exifr.parse(buffer, { gps: true, tiff: true, exif: true })
+    return exif || null
+  } catch {
+    return null
+  }
+}
+
+// ─── Screenshot verification (AI vision model) ───────────────────────────────
 async function verifyWithScreenshot(challengeTitle, challengeDescription, screenshotBase64, mimeType, requiresDate = true) {
   const today = getDailyKey()
+
+  // ── EXIF pre-check: if the image has embedded metadata, validate timestamp ──
+  const exif = await extractExif(screenshotBase64)
+  let exifContext = ''
+  if (exif) {
+    const exifDate = exif.DateTimeOriginal || exif.CreateDate || exif.DateTime
+    if (exifDate) {
+      const exifDay = new Date(exifDate).toISOString().slice(0, 10)
+      if (requiresDate && exifDay !== today) {
+        return {
+          approved: false,
+          feedback: `Data din metadatele imaginii (${exifDay}) nu corespunde cu ziua de azi (${today}). Asigură-te că poza este de astăzi.`,
+        }
+      }
+      exifContext = `\nMetadate EXIF detectate: data imaginii = ${exifDay} (${exifDay === today ? 'AZI ✓' : exifDay})`
+      if (exif.latitude && exif.longitude) {
+        exifContext += `, GPS: (${exif.latitude.toFixed(4)}, ${exif.longitude.toFixed(4)})`
+      }
+    }
+  }
 
   const dateInstruction = requiresDate
     ? `2. Verifică dacă data activității din screenshot corespunde cu data de azi (${today}) sau este din ziua curentă — OBLIGATORIU`
@@ -344,7 +376,7 @@ async function verifyWithScreenshot(challengeTitle, challengeDescription, screen
 
   const prompt = `Ești un verificator de provocări studențești. Analizezi un screenshot trimis ca dovadă.
 
-DATA DE AZI: ${today}
+DATA DE AZI: ${today}${exifContext}
 PROVOCARE: "${challengeTitle}"
 CE TREBUIE SĂ VERIFICI: "${challengeDescription}"
 
@@ -599,9 +631,19 @@ export function createChallengesHandler() {
 
         if (count >= requiredCount) {
           const compId = `chal-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
-          const feedback = count === 1
-            ? `Provocare completată automat — ai aplicat la un internship din aplicație!`
-            : `Provocare completată automat — ai aplicat la ${count} oportunități de carieră din aplicație!`
+          const feedbackMap = {
+            'career-apply': count === 1
+              ? 'Provocare completată automat — ai aplicat la un internship din aplicație!'
+              : `Provocare completată automat — ai aplicat la ${count} oportunități de carieră!`,
+            'focus-session': count < requiredCount
+              ? `Progres: ${count}/${requiredCount} sesiuni focus completate.`
+              : requiredCount === 1
+                ? 'Sesiune Focus de 25 de minute completată automat!'
+                : `Felicitări! Ai completat ${count} sesiuni Focus în această lună!`,
+            'message-sent': 'Provocare completată automat — ai trimis un mesaj unui coleg din aplicație!',
+            'tutoring-booked': 'Sesiune de tutoring sau Skill Swap rezervată din aplicație — provocare completată automat!',
+          }
+          const feedback = feedbackMap[actionType] || `Provocare "${title}" completată automat!`
 
           await query(`
             INSERT INTO challenge_completions (id, user_id, period_key, challenge_id, status, proof_text, ai_feedback, points, submitted_at)
