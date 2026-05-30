@@ -6,6 +6,7 @@ import { SECTION_ACCENTS } from '../constants/sectionConfig'
 import AccentLine from '../components/AccentLine'
 import { useStreaksContext } from '../../../app/providers/StreaksContext'
 import { useAuth } from '../../../app/providers/AuthContext'
+import { nameFromEmail } from '../../messages/messages.utils'
 
 export default function PomodoroTimer() {
   const { t } = useTranslation()
@@ -32,10 +33,13 @@ export default function PomodoroTimer() {
               setSessions(s => s + 1)
               incrementFocus()
               if (session?.userId) {
+                const userName = nameFromEmail(session.email)
+                const userScope = session?.university?.id && session?.detectedFaculty?.code
+                  ? `${session.university.id}:${session.detectedFaculty.code}` : null
                 fetch('/api/challenges/in-app-action', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ userId: session.userId, actionType: 'focus-session' }),
+                  body: JSON.stringify({ userId: session.userId, actionType: 'focus-session', userName, userScope }),
                 }).catch(() => {})
               }
             }

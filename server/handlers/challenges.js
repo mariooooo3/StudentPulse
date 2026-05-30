@@ -520,7 +520,7 @@ export function createChallengesHandler() {
         res.writeHead(400); res.end(JSON.stringify({ error: 'Invalid JSON' })); return
       }
 
-      const { userId, challengeId, proofText, proofImage, proofImageMime } = parsed
+      const { userId, challengeId, proofText, proofImage, proofImageMime, userName, userScope } = parsed
 
       if (!userId || !challengeId) {
         res.writeHead(400); res.end(JSON.stringify({ error: 'userId și challengeId sunt necesare' })); return
@@ -570,12 +570,14 @@ export function createChallengesHandler() {
       const storedProof = verifyType === 'screenshot' ? '[screenshot]' : (proofText?.trim() || '')
 
       await query(`
-        INSERT INTO challenge_completions (id, user_id, period_key, challenge_id, status, proof_text, ai_feedback, points, submitted_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        INSERT INTO challenge_completions (id, user_id, period_key, challenge_id, status, proof_text, ai_feedback, points, submitted_at, user_name, user_scope)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         ON CONFLICT (user_id, period_key, challenge_id) DO UPDATE SET
           status = EXCLUDED.status, proof_text = EXCLUDED.proof_text,
-          ai_feedback = EXCLUDED.ai_feedback, points = EXCLUDED.points, submitted_at = EXCLUDED.submitted_at
-      `, [entryId, userId, periodKey, challengeId, status, storedProof, feedback, points, nowIso()])
+          ai_feedback = EXCLUDED.ai_feedback, points = EXCLUDED.points, submitted_at = EXCLUDED.submitted_at,
+          user_name = COALESCE(EXCLUDED.user_name, challenge_completions.user_name),
+          user_scope = COALESCE(EXCLUDED.user_scope, challenge_completions.user_scope)
+      `, [entryId, userId, periodKey, challengeId, status, storedProof, feedback, points, nowIso(), userName || null, userScope || null])
 
       const { rows: totalRows } = await query(
         `SELECT COALESCE(SUM(points), 0) as total FROM challenge_completions WHERE user_id = $1 AND status = $2`,
@@ -593,7 +595,7 @@ export function createChallengesHandler() {
       for await (const chunk of req) body += chunk
       let parsed = {}
       try { parsed = JSON.parse(body) } catch {}
-      const { userId, actionType } = parsed
+      const { userId, actionType, userName, userScope } = parsed
 
       if (!userId || !actionType) {
         res.writeHead(400)
@@ -646,12 +648,14 @@ export function createChallengesHandler() {
           const feedback = feedbackMap[actionType] || `Provocare "${title}" completată automat!`
 
           await query(`
-            INSERT INTO challenge_completions (id, user_id, period_key, challenge_id, status, proof_text, ai_feedback, points, submitted_at)
-            VALUES ($1, $2, $3, $4, 'approved', $5, $6, $7, $8)
+            INSERT INTO challenge_completions (id, user_id, period_key, challenge_id, status, proof_text, ai_feedback, points, submitted_at, user_name, user_scope)
+            VALUES ($1, $2, $3, $4, 'approved', $5, $6, $7, $8, $9, $10)
             ON CONFLICT (user_id, period_key, challenge_id) DO UPDATE SET
               status = 'approved', proof_text = EXCLUDED.proof_text,
-              ai_feedback = EXCLUDED.ai_feedback, points = EXCLUDED.points, submitted_at = EXCLUDED.submitted_at
-          `, [compId, userId, periodKey, challengeId, `[in-app: ${actionType} ×${count}]`, feedback, basePoints, nowIso()])
+              ai_feedback = EXCLUDED.ai_feedback, points = EXCLUDED.points, submitted_at = EXCLUDED.submitted_at,
+              user_name = COALESCE(EXCLUDED.user_name, challenge_completions.user_name),
+              user_scope = COALESCE(EXCLUDED.user_scope, challenge_completions.user_scope)
+          `, [compId, userId, periodKey, challengeId, `[in-app: ${actionType} ×${count}]`, feedback, basePoints, nowIso(), userName || null, userScope || null])
 
           completed.push({ id: challengeId, title, points: basePoints, count, requiredCount })
         }
@@ -668,6 +672,30 @@ export function createChallengesHandler() {
 
       res.writeHead(200)
       res.end(JSON.stringify({ completed, progressMap }))
+      return
+    }
+
+    // GET /api/challenges/leaderboard?scope=universityId:facultyCode
+    if (req.method === 'GET' && req.url?.startsWith('/api/challenges/leaderboard')) {
+      const urlObj = new URL(req.url, 'http://localhost')
+      const scope = urlObj.searchParams.get('scope') || null
+
+      const { rows } = await query(`
+        SELECT
+          user_id,
+          COALESCE(MAX(user_name), 'Utilizator') AS display_name,
+          SUM(points)::int                        AS total_points,
+          COUNT(*)::int                           AS completed_count
+        FROM challenge_completions
+        WHERE status = 'approved'
+          AND ($1::text IS NULL OR user_scope = $1)
+        GROUP BY user_id
+        ORDER BY total_points DESC
+        LIMIT 10
+      `, [scope])
+
+      res.writeHead(200)
+      res.end(JSON.stringify({ leaderboard: rows, scope }))
       return
     }
 

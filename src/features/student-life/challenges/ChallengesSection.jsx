@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Loader2, Trophy, RotateCcw, Flame, CalendarDays, Calendar } from 'lucide-react'
+import { Loader2, Trophy, RotateCcw, Flame, CalendarDays, Calendar, BarChart2 } from 'lucide-react'
 import clsx from 'clsx'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../../app/providers/AuthContext'
 import { fetchChallenges, submitChallenge } from './challengesService'
 import ChallengeCard from './ChallengeCard'
 import SubmitProofModal from './SubmitProofModal'
+import LeaderboardPanel from './LeaderboardPanel'
 import { SECTION_ACCENTS, SECTION_META } from '../constants/sectionConfig'
 import SectionHeader from '../components/SectionHeader'
 import AccentLine from '../components/AccentLine'
+import { nameFromEmail } from '../../messages/messages.utils'
 
 const TAB_DEFS = [
   { id: 'daily',   icon: Flame },
@@ -36,10 +38,16 @@ export default function ChallengesSection() {
     desc: t(`challenges.tabs.${tab.id}Desc`),
   }))
   const [activeTab, setActiveTab] = useState('daily')
+  const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [submitting, setSubmitting] = useState(null) // challenge being submitted
+  const [submitting, setSubmitting] = useState(null)
+
+  const userName = nameFromEmail(session?.email)
+  const userScope = session?.university?.id && session?.detectedFaculty?.code
+    ? `${session.university.id}:${session.detectedFaculty.code}`
+    : null
 
   const load = useCallback(() => {
     // FIX: call setLoading(false) before early return to avoid infinite spinner
@@ -70,6 +78,8 @@ export default function ChallengesSection() {
       challengeTitle: submitting.title,
       challengeDescription: submitting.description,
       challengePoints: submitting.points,
+      userName,
+      userScope,
     })
     return result
   }
@@ -90,15 +100,47 @@ export default function ChallengesSection() {
   return (
     <section className="space-y-5 pb-24 lg:pb-6">
       <SectionHeader section="challenges" accent={accent} meta={SECTION_META.challenges}>
-        {data && (
-          <div className="flex items-center gap-2 rounded-xl border px-3 py-2"
-               style={{ background: accent.bg, border: `1px solid ${accent.border}` }}>
-            <Trophy size={14} style={{ color: accent.color }} />
-            <span className="font-mono text-sm font-black text-white">{data.totalPoints}</span>
-            <span className="text-xs font-semibold text-slate-400">{t('challenges.totalPoints')}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {data && (
+            <div className="flex items-center gap-2 rounded-xl border px-3 py-2"
+                 style={{ background: accent.bg, border: `1px solid ${accent.border}` }}>
+              <Trophy size={14} style={{ color: accent.color }} />
+              <span className="font-mono text-sm font-black text-white">{data.totalPoints}</span>
+              <span className="text-xs font-semibold text-slate-400">{t('challenges.totalPoints')}</span>
+            </div>
+          )}
+          <button
+            onClick={() => setShowLeaderboard(v => !v)}
+            className={clsx(
+              'flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition-all',
+              showLeaderboard
+                ? 'border-amber-400/40 bg-amber-400/10 text-amber-300'
+                : 'border-white/[0.08] bg-white/[0.03] text-slate-400 hover:text-slate-200',
+            )}
+          >
+            <BarChart2 size={13} />
+            <span className="hidden sm:inline">Clasament</span>
+          </button>
+        </div>
       </SectionHeader>
+
+      <AnimatePresence>
+        {showLeaderboard && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 28 }}
+            className="overflow-hidden"
+          >
+            <LeaderboardPanel
+              scope={null}
+              currentUserId={session?.userId}
+              accent={accent}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Tab navigation */}
       <div className="flex items-center gap-2 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-1.5">
