@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import {
+  Activity,
   Bot,
   Check,
   ChevronRight,
@@ -13,7 +14,6 @@ import {
   MessageSquare,
   Minus,
   Send,
-  Sparkles,
   X,
 } from 'lucide-react'
 import clsx from 'clsx'
@@ -126,7 +126,7 @@ function AssistantBubble({ onClick, unread, brand }) {
     >
       {/* Icon with gradient and glow ring */}
       <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-[0_0_20px_rgba(99,102,241,0.45)] ring-1 ring-indigo-400/30">
-        <Sparkles size={18} strokeWidth={1.75} className="text-white" />
+        <Activity size={18} strokeWidth={2} className="text-white" />
         {/* Online dot */}
         <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-[#0b1020] bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
         {/* Pulse animation */}
@@ -213,7 +213,7 @@ function Message({ item }) {
     <div className={clsx('flex gap-2.5', isUser ? 'justify-end' : 'justify-start')}>
       {!isUser && (
         <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500/30 to-violet-600/30 ring-1 ring-inset ring-indigo-400/20">
-          <Sparkles size={12} strokeWidth={1.75} className="text-indigo-300" />
+          <Activity size={12} strokeWidth={2} className="text-indigo-300" />
         </div>
       )}
       <div className="flex max-w-[82%] flex-col gap-1">
@@ -257,7 +257,7 @@ function LoadingDots() {
   return (
     <div className="flex items-center gap-2.5">
       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500/20 to-violet-600/20 ring-1 ring-inset ring-indigo-400/15">
-        <Sparkles size={12} strokeWidth={1.75} className="text-indigo-300" />
+        <Activity size={12} strokeWidth={2} className="text-indigo-300" />
       </div>
       <div className="flex items-center gap-1 rounded-2xl rounded-bl-sm border border-white/[0.06] bg-white/[0.06] px-4 py-3">
         {[0, 1, 2].map(i => (
@@ -450,7 +450,7 @@ export default function VirtualAssistant({
             <div className="border-b border-white/[0.06] px-4 py-3">
               <div className="flex items-center gap-3">
                 <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-[0_0_18px_rgba(99,102,241,0.4)] ring-1 ring-inset ring-white/10">
-                  <Sparkles size={17} strokeWidth={1.75} className="text-white" />
+                  <Activity size={17} strokeWidth={2} className="text-white" />
                   <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#080e1c] bg-emerald-400 shadow-[0_0_5px_rgba(16,185,129,0.7)]" />
                 </div>
                 <div className="min-w-0 flex-1">
